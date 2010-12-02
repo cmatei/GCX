@@ -1,0 +1,3 @@
+#!/bin/sh
+
+rsync -v @PACKAGE@_@VERSION@* $1

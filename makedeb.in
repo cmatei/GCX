@@ -1,0 +1,16 @@
+#!/bin/sh
+rm -rf ../@PACKAGE@-@VERSION@-deb
+mkdir ../@PACKAGE@-@VERSION@-deb
+cp @PACKAGE@-@VERSION@.tar.gz ../@PACKAGE@-@VERSION@-deb/@PACKAGE@_@VERSION@.orig.tar.gz
+cp dscupload ../@PACKAGE@-@VERSION@-deb
+cd ../@PACKAGE@-@VERSION@-deb
+tar xzvf @PACKAGE@_@VERSION@.orig.tar.gz
+cp -r ../gcx/debfiles @PACKAGE@-@VERSION@
+mv @PACKAGE@-@VERSION@/debfiles @PACKAGE@-@VERSION@/debian
+rm -rf @PACKAGE@-@VERSION@/debian/CVS
+rm -rf @PACKAGE@-@VERSION@/debian/*~
+cd @PACKAGE@-@VERSION@
+dpkg-buildpackage -rfakeroot
+cd ..
+lintian -i @PACKAGE@_@VERSION@*.deb
+linda -i @PACKAGE@_@VERSION@*.deb

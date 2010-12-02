@@ -1,0 +1,27 @@
+Source: gcx
+Section: science
+Priority: extra
+Maintainer: Riccardo Stagni <unriccio@email.it>
+Build-Depends: debhelper (>= 5), autotools-dev, libgtk1.2-dev
+Standards-Version: 3.7.2
+
+Package: gcx
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Recommends: gnuplot
+Description: astronomical image processing and photometry gtk+ application  
+ Gcx is an astronomical image processing and data reduction tool,
+ with an easy to use graphical user interface. It provides a 
+ complete set of data reduction functions for CCD photometry,
+ with frame WCS fitting, automatic star identification, aperture 
+ photometry of target and standard stars, single-frame ensemble 
+ photometry solution finding, multi-frame color coefficient 
+ fitting, extinction coefficient fitting, and all-sky photometry;
+ as well as general-purpose astronomical image processing functions 
+ (bias, dark, flat, frame alignment and stacking); It can function 
+ as a FITS viewer.
+ .
+ The program can control CCD cameras and telescopes, and implement 
+ automatic observation scripting. Cameras are controlled through a 
+ hardware-specific server, to which gcx connects through a TCP socket. 
+ It generates FITS files with comprehensive header information.

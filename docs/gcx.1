@@ -1,0 +1,390 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH GCX 1 "November 27, 2005"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+gcx \- astronomical image processing and photometry
+.SH SYNOPSIS
+.B gcx
+.RI [ options ] " [files" ...]
+.SH DESCRIPTION
+.B gcx 
+is an astronomical image processing and data reduction tool,
+with an easy to use graphical user interface. 
+It provides a complete set of data reduction functions for CCD photometry,
+with frame WCS fitting, automatic star identification, aperture 
+photometry of target and standard stars, single-frame ensemble photometry 
+solution finding, multi-frame color coefficient fitting, extinction coefficient
+fitting, and all-sky photometry, as well as general-purpose
+astronomical image processing functions (bias, dark, flat, frame alignment
+and stacking); It can function as a FITS viewer.
+.PP
+For automating data reduction of large numbers of frames, \fBgcx\fP
+implements \fIrecipe files\fP. These files contain specific information about the
+objects measured in each field. Once a recipe file is created for a
+given field, any number of frames of that field can be reduced without
+user intervention.
+.PP
+The program can control CCD cameras and 
+telescopes, and implement automatic observation scripting. Cameras are 
+controlled through a hardware-specific server, to which gcx connects 
+through a TCP socket. It generates FITS files with comprehensive header 
+information.
+.PP
+Telescopes and mounts using the LX200 protocol are
+supported. \fBgcx\fP uses it's automatic field identification
+functions to refine telecope pointing accuracy.
+.\" TeX users may be more comfortable with the \fB<whatever>\fP and
+.\" \fI<whatever>\fP escape sequences to invode bold face and italics, 
+.\" respectively.
+.SH OPTIONS
+When invoked without arguments, the program runs in GUI
+mode. Most functions are also accessible through command line
+options, descibed below.
+.TP
+.B \-h, \-\-help
+Print command line options.
+.TP
+.B \-\-help-all
+Print all the on-line help on stdout.
+.TP
+.B \-\-version
+Print program version.
+.TP
+.B \-D, \-\-debug <level>
+Set debug level to <level>; 0=quiet, 4=noisy.
+.TP
+.B \-o, \-\-output <file_name>
+Set output file name for import, convert and frame operations.
+.TP
+.B \-r, \-\-rcfile <config_file>
+Load configuration file.
+.TP
+.B \-S, \-\-set <option>=<value>
+Set the value of an option overriding the configuration file.
+.TP
+.B \-i, \-\-interactive
+Force display frames as they are being processed.
+.PP
+.SH Observation Scripting, Photometry and File Conversion Options
+.TP
+.B \-p, \-\-recipe <recipe_file>
+Load recipe file (searches rcp_path).
+.TP
+.B \-P, \-\-phot-run <recipe_file>
+Load recipe file and run photometry
+in batch mode. Report in native format.
+.TP
+.B \-V, \-\-phot-run-aavso <recipe_file>
+Load recipe file and run photometry in batch mode. Report in AAVSO
+format.
+.PP
+If <recipe_file> is set to one of the following three special tokens,
+the recipe will change depeding on information in the frame header:
+.TP
+.B \_TYHCO_ 
+will create a recipe on-the-fly from Tycho catalog data (if available);
+.TP
+.B _OBJECT_ 
+will search the recipe path for a file with the same
+name as the object in the frame (ending in .rcp);
+.TP
+.B _AUTO_ 
+will search for a recipe by object name, and if that
+is not found, create a tycho one.
+.TP
+.B \-\-import <catalog name>
+Convert a tabular catalog file to the gcx
+Lisp-like format. Reads stdin.
+Current table formats are:
+\fIgcvs, gcvs-pos, landolt, henden, sumner\fP.
+.TP
+.B \-\-merge <recipe_file>
+Merge a new recipe file over the one loaded
+with the \fB\-\-recipe\fP option. Checks are made
+for either positional or name duplicates.
+Only stars brighter than mag_limit are merged.
+.TP
+.B \-\-set-target
+Specify a target object to be merged into a
+recipe file. It will also set the recipe
+object, ra and dec fields.
+.TP
+.B \-\-make-tycho-rcp <radius>
+Create a recipe file for the object specified
+with \fB\-\-object\fP using \fI tycho2\fP stars in a box
+radius arcminutes around the object.
+.TP
+.B \-\-rcp-to-aavso <recipe_file>
+Convert a recipe file to the aavso db
+(tab-delimited) format.
+If the file argument is \fB'-'\fP, stdin is read.
+The recipe comment and star comment fields 
+are interpreted to get some db fields.
+See the \fB\-\-help-all\fP output for more info.
+.TP
+.B \-T, \-\-rep-to-table <report_file>
+Convert a report file to tabular format.
+If an output file name is not specified
+(with the \fB'-o'\fP argument), stdout is used.
+If the file argument is \fB'-'\fP, stdin is read. 
+The format of the table is specified by the value
+of the \fI\.file\.tab_format\fP option, see below.
+.TP
+.B \-O, \-\-obsfile <obs_file>
+Load/run observation scripting file (searches obs_path).
+.TP
+.B \-n, \-\-to-pnm
+Convert a fits file to 8-bit pnm.
+If an output file name is not specified
+(with the \fB'-o'\fP argument), stdout is used.
+.TP
+.B \-j, \-\-object
+Specify a target object (useful for setting an initial wcs
+when there isn't enough information present in the fits headers).
+.TP
+.B \-\-mag-limit
+Set a magnitude limit for the output of import and merge commands.
+.SH CCD Reduction Options
+.TP
+.B \-d, \-\-dark <dark_frame>
+Set the dark frame / do dark subtraction.
+.TP
+.B \-b, \-\-bias <bias_frame>
+Set the bias frame / do bias subtraction.
+.TP
+.B \-f, \-\-flat <flat_frame>
+Set the flat field frame / flatfield.
+.TP
+.B \-G, \-\-gaussian-blur <fwhm>
+Set blur FWHM / apply Gaussian blur.
+.TP
+.B \-a, \-\-align <align_ref_frame>
+Set the alignment reference frame
+/ align frames.
+.TP
+.B \-A, \-\-add-bias <bias>
+Set the value of a constant bias to add to all frames / add a bias to frames.
+.TP
+.B \-M, \-\-multiply <multiplier>
+Set a constant to multiply all frames with
+/ multiply frames by a scalar.
+.PP
+Multiplication is performed before addition.
+.TP
+.B \-u, \-\-update-file
+Save reduction results overwriting the original files.
+.TP
+.B \-s, \-\-stack
+Stack the frames using the method set in
+the configration file; for some methods
+additive background alignment is performed.
+.TP
+.B \-F, \-\-superflat
+Stack the frames using an multiplicative
+background alignment procedure; the frames
+should be already dark-substracted.
+.TP
+.B \-N, \-\-no-reduce
+Do not run the reduction operations, just
+load the frame list / reduction options.
+.PP
+When any of the CCD reduction options is set and the \fB-i\fP flag
+is not specified, the reduction operations are run in batch mode
+on all the supplied fits files. When no output file is specified
+or \fB-i\fP is set, the files are loaded into the batch processing file
+list, the reduction options set in the dialog, and the program
+starts up in gui mode
+.SH Report Converter Format String
+
+The report converter option converts the native gcx output to a
+fixed-width tabular format that is easy to import in other programs
+for further processing. The table's format is defined by the 
+\fI\.file\.tab_format\fP configuration option. 
+The option string consists of tokens separated by spaces.
+There are two types of tokens: option tokens, and column tokens.
+.PP
+Options tokens set global table options when present. They can appear
+anywhere in the format string.
+.TP
+.B tablehead 
+Generate a table header line containing the column titles.
+.TP
+.B collist
+Generate a list of columns with position information at the start of the output.
+.TP
+.B res_stats
+Generate a line with descriptive statistics on the stars' residuals at
+the end of each frame. 
+.PP
+Column tokens specify what information gets output in each column.
+The first column token corresponds to the first output column, and so
+on in order. Each column token can optionally be followed by a specifier
+of the form: width.precision. The width excludes a single character
+spacer between the columns. Supported colum tokens are:
+
+.TP
+.B name [w]
+Output the star's designator.
+.TP
+.B ra [w]
+Output the right ascension in h:m:s format.
+.TP
+.B dra [w.p]
+Output the right ascension in decimal degrees format.
+.TP
+.B dec [w]
+Output the declination in d:m:s format.
+.TP
+.B ddec [w.p]
+Output the declination in decimal degrees format.
+.TP
+.B smag [w.p] "<band>"
+Output the standard magnitude with the given name.
+.TP
+.B serr [w.p] "<band>"
+Output the error of the standard magnitude with the given name.
+.TP
+.B imag [w.p] "<band>"
+Output the instrumental magnitude with the given name.
+.TP
+.B ierr [w.p] "<band>" 
+Output the error of the instrumental magnitude with the given name.
+.TP
+.B flags [w] 
+Output reduction flags and the star type.
+.TP
+.B observation [w]
+Output the name of the observation (a synthetic name that
+can be used to group stars reduced from the same frame.
+.TP
+.B airmass [w.p]
+Output the airmass of the observation.
+.TP
+.B jdate [w.p]
+Output the Julian date of the observation.
+.TP
+.B mjd [w.p]
+Output the modified Julian date of the observation.
+.TP
+.B filter [w]
+Output the filter name used for the observation.
+.TP
+.B xc/yc [w.p]
+Output the frame coordintes of the star's centroid.
+.TP
+.B xerr/yerr [w.p]
+Output the estimated centroiding errors.
+.TP
+.B dx/dy [w.p]
+Output the amount the star was moved from it's catalog
+position when the measuring aperture was centered.
+.TP
+.B residual [w.p]
+Output the star's residual in the ensemble solution.
+.TP
+.B stderr [w.p]
+Output the star's standard error (residual divided by 
+the estimated error).
+.PP
+Fields for which data is not available are left blank.
+.SH Image Navigation and Object Selection
+.TP
+.B Middle click or space bar
+Pan cursor.
+.TP
+.B '='
+Zoom in around cursor.
+.TP
+.B '\-'
+Zoom out.
+.TP
+.B Left button drag left/right
+Adjust brightness.
+.TP
+.B Left button drag up/down
+Adjust contrast,
+.TP
+.B 0
+Auto scale intensity.
+.TP
+.B 9
+Scale Min-Max.
+.TP
+.B 1-8 
+Auto scale with different intensity spans
+1 is sharpest, 8 is dullest.
+.TP
+.B Left click on an object
+Select object (and deselect all others).
+.TP
+.B Shift-left click on an object
+Add to selection.
+.TP
+.B Ctrl-left click on a star image
+Mark star (if not too faint).
+.TP
+.B Left click on image
+Show local image statistics.
+.TP
+.B Right click on image
+Pop-up the main menu.
+.TP
+.B Right click on an object
+Pop-up the star menu.
+.PP
+Many useful commands have keyboard accelerators; they are displayed in the menus.
+.SH FILES
+The native image file format of gcx is FITS. The program will read 
+16-bit integer and 32-bit float files (BITPIX = 16 or BITPIX =
+\-32), and save 16-bit integer files. The internal representation of 
+images is in 32-bit floating point.
+
+\fBgcx\fP supports transparent compression and decompression of fits files
+when \fI zcat\fP and \fI gzip\fP are available and their path is set
+in the corresponding options.
+
+Configuration options are stored in \fI~/.gcxrc\fP. The options can be
+edited in GUI mode, or directly in the file itself. A template
+configuration file can be created by selecting "save" in the option
+editing dialog.
+
+The program reads several object catalog formats. See the relevant
+chapter in the User's manual for information on how to set up catalogs.
+Catalogs are normally placed under \fI/usr/share/gcx/catalogs\fP.
+
+Documentation files usually reside in the "docs" directory of the
+source distribution or in \fI /usr/share/doc/gcx\fP.
+
+Example data is distributed separately from the main source. 
+When installed from a package it usually goes to \fI/usr/share/doc/gcx/examples\fP.
+
+.SH SEE ALSO
+.BR GCX 
+.BR User\'s 
+.BR Manual;
+.BR gnuplot (1);
+.BR gzip (1);
+.BR zcat (1);
+.BR README.vizquery.
+.SH AUTHOR
+\fBgcx\fP was written by Radu Corlan, with valuable contributions from
+Alexandru Dan Corlan (Tycho2 searching, porting of GSC searching
+code); Liam Girdwood (various routines from the libnova library); 
+Pertti Paakkonen (GUI improvements). The star search algorithm is
+similar to (and inspired by) the one in Elwood Downey's XEphem. WCS
+conversion routines are taked from classic AIPS. The GSC
+scanning routines are adapted from the code distributed with the catalog.

@@ -1,0 +1,46 @@
+GCX - SOFTWARE FOR OBSERVATION AUTOMATION AND DATA REDUCTION
+
+Radu Corlan
+
+  Over the last year or so i've been developing gxc, a program that
+automates observations and VS data reductions. It started with cx, 
+a program i made to control my home-made ccd camera.
+(http://astro.corlan.net/cpx3m/index.html). 
+
+  As the telescope i use doesn't point accurately enough to be able to 
+make observations unattended, i've added a field-matching algorithm
+that can make pointing corrections by comparing the positions of starts 
+extracted from a test frame to the GSC. It is now possible to obtain frames
+from hundreds of different fields in a fully automatic mode.
+
+  Identifying stars is also the most tedious step in data reduction. With the
+field-matching algorithm, GCX can astrometrically calibrate a frame against
+the GSC or some other catalog starting from an approximate position and scale,
+such as the coordinates of the target and the focal length of the telescope.
+
+  Once the frame is astrometrically calibrated, the program can do aperture
+photometry on selected stars. To automate the process, position standards and
+photometric standards are grouped in a "recipy" file, which can be thought as 
+the electronic equivalent of an aavso chart. 
+
+  The recipy file is 'run' on the data frame, and the program will automatically 
+identify and measure the stars in the recipy file, and output a report.
+A relatively complex error model generates error figures for all measurements.
+I've checked the error model against time-series measurement results, and it
+has proven to be quite accurate.
+
+  The program was developed on Linux, but can probably easly be ported to other 
+UNIX systems that supprt the gtk-1.2 library. GCX can be run as a gui program, 
+performing all the operations step-by-step, or in batch mode - so that it can 
+be included in a higher-level reduction script. 
+
+  The project home page is:
+
+    http://astro.corlan.net/index.html  
+
+  It is also listed on freshmeat at:
+
+    http://freshmeat.net/projects/gcx
+
+
+

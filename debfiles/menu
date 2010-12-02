@@ -1,0 +1,2 @@
+?package(gcx):needs="X11" section="Applications/Science/Astronomy"\
+  title="gcx" command="/usr/bin/gcx"

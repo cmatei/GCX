@@ -1,0 +1,2 @@
+gcx --import henden < $1.dat | gcx --recipy - --set-target $1 --mag-limit 15 > $1.rcp
+echo $1

@@ -1,0 +1,25 @@
+gcx (0.9.11-1) unstable; urgency=low
+
+  * New maintainer
+  * Updated copyright file
+  * Updated menu file (and added dh_installmenu to rules)
+  * Updated standards version to 3.7.2
+  * Updated compat to 5
+  * Added watchfile
+  * Removed html documentation from binary package since it isn't up to date
+
+ -- Riccardo Stagni <unriccio@email.it>  Mon, 15 Oct 2007 02:01:52 +0200
+
+gcx (0.9.8-2) unstable; urgency=low
+
+  * removed xlibs-dev dependency as it is implied by libgtk1.2-dev
+  * thanks to Justin Pryzby for the patch
+  * FTBFS: build-depends on removed xlibs-dev (Closes: #346751)
+
+ -- Radu Corlan <radu@corlan.net>  Tue, 10 Jan 2006 00:19:46 +0200
+
+gcx (0.9.8-1) unstable; urgency=low
+
+  * Initial debian release (Closes: #344037)
+
+ -- Radu Corlan <radu@corlan.net>  Tue, 20 Dec 2005 01:55:01 +0200

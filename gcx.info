@@ -1,0 +1,14 @@
+Package: gcx
+Version: 0.9.7
+Revision: 1
+Source: http://gcx.sourceforge.net/%n-%v.tar.gz
+Maintainer: Radu Corlan <radu@corlan.net>
+HomePage: http://gcx.sourceforge.net
+License: GPL
+Source-MD5: b279e1df5951e08a68be963250cc80f0
+Description: Astronomical image processing and photometry
+InstallScript: <<
+#!/bin/sh -ev
+make install
+make -C docs install
+<<

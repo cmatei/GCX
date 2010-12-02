@@ -1,0 +1,32 @@
+As of version 0.8.9, gcx uses vizquery to obtain stars from the "big"
+catalogs (USNO-B, UCAC2, GSC2, GSC-ACT) from the Centre de Données
+astronomiques de Strasbourg, France. 
+
+To install vizquery, download the cdsclient package from 
+
+  ftp://cdsarc.u-strasbg.fr/cats/cdsclient.tar.gz
+
+and install it using the instructions from
+
+  http://cdsweb.u-strasbg.fr/devcorner.gml
+
+(which basically say: ./configure; make; make install)
+
+If the binaries from cdsclient are not installed in the command path,
+the "Online Catalogs/Vizquery command" gcx option should be set to the
+full path name to vizquery. It is also possible to append vizquery
+options to this command, the most useful being "-site=<site>" to specify
+a CDS mirror.
+
+Note that the "wwwget" program in some versions of cdstools has a
+problem causing it to segfault if the /etc/resolv.conf file does not
+contain a "search" or "domain" line. To fix this, change line 257 in
+wwwget.c (in function gethostname) from
+
+    if (*domain) {
+
+to 
+
+    if (domain && *domain) {
+
+and rebuild cdstools.

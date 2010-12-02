@@ -1,0 +1,3110 @@
+
+\documentclass[11pt,twoside,a4paper,openany]{book}
+\usepackage{longtable}
+\usepackage{graphicx}
+%\pagestyle{plain}
+\title{GCX User's Manual}
+\author{Radu Corlan}
+\date{Version 1.1\qquad 2008}
+\newcommand{\cmdline}[1]{\begin{quote}{\tt #1}\end{quote}}
+\newcommand{\menu}[1]{{\em #1}}
+\newcommand{\op}[1]{{\em #1}}
+\newcommand{\keys}[1]{{{\bf #1}}}
+\newcommand{\gcx}{{\sc gcx\ }}
+\newcommand{\exframe}{{\tt uori-v-001.fits.gz}}
+\newcommand{\exrcp}{{\tt uori.rcp}}
+\newcommand{\exmbds}{{\tt cygs-aug19.out}}
+\begin{document}
+\frontmatter
+\maketitle
+\thispagestyle{empty}
+\vfill
+\tableofcontents
+\clearpage
+\mainmatter
+
+\chapter{Introduction}
+
+The previous version of \gcx, {\sc cx} was written to control the newly designed
+{\tt cpx3m} ccd camera. Once the basic camera control functions were running, it was easy to
+add some LX200 control functions, so that the telescope could be pointed at various objects
+without having to switch applications. 
+
+Having telescope control and image acquisition integrated into one program makes the following
+step obvious: after entering goto/get commands over several cold nights, one wants to automate 
+the process---especially if he observes a large number of fields every night (as when doing 
+variable star work).
+
+The fact that the author's telescope doesn't point precisely doesn't help automation. 
+So the ability to check/correct the pointing becomes essential. {\tt cx} first got the ability 
+to read star information from the GSC and overlay it on the images; that eases visual checks 
+(one doesn't need maps anymore) but still is one step short of full automation.
+
+Finally, when reliable field matching was implemented in \gcx, it became possible to make 
+the program fully automatic. In the current version, \gcx can run through a list of 
+observations completely unattended, and only stops if clouds roll in.  
+
+As it happens, field matching and image processing are also essential steps for CCD photometry. 
+Over the time, the photometry functions of \gcx have expanded
+continuously up to the point where they contribute the largest part of
+the program. It is currently possible to reduce photometric data
+frames in a completely automatic fashion, and perform color
+transformations, transformation coefficient fitting and all-sky reduction
+with relative ease.
+
+\section{Features}
+
+\paragraph{Image handling}
+\begin{itemize}
+\item Open/save 16-bit FITS image files;
+
+\gcx uses floating-point images internally, so other FITS formats are easy to add;
+\item Zoom/Pan images, adjust brightness/contrast/gamma in an intuitive way, 
+  appropiate for astronomical images;
+\item Convert FITS files to 8-bit PNM after intensity mapping;
+\item Show image statistics (both global and local);
+\item Maintain a noise model for the image across transformations;
+//\item Maintain bad pixel information;
+\item Perform ccd reductions (dark/bias/flat);
+\item Automatically align (register) and stack images.
+\end{itemize}
+\paragraph{Catalogs and WCS}
+\begin{itemize}
+\item Read field star information from GSC1/2 and Tycho2;
+\item Read object information from {\tt edb} and native files;
+\item Read recipe files;
+\item Detect sources (stars) from images;
+\item Overlay objects on the image;
+\item Edit objects' information;
+\item Match image stars to catalog positions;
+\item Calculate world coordinates for image objects.
+\end{itemize}
+\paragraph{Camera Control}
+\begin{itemize}
+\item Control cameras over a TCP socket using a simple protocol;
+
+The control proces ({\tt cpxcntrl}) presently supports the cpx3m camera. It can be 
+easily modified to support other cameras.
+
+\item Acquire images under script control;
+\item Set binning/windowing/integration times/temperature;
+\item Dark frames;
+\item All acquired frames are fully annotated in their FITS headers;
+\item Auto-generate descriptive names for files.
+\end{itemize}
+\paragraph{Telescope control}
+\begin{itemize}
+\item Support LX200 protocol over serial;
+\item Point telescope under script control;
+\item Point telescope by object name (if edb catalogs are installed);
+\item Refine pointing by comparing image star positions with catalogs;
+\end{itemize}
+\paragraph{Aperture Photometry}
+\begin{itemize}
+\item Do sparse field stellar photometry using fixed circular apertures for stars, annular
+apertures for sky estimation;
+\item Aperture sizes fully programmable;
+\item Multiple sky estimation methods;
+\item Uses a complex error model thorughout, that takes into account
+photon shot noise, read noise, noise of the callibration frames and scintillation;
+\item Report noise estimates for every result;
+\item Take photometric targets (program and standard stars) from recipe files, 
+or directly from the image;
+\item Produce a comprehensive report.
+\end{itemize}
+\paragraph{Multi-Frame Reductions}
+\begin{itemize}
+\item Fit color transformation coefficients from multiple frames;
+\item Fit extinction coefficients;
+\item Perform all-sky reductions;
+\item Generate various plots for data checking;
+\end{itemize}
+\paragraph{Interfacing}
+\begin{itemize}
+\item Uses plain-ascii files for configuration files, reports and
+  recipies;
+\item Implements import filters and an output converter to interface
+  with tabular formats;
+\item Most functions available in batch mode, so the program can be made part of a script.
+\end{itemize}
+\section{Free Software}
+Gcx is free software, distributed under the GNU General Public License. Users can modify 
+it to add features, reduction algoritms, support for other cameras/telescopes, file formats.
+ It is written
+in C. The GUI uses the Gtk+ 1.2 toolkit. Some GNU-specific libc functions are used, but 
+nothing fancy. It should compile and run on any system that has GNU
+tools, glibc and Gtk+ 1.2. \gcx is maintained on a GNU/Linux system.
+
+
+\section{Contributing}
+The most important contribution you can make to \gcx is to try it out, and don't give up 
+immediately if something goes wrong. Complain to the author about
+it---he will try to help you.
+
+
+The next most important contribution is to extend the hardware support of the program.
+When interface library are available for cameras (many manufacturers do have such libraries), 
+it is relatively straightforward to add support for a camera, as \gcx has cleanly defined 
+camera interface. Likewise, many mount/telescope manufacturers use the LX200 protocol, so 
+essentially what is needed for other telescopes/mounts is testing and maybe a little 
+tweaking. The program only uses a few LX200 functions, so interfacing to even a custom mount 
+should be easy.
+
+Third, there's the bane of free software: documentation. Any help in documenting or checking
+the documentation of the program is greatly appreciated, and will go a long way towards 
+keeping \gcx users happy.
+
+And finally, the fun part: the code itself. There are many clever algorithms that can be added 
+to the program, and which will benefit from the general infrastructure and integration provided 
+by \gcx.
+
+\section{About this Manual}
+
+This manual is work in progress. It starts with a tutorial introduction, so people can get a 
+taste of what \gcx is all about. The focus in that chapter is on operations that don't 
+involve particular hardware (image viewing and data reduction).
+
+The next chapters describe the main data-reduction functions of the
+program. In general, each chapter stars with a general description of
+the algorithms and methods used, then proceeds to describing how the
+respective methods are implemented in practice. The chapters are written
+roughly in the order in which data reduction procedes.
+
+Finally, the appendices contain either technical details of the
+program or general aspects that invlove slighlty more complex mathematics.
+
+The manual is maintained in \LaTeX.
+
+\section{Related Projects}
+
+\begin{description}
+\item[{\tt cpxctrl}] the camera server used by \gcx. Currently it supports the cpx3m camera, 
+but should be easy to modify to control different ones;
+\item[{\tt cpx3m}] a free CCD camera design;
+\item[{\tt avsomat}] a batch variable star reduction program; more
+  portable than {\sc gcx}, it 
+shares some code but uses a different field-matching algorithm.
+\item[{\tt xephem}] The well known planetarium program by Elwood
+  Downey. \gcx can read the same
+object database format as xephem, namely {\tt .edb}, and uses compatible WCS annotation 
+FITS fields. The star search algorithm is also inspired from xephem. 
+\item[{\tt libnova}] A library for celestial mechanics and astronomical calculations; \gcx 
+uses some sidereal time and equatorial-to-horizontal coordinates transformation routines from
+libnova.
+\item[{\tt wcstools}] A suite of utilities for setting and using the
+  world coordinate system in FITS headers; \gcx 
+  uses the same FITS header fields for specifying the WCS as
+  wcstools. Also, the coordinate transformation (projection) routines
+  are taken from wcstools.
+\end{description}
+
+\clearpage
+\chapter{Getting Started}
+This section is a tour of gcx's features that don't require any data files 
+other than the ones provided with the distribution, or any special hardware.
+It should best be read while playing with the program.
+
+\section{Building and Running gcx}
+
+If you're lucky (meaning that you have an i386 GNU/Linux system with compatible libc 
+and {\tt gtk+-1.2} is installed on your system), the precompiled binary supplied with the 
+distribution will just work.
+To test, cd to the toplevel distribution directory (gcx-x.x.x) and run:
+\cmdline{src/gcx}
+If all goes well, you should get an empty window with a menu. Type \keys{ctrl-Q} or 
+\menu{File/Quit} to exit the program. It is recommended that the program is installed
+in {\tt /usr/local/bin} for example. 
+
+If the above doesn't work,\footnote{
+Or even if it does.} you have to recompile the program. Make 
+sure {\tt gtk+-1.2} is installed on the system (if you have Gnome, you also have gtk), then in 
+the toplevel directory type:
+\cmdline{./configure ; make clean ; make}
+Configure takes some options. See the INSTALL file supplied with the distribution for more 
+details. 
+
+If the above step completes successfully, become root and do a 
+\cmdline{make install}
+This will place the program in /usr/local/bin, and may also install data files in future
+versions. 
+
+The installation is now complete. 
+\section{Starting with gcx}
+
+
+The {\tt data} subdirectory of the distribution contains an example fits frame (\exframe), and an 
+example recipe file for the frame (\exrcp). These will be used throughout this section.
+
+First, start the program:\footnote{
+If the program wasn't installed in {\tt /usr/local/bin} or similar, you may have to type the 
+full path to the binary; from the distribution toplevel directory type:
+{\tt src/gcx} }
+\cmdline{gcx}
+You should be presented with a empty window, with a menu at the top.
+
+To load the example frame, type \keys{ctrl-O} or use \menu{File/Open Fits}; select the example 
+fits file (\exframe) in the {\tt data} directory an click \menu{Ok}. The program will load 
+and display the frame. 
+
+Alternatively, the fits file name can be supplied on the command line. Something like:
+\cmdline{gcx data/\exframe}
+will star the program and load the frame at the same time.
+
+Two status bars are displayed at the bottom of the window. The left one shows the current display
+parameters: the zoom level, the {\em low cut} and the {\em high cut}. The low cut corresponds to 
+black on the monitor, while the high cut corresponds to 100\% white. The values are expressed in 
+the same units the FITS file is.
+
+The right-side status bar shows the various status and error messages. When loading an image, 
+global statistics for the image are displayed. This will be referred to as the ``status bar'' 
+throughout this manual.
+
+On most errors, a beep is sounded and an error message is printed in the status bar. Sometimes 
+though, a command may appear to do nothing. Checking the terminal from
+which the program was launched will sometimes give an extra hint as to what happened.
+
+\section{Navigating the Image}
+
+To pan around the image, either use the scrollbars, or place the cursor over the point that 
+you want in the center of the image and press the spacebar or the
+center mouse button.\footnote{ The image 
+will pan only up to the point where it's edge is at the edge of the window.}
+
+You can pan back to the center of the image using \keys{ctrl-L} or select \menu{Image/Pan Center} 
+from the menu. 
+
+To zoom in, place the cursor over the point you want to zoom in around, and press the \keys{=} 
+key (same key that has the {\tt '+'} symbol). To zoom out, press \keys{-}. The \menu{Image} 
+menu also has \menu{Zoom In} and \menu{Zoom Out} options.
+
+When loading a frame, the image cuts are automatically selected for a convenient display of 
+astronomical frames. The background is set at a somewhat dark level, and the dynamic range 
+is set to span 22 times the standard deviation of the intensity across the frame. You can 
+always return to these cuts by pressing \keys{0} or selecting \menu{Image/Auto Cuts}.
+
+Pressing \keys{1} -- \keys{8} will select various predefined contrast levels. \keys{1} is the most 
+contrasty: the image spans 4 sigmas, while \keys{8} spans 90 sigmas.
+\keys{9} will scale the image so that the full input range is represented (the cuts are set to 
+the min/max values of the frame). Selecting \menu{Image/Set Contrast/...} from the menu will 
+accomplish the same effect.
+
+To vary the brightness of the background, use \keys{B} (\menu{Image/Brighter}) and \keys{D} 
+(\menu{Image/Darker}).
+
+Another, sometimes more convenient way of making contrast/brightness
+adjustments is to drag\footnote{move
+the mouse while holding the left button pressed} 
+the pointer over the image. Dragging horisontally
+will change the brightness, while dragging vertically will adjust the contrast. 
+
+The key presses mentioned above are displayed in the menus alongside the respective options. 
+\keys{F1} or \menu{Help/Show Bindings} will show on-line help about mouse actions.
+
+It is important to know that all the ajustments described only apply to the display. The 
+internal representation of the frame (and of course the disc file) is never changed 
+in any way.
+
+\section{Examining the FITS Header}
+
+Select \menu{File/Fits Header} from the menu. A new window will display the optional 
+FITS header fields from the loaded frame.\footnote{The fields that are
+  always required, like {\tt naxis}, {\tt SIMPLE}, {\tt BITPIX}, etc are not displayed.}
+
+\section{Stars}
+
+\gcx maintains a list of objects it can overlay on the display and run various processing 
+steps on. They are called ``stars'' or sources. The stars can be extracted from the image, or 
+loaded from catalogs or star files.
+
+%\subsection{Detecting Stars}
+
+Ctrl-click on a star image. A round circle will appear around it (you cannot mark very 
+faint or saturated stars). You don't need to click precisely on the peak - the program will 
+search around, find a star and create an object (a {\em user star}) positioned at the 
+centroid of the star image.
+
+Click inside the circle. Information about the star will be displayed in the status bar: 
+the start type (field star), the pixel coordinates (counting from the top-left corner), and the
+world coordinates if possible. Since the frame we loaded contained WCS information, but 
+it couldn't be verified by the program, the status bar will show world coordinates, but will mark
+them as ``uncertain'' and disable all operations that depend on these objects' WCS. More on
+validating the WCS below.
+
+Right clicking on a star will pop up a specific menu. As our WCS isn't validated yet, only 
+the 'delete' option is active at this point.
+
+Now press \keys{S} or select \menu{Stars/Detect Sources}. The program will search the whole 
+frame, and mark stars. There is a limit as to how many stars will be marked. The limit can 
+be changed by selecting \menu{File/Edit Options}, clicking on the ``+'' next to {\em Star 
+Detection and Search Options} and increasing the number in the {\em Maximum Detected Stars} field.
+
+There is also a limit on how faint the detected stars can be. Decreasing the value in the {\em
+Star Detection SNR} field will make the program look for fainter stars. Note that a very low
+value of SNR will increase the run time of the detection routine considerably. Don't go below 
+2 or so.
+
+To remove the detected stars from the display, use \menu{Stars/Remove Detected Stars} or 
+press \keys{shift-S}. 
+
+Automatically detected stars and manually marked (user) stars are displayed 
+with different symbols and deleted with separate commands, but otherwise equivalent. The program
+considers automatically detected stars somewhat expendable, but tries not to remove user stars
+unless specifically requested.
+
+%\subsection{Catalog Stars}
+
+A second class of stars handled by \gcx are catalog stars. They can be loaded from catalogs if 
+installed on the system, or from star files. 
+
+Installing catalogs will be described later in this manual. For the moment, we will load the 
+example recipe file from the {\tt data} directory of the distribution. 
+
+Select \menu{File/Load Recipe} from the menu, then select the example recipe file in the
+{\tt data} directory (\exrcp) and click ok.
+
+Three types of stars will show up. Diamond-shaped ones are field stars. They are used to fit
+and validate the WCS. Target-shaped symbols are the standard stars. Their magnitudes are used
+to photometrically calibrate the frame. Cross symbols are ``variable''
+or ``target'' stars - stars that we want 
+to measure, but we don't know their magnitude in advance.\footnote{
+The symbols used to depict various star types can be set by the user,
+so their appearance can vary. These are the default shapes.}
+
+
+To find out more about a star, right-click on a star symbol, and select \menu{Edit Star} 
+from the pop-up menu. This will open a dialog and display information about the star, 
+which can be edited. The name, coordinates and comments fields should be obvious.
+Two types of magnitudes are shown: standard magnitudes are obtained from the catalog or 
+recipe file; instrumental magnitudes are measured by the program.
+
+A magnitude entry looks like this: 
+\cmdline{\tt<band\_name>(<system>)=<magnitude>/<error>}
+The error and system fields are 
+optional. The {\em band name} is the name of the filter ('v', 'b', etc). The {\em system}
+describes the source of the data. For instance, v(aavso) means 'v' magnitudes taken from 
+aavso charts, while b(landolt) would be used for 'b' magnitudes of landolt standards. 
+
+For more information about stars, please see Chapter~\ref{ch:stars}
+
+\section{World Coordinate System}
+Each time a frame is loaded, the program keeps track of the relation between the the positions 
+within the frame, and the ``true'' positions of the objects. This relation is called the ``WCS'' 
+inside the program. 
+
+If no information is known about the position of the field, the WCS is called ``invalid''. 
+This can happen if the frame doesn't have WCS information in the header. When some information
+is available, we say the we have an ``initial WCS''. The program will treat wcs information from
+the header as approximate. If we have an initial WCS and some field stars, we can match the 
+positions of the field stars with stars detected from the frame. If the program finds a 
+good-enough match, it will decide that the WCS can be reliably used, and mark the WCS as 'valid'.
+
+Our example frame already has an initial WCS. We have field stars loaded from the recipe file
+(or we could have some from GSC). We will first press \keys{S} to detect starts from the frame.
+Select \menu{Wcs/Auto Pairs} (or press \keys{P}). This will match the stars and create pairs, 
+which are drawn with dotted lines. Next, press \keys{Shift-W} (or \menu{Wcs/Fit Wcs from Pairs}), 
+and the program will fit the WCS so that the pairs overlap, and display the mean error of the fit
+in the status bar. If enough pairs are fitted and the error is small enough, the fit will 
+be validated.
+
+Pressing \keys{M} or \menu{Wcs/Auto Wcs} will do all the above steps in one operation (detect 
+stars, load field stars from GSC if possible, find pairs and fit the WCS). Pressing \keys{shift-M}
+or \menu{Wcs/Quiet Auto Wcs} will do the same, but will remove the detected stars and field 
+stars after the fit. It will do nothing if the WCS is already valid.
+
+The fitting algorithm can be tuned by changing parameters under {\em WCS fitting options} in
+the options dialog.
+
+Once we have a valid WCS, we have new uses for the detected and user stars. Clicking on them will
+print their true coordinates on the status bar. It is also possible to mark them as variable stars,
+so they can be measured, or as standard stars, so they can participate in the photometry solution
+(for example when inputting data from a paper chart).
+
+Choose a few detected stars, right click on them and choose \menu{Edit Star}. 
+Now check the ``variable'' flag. The star will be transformed into a variable, and its
+symbol changed to a cross.
+
+\section{Aperture Photometry}
+
+Now that we have our valid WCS and we know which stars we want to measure and which standards 
+to use, the actual photometry is easy: just press \keys{shift-P} or 
+\menu{Processing/Quick Aperture Photometry}.
+
+A quick result for the first variable star is printed in the status
+bar. All stars' magnitudes are updated, and can be examined using the
+\menu{Edit Star} function.
+
+The reduction process has a number of parameters, which can be accessed through the options 
+dialog, under {\em Aperture Photometry Defaults}. For  more details
+about the photometry process check Chapter~\ref{ch:aphot}.
+
+All the clicking in this section can be eliminated with one command. From the toplevel directory,
+run: 
+\cmdline{gcx data/\exframe~-P data/\exrcp}
+The program will load the frame, load the recipe, fit the WCS and run the photometry. A report
+will be written to standard out (all debugging messages are printed to stderr, so redirecting 
+stdout to a file will write just the report to that file. For example:
+\cmdline{gcx data/\exframe~-P data/\exrcp ~>outf}
+will write the report to outf.
+
+
+\section{Going Further}
+\gcx has many more features and options than the ones described above. To find out about them, 
+read below, browse the menus, or ask the author. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\chapter{Image Files}
+
+The basic format used by \gcx for image files is FITS. Internally, images are represented using
+32-bit (single-precision) floating-point values. The images are read and saved as 16-bit integer
+files. It it relativey easy to modify the program to read outher FITS formats (like 8-bit or 
+floating point), should the need arise. 
+
+\gcx will read and write fits files compressed in the gnuzip format (ending in {\tt.fits.gz})
+transparently. A zipped file name can be used whenever a regular fits
+file name is 
+required.\footnote{This function uses the {\tt zcat} utility, which must be installed on the
+  system.}
+
+While the way image data is represented in the FITS files is well specified, additional 
+information from the fits header can vary between different programs. Since the data reduction 
+functions of \gcx make use of quite a few fits header values, it is important to understand
+how they are interpreted.
+
+Some camera control programs generate broken 16-bit FITS files that
+have {\tt BZERO} set to 0 and all values stored as unsigned
+numbers. When loaded, values larger than 32768 appear as negative
+numbers. To accomodate these files, \gcx provides the \op{File and
+  Device Options/Force unsigned FITS} option, which will make the
+program interpret all values in frames with {\tt BZERO}=0 as unsigned. Note
+that files are always saved in the standard format.
+
+\section{FITS Header fields}
+
+The default names of the fits header fields have been set to what the author considers the 
+most common. It is however possible to change any of the field names by editing the options
+or the \verb+~/.gcxrc+ file.
+
+After loading a fits file, you can examine it's header by selecting 
+\menu{File/Show Fits Header}.\footnote{Note that the required FITS fields like {\tt SIMPLE, 
+BITPIX, NAXIS, NAXIS2, BSCALE, BZERO} are not shown by this operation.}
+When new frames are created by \gcx from images captured by a CCD
+camera, the frame is annotated from one of the following sources: 
+\begin{itemize}
+\item The {\em General Observation Setup Data} options;
+\item Object information from the currently selected target object;
+\item Frame information from the camera.
+\end{itemize}
+The table below details the most important fits header fields 
+set and read by \gcx:
+
+\smallskip
+\noindent\begin{longtable}{@{}lcp{3cm}p{5cm}}
+Name&Type&Meaning&Comments\\
+&&&\\
+\endhead
+%\hline
+%\multicolumn{4}{l}{World coordinate information}\\
+%\hline
+{\tt CRPIX1/2}&Real&Coordinates of reference pixel&Set to the center of the frame; 
+               Used to set the initial WCS.\\
+{\tt CDELT1/2}&Real&Scale of image in degrees per pixel&Set initially from the observation
+               setup focal length, pixel size and binning; updated after WCS fitting.\\
+{\tt CROTA1}&Real&Rotation of image in degrees&Set initially to 0; updated after WCS fitting.\\
+{\tt CRVAL1/2}&Real&World coordinates of the reference pixel&Set from the target object 
+               coordinates; update after WCS fitting.\\
+%&&&\\
+{\tt FILTER}&String&Name of filter used&Set from the current observation data or filter 
+               wheel status; used for photometric reductions.\\
+{\tt ELADU}&Real&Image electrons per AD unit&Set from camera parameters; used by the photometry
+               routines in the error model.\\
+{\tt RDNOISE}&Real&camera read noise in AD units&Set from camera parameters; used by the photometry
+               routines in the error model.\\
+%&&&\\
+{\tt EXPTIME}&Real&integration time in seconds&Set from camera paramters; used by the 
+               scintillation noise evaluation routine\\
+{\tt JDATE}&Real&Julian date of the start of integration&Used, among other things to calculate
+               the frame airmass\\
+{\tt MJD}&Real&Modified Julian Date of the start of integration&An alternative to JDATE\\
+{\tt DATE-OBS}&String&The date/time of start of exposure in the format
+               specified by the fits standard&An alternative to JDATE\\
+{\tt TIME-OBS}&String&The time of day portion of the date/time, used
+               when the {\tt DATE-OBS} field only sets the date&An alternative to JDATE\\
+{\tt APERT}&Real&Telescope aperture in cm&Set from general observation options; Used 
+               to evaluate scintillation noise\\
+{\tt LAT-OBS}&String&Latitude of observation site in DMS format&Set from general observation options; Used 
+               to calculate airmass\\
+{\tt LONG-OBS}&String&Latitude of observation site in DMS format; Eastern
+               latitudes are negative
+               &Set from general observation options; Used 
+               to calculate airmass\\
+{\tt AIRMASS}&Real&Frame airmass&If present, disables airmass calculation and sets the airmass 
+               value\\
+{\tt OBJECT}&String&Target object name&Used to set the initial WCS if other information
+               is not available\\
+{\tt OBJCTRA}&String&Target right ascension in HMS format&Used to set the initial WCS if other information
+               is not available\\
+{\tt RA}&String&Target right ascension in HMS format&Used to set the initial WCS if other information
+               is not available\\
+{\tt OBJCTDEC}&String&Target declination in DMS format&Used to set the initial WCS if other information
+               is not available\\
+{\tt DEC}&String&Target declination in DMS format&Used to set the initial WCS if other information
+               is not available\\
+{\tt SECPIX}&Real&Image scale in arcseconds per pixel&Used to set the initial WCS if other information
+               is not available\\
+\end{longtable}
+
+\section{Viewing Image Files}
+
+To pan around the image, either use the scrollbars, or place the cursor over the point that 
+you want in the center of the image and press the spacebar or the
+center mouse button.\footnote{The image 
+will pan only up to the point where it's edge is at the edge of the window.}
+You can pan back to the center of the image using \keys{ctrl-L} or select \menu{Image/Pan Center} 
+from the menu. 
+
+To zoom in, place the cursor over the point you want to zoom in around, and press the \keys{=} 
+key (same key that has the {\tt '+'} symbol). To zoom out, press \keys{-}. The \menu{Image} 
+menu also has \menu{Zoom In} and \menu{Zoom Out} options.
+
+When loading a frame, the image cuts are automatically selected for a convenient display of 
+astronomical frames. The background is set at a somewhat dark level, and the dynamic range 
+is set to span 22 times the standard deviation of the intensity across the frame. You can 
+always return to these cuts by pressing \keys{0} or selecting \menu{Image/Auto Cuts}.
+
+Pressing \keys{1} -- \keys{8} will select various predefined contrast levels. \keys{1} is the most 
+contrasty: the image spans 4 sigmas, while \keys{8} spans 90 sigmas.
+\keys{9} will scale the image so that the full input range is represented (the cuts are set to 
+the min/max values of the frame). Selecting \menu{Image/Set Contrast/...} from the menu will 
+accomplish the same effect.
+
+To vary the brightness of the background, use \keys{B} (\menu{Image/Brighter}) and \keys{D} 
+(\menu{Image/Darker}).
+
+Another (sometimes more convenient) way of making contrast/brightness
+adjustments is to drag 
+the pointer over the image. Dragging horisontally
+will change the brightness, while dragging vertically will adjust the contrast. 
+
+It is important to know that all the ajustments described only apply to the display. The 
+internal representation of the frame (and of course the disc file) is never changed 
+in any way.
+
+Further adjustments to the way the image is displayed can be made by bringing up the 
+\op{Image/Curves\&Histogram} dialog. This dialog shows a portion of the frame's histogram, 
+overlapped by the currently set intensity transfer function. The image cuts are placed
+at the red vertical bars in the histogram window. 
+
+The shape of the transfer function can be altered by changing the Gamma and Toe parameters.
+Gamma controls the overall shape, while the Toe controls what happens in the leftmost portion
+of the curve. Increasing the toe will prevent the transfer function from having a
+very high slope near zero, as would be implied by the gamma setting.
+
+\section{Saving and Exporting Images}
+
+The image currently displayed can be saved in the FITS format by selecting 
+\menu{File/Save FITS As}. When frames are saved as FITS, their values aren't affected by the
+display settings. Another option is to export the file to a different format (presently, only 
+the 8-bit pnm format is supported). When exporting, the intensity mapping used for displaying
+the image is used to convert from the original frame to the 8-bit output image.
+
+
+
+
+
+
+
+
+
+
+
+
+
+\chapter{Stars and Catalogs}\label{ch:stars}
+
+In addition to images, \gcx handles lists of astronomical objects generally referred to as 
+{\em stars}. There are several types of stars, and the various types have different kinds of 
+information attached. They can be grouped in two classes: 
+\begin{enumerate}
+\item {\em Frame stars} only have positions within a frame (pixel coordinates). They come 
+  into existence by detection, either automatic, or user-directed. There are three
+  sub-types of frame stars:
+  \begin{itemize}
+    \item detected stars;
+    \item user stars;
+    \item aligment stars.
+  \end{itemize}
+\item {\em Catalog stars} have world coordinates (right ascension and declination) attached to them, 
+  and can also hold photometric information. Catalog stars are either read from a catalog or recipe
+  file, or created interactively by editing another star. There are four sub-types of catalog stars:
+  \begin{itemize}
+    \item fields stars;
+    \item catalog objects;
+    \item standard stars;
+    \item photometry targets (AP targets).
+  \end{itemize}
+\end{enumerate}
+Stars are drawn on top of the displayed images. The apearance of the
+various types of stars can be changed using the options under \op{Star
+Display Options}.
+
+\section{Star Detection}\label{sec:stardet}
+
+A relatively straight-forward star detection algorithm is implemented in {\sc gcx.} 
+It will search for
+local intensity peaks that satisfy the following conditions:
+\begin{enumerate}
+\item The peak is higher than the local background plus a specified number of standard deviations
+  (usually 6-9). The number of standard deviations is specified in the \op{Star Detection SNR} 
+  option;
+\item There are at least 4 pixels adjacent to the peak which are above the threshold;
+\item The peak is not too close to another, higher peak;
+\item The star radius (are in which the star is above the background) isn't too large;
+\end{enumerate}
+The \op{Maximum Detected Stars} parameter limits the number of stars that are detected. 
+The whole frame is searched and the bightest stars are kept.
+
+The star detection routine is called by selecting \menu{Stars/Detect Sources}, or 
+automatically by other operations (WCS fitting and frame
+alignment). The detection routine will produce {\em detected stars},
+except when called on an alignment reference frame, in which case it
+will produce {\em alignment stars}.
+
+Another way of creating frame stars is to control-click on or near an
+otherwise unmarked star image. This will initiate a spiral star search in a
+region around the the cursor, with the SNR parameter set to a low
+value (3.0). In this way, even very faint stars that are located near
+the cursor can be marked. This procedure creates {\em user stars}.
+
+\section{Loading Catalog Stars}
+
+As their name implies, catalog stars are generally loaded from catalog
+files. \gcx supports three kinds of catalogs: object catalogs, from
+which the stars are loaded by name (like GCVS, NGC, Messier, IC);
+field star catalogs, from which the stars are loaded by region of
+interest; and star files (including recipe files), which are loaded in
+their entirety, as they presumably contain stars in a region of
+interest.
+
+As catalog stars are located by world coordinates, the program cannot
+display any of them if it doesn't have at least an approximate idea
+of what the image's coordinates are in the real world. The frame must
+have at least an {\em initial WCS}.\footnote{See the ``World Coordinates'' section below.}
+
+If the frame WCS is unset, the program will refuse to load field
+stars; it will set the initial WCS so that the loaded object is at 
+the center of the frame if a single object is loaded from an object
+catalog; and it will refuse to load a star file, unless the star file is 
+a recipe that contains target coordinates, in which case the initial
+WCS will be set from those coordinates.
+
+\subsection{Object Catalogs}
+Two formats for object catalogs are currently supported: the {\tt
+.edb} format, also used by XEphem, and the {\tt .gcx} format. The two
+are treated differently: {\tt .gcx} files can be loaded in memory and
+the whole set searched by name; {\tt .edb} files are searched
+directly (without loading). The particular edb file to search is
+selected depending on the object name.
+
+There are two ways of loading stars from object catalogs: Selecting
+\menu{Stars/Add From Catalog} will prompt for an object name and load
+it. If the frame has the {\tt OBJECT} FITS field set, selecting
+\op{Stars/Show Target} will try to load the object specified in that 
+field. Stars loaded from object catalogs are of the {\em catalog
+object} type.
+
+\subsection{Field Star Catalogs}
+
+Currently, the program supports two field star catalogs directly: GSC
+(and GSC-ACT) and TYCHO2. It can also load GSC2 objects in the form of 
+star files (see below).
+
+To load stars from GSC or Tycho, the frame has to have at least an
+initial WCS; then select \menu{File/Load Field Stars/From GSC Catalog}
+or \menu{File/Load Field Stars/From Tycho2 Catalog}. 
+
+Options under \op{Star Detection and Search Options} control the
+maximum number of stars loaded and the limiting magnitude. When more
+stars than the specified limit are found in the catalog, only the brightest
+ones are loaded. The region searched is slightly larger than the
+frame's size in world coordinates.
+
+\section{Star Files}
+
+\paragraph{GSC-2 files} A file 
+containing GSC2 stars in a specified region can be obtained from
+\cmdline{http://www-gsss.stsci.edu/support/data\_access.html}
+It can be loaded into \gcx by selecting \menu{File/Load Field
+  Stars/From GSC-2 file}. Stars loaded this way are marked as 
+{\em field stars}.
+
+\paragraph{Native format files} \gcx defines a native format for star
+files. It is used for
+object catalogs, photometry recipe and report files, among other
+things. Stars from any of these files can be read by selecting
+\menu{File/Load Recipe}. The native format contains star type
+information, which is maintained on loads.
+
+\paragraph{Other star files} Many star files are available from
+various sources, usually in some form of tabular format. \gcx has a
+command-line only import function to convert these to recipe files
+(see {\tt gcx --help} for more details). While it can read a limited
+range of formats, it is relativey easy to either convert a given file
+to a supported format, or modify an existing conversion
+routine.\footnote{
+The conversion routines are located in {\tt recipe.c}; 
+The function called by the import function is {\tt convert\_catalog}.}
+
+\section{Setting up Catalogs}
+
+The program expects the various catalogs to be set up in a certain
+way. Here are the requirements for the various catalogs.
+
+\subsection{Setting up GSC}
+
+The program reads the GSC or GSC-ACT\footnote{
+GSC-ACT is a recalibrated version of the GSC. While the
+ random astrometric errors are about the same, the systematic errors
+ have been reduced considerably.}
+ catalogs in the compact (binary)
+form. It can be downloaded in this format from:
+\cmdline{ftp://cdsarc.u-strasbg.fr/pub/cats/I/255/GSC\_ACT/}
+Place the downloaded files in a directory (for instance {\tt
+  /usr/share/gcx/gsc-act}) and set \op{File and Device Options/GSC
+Location} to point to that directory. Make sure all the directory and
+file names under the gsc dir use all lower case letters.
+
+\subsection{Setting up Tycho2}
+
+The Tycho2 catalog can be downloaded from
+\cmdline{ftp://cdsarc.u-strasbg.fr/pub/cats/I/259/}
+We need to download all the {\tt tyc2.dat.nn.gz} files, unzip
+them and concatenate together to create one (big) tycho2.dat
+file, perhaps like this:
+\cmdline{zcat tyc2.dat.??.gz >tycho2.dat}
+After that, set \op{File and Device Options/Tycho2 location} to
+the full path of the file, like for instance:
+\cmdline{/usr/share/gcx/tycho2/tycho2.dat}
+ \gcx must have write permissions to the 
+directory where the {\tt tycho2.dat} file is located, as it needs 
+to create some indexes when the catalog is first accessed.
+
+\subsection{Setting up Object Catalog Files}
+
+To tell the program what native format catalog files to load, set the
+\op{File and Device Options/Catalog files} option to a comma-delimited
+list of files. The list can contain wildcards and is
+tilde-expanded. An example entry would be:
+\cmdline{/usr/share/gcx/catalogs/*.gcx:\~\strut /catalogs/gcvs.gcx}
+
+All {\tt .edb} files that are searched must be located in the same
+directory, specified in \op{File and Device Options/EDB
+  files}. Depending on the searched object's name, \gcx will look in a
+specific file:\footnote{
+This make-shift arrangement is likely to change in future
+  versions.}
+
+\medskip
+\noindent\begin{tabular}{ll}
+%\endheader
+Objects with names starting in ``M''&{\tt Messier.edb}\\
+Objects with names starting in ``NGC''&{\tt NGC.edb}\\
+Objects with names starting in ``UGC'' or ``UGCA''&{\tt UGC.edb}\\
+Objects with names starting in ``IC''&{\tt IC.edb}\\
+Objects with names starting in ``SAO''&{\tt sao.edb}\\
+Objects with ending in a constellation name&{\tt gcvs.edb}\\
+Other objects&{\tt YBS.edb}\\
+\end{tabular}
+
+
+
+
+
+
+
+
+
+
+\chapter{World Coordinates}
+
+World coordinates are the ``real'' equatorial coordinates of objects
+in catalogs: right ascension, declination and their epoch.\footnote{
+Whenever the epoch of some coordintes is not specified, \gcx
+assumes J2000.} 
+Given an image frame, we reffer to the transformation between $x$ and
+ $y$ pixel coordinates and their world coordinate counterparts as the
+{\em World Coordinte System} (WCS for short) of the frame.
+
+The transformation between the spherical equatorial and the ``flat''
+image coordinates cannot be done without choosing a projection
+system. \gcx uses the plane-tangent projection system, which is
+appropiate for relatively narrow fields.\footnote{
+This is the same system used by the popular {\em wcstools} package.}
+
+\section{World Coordinate System Parameters}
+
+In the plane-tangent system, the WCS is specified by the following
+values:
+\begin{enumerate}
+\item The frame coordinates of a reference pixel in the image (usually
+  the center of the frame) in the {\tt CRPIX1}
+  and {\tt CRPIX2} fits header fields;
+\item The world coordinates (r.a.~ and dec) of the reference pixel in 
+  the {\tt CRVAL1} and {\tt CRVAL2} fields;
+\item The epoch of the coordinates in the {\tt EQUINOX} header
+  field;
+\item The horisontal and vertical scale of the image in degrees per
+  pixel in the {\tt CDELT1} and {\tt CDELT2} fields;
+\item The rotation of the frame in the {\tt CROTA1} field.
+\end{enumerate}
+A slightly different form of these parameters is presented in the 
+WCS editing dialog: the scale parameters are expressed in the more
+friendly arc seconds per pixel units, and the coordinates are
+expressed in the HMS and DMS formats.
+
+\section{World Coordinate System States}
+
+A given frame's WCS can be in one of the following states:
+\begin{description}
+\item[Unset] When the WCS is unset, the program has no idea about the 
+WCS. It will refuse to do any operation that requires the WCS.
+\item[Initial] An initial WCS is an approximate set of values for the 
+WCS parameters. It enables the program to load catalog stars and
+display them on the image (more or less around their true
+positions). It also provides a starting point for WCS fitting. \gcx
+will not use an initial WCS for any operation that requires precise 
+coordinates (like aperture photometry).
+\item[Fitted] The WCS has been
+  successfully fitted, but the quality of the fit was not enough
+  to allow it to be validated. A {\em fitted} WCS is treated very much like 
+  an initial WCS.
+\item[Valid] If a fit was good enough (enough stars were fitted, and
+  the error was low enough), the WCS is deemed {\em valid}. All
+  operations that use the WCS are enabled in this situation.
+\end{description}
+
+
+\section{Obtaining an Initial WCS}
+
+When a frame is loaded, the WCS is initially unset. The header of the
+frame is searched for information about the initial WCS. The following
+fields are searched, in order:\footnote{
+The actual names of any of the fields can be changed in the
+  options page. The names below are the defaults.}
+\begin{enumerate}
+\item {\tt CRVAL1/2, CDELT1/2, CROTA1, CRPIX1/2, EQUINOX}. The bare
+  minimum set consists of{\tt CRVAL1, CRVAL2} and one of the {\tt
+  CDELTs}.
+\item {\tt RA} or {\tt OBJCTRA}, {\tt DEC} or {\tt OBJCTDEC}, {\tt
+  PIXSCALE} or {\tt SECPIX}. If neither of the scale fields is found, 
+  a default scale values is taken from \op{Wcs Fitting
+  Options/Default image scale};
+\item {\tt OBJECT} If this field is present, the object's name is
+  searched in the catalog, and its coordinates used. The image scale
+  is set from \op{Wcs Fitting Options/Default image scale};
+\end{enumerate}
+When neither of the above fields are found, the WCS is left in the
+{\em unset} state. An initial WCS can be set in this case by either
+entering the parameters in
+the WCS edit dialog (\menu{Wcs/Edit Wcs}), loading a catalog object
+using \menu{Stars/Add From Catalog} or loading a recipe file that 
+has the target object or field center specified. In the last two cases, the default
+scale is used.
+
+
+\section{Fitting the WCS to an Image}
+
+By WCS fitting we understand the process of comparing the
+positions of stars extracted from the image frame versus the projected
+positions of catalog stars, and the subsequent adjustment of the WCS
+for the best match. 
+
+The fitting process consists of the following steps:
+\begin{enumerate}
+\item Detecting frame stars. This step is described in section
+  \ref{sec:stardet};
+\item Obtaining catalog stars for the match. These can come from
+  either a recipe file or one of the field stars catalogs. The program
+  will load stars from the Tycho2 and GSC catalogs. All the stars from
+  a loaded recipe file that have the ``astrimetric'' flag set will
+  also be used for WCS fitting;
+\item Finding star pairs. This step tries to find similar asterism in
+  the detected and catalog sets and match the corresponding stars. 
+%  The algorithm used is described in detail in Appendix \ref{ap:pairs}.
+
+  The algorithm tolerates frame rotation and changes in scale. If some
+  bounds can be placed on initial errors (for instance if we know that
+  only a limited rotation range is expected) it is possible to pass
+  that information to the algorithm in order to narrow the search.
+
+\item Fitting the solution. This is an iterative step consisting of
+  calculating the required offset, scale and rotation in the frame
+  coordinates, then adjusting the WCS accordingly. After that, the
+  image coordinates of the catalog stars are recalculated and the step
+  repeated until there is no significant change in the WCS. The
+  iterative approach is necessary because the projection operation is
+  non-linear. At the end of the fitting step, a {\em rms} position
+  error is calculated, and compared to the value of the \op{Max error
+  for WCS validation}. If the error is lower and enough pairs have
+  been used in the fit (more than \op{Min pars for WCS validation}),
+  the WCS is marked ``valid''.
+\end{enumerate}
+
+The \op{Scale tolerance} option sets the maximum initial error of the
+image scale for the pairing alogorithm. A value of 0.1 specifies that
+the scale of the initial WCS has an error of at most $\pm 10\%$. The
+\op{Rotation tolerance} specifies how much field rotation is expected
+by the pairs matching algorithm. A value of 180 will let the algorithm
+match frames of any rotation. A third important parameter is
+\op{Minimum number of pairs}. This specifies the number of pairs at
+which the algorithm decides it has found a match. The default values
+for these parameters almost never generate a bad match, even for quite
+dense fields. If one increases the scale tolerance, there is an
+increased risk of having a bad match, and the minimum pairs should be
+increased as well. 
+%Other pairing parameters are described in Appendix~\ref{ap:pairs}. 
+
+The pairing algorithm requires the initial WCS to have the correct 
+mirroring. When the initial WCS's scale comes from the {\tt CDELT1/2}
+fields, their signs will determine the mirroring: when both have the
+same sign, the frame is ``normal'', i.e. W is to the right when N is
+up. If the signs are different, the field is flipped.
+
+When the initial WCS's scale comes from a single scale parameter, the
+mirroring will be set by the program according to the value of the 
+\op{General Observation Setup Data/Flipped field} option.
+
+\subsection{WCS Fitting Commands}
+
+The WCS fitting steps can be performed one at a time, or all together.
+The \menu{Wcs/Auto Wcs} operation will do the following steps:
+\menu{Stars/Detect sources}, \menu{File/Load Field Stars/From Tycho2
+  Catalog}, \menu{Wcs/Auto pairs}, \menu{Wcs/Fit Wcs from pairs}.
+The \menu{Wcs/Quiet Auto Wcs} variant will also delete the detected and
+field stars at the end of the fit.
+
+Selecting \menu{Wcs/Reload from frame} will revert the WCS to the
+parameters before the fit. The pairs will remain marked.
+
+In the unlikely event that the pairing algorithm fails,\footnote{
+The author would very much like to receive any frames for which the
+ algorithm fails.}
+ it is possible to create pairs ``by hand''. Select a detected star,
+ then right-click on the catalog star you want to pair it with and
+ select \menu{Create Pair} from the pop-up menu. When at least 2 pairs
+ have been marked, we can fit the wcs with \menu{Wcs/Fit Wcs from
+ Pairs}. Note that the fit will not be marked as 
+``valid'' unless at least 
+ \op{Minimum number of pairs} have been marked.
+
+
+
+
+
+
+
+
+
+
+\chapter{CCD Reduction}
+
+%\section{Introduction}
+
+Ideally, an image taked by a CCD camera through a telescope will give accurate information 
+about the light flux distribution over a portion of the sky. Unfortunately, this is not 
+generally the case. Instrument imperfections and the discrete nature of light itself
+concur to introduce errors in the measured data. The errors (differences between 
+the measured values and the ``true'' ones) are the result of several factors, some 
+random in nature, and some deteministic. 
+
+The goal of the CCD reduction process is to eliminate (or at least minimise) the contribution 
+of deterministic factors in the errors, in other words to remove the {\em instrument signature}
+from the data.
+
+A second, but not less important, goal is to preserve information about the noise sources, so that 
+users of the reduced data can evaluate the random errors of the data.
+
+We begin this chapter by describing the way the general CCD reduction
+process works, and in the process define bias, dark and flat
+files. The second part of the chapter is devoted to the practical
+implementation of the reduction tasks in the program.
+
+\section{CCD Camera Response Model}
+Raw pixel values for a CCD frame can be calculated as
+follows:\footnote{
+Neglecting non-linear terms in the CCD response.}
+\begin{equation}\label{eq:ccd1}
+s(x,y) = B(x,y) + t D(x,y) + t G(x, y) I(x, y) + {\rm noise}
+\end{equation}
+where $B(x,y)$ is the {\em bias} value of each pixel, $t$ is the integration time, 
+$D(x,y)$ is the {\em dark current}, 
+$G(x,y)$ is the {\em sensitivity} and $I(x,y)$ is the light flux reaching the pixel.
+We cannot predict the instantaneous values of the noise component but some statistics 
+about it can be calculated (Appendix~\ref{ap:noise}).
+
+To estimate the flux values reaching the sensor from the raw frame, we need to
+estimate $B$, $D$ and $G$. After that, Equation \ref{eq:ccd1} can be solved for $I$.
+$B$, $D$ and $G$ are calculated starting from calibration frames taken
+under controlled conditions: 
+{\em bias}, {\em dark} and {\em flat} frames.
+
+\section{Bias and Dark Frames}
+
+If we take very short exposures without opening the camera's shutter ({\em bias frames}
+$t = 0$ and $I(x,y)=0$; Equation~(\ref{eq:ccd1}) becomes: 
+\begin{equation}\label{eq:bias}
+b(x,y) = B(x,y) + {\rm noise}
+\end{equation}
+To obtain an estimate of $B$, we simply use $b$:
+\begin{equation}
+\widetilde{B}(x,y) = b(x,y)
+\end{equation}
+We use the tilde to denote that we can only estimate $B$, because of the noise. If we average 
+several bias frames together we can get arbitrarily close to $B$, as the relative noise 
+contribution decreases with the square root of the number of frames averaged.
+\begin{equation}
+\widetilde{B}(x,y) = \frac{1}{N}\sum_i b_i(x,y)
+\end{equation}
+We will call this the {\em master bias frame}.
+
+\paragraph{Dark frames} If we now take longer exposures with the shutter closed, 
+we obtain {\em dark frames}:
+\begin{equation}\label{eq:dark}
+d(x,y) = B(x,y)+tD(x,y)+{\rm noise}
+\end{equation}
+From this, we can simply subtract the bias and divide by the exposure time, and we get
+our dark current estimate:
+\begin{equation}
+\widetilde{D}(x,y) = \frac{d(x,y) - \widetilde{B}(x,y)}{t_{\rm dark}}
+\end{equation}
+Of course, to reduce the noise contribution we can also average several dark frames:
+\begin{equation}
+\widetilde{D}(x,y) = \frac{1}{t_{\rm dark}}\frac{1}{M}\sum_i d_i(x,y) - \widetilde{B}(x,y)
+\end{equation}
+It is convenient to work with a different form of the dark current frame:
+\begin{equation}
+\widetilde{D}'(x,y)=t_{\rm dark}\widetilde{D}(x,y)=\frac{1}{M}\sum_i d_i(x,y) - \widetilde{B}(x,y)
+\end{equation}
+which will be called the {\em bias subtracted master dark frame}.
+
+If we have a data frame with an integration time of $t_{\rm data}$, the first two
+terms in (\ref{eq:ccd1}) are estimated by the {\em master dark} frame $\widetilde{D}_M$:
+\begin{equation}\label{eq:mdark}
+\widetilde{D}_M(x,y)
+=\widetilde{B}(x,y) + t_{\rm data}\widetilde{D}(x,y)=
+\widetilde{B}(x,y)+\frac{t_{\rm data}}{t_{\rm dark}}\widetilde{D}'(x,y)
+\end{equation}
+
+
+
+\paragraph{Noise contribution of bias and dark frames.}
+A detailed description of noise sources in CCD cameras is provided in Appendix~\ref{ap:noise}. 
+If the dark current contribution is not very large, the {\em noise} terms of (\ref{eq:bias}) and 
+(\ref{eq:dark}) are both equal to the camera {\em read noise}. 
+
+If we use our estimated $\widetilde{B}$ and $\widetilde{D}$ to reduce a data frame with
+an integration time of $t_{\rm data}$, the bias and dark subtraction will contribute a
+noise level of:\footnote{Neglecting the noise the bias frames add to the dark 
+current estimate.}
+\begin{equation}\label{eq:dbnoise}
+\sigma_{DB} = N_R\sqrt{\frac{1}{N}+\frac{1}{M}
+  \left(\frac{t_{\rm data}}{t_{\rm dark}}\right)^2}
+\end{equation}
+where $N_R$ is the camera read noise, $N$ is the number of bias frames averaged, $M$ the number of 
+dark frames averaged and $t_{\rm dark}$ the integration time used for the dark frames.
+
+We generally want to keep the square root in (\ref{eq:dbnoise}) between $1/3$ and $1$. 
+A value lower than $1/3$ will provide a negligible improvement in the overall signal/noise 
+ratio, while for values larger than 1, this term will dominate the camera read noise and 
+become significant.
+
+\subsection{Working without Bias Frames}
+It is easy to observe from (\ref{eq:mdark}) that we can obtain our master dark frame by simply
+averaging dark frames taken with the same integration time as our data frames. In this
+case, we don't need the bias frames at all:
+\begin{equation}
+  \widetilde{D}_M(x,y) = \frac{1}{M}\sum_i d_i(x,y)
+\end{equation}
+As a bonus, the noise contribution of the master dark frame is reduced to:
+\begin{equation}\label{eq:dnoise}
+  \sigma_{D} = N_R\sqrt{\frac{1}{M}}
+\end{equation}
+
+In general, people using large telescopes and $LN_2$ cooled cameras preffer using bias frames,
+as they require less time than dark frames; The dark current of these cameras is 
+very low and stable, and a single set of darks can be used to reduce many
+observations. Users of thermoelectrically-cooled cameras, which have more significant 
+dark currents, are more likely to use dark frames exclussively. 
+
+\section{Flat-field Frames}
+
+With $B$ and $D$ out of the way, we need a way to estimate $G$ in (\ref{eq:ccd1}) before we can
+recover the incident flux. To do this, we apply a flat-field (even)
+illumination to 
+the camera\footnote{For the purpose of this discussion, 
+the telescope illumination non-uniformity is
+folded into the camera response; the sensitivity we estimate will correct both the camera and 
+the telescope's response nonuniformity.}
+and acquire several {\em flat-field frames}
+\begin{equation}
+  f(x,y)=B(x,y)+t_{\rm flat}D(x,y)+t_{\rm flat}G(x,y)L+{\rm noise}
+\end{equation}
+$L$ is the light flux reaching each pixel, assumed equal across the frame.
+
+We then calculate a master dark frame for the flat fields $D_M^F(x,y)$ and subtract it from the
+flats, obtaining:
+\begin{equation}\label{eq:flat1}
+  f'(x,y)=f(x,y)-D_M^F(x,y)=t_{\rm flat}G(x,y)L+{\rm noise}
+\end{equation}
+Again, to reduce the noise contribution, we usually average several flat frames, to arrive at a
+{\em master flat} frame 
+\begin{equation}\label{eq:flat2}
+  \widetilde{F}_M(x,y) = \frac{1}{N}\sum_i f'(x,y) = \frac{1}{N}\sum_i f(x,y)-D_M^F(x,y)
+\end{equation}
+If we knew $F$, we could solve the above equation for $G(x,y)$. However, the aboslute value of 
+$F$ is not known, and in many cases can vary between different flats. So, instead of 
+calibrating the absolute value of $G(x,y)$, we only try to remove it's variation across
+the frame. We write:
+\begin{equation}
+  G(x,y)=\bar{G}g(x,y)
+\end{equation}
+where the average of $g(x,y)$ across the frame is 1. (\ref{eq:flat2}) becomes:
+\begin{equation}\label{eq:flat3}
+  \widetilde{F}_M(x,y)=t_{\rm flat}\bar{G}g(x,y)L
+\end{equation}
+We take the average of $\widetilde{F}_M(x,y)$ across the frame:
+\begin{equation}\label{eq:flat4}
+  \bar{F}=\sum_x\sum_yt_{\rm flat}\bar{G}g(x,y)L=t_{\rm flat}\bar{G}L\sum_x\sum_yg(x,y)=
+  t_{\rm flat}\bar{G}L
+\end{equation}
+Dividing equation \ref{eq:flat3} by $\bar{F}$, we obtain:\footnote{
+We can in principle replace the master flat frame with this normalised frame, by which
+we can divide the data frames directly. However, a normalised frame doesn't represent well in the
+very common 16-bit integer format. So we instead choose to keep the master flat frame scaled
+to it's original scale, and take care of the normalisation in the flat-field division routine.}
+\begin{equation}\label{eq:flat5}
+  \frac{\widetilde{F}_M(x,y)}{\bar{F}}=g(x,y)
+\end{equation}
+
+\section{Reducing the Data Frames}
+Armed with our master dark and master flat frames, we can proceed to reduce our data frame. 
+Starting from:
+\begin{equation}\label{eq:ccd2}
+s(x,y) = B(x,y) + t_{data} D(x,y) + t_{\rm data} \bar{G} g(x, y) I(x, y)) + {\rm noise}
+\end{equation}
+we subtract the master dark frame (\ref{eq:mdark}) and divide by the normalised 
+master flat (\ref{eq:flat5}) and obtain:
+\begin{equation}\label{eq:ccd3}
+\frac{\bar{F}}{\widetilde{F}_M(x,y)}[s(x,y) - \widetilde{D}_M(x,y)] = 
+t_{\rm data} \bar{G} I(x,y) + {\rm noise}
+\end{equation}
+\begin{equation}\label{eq:ccd4}
+\widetilde{I}(x,y) = \frac{1}{\bar{G}\cdot t_{\rm data}}\frac{\bar{F}}{\widetilde{F}_M(x,y)}
+[s(x,y) - \widetilde{D}_M(x,y)]
+\end{equation}
+Or, in terms of the master bias and bias-subtracted master dark frames:
+\begin{equation}\label{eq:ccd5}
+\widetilde{I}(x,y) = \frac{1}{\bar{G}\cdot t_{\rm data}}\frac{\bar{F}}{\widetilde{F}_M(x,y)}
+[s(x,y) - \frac{t_{\rm data}}{t_{\rm dark}}\widetilde{D}'(x,y) - \widetilde{B}(x,y)]
+\end{equation}
+
+We have obtained an estimate of the incident light flux up to a constant 
+($\bar{G}t_{\rm data}$) which represents the average sensitivity of the camera
+multiplied by the integration time, which is the best we can do without a reference 
+source calibrated in absolute units. 
+
+\section{Frame Combining Methods}\label{sec:combining}
+
+Earlier in this chapter we mentioned that it is useful in many cases to ``average'' several frames
+in order to reduce the noise. It turns out that while arithmetic averaging does indeed reduce
+the resulting noise, it doesn't go very far in removing the effect of
+devinat values that are far from the mean. When combining CCD frames, the most common causes of deviant values are
+cosmic ray hits on all frames and unwanted star images on sky flats. 
+
+When combining $N$ CCD frames, we start with $N$ values for each pixel and want to arrive
+at a combined pixel value that uses as much as possible of the available information (so that 
+we obtain the maximum noise reduction), while rejecting any values that are affected by artifacts.
+\gcx implements four combining methods, described below.
+
+\paragraph{Average}
+Average is the ``baseline'' method of frame combining. The values are added together and the 
+result divided by the number of values (arithmetic mean). For Gaussian-distributed data, averaging
+produces the values with the least variance (so it has the maximal {\em statistical efficiency}).
+Averaging is independent of the individual frame scaling, and
+computationally efficient.
+
+The deviant value rejection of averaging is only modest; deviant values are reduced by a factor
+of $N$. For this reason, it is recommended that averaging only be used when we know that deviant 
+values are not present (for example, when combining frames for which the outlier rejection has
+already been done).
+
+\paragraph{Median}
+A far more robust method of obtaining a combined value is the median (selecting the values which 
+has an equal number of values greater and smaller than itself). The median is easily calculated 
+and very little influenced by deviant values. It requires all frames 
+to have the same intensity scale.
+
+On the down side, the median's statistical efficiency for Gaussian distributed values is only 
+0.65 of average's. Also, when combining integer values, the median does nothing to smooth out the
+quantisation effects; the median of any number of integer values is also an integer.
+
+\paragraph{Mean-Median}
+
+Mean-median is a variant of the median method intended to improve the statistical efficiency
+of the median, and get around the quantisation problem. In the mean-median method, we compute the
+standard deviation of the pixel values around the median, and discard all the values than are 
+farther away than a specified number of standard deviations (usually 1.5 or 2). 
+The remaining values are averaged together.
+
+Mean-median is fast, and works well for large sets. With small sets, the fact that the deviant 
+pixels increase the calculated standard deviation limits it's efficiency. It requires all frames 
+to have the same intensity scale.
+
+\paragraph{Kappa-Sigma Clipping}
+
+$\kappa\sigma$-clipping is the most ellaborate combining method provided by \gcx. It starts 
+by calculating the median and the standard deviation around it. The values with large
+deviations relative to the standard deviation are excluded. Then, the mean and standard 
+deviation of the remaining values are computed. Again, the values that are away for the 
+mean are excluded, and the process is repeated until there is no change in the mean or the
+iteration limit is reached. 
+
+$\kappa\sigma$-clipping is very effective at removing cosmic rays and star images from sky
+flats, even with a reduced number of frames. It is also capable of removing all the star 
+images from a number of frames of different fields, leaving only the sky background, which makes
+it possible to create a flat frame from the regular data frames (see below for {\em super-flat}).
+
+$\kappa\sigma$-clipping is the most computationally-intensive method of frame combining. 
+It requires all frames to have the same intensity scale.
+
+\section{CCD Reduction with {gcx}}
+
+Like most tasks in \gcx CCD Reductions can be performed either interactively or using 
+the command-line interface. We'll discuss the interactive way first.
+
+\subsection{Loading and Selecting Image Frames}
+
+To open up the CCD reduction dialog, select \menu{Processing/CCD Reduction} or press \keys{L}.
+In the \op{Image Files} tab, click on \op{Add} and in the file selector select any number of files
+and click \op{Ok}. The selected files will appear in the file list.
+
+To display any of the frames in the list, click on it (it will become selected) and then click
+\op{Display}. The image will show in the main window. The loaded files can be viewed in sequence 
+by clicking \op{next} or pressing \keys{N} repeteadly. If for some reson we want to exclude a 
+frame from being processed, clicking on \op{Skip} or pressing \keys{S} will mark it to be skipped.
+
+Skipped frames appear in the list with their names enclosed in square brackets. If we want 
+to remove the skip mark, clicking \op{Unskip} while the frames are selected will accomplish 
+that. Note that all reduction operations apply to all the frames in the file list that don't have 
+the skip mark, regardless of which are selected.
+
+Whenever a frame is selected, a status line at the bottom of the dialog shows the file's name 
+and any operations already performed on it.\footnote{All processing is done on a copy of the 
+frame held in memory---the original frames are not altered in any way.}
+
+To revert some frames to their original status, select them and click on \op{Reload}. Frames 
+can be completely removed from the list by selecting them and the clicking on \op{Remove}.
+
+\subsection{Creating a Master Bias or Master Dark Frame}
+
+We will create a master bias frame by stacking several bias frames. If
+we preffer to work without bias 
+frames, we can use the same procedure to create a master dark frame.
+First clear the file list 
+(\op{Select all} then \op{Remove}) and add the bias frames to be
+stacked to the list.
+
+Then, in the \op{CCD Reduction} tab, check that all the ``enable'' ticks are off (we don't want 
+to apply any operation to the bias frames). Same for the \op{Aligment} tab.
+
+In the \op{Stacking} tab, select the desired parameters for the stacking operation (the method 
+and method parameters). A good initial setting is kappa\_sigma, 1.5 sigmas and an iteration limit
+of 4. Set background matching to Off, and check ``Enable stacking''.
+
+Finally, in the \op{Run} tab type in a file name\footnote{
+If the output file name field is left blank, the result of the stacking operation
+will not be saved. It will however display in the main  window, and can be saved from there.}
+\footnote{The \op{Output file / dir name} field must contain a file name if the result of
+the current reduction set is a single frame (stacking is enabled) or a directory name if the
+result of the current reduction set consists of several frames (stacking is disabled).}
+ (for example ``master\_bias'') and click \op{Run}. The progress of the stacking operation 
+can be followed in the text window. After stacking is complete, the resulting frame is
+shown in the main window.
+
+\subsection{Creating a Bias-Subtracted Master Dark Frame}
+
+Suppose now that we have a number of dark frames taken with the same integration time 
+and we want to create a bias subtracted master dark frame from them. We'll use the
+master bias frame we just created.
+
+Like above, clear the frame list and load the dark frames. Then, in the \op{CCD Reduction} tab
+enter the name of the master bias frame we just created (or click on the ``\dots'' button and select
+it in the file selector). The ``enable'' mark for bias subtraction should be on.
+
+Then make sure that stacking is still enabled, enter an output file name and click on \op{Run}.
+The program will subtract the master bias frame from each of the dark frames, and then combine 
+the results. As before, the result will be shown in the main window.
+
+Sometimes we need to scale the bias-subtracted dark frame, so it can be used to reduce data 
+frames taken with a different integration time. We can also do that now. Suppose our
+dark frames used 60 seconds on integration time, and we want to reduce 30-seconds data frames.
+We will need out bias-subtracted master dark to be scaled by a factor of 0.5. 
+In the \op{CCD Reduction} tab check the ``multiply enable'' box and enter 0.5 in the
+multiply entry. Then click on \op{Run} again,\footnote{
+Note that once a reduction operation has been performed on a image frame in the list,
+it will not be performed again unless the image frame is reloaded---which discards any changes 
+to it. If we want to apply different sets of reduction operations to some frames, like
+creating frames with different scales, the frames have to be reloaded (selected in the 
+\op{Image Files} list and \op{Reload} clicked) before changes in parameters 
+(like the multiplication factor or bias file name) can take effect.}
+of course not before changing the output 
+file name into something meaningful, like ``bmdark-30'' or something similar.
+
+\subsection{Creating a Master Flat Frame}
+
+To create a master frame, we need either a master dark frame of suitable integration time for
+the flats, or a master bias and suitably scaled bias-subtracted master dark frame.
+
+Clear the file list and add the flat frames to it. In the \op{CCD Reduction} tab, set the
+bias and dark frame file names,\footnote{
+Or just the dark file name if we work without biases.}
+ and make sure their ``enable'' boxes are checked. 
+Go to the \op{Stacking} tab and enable stacking, set your algorithm and parameters. Except 
+if you are very sure that the flat frames have the same intensity (such as when using a
+known stable light box), enable multiplicative background matching.
+Finally, select an output file name, and run the flat generation.
+
+\paragraph{Making a Superflat} If we have enough data frames with a significant sky background and 
+different fields, they can be combined and the sky background used as a flat. We proceed 
+the same as for normal flats, except that we select data frames with a good background. 
+It is recommended that frames with low sky level are excluded from the superflat set. 
+
+We probably want to multiply the frames by a constant to make sure the relatively low level 
+flat resulting is not affected by quatisation when the frame is saved in an integer format. 
+
+\subsection{Reducing the Data Frames}
+
+Reducing the data frames should is easy now; load them into the file list, specify the 
+bias, dark and flat to be used, select an output directory name and click on \op{Run}.
+
+\gcx will never overwrite the original frames, so we will need to create a second set of 
+reduced files. However, unless we have some use for the reduces frames, we can avoid saving
+them and just run the reduction every time we use the frames. For instance, we can align 
+and stack the frame, or run aperture photometry on the reduced frames by just specifying
+the bias/dark/flats together with the required operation. 
+
+\subsection{Aligning and Stacking Frames}
+
+When combining data frames, it is often required that they are aligned before their values are 
+combined. \gcx contains an automatic alignment algorithm that works well with frames taken
+with the same setup (for instance multiple exposures). In the current version, the alignment 
+routine only performs image translations (it does not rotate or scale
+the images).\footnote{
+The matching algorithm does provide rotation and scale information, so this option
+is planned to be added in a future version.}
+
+To align frames, they need to be in the file list. Then, in the \op{Alignment} tab select an
+alignment frame file name. This is the frame used as a reference---all others will be shifted 
+to match this one. Clicking the \op{Show Alignment Stars} button will detect suitable stars 
+from the alignment frame and display them in the main
+window.\footnote{
+The stars will only show if an image frame is currently being displayed.}
+
+Clicking on \op{Run} will perform the actual alignment. Stars are detected from each frame, and
+their position matched to the reference frame.\footnote{
+On fields with a large number of stars, it is sometimes possible that the default 
+settings result in a bad match. If this is the case (a good indication of this is an 
+unusually hish shift displayed in the Run report) increase the \op{Wcs Fitting 
+Options/Minimum number of pairs} value by a few units.}
+ The frame will then be translated the appropiate
+amount. It is also possible to apply a gaussian smoothing filter here. Usually small FWHMs work
+best (0.1-0.5 pixels). 
+
+After the frames are aligned, we can use the \op{Display} and \op{Next} buttons in the file list
+tab to browse the aligned files. Stars should show well centered inside the alignment star 
+markings. This is also a good time to exclude any bad frames (such as frames with 
+tracking problems).
+
+When satisfied with the aligned frames, we can stack them and produce a final image. Just enable
+the stack check box and click on \op{Run} again. 
+
+\subsection{Running CCD Reductions from the Command Line}
+
+All CCD reduction operations are also accessible from the command line, which makes it easy
+to integrate \gcx with other applications. The command-line options are described by calling
+\cmdline{gcx --help}
+Here we'll provide some examples of use. Let's assume that we have a number of 20-second 
+data frames, some 20-second dark frames, some 1-sec sky flats, and some bias frames.
+We want to reduce the data frames and align and stack them together.
+
+First, we check that the stacking method and parameters are properly set in the
+\op{CCD Reduction Options} page or the {\tt ~/.gcxrc} file.
+
+We combine the bias frames to create a master bias file ({\tt m-bias.fits}):
+\cmdline{gcx -s -o m-bias bias*}
+Then we combine the dark frames to create the master dark frame for
+the data frames ({\tt m-dark-20.fits}):
+\cmdline{gcx -s -o m-dark-20 dark*} 
+We create a bias-subtracted master dark frame and scale it to be used
+on the flats ({\tt dark-1s.fits}):
+\cmdline{gcx -b m-bias -s -M 0.05 -o dark-1s dark*} 
+And then the master flat frame ({\tt m-flat.fits}):
+\cmdline{gcx -b m-bias -d dark-1s -F -o m-flat flat*} 
+Assuming that {\tt red} is a directory, we reduce all frames and save them there:
+\cmdline{gcx -d m-dark-20 -f m-flat -o red data*} 
+We align and stack the data files (with a 0.1 pixels FWHM gaussian blur):
+\cmdline{gcx -a red/data001 -s -G 0.1 -o stack1 red/data*}
+As an alternative, we align and stack directly from the original files, this time without any
+blur:
+\cmdline{gcx -d m-dark-20 -f m-flat -a data001 -s -o stack1 data*}
+The order of the command-line options is not important. CCD reduction operations
+are always performed in the order: bias, dark, flat, multiply by a constant, add a constant,
+align and gaussian blur, stack. If no extension is provided on the file names, \gcx will
+append {\tt .fits} or {\tt .fits.gz} automatically on saved image files, and will look
+for one of {\tt .fits} or {\tt .fit} with or without a {\tt.gz} suffix.
+
+
+
+
+
+
+
+
+
+
+
+
+
+\chapter{Aperture Photometry}\label{ch:aphot}
+
+The basic funtion of the aperture photometry routine in \gcx 
+is to measure the flux of a number of stars in the image (which will
+be expressed as an {\em instrumental magnitude}), and estimate
+it's expected error. 
+
+As an additional function, if some of the stars are {\em standard
+  stars} of known magnitude the program will calculate the standard
+magnitude of the measured stars using the standard stars as a
+reference (ensemble photometry).\footnote{Without taking the color of the stars into
+  account. Computing and applying color transformation coefficients
+  requires using the information from multiple frames, taken with
+  different filters. The output of the aperture photometry operation
+  can be fed into the multi-frame reduction routine which takes care
+  of that. }
+
+\section{Measuring Apertures}
+
+To measure the flux of a star, we add together the intensity values
+from a circular region around the target star (the central aperture), 
+and subtract the
+estimated background contribution. The background is estimated from
+values in a annular region surrounding the star at a distance.
+
+Normally, we choose the size of the central aperture to be large
+enough to include most of the star image. Common ranges are between 
+3 and 5 times the FWHM of the star image.\footnote{
+Choosing too large an aperture has two drawbacks: it is more
+likely for the aperture to include unwanted stars; and the signal to
+noise ratio is degraded, especially for faint stars. A common way
+around this is to emply variable-size apertures, and correct the data
+for the amount of light that falls outside the aperture. While this
+method can give good results, it requires that the star images be
+well-sampled and uniform is shape across the frame. It also needs a
+good model for the light sensitivity distribution inside a
+pixel. Neither of the above conditions are met by common amateur
+setups, so great care is required when working with variable apertures.}
+
+The annular sky aperture is chosen to be far enough from the star so
+that it includes an insignificant amount of flux from it. The default
+values of the measurement aperture radiuses are 6 pixels for the
+central aperture and 9/13 pixels for the sky aperture. These values
+are appropiate for star images between 2.5 and 3.5 pixels FWHM. If one obtains
+consistently tighter star images, reducing the central aperture would
+help improve the SNR of faint stars. The three radiuses are specified
+by options under \op{Aperture Photometry Options}.
+
+Assuming there are $N$ pixels inside the central aperture, the total
+flux (star + background) is:
+\begin{equation}
+F_T = \sum_i I_i
+\end{equation}
+Where the sumation is taken over the pixels in the central
+aperture. If $\widetilde{B}$ is the estimated background level, the
+star's flux is taken to be:
+\begin{equation}
+F = \sum_i I_i - N \widetilde{B}
+\end{equation}
+and the star's instrumental magnitude is:
+\begin{equation}
+M_I = -2.511886\log\left(\sum_i I_i - N \widetilde{B}\right)
+\end{equation}
+
+The estimated error of the instrumental magnitude is calculated taking
+most known random error sources into account. A detailed description
+of the error model and the way the instrumental magnitude error is
+calculated can be found in Appendix~\ref{ap:noise}.
+
+\section{Sky Estimation}
+
+To calculate the instrumental magnitude above we used an estimate of
+the sky background near the star. This value is calculated from the
+pixels in the annular ring.
+
+Given the relatively large size of the sky annulus, it is very
+likely that we will find unwanted stars in at least some of the 
+annuli. We must therefore use a robust algorithm to obtain the
+expected sky value. 
+
+The program offers a number of algorithms: {\em average, median,
+  mean-median, $\kappa$-$\sigma$ and synthetic mode}. The first four 
+are described in Section~\ref{sec:combining}.\footnote{mean-median has
+  been deprecated as a sky estimation method in recent versions.}
+
+It is generally not recommended to use average, as it is not robust. 
+The others, while not having a problem with robustness, will not
+produce the best estimate (which is the {\em mode}\footnote{
+The most frequent value}
+ of the sky annulus pixel values) when the distribution of the sky
+ values is skewed. In this case (which arises whenever the sky level is
+ relatively low), the synthetic mode is the best algorithm.
+The synthetic mode is calculated as follows:
+
+The histogram of the sky values is created. Then, the histogram is
+clipped using a $\kappa$-$\sigma$ algorithm in order to eliminate
+the effect of unwanted stars and other defects. The mean and median of
+the clipped histogram are computed, and the synthetic mode is defined
+as:
+\begin{equation}
+\widetilde{B} = {\rm mode} = 3 \cdot {\rm median} - 2\cdot {\rm mean}
+\end{equation}
+If the distribution is not skewed, the mean equals the median,
+and the mode would be equal to both. 
+
+The desired sky estimation algorithm is selected by the \op{Aperture
+  Photometry Options/Sky method} option. The rejection band for the
+  $\kappa$-$\sigma$ and synthetic mode algorithms is set by 
+\op{Aperture Photometry Options/Sigmas}. 
+
+Methods that rely on outlier rejection work best when a relatively
+large sky aperture is used. 
+
+
+\subsection{Region Growing}
+
+Spurious stars in the sky annulus present a problem. While their peaks
+are easily rejected by the clipping algorithm, their ``tails'' are
+not, and will affect the estimated sky value. To avoid this, \gcx can
+grow the area of rejected pixels, by including all pixels within a
+given radius of an outlier. This option can be enabled by setting the
+\op{Aperture Photometry Options/Region growing} option to a value
+larger than 0. Region growing is only applied when the
+$\kappa$-$\sigma$ and synthetic mode algorithms are used.
+
+
+\section{Placing the Apertures}
+
+In \gcx all photometry targets are specified using their world coordinates (right ascension, 
+declination and epoch). The targets and standards are generally taken
+from a particular star file called a {\em recipe file}. The WCS of the
+frame is fitted, then the coordinates of the standards and targets are
+transformed to frame coordinates. The resulting positions are used as
+initial positions for the measuring apertures.
+
+If the \op{Aperture Photometry Options/Center apertures} option is set
+the program will try to detect stars in the immediate vicinity of the
+initial positions, and center the apertures on the detected stars. The
+maximum distance from the initial position to the detected star is
+specified by \op{Aperture Photometry Options/Max centering error}. If
+this value is exceeded, the star is marked with the {\em not found}
+flag and the aperture is not moved. Otherwise it is marked with the
+{\em centered} flag.
+
+If the apertures were centered, the amount by which each star was moved
+is indicated by a line extending from the center of the star symbol in
+the direction in which the star was moved. The length of the line is
+a factor of \op{Star Display Options/Plot error scale} longer than the 
+star's displacement.
+
+\section{Finding the Ensemble Photometry Solution}
+
+If we have the instrumental magnitudes of the target stars and at
+least one standard star, we can calculate the standard magnitude of
+our targets\footnote{This will still not be the ``true'' magnitude of the star,
+ because we haven't taken the colors of the standard and target into
+ account. It is however the best we can do from a single frame. See
+ Chapter~\ref{ch:multiframe} for fitting color transformation coefficients and
+ other multi-frame reduction operations.}
+ by simply adding the standard magnitude to the difference
+in instrumental magnitudes between the target and the standard. This
+is the simplest form of differential photometry.
+
+We can however obtain significant advantages using more than one
+standard in the reduction:
+\begin{itemize}
+\item The errors of the standard stars will average out. This reduces
+  both the contribution of their instrumental magnitude error and that of their
+  standard magnitude error. It also reduces the contribution of the
+  conformity error that is caused by the stars having different
+  colors.
+\item Even more importantly, using several standards in reduction will
+  provide valuable information about the quality of the frame. The
+  instrumental magnitudes of the standard stars have to follow their
+  standard magnitudes within limits set by the expected errors. If
+  this doesn't happen we know that there was a problem with the
+  frame. If it does happen, we are almost certain that the frame has
+  good data.
+\end{itemize}
+
+We try to find the best estimate of the {\em frame zero point},
+i.e.~the value which is added to the instrumental magnitudes to
+obtain standard magnitudes. If we had no errors, all the standard
+stars' instrumental magnitudes would differ from their standard
+magnitudes by exactly the zero point value. This of course is never the
+case in practice. The differences will be dispersed above and below
+the zero point. We call the difference between a standard star's
+standard magnitude and the sum of it's instrumental magnitude and the
+zero point the star's {\em residual}. 
+
+We want to choose the zero point is such a way that the residuals 
+are minimised. More specifically, we try to minimize the sum of the
+residuals' squares. It is easy to see that the residuals' sum of
+squares is minimised if the zero point is chosen so that the average of
+the residuals is zero.
+
+There are two problems with this approach: First, by using many
+standards, we have a good chance that a few of the have ``bad''
+values. They could be affected by a cosmic ray hit or a speck of dust
+that wasn't there when the flat was taken, or the catalog value may be
+in error. Or one of the standards may turn out to be variable.
+Secondly, if we use both bright and faint standards, the errors of the
+brighter ones are known to be lower. We would like the faint stars to
+have less influence on the resulting zero point than the bright ones.
+
+The algorithm used takes care of both these problems. It assigns
+weights to each standard star according to it's estimated error, and
+iteratively downweights stars that have residuals that are larger than
+expected. For a detailed description, see Appendix~\ref{ap:robust}.
+
+The algorithm produces it's best estimate of the frame's zero point,
+and a ``diagnostic'' value called the {\em mean error of unit weight},
+usually abbreviated to {\em meu} or {\em me1}. The mean error of unit
+weight is a number that shows how well the spread of the residuals matches the
+estimated errors. It should have a value close to unity. A larger
+value shows that we have some error sources we didn't take into
+account. A consistently smaller value indicates that our error
+estimating parameters are overrated, and the estimated errors are too
+large.
+
+Finally, the standard magnitude of the target stars is calculated by
+adding their instrumental magnitude to the estimated zero point. The
+error is the quadrature sum of the target's instrumental magnitude
+error and the zeropoint error.\footnote{
+When using multiple standard stars, we have the ``luxury'' of using
+the actual spread of their magnitudes to calculate the zeropoint
+error, as opposed to the estimated errors. }
+
+
+\section{Annotations}\label{sec:annotations}
+
+The instrumental magnitude obtained is given the name of the filter
+the frame was taken with. The filter name is obtained from the {\tt
+  FILTER} field. If the field is not present, or the \op{Aperture
+  Photometry Options/Force iband} option is set, the filter name is
+taken from \op{Aperture Photometry Options/In\-stru\-mental band}.
+If any pixel within the central aperture exceeds \op{Aperture
+  Photometry Options/Saturation limit} the star is marked with the
+  {\em bright} flag.
+
+Relevant information from the fits header and recipe header is carried
+on to the observation report. The fields include:
+\begin{longtable}{lp{9cm}}
+object&the name of the target object, taken from the fits
+  header or recipe.\\
+ra, dec&World coordinates of target object.\\
+equinox&Equinox of world coordinates and star coordintes in
+  the report.\\
+mjd&Modified Julian Date of integration start from {\tt JDATE}
+  or {\tt MJD} fits fields.\\
+exptime&Integration time from the {\tt EXPTIME} field.\\
+airmass&Frame airmass, from either the {\tt AIRMASS} field or
+  calculated from the geographical coordinates and time.\\
+aperture&Telescope aperture from the {\tt APERT} field.\\
+telescope&Telescope name from the {\tt TELESCOP} field.\\
+filter&Filter used from the {\tt FILTER} field or as set by the
+  user.\\
+latitude&Location of the observing site from the {\tt LAT-OBS}
+  field.\\
+longitude&Location of the observing site from the {\tt LONG-OBS}
+  field.\\
+altitude&Altitude of the observing site from the {\tt ALT-OBS}
+  field.\\
+observer&Name of observer from the {\tt OBSERVER} field.\\
+sequence&A string describing where the sequence in the recipe
+  originated, from the {\tt sequence} field of the recipe.\\
+\end{longtable}
+
+\section{Running Aperture Photometry}
+
+To run the aperture photometry routine on a frame, load the frame into
+gcx (\menu{File/Open Fits}), then load a recipe file or another star
+file that contains standard and target stars.\footnote{
+A recipe file can be created ``on the fly'' by marking stars and then
+editing them to enter the standard magnitudes and types (standard and
+target). A valid WCS is required before being able to edit frame
+stars. In a pinch, using \menu{Wcs/Force Validate} will make the
+program think it has one. Of course, all the coordinates will be off in
+the report file. It is much better to create a proper recipe file
+first (Section~\ref{sec:recipe}).
+}
+
+Then fit the frame's WCS using \menu{Wcs/Auto Wcs} and finally run the
+aperture photometry routine with \menu{Processing/Aperture Photometry
+  to File}. A report file will be created, that lists all the standard and target
+stars with their instrumental and standard magnitudes, general
+information about the frame and fit information. More details about
+the report format can be found in Appendix~\ref{ap:format}.
+
+When reducing a large number of frames, it is more convenient to
+invoke \gcx from the command line, perhaps from a script. To reduce
+frame {\tt frame.fits} using the recipe file {\tt vs.rcp} and
+append the format at the end of the {\tt rep.out} file, we can use:
+\cmdline{gcx -P vs.rcp -o rep.out frame.fits}
+In addition, if we have a master dark frame {\tt mdark.fits} and a
+master flat frame {\tt mflat.fits}, we can combine CCD reduction for
+the frame with the aperture photometry, like this:\footnote{
+This way we don't need to keep CCD-reduced version of the data frame,
+but rather work directly on the original frames.
+}
+\cmdline{gcx -d mdark -f mflat -P vs.rcp -o rep.out frame.fits}
+Aperture photometry reports from several frames can be combined by
+simply concatenating the files together. The combined file can be used
+for further refining the data reduction with the multi-frame reduction
+routine (Chapter~\ref{ch:multiframe}). 
+
+Selected information from the (combined) report file can be set out in
+a tabular format using the report converter function of {\sc gcx.} The
+format of the table is specified in the \op{File and Device
+  Options/Report converter output format} option. Possible values for
+the format are described in Appendix~\ref{ap:repconv} and the on-line
+help. After setting the format,\footnote{
+The output format can be set from the command line using the {\tt
+  -S} option.}
+ invoke the report converter using:
+\cmdline{gcx -T rep.out -o rep.txt}
+Which will convert the report file {\tt rep.out} to a table 
+named {\tt rep.txt}.
+
+\section{Creating Recipe Files}\label{sec:recipe}
+
+Having a recipe file is central to running aperture photometry in {\sc
+  gcx}. Fortunately, creating one is relatively straightforward. 
+
+Let's
+create a recipe file for the \exframe~ frame, which is included in
+the \gcx distribution. Open the frame and match the WCS (using
+\menu{Wcs/Auto Wcs}). The WCS matching command leaves the GSC field
+  stars and the detected stars visible. 
+
+\subsection{Target Stars}
+
+First, we add our target: 
+select \menu{Stars/Add from Catalog}, and enter it's name at the
+prompt (uori). An object symbol will appear on the screen (around the
+bright star near the center, which is U Orionis). Select it, and bring
+up the star editing dialog using \menu{Stars/Edit} or right-click on
+the star and select \menu{Edit Star} from the pop-up menu. Change the
+star's type to ``AP Target'' and click \menu{Ok}. The symbol on the
+image should change to a big cross, indicating the star is a target.
+
+If we don't have GCVS installed, we can identify the star from a star
+chart and edit a field star or even a detected star and make it the
+target. We normally want to change the star's name to something
+descriptive and check that the coordinates are correct.
+
+If there is no star at the desired position (which can happen if we
+prepare a recipe for a very faint variable), just edit any star,
+change the coordinates to the desired ones and the type to target.
+A recipe can have any number of targets; more can be added in
+the same way.
+
+\subsection{Standard Stars}
+
+Now we need some standard stars. If we have a chart we want to use as
+the base of the recipe, we can create it on-screen similarly with the
+target (by editing field stars). The difference is that the standards
+are marked as ``Standard Star'', and we need to enter their standard
+magnitudes. Several magnitudes can be entered in the ``Standard
+magnitudes'' field of the edit dialog. A magnitude is given as:
+\cmdline{$<$band$>$(source)=$<$magnitude$>$/$<$error$>$}
+where $<${\em band}$>$ is the name of the standard band,\footnote{
+The band names are case-insensitive.} {\em(source)} is an optional
+field describing where the magnitude value originated, $<${\em
+  magnitude}$>$ and $<${\em error}$>$ are the star's magnitude and
+error, respectively. The error field is optional, and it's absence
+means that we don't know the error of the magnitude. A few examples of
+magnitude entries are:
+
+\smallskip
+\begin{center}\begin{tabular}{lp{6.5cm}}
+\tt v(aavso)=12.5&A typical example for a value taken from a paper
+  aavso chart; the error is unknown.\\
+\tt v=12.53/0.05 ic=11.2/0.03&A star for which we know the
+magnitudes in two bands.\\
+\tt b=13.2 v=12.7/0.1 r=12.2& We know three magnitudes, but only one error.\\
+\end{tabular}\end{center}
+
+Another way to get standard stars is to use the tycho catalog. Remove
+all field stars, then select \menu{File/Load Field Stars/From Tycho2
+  Catalog}. 
+The Tycho stars will show up as field stars. All we have to do is to 
+mark the ones that we want to use as standards. 
+
+\subsection{Creating the Recipe File}
+
+Now we can finally create the recipe file. Select
+\menu{File/Create Recipe} and enter a recipe name (or press the
+``\dots'' button and select a file name). Then select which stars
+we want to include in the recipe file. We will most certainly want the
+standard and target stars, but we may include objects and field stars 
+to be used for WCS matching if we envision using the recipe on a
+machine that doesn't have catalogs installed.
+
+To verify our newly created recipe, remove all stars
+(\menu{Stars/Remove All}) and load the file we just
+created (using \menu{File/Load Recipe}). Run the photometry routine
+(\menu{Processing/Aperture Photometry to File}) and check the output.
+
+\subsection{Working without an Image Frame}
+
+In the above examples, we have used a frame of the field as a
+backgound on top of which we loaded the stars. This is not
+required. If we select \menu{Stars/Add from catalog} without having a
+frame loaded, the program will create a blank frame with the size set
+by \op{File and Device Options/New frame width} and \menu{height}, and
+set it's WCS with the center of the frame pointing at the selected
+object, and the scale as set by \op{File and Device Options/New frame
+  scale}. 
+
+\subsection{Creating Recipies from the Command Line}
+
+If we want to create many recipies at a time, it can be more
+convenient to use the command line. To create a recipe from the Tycho2
+catalog, use:
+\cmdline{gcx --make-tycho-rcp 20 -j uori -o uori.rcp}
+This will create a recipe using Tycho stars situated within a 20
+minutes radius from U Orionis and save the result to {\tt uori.rcp}.
+
+If we have a sequence file in a format supported by \gcx, such as the
+``{\tt .dat}'' files made available by Arne Henden at:
+\cmdline{ftp://ftp.nofs.navy.mil/pub/outgoing/aah/sequence}
+it can be converted to a recipe file using the following command:
+\cmdline{gcx --import henden <uori.dat --mag-limit 15 |$\backslash$\\
+gcx -p - --set-target uori >uori.rcp}
+The first part of the command reads the {\tt uori.dat} file and
+converts it to a \gcx star file, keeping only stars brighter that the
+$15^{\rm th}$ magnitude, and writes the star file to the standard
+output. The second parts of the command reads the the file from the
+standard input, adds ``uori'' as a target, and writes the resulting
+rcp file to uori.rcp.
+
+
+
+
+
+
+\chapter{Multi-Frame and All-Sky Reduction}\label{ch:multiframe}
+
+If we want to determine star colors, calculate transformation
+coefficients to transform data to a standard system or obtain 
+magnitudes of stars for which we don't have standards in the same
+field, we must reduce multiple observation frames together.
+
+People fortunate enough to observe in photometric conditions can use
+a number of packages to reduce their data. For low altitude dwellers,
+the selection is not that large. For them, \gcx implements
+multiple-frame 
+reduction routines that are designed to
+work in less than perfect conditions. 
+
+Input data to the multi-frame reduction consists of observation
+reports as produced by the aperture photometry routine. For color
+coefficient fitting and transformation to a standard system, we need
+frames of the target objects taken in enough bands. For
+all-sky reductions, the observation reports need to have accurate time
+and airmass information (which implies that the original frames need
+to have enough information for the airmass determination).
+
+\section{Color Transformation Coefficients}
+
+To keep notation simple, let's assume that we reduce data taken in B
+and V. We'll use $B$ and $V$ for the standard magnitudes, and $b$ and
+$v$ for the instrumental magnitudes. The expressions for the standard
+magnitudes are:\footnote{
+These assume that a linear color transformation coefficient is enough
+to transform the data. While this is a largely used assumption, it is
+by no means guaranteed for any data set. One should carefully check
+the data to determine if a linear transformation is
+appropiate}
+\begin{equation}\label{eq:transform}
+B_j = b_j + Z_k + k_B(B_j-V_j)
+\end{equation}
+\begin{equation}
+V_j = v_j + Z_k + k_V(B_j-V_j)
+\end{equation}
+The $j$ subscripts go over all individual star observations in a given
+band, while the $k$ subscripts iterate over the observation frames.
+For standard stars, the $B_j$ and $V_j$ are known while $b_j$ and $v_j$ are
+measured from the frames themselves. We have to fit the zeropoints
+$Z_k$ and the transformation coefficients $k$. Because we have chosen
+to express the transformation coefficients in function of the standard
+magnitudes, we can proceed with one band at a time. We'll assume it is 
+V. The steps are:
+\begin{enumerate}
+\item Set an starting value of the transformation coefficient. We can
+  start with 0 without problems, as the coefficients are generally
+  small numbers.
+\item For each V frame, fit the zeropoint using the robust algorithm
+  in Appendix~\ref{ap:robust}, with the difference that the current color
+  transformation is applied when calculating the residuals, so
+  Equation~\ref{eq:residuals} becomes:
+  \begin{equation}
+    \rho_j=y_j - \widetilde{Z_k} - k_V (B_j - V_j)
+  \end{equation}
+  Note that in this equation, the $j$ subscripts iterate over the
+  stars in frame $k$.
+\item Now, for all the stars in all the V frames, estimate the
+  ``tilt'' of the residuals, and adjust the transformation coefficient
+  and zeropoints accordingly. We use the weights from the individual
+  frames' fits when estimating the tilt:
+  \begin{equation}
+    \theta = \frac{\sum_j\rho_j(B_j-V_j) W'_j}{\sum_j(B_j-V_j)^2 W'_j}
+  \end{equation}
+  \begin{equation}
+    k_V = k_V + \theta
+  \end{equation}
+  \begin{equation}
+    Z_k = Z_k + \theta\frac{\sum_j(B_j-V_j) W'_j}{\sum_jW'_j}
+  \end{equation}
+\item Iterate the last two steps until the solution converges (the
+  transformation coefficient doesn't change significantly).
+\end{enumerate}
+We have now obtained the transformation coefficient for the V
+magnitudes, and also adjusted all the frame zeropoints so that their
+dependence on the color of the standard stars in each frame is
+eliminated.\footnote{
+When we fit frame zero points without taking the transformation
+coefficients, the zero points are ``exact'' for stars having the color
+index equal to the mean color index of the standard stars in each
+frame. The adjusted zeropoints are ``exact'' for stars with a 
+color index of zero.}
+The above is repeated for each band we want to reduce. Note that we
+have obtained the transformation coefficients without assuming any
+relation between the zero points of various frames---just differential 
+photometry.
+
+We can choose any color index for a given band. For instance, there is
+nothing stopping us from calculating a $(B-V)$ transformation
+coefficient for $I$ or $R$ magnitudes. In fact, if we have more
+standards data in B and V, it may prove better to do so. In general,
+Equation~(\ref{eq:transform}) can be written for any band $M$ as:
+\begin{equation}\label{eq:transform2}
+  M_j = m_j + Z_k + k_M(C_1^M - C_2^M)\\
+\end{equation}
+where $C_1^M$ and $C_2^M$ are any bands for which we have standards
+data. We can fit the transformation coefficient $k_M$ using only the
+$M$ observations. However, when we want to transform the stars, we
+will need observations in $M$, $C_1^M$, $C_2^M$ and all the bands that
+these depend on. 
+
+\subsection{Transforming the Stars}
+To calculate the transformed standard magnitudes of our target stars,
+all we have to do is to write Equation~(\ref{eq:transform2}) for each
+band, and solve the resulting system of linear equations for the
+standard magnitudes. The system is very well behaved (it's matrix is
+close to unity) so \gcx uses the simple Gauss-Jordan elimination method to
+solve it.
+
+%\begin{figure}
+%\includegraphics{cygs}
+%\end{figure}
+
+\section{All-Sky Reduction}
+
+When the field of our intended target doesn't contain any suitable
+standard stars, we have to determine their magnitudes by comparing to
+stars in a different field. To do this, we need to determine a
+relation between the zeropoints of different frames.
+
+Under photometric conditions, we can consider that the {\em atmospheric
+extinction}\footnote{
+The amount of light lost when passing through the atmosphere.}
+depends only on the thickness of the atmosphere along the light
+path. The ratio between the thickness of the atmosphere in the
+direction of field and it's thickness towards zenith is called the
+{\em airmass} of the field. The airmass depends on the zenital angle
+{\em z} of the field, and is close to $\sec(z)$ when far from the
+horison. The formula used by \gcx is the following:\footnote{
+R.H. Hardie, 1962, \em{Photoelectric Reductions}, Chapter 8 of {\em Astronomical
+Techniques}, W.A. Hiltner (Ed), Stars and Stellar Systems, II (University
+of Chicago Press: Chicago), pp178-208. 
+}
+\begin{eqnarray}
+s = \sec(z) - 1;\\
+A=1 + s[0.9981833 - s(0.002875+0.0008083 s)]
+\end{eqnarray}
+The zenital angle of a frame can be determined given it's equatorial
+coordinates, the geographical coordinates of the observing site, and time.
+
+If the extinction is unform in all directions, we can define an {\em
+  extinction coefficient} $E$, so that for any frame:
+\begin{equation}
+Z(A) = Z_0 - EA
+\end{equation}
+where $Z_0$ is the zeropoint outside the atmosphere, and A is the
+frame's airmass. If we have two frames with airmasses $A_1$
+and $A_2$, their zeropoints can be related by:
+\begin{equation}\label{eq:ext2}
+Z_2 = Z_1 - E(A_2-A_1)
+\end{equation}
+Under photometric conditions, it is customary to determine the
+extinction coefficient by observing the same field at different
+airmasses and then fitting E from (\ref{eq:ext2}). This is only
+possible when $E$ doesn't change (or changes in a smooth, linear
+fashion) over a period of the order of hours.
+
+Because the \gcx all-sky routine is targeted at less-than-perfect 
+conditions, we will choose another strategy in determining the
+extinction coefficient. We use several standard fields located 
+relatively near our target fields. Then we we try to ``chop'' the
+extinction coefficient as much as possible by alternating between the 
+standard and target fields.\footnote{The standard fields can contain 
+  differential photometry targets.}
+
+We end up with a series of observations from different fields, all in
+the same general airmass range. By examining the standard fields'
+zeropoints variation with time and airmass, we can determine if there
+were any ``windows'' during which the extinction was stable.  
+
+Once a stable window was found, we can fit the extinction coefficient
+from the observations in that window. It is unlikely that the
+observations will span a wide range of airmasses, which will make the
+fitted value of the extinction coefficient somewhat imprecise. But
+this is offset by the fact that the airmass of the target frames is the
+same range, so the contribution of the extinction term is not very
+large. As long as the airmass of the standard fields brackets those of
+the target fields, we are {\em interpolating} rather than
+extrapolating the extinction.\footnote{
+The program allows a small amount of extrapolation to take place.}
+
+\subsection{Extinction Coefficient Fitting}
+
+Before attempting to fit the extinction coefficient, the zeropoints
+and color transformation coefficient of all frames must be fitted. It
+is highly recommended to examine plots of the resulting zeropoints
+versus time and airmass to see if it's worth trying to do any all-sky
+reduction at all (more on this below).
+
+With these precautions, the program will proceed to fit the extinction
+coefficients using a variant of the algorithm described in
+Appendix~\ref{ap:robust},\footnote{
+A robust regression, rather than averaging algorithm is used, which
+uses the same outlier down-weighting scheme.}
+with the initial weights assigned based on the calculated errors of 
+the zeropoints. The fitted model is:\footnote{
+It is common to include additional coefficients in the model, such as
+ambient or sensor temperature or time. But they are generally only
+effective in photometric conditions, where the extinction varies
+smoothly over long intervals of time.
+}
+\begin{equation}\label{eq:zmodel}
+Z = \bar{Z} + E (A - \bar{A})
+\end{equation}
+where $\bar{A}$ is the mean airmass of the standard frames, while
+$\bar{Z}$ is the zeropoint of a mean airmass frame.
+
+A different extinction coefficient is fitted for each
+band. Frames that are outliers of the fit (their standard error
+exceeds the threshold set in \op{Multi-Frame Photometry
+  Options/Zeropoint outlier threshold}) are marked as such.
+
+\subsection{Calculating Zero Points}
+
+After fitting the extinction coefficient, we can apply
+Equation~\ref{eq:zmodel} and calculate the zeropoint of any target
+frame. The program tries to filter the frames for which such a
+determination would likely be in error. It will only calculate a
+zeropoint for frames which satisfy the following:
+\begin{enumerate}
+\item The frame has to be both preceded and succeded in time by
+  non-outlier standard frames;
+\item The frame's airmass has to be in the same range as the standard
+  frames from which the extinction coefficient was fitted. 
+
+  If $A_m$ is the minimum and $A_M$ is the maximum standard airmass,
+  and $r$ is the value of \op{Multi-Frame Photometry
+    Options/Airmass range}
+  the zeropoint is only calculated for frames with airmasses between 
+  \begin{equation}
+    \frac{A_M + A_m}{2} - \frac{r}{2}(A_M - A_m)
+  \end{equation}
+  and 
+  \begin{equation}
+    \frac{A_M + A_m}{2} + \frac{r}{2}(A_M + A_m)
+  \end{equation}
+\end{enumerate}
+
+\section{Running Multi-Frame Reduction}
+
+This section is a step-by-step tour of the multi-frame reduction
+tool. An realistically-sized example input file is provided in the
+distribution data directory (\exmbds). This file was generated by
+\gcx aperture photometry from 143 frames taken in B, V, R and I in a
+single night, all in Cygnus. The standards data is from
+Henden sequence files, which were converted into \gcx recipies with
+the import function.
+The file consists of individual aperture photometry reports appended
+together.
+
+\subsection{Specifying Reduction Bands}
+
+Before we can reduce data, we have to define which color indices are
+used for each band. The \op{Multi-Frame Photometry Options/Bands
+  setup} option specifies this. It contains a list of specifiers of
+the form: \verb+<band>(<c1>-<c2>)+ separated by spaces. Each specifier
+tells the program to use the color index ``{\tt<c1>-<c2>}'' to reduce
+frames taken in ``{\tt band}''. For example, the default setting:
+\cmdline{\begin{center}b(b-v) v(b-v) r(v-r) i(v-i)\end{center}}
+will set the following transformation model:
+\begin{eqnarray}
+B&=&b+Z_B+k_B(B-V)\\
+V&=&v+Z_V+k_V(B-V)\\
+R&=&r+Z_R+k_R(V-R)\\
+I&=&i+Z_I+k_I(V-I)
+\end{eqnarray}
+This model is appropiate if we reduce BV, BVI, BVR or BVRI
+data. However, it will have to be changed if for instance we want to
+reduce VI data, as using it will require B, V and I observations,
+because of the V dependence on B. An appropiate model for VI data
+would be:
+\begin{eqnarray}
+V&=&v+Z_V+k_V(V-I)\\
+I&=&i+Z_I+k_I(V-I)
+\end{eqnarray}
+which is specified by setting:
+\cmdline{\begin{center}v(v-i) i(v-i)\end{center}}
+in the \op{Bands setup} option.
+
+The same option can be used to set initial transformation coefficients
+and their errors, by appending ``{\tt=<coeff>/err}'' to each band
+specifier like for example:
+\cmdline{b(b-v)=0.12/0.001 v(b-v)=-0.07/0.02}
+
+\subsection{Loading Report Files}
+
+The data to be reduced can reside in one or more files. 
+To load data, open the the multi-frame reduction dialog using 
+\menu{Processing/Multi-frame reduction} or \keys{Ctrl-M}, and select
+\menu{File/Add to Dataset}. Select the file name and press \op{Ok}.
+The data from the frames contained in the file will load, and the
+frames will appear in the ``Frames'' tab of the dialog.
+
+More observations can be added by using \menu{Add to Dataset}
+repeteadly.\footnote{
+If we have a large numbers of files to add, it's probably easier if
+they are concatenated before loading (using {\tt cat} for instance).
+} We'll assume the example file (\exmbds) is loaded for the next
+steps.
+
+\paragraph{Frames} The ``Frames'' tab contains a list with all the frames in the
+dataset, one per line. It will display increasing amounts of
+information as the fit progresses. The columns that are filled up 
+right after loading the data files should be self-explanatory. The
+other columns show:
+\begin{longtable}{lp{9cm}}
+Zpoint&The fitted zero point of the frame;\\
+Err&The calculated error of the zero point;\\
+Fitted&The number of standard stars used in the fit;\\
+Outliers&The number of standard stars that are considered 
+outliers of the fit (have large standard errors);\\
+MEU&The mean error of unit weight for the zeropoint fit of
+the frame.\\
+\end{longtable}
+
+Clicking on the column headers will make the program sort the list by
+the respective column. Clicking again will reverse the sort order. 
+One or more frames can be selected in the list. All operations apply
+to the selected frames or, if none are selected, to the whole list.
+
+\paragraph{Stars} When a frame line is clicked, the stars from that frame are displayed
+in the ``Stars'' tab. Like the frames, the stars can be
+sorted on various columns by clicking on the column headers. The
+columns of the stars table show:
+\begin{longtable}{lp{9cm}}
+Name&The star's name. A star is identified across multiple frame by
+it's name;\\
+Type&Star type (standard or target);\\
+Band&The band the magnitudes are in;\\
+Smag&The standard magnitude for the star. If the contents of this
+field are calculated by the program, as for target stars, the
+magnitude appears in square brackets;\\
+Err&Error of the standard magnitude (either taken from the report
+file, or calculated by the program);\\
+Imag&Instrumental magnitude in this observation;\\
+Err&Error of the instrumental magnitude, taken from the report file;\\
+Residual&The residual in the last fit of the frame. Only appears for
+standard stars;\\
+Std Error&Standard error of the star (the residual divided by the
+estimated error). Only for the standard stars;\\
+Outlier&''Y'' or ``N'' depending on whether the star has a large
+standard error or not;\\
+R.A, Dec&Star catalog position;\\
+Flags&A list of flags that apply to the star. Some are taken from the
+report file, some are added by the fitting routines.\\
+\end{longtable}
+
+\paragraph{Bands} The bands tab shows the currently configured bands,
+and the various transformation coefficients relating to these
+bands. They only show the fitted coefficients as they resulted from
+the last fit operation. If only some frames were selected in that
+operation, then these values may only apply to those frames. 
+
+\subsection{Fitting Individual Zero Points}
+
+The simplest type of fit we can do is fit the zeropoints of each frame
+individually, without taking the other frames into consideration (like
+the last step in the aperture photometry routine). Even though the
+report files likely contained the individual fit information, it was
+discarded when the report was loaded. We need to perform at least
+this step before we can generate any plots for the data.
+
+There are two variants of this command: one zeroes all the
+transformation coefficients before doing the fit (\menu{Fit Zero
+  Points with Null Coefficients}), while the other will apply the
+current transformation coefficients to the standard stars first.
+(\menu{Fit Zero Points with Current Coefficients}).
+
+Make sure the frames you want to fit are selected before applying the
+command (if no frames are selected, the command will apply to all
+frames).
+
+After the fit, examine the MEU column, which will show the quality of
+the fit (the number should be around 1.0). Since we only fitted the
+zeropoint, and not the color coefficients the values are slightly
+larger than the best than can be obtained.
+
+\subsection{Plots}
+
+\begin{figure}
+\includegraphics[width=\textwidth]{v-res-mag-zponly}
+\caption{Residuals vesus standard magnitudes for all frames in the
+  example data set, after zero point fitting without color
+  transformation.}
+\label{fig:v-res-mag-zponly}
+\end{figure}
+
+At this point, we can generate various plots, which are instrumental
+in judging the quality of the data, especially when we consider the more
+ellaborate fits. The program generates data file for the {\tt gnuplot}
+utility, and will run {\tt gnuplot} directly if the option \op{File
+  and Device Options/Gnuplot command} is correctly set.\footnote{
+The default setting will work if gnuplot is installed in the command
+path.} If the \menu{Plot to File} option in the \menu{Plot} menu is 
+selected, the program will generate a data file instead of running 
+gnuplot directly.\footnote{The data frame is a simple ascii table with
+some gnuplot commands at the top; it can easily be imported in other
+plotting utilities or spreadsheet programs if desired.}
+
+Let's select the V frames (click on the band column header twice to
+bring the V band at the top, then click on the first V frame, and
+finaly shift-click on the last V frame). Now run \menu{Plot/Residuals
+  vs Magnitude}. A plot should appear that is similar to the
+one in Figure~\ref{fig:v-res-mag-zponly}.
+
+\begin{figure}
+\includegraphics[width=\textwidth]{aucyg-res-std}
+\caption{Residuals versus standard magnitudes of one AU CYG frame.}
+\label{fig:aucyg-res-std}
+\end{figure}
+
+The plot generally has the familiar shape of photon-shot
+noise dominated observations, with random errors increasing as the
+stars become fainter. An additional feature of this dataset are the 
+``branches'' going up starting at around mag 12 and 11. These are
+caused by saturated standard stars (the standards we used are not
+reliable above mag 12.5 or so). If the stars would be saturated in our
+observations, the ``branches'' would go downward.\footnote{
+If the data was reduced with \gcx the saturated stars would normally
+be marked as such and excluded for the fit. If down-going branches
+appear, the \op{Saturation limit} option's value should be decreased.
+}
+
+\begin{figure}
+\includegraphics[width=\textwidth]{aucyg-wres-std}
+\caption{Standard errors versus magnitudes of one AU CYG frame.}
+\label{fig:aucyg-wres-std}
+\end{figure}
+
+To investigate the matter further, we select a frame with a large
+number of outliers, which is likely to contain such a ``branch''. For
+example, let's select aucyg. The \menu{Residuals vs
+  Magnitude} plot for this frame is shown in
+Figure~\ref{fig:aucyg-res-std}. The bright stars branching up are
+obvious in this plot. However, the importance of the errors is
+difficult to judge, as the ``normal'' error changes with the stars'
+magnitudes (and fainter stars show similar residuals). The
+\menu{Standard Errors vs Magnitude} plot comes handy in this
+situation. It is similar to the previous plot, only the residuals are
+divided by the expected error of the respective stars. We expect all
+stars to show similar standard errors, all within a 6 units wide band
+around zero. This plot is shown in Figure~\ref{fig:aucyg-wres-std}.
+We can clearly see that the relatively large residuals to the right of
+the plot are within normal limits (also indicated by the value of the 
+MEU fit parameter). The ``branch'' is clearly deviant (with standard
+errors going up to 30 and more).\footnote{The plot routine clips standard
+  errors at $\pm30$, and residuals at $\pm2$.}
+ Fortunately, the robust fitting
+algorithm has downweighted the deviant points significantly, so the
+``good'' values still spread symetrically around zero.\footnote{
+  The most dangerous deviant points in this case are not the ones with large
+  standard errors (which are easily detected), but the ones right near
+  the turning point of the graph. Being bright stars, they will have
+  small estimated errors, and can bias the solution significantly. In
+  this particular case it didn't happen because of the large number of
+  ``normal'' stars.
+}
+
+\subsection{Fitting Color Transformation Coefficients}
+
+\begin{figure}
+\includegraphics[width=\textwidth]{v-se-color-zponly}
+\caption{Standard errors vs color for the V frames, before
+  transformation coefficient fitting.}
+\label{fig:v-se-color-zponly}
+\end{figure}
+
+\begin{figure}
+\includegraphics[width=\textwidth]{v-se-color}
+\caption{Standard errors vs color for the V frames, after
+  transformation coefficient fitting.}
+\label{fig:v-se-color}
+\end{figure}
+
+With the V frames selected, let's plot the standard errors again, this
+time against the star's color index. For this, select \menu{Plot/Standard Errors
+vs Color}. The output should look similar to
+Figure~\ref{fig:v-se-color-zponly}. Even given the scatter of the
+individual observations, the plot shows a clear sloping (making the
+residuals proportional to the color index).\footnote{
+ It is important at this step to examine the data carefully and check
+ if a simple linear transformation coefficient will remove any color
+ trend in the data. Some data sets may show a curved dependence (for
+ which a polynomial transformation would be better), while other can
+ show turning points. In those cases, the linear transformation no
+ longer holds.}
+ To remove this slope and 
+at the same time calculate the color transformation coefficient, we
+use \menu{Reduce/Fit Zero Points and Transformation Coefficients}. 
+After the fit is done, the slope is removed, as shown in 
+Figure~\ref{fig:v-se-color}. The title of the figure shows the
+transformation used. In our case, the resulting tranformation
+coefficient is 0.062, a rather small figure indicating a good fit
+between the filters used and the standard ones. If we check the MEU 
+fields for each frame, we will see that they have decreased, showing 
+that the data more closely matches the standard magnitudes after the
+color transformation.
+
+After the fit, the list in the ``Bands'' tab is updated to show the
+fitted transformation coefficients and their expected errors. Note
+that the error is quite small in our case (0.002),\footnote{
+  This error propagates to the final magnitude in proportion with the 
+target star's color index. An coefficient error of 0.002 will 
+contribute a systematic error of 0.004 to a star with $B-V=2.0$, 
+and 0.001 to one with $B-V=0.5$}
+ even though the
+data seemed to spread a lot. The large number of stars used in the fit
+helped reduce the error considerably.
+
+A good sanity check for the transformation coefficient fit is to run
+the same routine on subsets of the initial data set and compare the 
+resulting transformation coefficients. They should match within the
+reported error figures.
+
+Before proceeding, let's do the transformation coefficient fit for the
+whole dataset: \menu{Edit/Unselect All}, then \menu{Reduce/Fit Zero 
+Points and Transformation Coefficients}. 
+
+\subsection{All-Sky Reduction}
+
+\begin{figure}
+\includegraphics[width=\textwidth]{zp-am-1}
+\caption{Zero points vs airmass for frames with standards data.}
+\label{fig:zp-am-1}
+\end{figure}
+\begin{figure}
+\includegraphics[width=\textwidth]{zp-t-1}
+\caption{Zero points vs time for frames with standards data.}
+\label{fig:zp-t-1}
+\end{figure}
+
+
+
+The example data set contains BVRI frames for all fields. However,
+only some of the fields have R and I standards data. The night was
+clear, but conditions were changing. Let's see what we can do about
+the R and I frames that need all-sky reduction.
+
+We can examine the frame zero points versus the airmass, expecting
+them to fall on a down-sloping line.\footnote{
+ The zeropoints increase when the transparency improves.
+} Using \menu{Plot/Zeropoints vs Airmass} will produce the plot in
+Figure~\ref{fig:zp-am-1}, which shows all the bands' zeropoints on the
+same graph. We see that most of the frames do indeed lie on
+down-sloping lines with a scatter consistent with their expected
+errors as shows by the error bars, but there are some outliers. So the
+conditions weren't photometric. If we now plot the same zeropoints
+against time (\menu{Plot/Zeropoints vs Time}), Figure~\ref{fig:zp-t-1} we
+can see what has happened: the transparency has improved starting at
+MJD 53236.95, to the point where we can use the all-sky method for
+frames taken after that point. 
+
+\begin{figure}
+\includegraphics[width=\textwidth]{zp-am-2}
+\caption{Zero points vs airmass for all frames, after the extinction fit.}
+\label{fig:zp-am-2}
+\end{figure}
+\begin{figure}
+\includegraphics[width=\textwidth]{zp-t-2}
+\caption{Zero points vs time for all frames, after the extinction fit.}
+\label{fig:zp-t-2}
+\end{figure}
+
+
+Let's run the all-sky reduction (\menu{Reduce/Fit Extinction and
+  All-Sky Zero Points}) and generate the plots again. As we can see in 
+Figures~\ref{fig:zp-am-2} and ~\ref{fig:zp-t-2}, the program has
+  selected the frames which are bracketed by other ``good'' frames,
+\footnote{
+  The status of the frames that have had a good extinction fit will
+  end in ``-AV''. 
+} and calculated their all-sky zeropoints. The all-sky frames are
+  shown with different colors. These plots should be carefully
+  examined and any suspicious frames removed from the all-sky
+  reduction. In our case however, it seems that the program has made a
+  good choice of frames. 
+
+
+The calculated extinction coefficients and their errors are displayed
+in the ``Bands'' tab. The errors of the exctinction coefficients are
+relatively large. In this case, this is due to the fact that the
+frames are taken in a narrow range of airmasses. The same narrow range
+of airmasses will however reduce the impact of the errors on the
+calculated zeropoints. this can be seen on the graphs, where the error
+bars of the all-sky frames, which take the extinction coefficient
+errors into account, are of the same order as those of the ``normal''
+frames.\footnote{
+  The points on the time graph can appear to wander more than the
+  error bars would indicate. This is because the values there have not
+  been corrected for airmass, and the airmass does not correlate with time.
+}
+
+\section{Reporting}
+
+After the fits are done, the complete dataset can be saved in the
+native format using \menu{File/Save Dataset}. The native format
+preserves all the information in a future-proof fashion, but importing
+it into other applications can be a little involved.
+
+The {\tt --rep-to-table} or {\tt -T} command-line option allows the native format
+to be converted into a table with fixed-width columns. The format and 
+content of the columns are fully programmable by changing the \op{File
+and Device Options/Report converter output format} option. The
+following command will convert dataset.out from the native format to a
+table (dataset.txt) with the format as set in the option:
+\cmdline{gcx -T dataset.out $>$dataset.txt}
+Alternatively, the table format can be specified on the command
+line. For example, to create a table with the stars' name, mjd of
+observation, and V magnitudes and errors use:
+\cmdline{gcx -T dataset.out -S ".file.tab\_format=name jdate
+  $\backslash$\\ smag 'v' serr 'v'" $>$dataset.txt}
+The complete format string specification can be found in
+Appendix~\ref{ap:repconv}.
+
+Finally, it is possible to list the target stars in the AAVSO
+format. If a validation file location is set in the \op{File and
+  Device Options/Aavso validation file}, it will be searched 
+for the designation of the stars. The observer code field will be
+filled in from the \op{general Observation Setup Data/Observer code}
+option.
+
+
+
+%\chapter{Camera and Telescope Control}
+%\section{Observation Scripts}
+
+
+\appendix
+\chapter{Noise Modelling}\label{ap:noise}
+
+The issue of noise modelling is essential in any photometric endeavour. Measurement values 
+are next to meaningless if they aren't acompanied by a measure of ther uncertainty. 
+
+One can assume that the noise and error modelling only applies to deriving an error figure. 
+This in true only in extremely simple cases. In general, the noise estimates will also affect 
+the actual values. For instance, suppose that we use several standards to calibrate a field. 
+From the noise estimate, we know that one of the standards has a large probable error. Then, 
+we choose to exclude (or downweight) that value from the solution---this will change the
+calibration, and directly affect the result (not just it's noise estimate).
+
+\paragraph{Precision and Accuracy.} The precision of a measurement denotes the degree to 
+which different measurements of the same value will yield the same result; it measures the 
+repeatability of the measurement process. A precise measurement has a small {\em random error}.
+
+The accuracy of a measurement denotes the degree to which a measurement result will represent 
+the true value. The accuracy includes the {\em random error} of the measurement, as well as 
+the {\em systematic error}.
+
+Random errors are in a way the worst kind. We have to accept them and take into account, but 
+they cannot be calculated out. We can try to use better equipment, or more telescope time
+and reduce them. On the other hand, since random errors are, well, random in nature (they 
+don't correlate to anything), we can in principle reduce them to an aribitrarily low level 
+by averaging a lerge number of measurements.
+
+Systematic errors on the other hand can usually be eliminated (or at least reduced) by 
+calibration. Systematic errors are not that different from random errors. They differ
+fundamentally in the fact the they depend on {\em something}. Of course, even random
+errors ultimately depend on something. But that something changes incontrollably, and 
+in a time frame that is short compared to the measurement time scale.
+
+A systematic error can turn into a random error if we have no control over the thing that 
+the error depends on, or we don't have something to calibrate against. We could treat this 
+error as ``random'' and try to average many measurements to reduce it, but we have to make 
+sure that the something that the error depends on has had a change to vary between the 
+measurements we average, or we won't get very far.
+
+\paragraph{Noise} is the ``randomest'' source of random errors. We have no way to 
+calibrate out noise, but it's features are well understood and relatively easy to model.
+One doesn't have a good excuse not to model noise reasonably well.
+
+We will generally talk about ``noise'' when estimating random errors that derive from 
+an electrical or optical noise source. Once these are combine with
+other error  sources (like for instance 
+expected errors of the standards), we will use the term ``error''. Of course, there are two
+ways of understanding an error value. If we know what the true value should be, we can talk 
+about and {\em actual error}. If we just consider what error level we can expect, we talk 
+about an estimated, or {\em expected error}.
+
+\section{CCD Noise Sources}
+
+There are several noise sources in a CCD sensor. We will see that in the end they can 
+usually be modeled with just two parameters, but we list the main noise contributors 
+for reference.
+\begin{enumerate}
+\item {\em Photon shot noise} is the noise associated with the random arrival of photons 
+at any detector. Shot noise exists because of the discrete nature of light and 
+electrical charge. The time between photon arrivals is goverened by Poisson 
+statistics. For a phase-insensitive detector, such as a CCD, 
+\begin{equation}
+\sigma_{\rm ph} = \sqrt{S_{\rm ph}}
+\end{equation}
+where $S_{\rm ph}$ is the signal expressed in electrons. Shot noise is sometimes called 
+``Poisson noise''.
+\item {\em Output amplifier noise} originates in the output amplifier of the sensor. 
+It consists of two components: thermal (white) noise and flicker noise. Thermal noise 
+is independent of frequency and has a mild temperature dependence (is proportional to 
+the square root of the absolute temperature). It fundamentally originates in the thermal 
+movement of atoms. Flicker noise (or $1/f$ noise) is strongly dependent on frequency. 
+It originates in the existance of long-lived states in the silicon crystal (most notably
+``traps'' at the silicon-oxide interface). 
+
+For a given readout configuration and speed, these noise sources contribute a constant 
+level, that is also independant of the signal level, usually called the {\em readout noise}. 
+The effect of read noise can be reduced by increasing the 
+time in which the sensor is read out. There is a limit to that, as
+flicker noise will begin to kick in. For some cameras, one has the option of trading readout
+speed for a decrease in readout noise.
+
+\item {\em Camera noise.} Thermal and flicker noise are also generated in
+the camera electronics. the noise level will be independent on the signal. 
+While the camera designer needs to make a distiction between the 
+various noise sources, for a given camera, noise originating in the camera and the ccd 
+amplifier are indistinguishable.
+
+\item {\em Dark current noise.} Even in the absence of light, electron-hole pairs are generated 
+inside the sensor. The rate of generation depends exponentially on temperature (typically
+doubles every 6-7 degrees). The thermally generated electrons cannot be separated from
+photo-generated photons, and obey the same Poisson statistic, so
+\begin{equation}
+\sigma_{\rm dark} = \sqrt{S_{\rm dark}} 
+\end{equation}
+ We can subtract the average 
+dark signal, but the shot noise associated with it remains. The level of the dark current 
+noise depends on temperature and integration time.
+
+\item {\em Clock noise.} Fast changing clocks on the ccd can also generate spurious charge. 
+This charge also has a shot noise component associated. However, one cannot read the sensor 
+without clocking it, so clock noise cannot be discerned from readout noise. The clock noise 
+is fairly constant for a given camera and readout speed, and independent of the signal level.
+\end{enumerate}
+
+Examining the above list, we see that some noise sources are independent of the signal level. 
+They are: the output amplifier noise, camera noise and clock noise. They can be combined in
+a single equivalent noise source. The level of this source is called {\em readout noise}, and
+is a characteristic of the camera. It can be expressed in electrons, or in the camera output
+units (ADU). 
+
+The rest of the noise sources are all shot noise sources. The resulting value will be:
+\begin{equation}
+\sigma_{\rm shot} = \sqrt{\sigma_{\rm ph}^2 + \sigma_{\rm dark}^2} 
+\end{equation}
+\begin{equation}
+ \sigma_{\rm shot} = \sqrt{S_{\rm ph} + S_{\rm dark}} = \sqrt{S} 
+\end{equation}
+$S$ is the total signal from the sensor above bias, expressed in electrons. So to calculate the 
+shot noise component, we just need to know how many ADUs/electron the camera produces. This
+is a constant value, or one of a few constant values for cameras that have different gain
+settings. We will use $A$ to denote this value. 
+
+\section{Noise of a Pixel Value}
+We will now try to model the level of noise in a pixel value. The result of reading one pixel 
+(excluding noise) is:
+\begin{equation}
+s = s_b + A ( S_d + S_p) 
+\end{equation}
+where $s_b$ is a fixed bias introduced by the camera electronics, $S_d$ is the number of 
+dark electrons, and $S_p$ is the number of photo-generated electrons (which is the number 
+of photons incident on the pixel multiplied by the sensor's quantum efficiency).
+
+Now let's calculate the noise associated with this value.
+\begin{equation}
+\sigma^2 = \sigma_r^2 + A^2 (S_d + S_p) = \sigma_r^2 + A(s - s_b) 
+\end{equation}
+Where $\sigma_r$ is the readout noise expressed in ADU, and $S$ is the total signal
+expressed in electrons. Note that we cannot calculate 
+the noise if we don't know the bias value. The bias can be determined by reading 
+frames with zero exposure time (bias frames). These will contribute some read noise though. 
+By averaging several bias frames, the noise contribution can be reduced. Another approach is 
+to take the average across a bias frame and use that value for the noise calculation of all
+pixels. Except for very non-uniform sensors this approach works well. \gcx supports both 
+ways.
+
+Note that a bias frame will only contain readout noise. By calculating the standard 
+deviation of pixels across the difference between two bias frames we obtain $\sqrt{2}$ times the
+readout noise.
+
+\section{Dark Frame Subtraction}
+
+A common situation is when one subtracts a dark frame, but doesn't use bias frames. 
+The noise associated with the dark frame is:
+\begin{equation}
+\sigma_d^2 = \sigma_r^2 + A^2 S_d
+\end{equation}
+The resulting pixel noise after dark frame subtraction will be:
+\begin{equation}
+\sigma_{\rm ds}^2 = 2\sigma_r^2 + A^2 (2 S_d + S_p)
+\end{equation}
+while the signal will be
+\begin{equation}
+s_{\rm ds} = AS_p
+\end{equation}
+Using just the camera noise parameters, we cannot determine the noise anymore. 
+We have to keep track of the dark subtraction and it's noise effects. We however
+rewrite the dark-subtracted noise equation as follows:
+\begin{equation}
+\sigma_{\rm ds}^2 = \left(\sqrt{2\sigma_r^2 + 2 A^2 S_d}\right)^2 + A^2 S_p 
+\end{equation}
+If we use the notation $\sigma_r' = \sqrt{2\sigma_r^2 + 2 A^2 S_d}$, we get: 
+\begin{equation}
+\sigma_{\rm ds}^2 = \sigma_r'^2 + A^2 S_p
+\end{equation}
+This is identical in form to the simple pixel noise equation, except that the true 
+camera readout noise is replaced by the equivalent read noise $\sigma_r'$. What's more, the
+bias is no longer an issue, as it doesn't appeear in the signal equation anymore. We can 
+derive the pixel noise from the signal directly, as:
+\begin{equation}
+\sigma_{\rm ds}^2 = \sigma_r'^2 + As_{\rm ds}
+\end{equation}
+The same parameters, $\sigma_r'$ and $A$ are sufficient to describe the noise in the 
+dark-subtracted frame.
+
+\section{Flat Fielding}
+ 
+To flat-field a frame, we divide the dark-subtracted pixel value $s_{\rm ds}$ by the flat field
+value $f$. The noise of the flat field is $\sigma_f$. The resulting signal value is
+\begin{equation}
+s_{\rm ff} = \frac{1}{f}AS_p
+\end{equation}
+If we neglect second-order noise terms, the noise of the flat-fielded, dark subtracted pixel 
+is: 
+\begin{equation}
+\sigma_{\rm ff}^2 = f \sigma_r'^2 + A^2 S_p + \left(\frac{\sigma_f}{f}AS_p\right)^2
+\end{equation}
+\begin{equation}
+\sigma_{\rm ff}^2 = f^2 \sigma_r'^2 + A f s_{\rm ff} + \left(\sigma_f s_{\rm ff}\right)^2
+\end{equation}
+The problem with this result is that f is not constant across the frame. So in general, the noise
+of a flat-fielded frame cannot be described by a small number of parameters. In many cases though, 
+$f$ doesn't vary too much across the frame. We can then use it's average value, $\widetilde{f}$ 
+for the noise calculation. This is the approach taken by the program.
+
+We can identify the previous noise parameters, $\sigma_r'' = 
+\widetilde{f}\sigma_r'$ and $A' = A\widetilde{f}$. For specifing the
+effect of the flat-fielding, we introduce a new parameter, 
+$\sigma_f$.
+
+Without reducing generality, we can arrange for $\widetilde{f} = 1$. This means that the 
+average values on the frames don't change with the flatfielding operation, and is a common 
+choice.
+
+In this case, $\sigma_r$ and $A$ aren't affected by the flatfielding operation, while the 
+third noise parameter becomes $\sigma_f/\widetilde{f}$, which is the reciprocal of the SNR of 
+the flat field.
+
+\gcx models the noise of each pixel in the frame by four parameters: $\sigma_r$, $A$, 
+$\sigma_f/\widetilde{f}$ and $\widetilde{s_b}$. The noise function $n(s)$ of each pixel 
+is:
+\begin{equation}
+n^2(s) = \sigma^2 = \sigma_r^2 + A |(s-\widetilde{s_b})| + 
+\left(\frac{\sigma_f}{\widetilde{f}}\right)^2(s-\widetilde{s_b})^2
+\end{equation}
+$\sigma_r$ comes from the {\tt RDNOISE} field in the frame header. $A$ is the
+reciprocal of the value of the {\tt ELADU} field. $\sigma_f/\widetilde{f}$ comes from
+{\tt FLNOISE}, while $\widetilde{s_b}$ comes from {\tt DCBIAS}. 
+
+Every time frames are processed 
+(dark and bias subtracted, flatfielded, scaled etc), the noise parameters are updated.
+
+\section{Instrumental Magnitude Error of a Star}
+
+Once we know the noise of each pixel, deriving the expected error of an instrumental magnitude 
+is straightforward. Let $N_b$ be the number of pixels in the sky annulus, and $s_i$ the level
+of each pixel. The noise of the sky estimate is:\footnote{
+This assumes that the method used for sky estimation has a statistical efficiency close 
+to the mean, which isn't generally the case. Perhaps this should be taken into account, 
+at least for methods whose efficiency is well known, like the median.}
+\begin{equation}
+\sigma_b^2 = \frac{1}{N_b}\sum_{i=1}^{N_b}n^2(s_i)
+\end{equation}
+Now let $N_s$ be the number of pixels in the central aperture. The noise from these pixels is:
+\begin{equation}
+\sigma_s^2 = \sum_{i=1}^{N_s}n^2(s_i)
+\end{equation}
+The total noise after sky subtraction will be:
+\begin{equation}
+\sigma_n^2 = \sigma_s^2 + N_s \sigma_b^2.
+\end{equation}
+The program keeps track and reports separately the photon shot noise, the sky noise, 
+the read noise contribution and the scintillation noise.
+
+Scintillation is an atmospheric effect, which results in a random variation of the
+received flux from a star. We use the following formula for scintillation noise:
+
+\begin{equation}
+\sigma_{\rm sc} = 0.09 F \frac{A^{1.75}}{D^\frac{2}{3}\sqrt{2t}}
+\end{equation}
+Where $F$ is the total flux received from the star, $A$ is the airmass of the observation, 
+$D$ is the telescope aperture in cm, and $t$ is the integration time. Scintillation varies
+widely over time, so the above is just an estimate.
+
+Finally, we can calculate the expected error of the instrumental magnitude as
+\begin{equation}
+\epsilon_i = 2.51188 \log\left(1 + \frac{\sqrt{\sigma_n^2 + \sigma_{\rm sc}^2}}{F}\right).
+\end{equation}
+
+
+
+
+
+
+
+\chapter{Robust Averaging}\label{ap:robust}
+
+A robust averaging algorithm is implemented by \gcx and used in
+several places, most notably for zeropoint fitting by the aperture
+photometry and multiframe reduction routines. 
+The algorithm calculates the robust average of a number of values
+(for the zeropoint routines, these are the differences between the
+standard and instrumental magnitudes of standard stars). 
+
+The data used consists of the values we want to calculate, and
+the estimated error of each value. For fitting frame zeropoints
+they are:
+\begin{eqnarray}
+y_k = S_k - I_k\\
+\epsilon^2_k = \epsilon_{ik}^2 + \epsilon_{sk}^2
+\end{eqnarray}
+where $S$ is the standard magnitude, $I$ is the instrumental magnitude, 
+$\epsilon_i$ is the estimated error of the instrumental magnitude, 
+$\epsilon_s$ is the error of the standard magnitude of each star.
+Each star is assigned a {\em natural weight}, calculated as
+\begin{equation}
+W_k = \frac{1}{\epsilon_k^2}
+\end{equation}
+We start with a very robust estimate of the average:
+\begin{equation}
+\widetilde{Z}={\rm median}(y_k)
+\end{equation}
+and calculate the {\em residuals} of each value:
+\begin{equation}\label{eq:residuals}
+\rho_k=y_k - \widetilde{Z}
+\end{equation}
+and the {\em standard errors}:
+\begin{equation}
+\rho'_k=(y_k - \widetilde{Z})\sqrt{W_k}
+\end{equation}
+The expected value of each standard error is 1. We can identify
+possible outliers by their large standard errors. A simple way to
+treat outliers is to just exclude from the fit any value that has a
+standard error larger than a certain threshold. This has the
+disadvantage that small changes in the values can cause large jumps in
+the solution if an outlier just crosses the threshold. Instead, we
+adjust the weights of the data points to reduce the outliers'
+contribution to the solution:
+\begin{equation}
+W'_k = \frac{W_k}{1 + \left({\rho'_k}\over{\alpha}\right)^\beta}
+\end{equation}
+The weighting function reduces the weight of values that have residuals $\alpha$ times larger 
+than expected to one half. Of course values with even larger residuals are downweighted even 
+more. The parameter $\beta$ tunes the ``sharpness'' of the weighting
+function.\footnote{
+See Peter B.~Stetson, {\em The Techiques of Least Squares and Stellar
+  Photometry with CCDs} at http://nedwww.ipac.caltech.edu/level5/Stetson/Stetson\_contents.html.}
+A new estimate of the average is produced by:
+\begin{equation}
+\widetilde{Z}=\widetilde{Z} + \sum_k(y_k-\widetilde{Z})W'_k
+\end{equation}
+The residual calculation, weighting and average estimating are
+iterated until the estimate doesn't change. 
+
+Finally, the error for the estimated parameters is calculated. 
+the error of the zero point is:
+\begin{equation}
+\epsilon_{\rm zp}^2 = \frac{\sum\rho_k^2W'_k}{\sum W'_k}
+\end{equation}
+and the {\em mean error of unit weight} is:
+\begin{equation}
+{\rm me1}^2 = \frac{\sum\rho_k^2W'_k}{N-1}
+\end{equation}
+where $N$ is the number of standard stars. The mean error of unit weight 
+is 1 in the ideal case (when all the errors are estimated correctly). A significantly
+larger value should raise doubts about the error estimates.
+
+
+
+
+
+
+
+
+
+
+%\chapter{Star Pairing Algorithm}\label{ap:pairs}
+
+
+
+
+
+
+
+\chapter{Native Star Files}\label{ap:format}
+
+The file format used by \gcx for star catalogs, recipies and
+observation reports consists of lists of token--value pairs. 
+Each list is enclosed in brackets. The value part of each 
+pair can be a number, a string (enclosed in double quotes) or 
+another list. The order of the pairs within the list is not important.
+
+A file can contain several top-level lists. Each such list is called 
+a ``frame''. A typical recipe frame looks like:
+{\footnotesize\begin{verbatim}
+( recipe ( object "aucyg" ra "20:18:32.76" dec "34:23:21.3" 
+    equinox 2000 comments "generated from tycho2" ) 
+  sequence "tycho2" 
+  stars (
+
+    (name "2680-1551" type std mag 7.48
+    ra "20:17:54.500" dec "34:05:25.22" perr 0.0071
+    comments "p=T "
+    smags "v=7.344/0.020 b=8.654/0.020 vt=7.483/0.011 bt=9.024/0.017"
+    flags ( astrom ) ) 
+
+    (name "2680-1588" type std mag 7.79
+    ra "20:16:56.755" dec "34:08:22.86" perr 0.0057
+    comments "p=T "
+    smags "v=7.795/0.020 b=7.745/0.020 vt=7.790/0.011 bt=7.731/0.015"
+    flags ( astrom ) ) 
+
+    (name "aucyg" type target mag 9.5
+    ra "20:18:32.76" dec "34:23:21.3" 
+    comments "p=V t=M s=M6e-M7e m(p)=9.50/15.30"
+    flags ( var ) ) ) 
+  )
+\end{verbatim}}
+\noindent An observation report frame can look like:
+{\footnotesize\begin{verbatim}
+( observation ( filter "b" object "aucyg" ra "20:18:39.31" 
+    dec "34:23:05.6" equinox 2000 mjd 53236.9839856 
+    telescope "SCT" aperture 30 exptime 20 sns_temp 238.3 
+    latitude "44:25:50.0" longitude "-26:06:50.0" 
+    altitude 75 airmass 1.223 observer "R. Corlan" ) 
+  noise ( read 7 eladu 2 flat 0 ) 
+  ap_par ( r1 5 r2 9 r3 13 sky_method "synthetic_mode" ) 
+    (name "AU_CYG_39" type std mag 12.1
+    ra "20:17:47.15" dec "34:32:01.4" 
+    smags "v=12.062/-0.001 b-v=1.982/-0.002 b=14.044/0.002"
+    imags "b=-7.256/0.167"
+    residual -0.209 stderr 1.25 
+    noise (photon 0.13 sky 0.074 read 0.075 scint 0.0021)
+    centroid (x 876.89 y 385.24 xerr 0.0085 yerr 0.0065 dx -0.18 dy -0.15)
+    flags ( astrom centered ) ) 
+
+    (name "AU_CYG_10" type std mag 13
+    ra "20:17:44.52" dec "34:21:00.0" 
+    smags "v=12.961/-0.001 b-v=0.765/-0.001 b=13.726/0.001"
+    imags "b=-7.991/0.089"
+    residual 0.208 stderr 2.33 
+    noise (photon 0.066 sky 0.038 read 0.038 scint 0.0021)
+    centroid (x 569.61 y 331.56 xerr 0.002 yerr 0.0017 dx 0.19 dy -0.17)
+    flags ( astrom centered ) ) 
+
+    (name "aucyg" type target mag 9.5
+    ra "20:18:32.76" dec "34:23:21.3" 
+    comments "p=V t=M s=M6e-M7e m(p)=9.50/15.30"
+    smags "b=12.642/0.085"
+    imags "b=-8.867/0.042"
+    centroid (x 782.90 y 615.40 xerr 0.0079 yerr 0.0064 dx 0.17 dy 0.07)
+    noise (photon 0.031 sky 0.017 read 0.017 scint 0.0021)
+    flags ( var centered ) ) ) 
+  transform ( band "b" zp 21.509 zperr 0.074 zpme1 1.29 ) )
+\end{verbatim}}
+\noindent A typical catalog frame would be:
+{\footnotesize\begin{verbatim}
+( catalog (comments "Internal catalog output")
+    stars (
+      ( name "piuma" type catalog ra "08:39:11.70" dec "65:01:15.0"
+        flags ( var ) )
+      ( name "lpup" type catalog ra "07:13:31.90" dec "-44:38:39.0"
+        flags ( var ) )
+      ( name "piori" type catalog ra "04:54:15.10" dec "02:26:26.4"
+        flags ( var ) ) ) )
+\end{verbatim}}
+
+\noindent All three forms of the star file have in common the top-level token {\tt
+  stars} which is followed by the list of all stars within the frame. 
+Each star is also represented by a list, having some of the following
+  tokens:
+\begin{longtable}{llp{8cm}}
+name&string&The name of the star;\\
+type&symbol&The type of the star: {\tt std} for standards, 
+{\tt target} for targets, {\tt catalog} far catalog objects and 
+{\tt field} for field stars;\\
+ra&string&Right ascension in HMS format;\\
+dec&string&Declination in DMS format;\\
+perr&number&Position error in arc seconds;\\
+equinox&number&Equinox of coordinates;\\
+mag&number&Generic magnitude of the star, used for display 
+purposes only;\\
+smags&string&A string describing the standard magnitudes of the star
+and their errors. See Section~\ref{sec:recipe} for the format;\\
+imags&string&A string describing the instrumental magnitudes of the star
+and their errors;\\
+centroid&list&A list containing positional information. {\tt x} and
+{\tt y} are frame coordinates of the star's centroid. {\tt xerr} amd
+{\tt yerr} are the estimated position errors calculated by the
+centroiding code. {\tt dx} and {\tt dy} are the amounts by which the
+star's centroid is shifted from the catalog position;\\
+noise&list&A list of components of the star's instrumental noise
+model;\\
+residual&number&The residual of the star after the zeropoint fit;\\
+stderr&number&The standard error (scaled residual) of the star after the zeropoint fit;\\
+flags&list&A list of reduction flags.\\
+\end{longtable}
+
+\noindent Some top-level tokens of the star files are:
+\begin{longtable}{llp{8cm}}
+stars&list&List of stars in the frame;\\
+recipe&list&A list of recipe parameters. Most important are the target
+  object and field center coordinates;\\
+observation&list&Parameters of the ccd frame from which the data was
+  obtained. See Section~\ref{sec:annotations} for more details;\\
+catalog&list&Identifies the frame as a catalog frame. The most
+  important token in this list is {\tt comments};\\
+sequence&string&The source of the standard magnitudes in the star
+  list;\\
+noise&list&A list of parameters of the CCD noise model used to
+  calculate instrumental errors;\\
+ap\_par&list&Parameters used by the aperture photometry routine
+  (aperture sizes and sky estimation method);\\
+transform&list&transformation coefficients, zeropoint and 
+  extinction coefficients used to calculate the standard magnitudes of
+  target stars.\\
+\end{longtable}
+
+The native star format can be converted to a tabular format using the
+report converter function as described in Appendix~\ref{ap:repconv}.
+
+
+
+
+
+
+
+
+\chapter{Command Line Options}
+
+Most of the data reduction functions of \gcx are available from the
+command line. The program's command-line options are listed below. The
+same text can be obtained using {\tt gcx --help}.
+{\footnotesize \input{cmdline.txt}}
+
+
+
+
+
+
+\chapter{Report Converter}\label{ap:repconv}
+
+The output format of \gcx can be converted to a more common tabular
+form using the {\tt -T} option. This option uses the value of the
+{\tt .file.tab\_format} option (\op{File and Device Options/Report converter
+  output format}) to specify it's output format. The text
+below, taken from the on-line help, describes this option.
+
+{\footnotesize \input{repconv.txt}}
+
+
+
+
+
+
+\chapter{Global Options}\label{ap:options}
+
+\gcx has a large number of configuration options. They can be accesses through the options 
+dialog, which can be brought up by pressing \keys{O} or \menu{File/Edit Options}. Clicking on
+``save'' in the options dialog will update the default configuration file ({\tt .gcxrc}), located
+in the home directory.
+
+When the program stars, it looks for the configuration file. If it cannot be read, it will 
+initialise all parameters with defaults. 
+
+There are two ways of modifying some of the options for a specific
+run: either use the {\tt -S} command-line option for each option that
+needs to change, or make a configuration file that contains the option
+changes for the run and use the {\tt -r} command-line option. The name
+used in the configuration file is listed with each option.
+
+\input{options.ltx}
+
+
+
+\end{document}
