@@ -1,23 +1,23 @@
 /*******************************************************************************
   Copyright(c) 2000 - 2003 Radu Corlan. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: radu@corlan.net
 *******************************************************************************/
 
@@ -130,21 +130,21 @@ static GtkWidget *get_main_menu_bar(GtkWidget *window)
 	GtkWidget *ret;
 	GtkItemFactory *item_factory;
 	GtkAccelGroup *accel_group;
-	gint nmenu_items = sizeof (reduce_menu_items) / 
+	gint nmenu_items = sizeof (reduce_menu_items) /
 		sizeof (reduce_menu_items[0]);
 	accel_group = gtk_accel_group_new ();
 
-	item_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR, 
+	item_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR,
 					     "<main_menu>", accel_group);
 	gtk_object_set_data_full(GTK_OBJECT(window), "main_menu_if", item_factory,
 				 (GtkDestroyNotify) gtk_object_unref);
-	gtk_item_factory_create_items (item_factory, nmenu_items, 
+	gtk_item_factory_create_items (item_factory, nmenu_items,
 				       reduce_menu_items, window);
 
   /* Attach the new accelerator group to the window. */
 	gtk_window_add_accel_group (GTK_WINDOW (window), accel_group);
 
-    /* Finally, return the actual menu bar created by the item factory. */ 
+    /* Finally, return the actual menu bar created by the item factory. */
 	ret = gtk_item_factory_get_widget (item_factory, "<main_menu>");
 	return ret;
 }
@@ -152,7 +152,7 @@ static GtkWidget *get_main_menu_bar(GtkWidget *window)
 
 
 
-/* create an image processing dialog and set the callbacks, but don't 
+/* create an image processing dialog and set the callbacks, but don't
  * show it */
 static GtkWidget *make_image_processing(gpointer window)
 {
@@ -192,7 +192,7 @@ static GtkWidget *make_image_processing(gpointer window)
 	set_named_callback (GTK_OBJECT (dialog), "flat_browse", "clicked",
 			    GTK_SIGNAL_FUNC (imf_red_browse_cb));
 	set_named_callback (GTK_OBJECT (dialog), "badpix_browse", "clicked",
-			    GTK_SIGNAL_FUNC (imf_red_browse_cb));	
+			    GTK_SIGNAL_FUNC (imf_red_browse_cb));
 	set_named_callback (GTK_OBJECT (dialog), "align_browse", "clicked",
 			    GTK_SIGNAL_FUNC (imf_red_browse_cb));
 	set_named_callback (GTK_OBJECT (dialog), "output_file_browse", "clicked",
@@ -211,6 +211,8 @@ static GtkWidget *make_image_processing(gpointer window)
 			    GTK_SIGNAL_FUNC (imf_red_activate_cb));
 	set_named_callback (GTK_OBJECT (dialog), "flat_entry", "activate",
 			    GTK_SIGNAL_FUNC (imf_red_activate_cb));
+	set_named_callback (GTK_OBJECT (dialog), "badpix_entry", "activate",
+			    GTK_SIGNAL_FUNC (imf_red_activate_cb));
 	set_named_callback (GTK_OBJECT (dialog), "align_entry", "activate",
 			    GTK_SIGNAL_FUNC (imf_red_activate_cb));
 	set_named_callback (GTK_OBJECT (dialog), "recipe_entry", "activate",
@@ -218,7 +220,7 @@ static GtkWidget *make_image_processing(gpointer window)
 	menubar = get_main_menu_bar(dialog);
 	gtk_object_set_data(GTK_OBJECT(dialog), "menubar", menubar);
 	//gtk_menu_bar_set_shadow_type(GTK_MENU_BAR(menubar), GTK_SHADOW_NONE);
-	
+
 	top_hb = gtk_object_get_data(GTK_OBJECT(dialog), "top_hbox");
 	gtk_box_pack_start(GTK_BOX(top_hb), menubar, TRUE, TRUE, 0);
 	gtk_box_reorder_child(GTK_BOX(top_hb), menubar, 0);
@@ -234,14 +236,14 @@ static void demosaic_method_activate(GtkWidget *wid, gpointer data)
 	P_INT(CCDRED_DEMOSAIC_METHOD) = (long)data;
 	par_touch(CCDRED_DEMOSAIC_METHOD);
 }
- 
+
 
 static void stack_method_activate(GtkWidget *wid, gpointer data)
 {
 	P_INT(CCDRED_STACK_METHOD) = (long)data;
 	par_touch(CCDRED_STACK_METHOD);
 }
- 
+
 /* update the dialog to match the supplied ccdr */
 /* in ccdr is null, just update the settings from the pars */
 static void set_processing_dialog_ccdr(GtkWidget *dialog, struct ccd_reduce *ccdr)
@@ -255,7 +257,7 @@ static void set_processing_dialog_ccdr(GtkWidget *dialog, struct ccd_reduce *ccd
 	g_return_if_fail(omenu != NULL);
 	menu = gtk_menu_new();
 	g_return_if_fail(menu != NULL);
-	
+
 	c = stack_methods;
 	i = 0;
 	while (*c != NULL) {
@@ -272,7 +274,7 @@ static void set_processing_dialog_ccdr(GtkWidget *dialog, struct ccd_reduce *ccd
 	gtk_widget_show(omenu);
 	gtk_option_menu_remove_menu(GTK_OPTION_MENU (omenu));
 	gtk_option_menu_set_menu(GTK_OPTION_MENU (omenu), menu);
-	gtk_option_menu_set_history (GTK_OPTION_MENU (omenu), 
+	gtk_option_menu_set_history (GTK_OPTION_MENU (omenu),
 				     P_INT(CCDRED_STACK_METHOD));
 	named_spin_set(dialog, "stack_sigmas_spin", P_DBL(CCDRED_SIGMAS));
 	named_spin_set(dialog, "stack_iter_spin", 1.0 * P_INT(CCDRED_ITER));
@@ -281,7 +283,7 @@ static void set_processing_dialog_ccdr(GtkWidget *dialog, struct ccd_reduce *ccd
 	g_return_if_fail(omenu != NULL);
 	menu = gtk_menu_new();
 	g_return_if_fail(menu != NULL);
-	
+
 	c = demosaic_methods;
 	i = 0;
 	while (*c != NULL) {
@@ -298,7 +300,7 @@ static void set_processing_dialog_ccdr(GtkWidget *dialog, struct ccd_reduce *ccd
 	gtk_widget_show(omenu);
 	gtk_option_menu_remove_menu(GTK_OPTION_MENU (omenu));
 	gtk_option_menu_set_menu(GTK_OPTION_MENU (omenu), menu);
-	gtk_option_menu_set_history (GTK_OPTION_MENU (omenu), 
+	gtk_option_menu_set_history (GTK_OPTION_MENU (omenu),
 				     P_INT(CCDRED_DEMOSAIC_METHOD));
 
 	if (ccdr == NULL)
@@ -343,7 +345,7 @@ static void set_processing_dialog_ccdr(GtkWidget *dialog, struct ccd_reduce *ccd
 			set_named_checkb_val(dialog, "bg_match_mul_rb", 1);
 		} else {
 			set_named_checkb_val(dialog, "bg_match_add_rb", 1);
-		} 
+		}
 		set_named_checkb_val(dialog, "stack_checkb", 1);
 	}
 	if ((ccdr->ops & IMG_OP_INPLACE)) {
@@ -384,7 +386,7 @@ static void set_processing_dialog_imfl(GtkWidget *dialog, struct image_file_list
 	gtk_list_append_items(list, il);
 }
 
-void set_imfl_ccdr(gpointer window, struct ccd_reduce *ccdr, 
+void set_imfl_ccdr(gpointer window, struct ccd_reduce *ccdr,
 		   struct image_file_list *imfl)
 {
 	GtkWidget *dialog;
@@ -435,7 +437,7 @@ static void imf_skip_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 //		gtk_label_set_text(GTK_LABEL(GTK_BIN(item)->child), label);
 	}
 	update_selected_status_label(dialog);
-	if (g_list_length(list->selection) == 1) 
+	if (g_list_length(list->selection) == 1)
 		imf_next_cb(dialog, 0, NULL);
 }
 
@@ -529,7 +531,7 @@ static void imf_next_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 	sel = gtk_container_children(GTK_CONTAINER(list));
 	len = g_list_length(sel);
 	g_list_free(sel);
-	if (index + 1 < len) { 
+	if (index + 1 < len) {
 		gtk_list_unselect_all(list);
 		index ++;
 		gtk_list_select_item(list, index);
@@ -581,7 +583,7 @@ static void imf_prev_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 	sel = gtk_container_children(GTK_CONTAINER(list));
 	len = g_list_length(sel);
 	g_list_free(sel);
-	if (index > 0) { 
+	if (index > 0) {
 		gtk_list_unselect_all(list);
 		index --;
 		gtk_list_select_item(list, index);
@@ -786,7 +788,7 @@ static void imf_update_status_label(GtkWidget *label, struct image_file *imf)
 
 	i = snprintf(msg, 127, "%s", basename(fn));
 	free(fn);
-	if (imf->flags & IMG_SKIP) 
+	if (imf->flags & IMG_SKIP)
 		i += snprintf(msg+i, 127-i, " SKIP");
 	clamp_int(&i, 0, 127);
 	if (imf->flags & IMG_LOADED)
@@ -815,7 +817,7 @@ static void imf_update_status_label(GtkWidget *label, struct image_file *imf)
 	clamp_int(&i, 0, 127);
 	if (imf->flags & IMG_OP_DEMOSAIC)
 		i += snprintf(msg+i, 127-i, " DEMOSAIC");
-	clamp_int(&i, 0, 127);	
+	clamp_int(&i, 0, 127);
 	if (imf->flags & IMG_OP_PHOT)
 		i += snprintf(msg+i, 127-i, " PHOT");
 	gtk_label_set_text(GTK_LABEL(label), msg);
@@ -916,7 +918,7 @@ static void imf_red_browse_cb(GtkWidget *wid, gpointer dialog)
 		entry = gtk_object_get_data(GTK_OBJECT(dialog), "badpix_entry");
 		g_return_if_fail(entry != NULL);
 		file_select_to_entry(dialog, entry, "Select bad pixel file", "*", 1);
-	}	
+	}
 	if (wid == gtk_object_get_data(GTK_OBJECT(dialog), "align_browse")) {
 		entry = gtk_object_get_data(GTK_OBJECT(dialog), "align_entry");
 		g_return_if_fail(entry != NULL);
@@ -982,7 +984,7 @@ static void dialog_to_ccdr(GtkWidget *dialog, struct ccd_reduce *ccdr)
 	g_return_if_fail (ccdr != NULL);
 	if (get_named_checkb_val(dialog, "bias_checkb")) {
 		text = named_entry_text(dialog, "bias_entry");
-		if ((ccdr->ops & IMG_OP_BIAS) && ccdr->bias && 
+		if ((ccdr->ops & IMG_OP_BIAS) && ccdr->bias &&
 		    strcmp(text, ccdr->bias->filename)) {
 			image_file_release(ccdr->bias);
 			ccdr->bias = image_file_new();
@@ -990,7 +992,7 @@ static void dialog_to_ccdr(GtkWidget *dialog, struct ccd_reduce *ccdr)
 		} else if (!(ccdr->ops & IMG_OP_BIAS)) {
 			ccdr->bias = image_file_new();
 			ccdr->bias->filename = strdup(text);
-		} 
+		}
 		g_free(text);
 		ccdr->ops |= IMG_OP_BIAS;
 	} else {
@@ -1002,7 +1004,7 @@ static void dialog_to_ccdr(GtkWidget *dialog, struct ccd_reduce *ccdr)
 
 	if (get_named_checkb_val(dialog, "dark_checkb")) {
 		text = named_entry_text(dialog, "dark_entry");
-		if ((ccdr->ops & IMG_OP_DARK) && ccdr->dark && 
+		if ((ccdr->ops & IMG_OP_DARK) && ccdr->dark &&
 		    strcmp(text, ccdr->dark->filename)) {
 			image_file_release(ccdr->dark);
 			ccdr->dark = image_file_new();
@@ -1010,19 +1012,19 @@ static void dialog_to_ccdr(GtkWidget *dialog, struct ccd_reduce *ccdr)
 		} else if (!(ccdr->ops & IMG_OP_DARK)) {
 			ccdr->dark = image_file_new();
 			ccdr->dark->filename = strdup(text);
-		} 
+		}
 		g_free(text);
 		ccdr->ops |= IMG_OP_DARK;
 	} else {
 		if ((ccdr->ops & IMG_OP_DARK) && ccdr->dark)
 			image_file_release(ccdr->dark);
 		ccdr->dark = NULL;
-		ccdr->ops &= ~IMG_OP_DARK;		
+		ccdr->ops &= ~IMG_OP_DARK;
 	}
 
 	if (get_named_checkb_val(dialog, "flat_checkb")) {
 		text = named_entry_text(dialog, "flat_entry");
-		if ((ccdr->ops & IMG_OP_FLAT) && ccdr->flat && 
+		if ((ccdr->ops & IMG_OP_FLAT) && ccdr->flat &&
 		    strcmp(text, ccdr->flat->filename)) {
 			image_file_release(ccdr->flat);
 			ccdr->flat = image_file_new();
@@ -1030,14 +1032,14 @@ static void dialog_to_ccdr(GtkWidget *dialog, struct ccd_reduce *ccdr)
 		} else if (!(ccdr->ops & IMG_OP_FLAT)) {
 			ccdr->flat = image_file_new();
 			ccdr->flat->filename = strdup(text);
-		} 
+		}
 		g_free(text);
 		ccdr->ops |= IMG_OP_FLAT;
 	} else {
 		if ((ccdr->ops & IMG_OP_FLAT) && ccdr->flat)
 			image_file_release(ccdr->flat);
 		ccdr->flat = NULL;
-		ccdr->ops &= ~IMG_OP_FLAT;		
+		ccdr->ops &= ~IMG_OP_FLAT;
 	}
 
 	if (get_named_checkb_val(dialog, "badpix_checkb")) {
@@ -1050,7 +1052,7 @@ static void dialog_to_ccdr(GtkWidget *dialog, struct ccd_reduce *ccdr)
 		} else if (!(ccdr->ops & IMG_OP_BADPIX)) {
 			ccdr->bad_pix_map = calloc(1, sizeof(struct bad_pix_map));
 			ccdr->bad_pix_map->filename = strdup(text);
-		} 
+		}
 		g_free(text);
 		ccdr->ops |= IMG_OP_BADPIX;
 	} else {
@@ -1064,7 +1066,7 @@ static void dialog_to_ccdr(GtkWidget *dialog, struct ccd_reduce *ccdr)
 
 	if (get_named_checkb_val(dialog, "align_checkb")) {
 		text = named_entry_text(dialog, "align_entry");
-		if ((ccdr->ops & IMG_OP_ALIGN) && ccdr->alignref && 
+		if ((ccdr->ops & IMG_OP_ALIGN) && ccdr->alignref &&
 		    strcmp(text, ccdr->alignref->filename)) {
 			image_file_release(ccdr->alignref);
 			ccdr->alignref = image_file_new();
@@ -1073,7 +1075,7 @@ static void dialog_to_ccdr(GtkWidget *dialog, struct ccd_reduce *ccdr)
 		} else if (!(ccdr->ops & IMG_OP_ALIGN)) {
 			ccdr->alignref = image_file_new();
 			ccdr->alignref->filename = strdup(text);
-		} 
+		}
 		g_free(text);
 		ccdr->ops |= IMG_OP_ALIGN;
 	} else {
@@ -1159,10 +1161,10 @@ static void dialog_to_ccdr(GtkWidget *dialog, struct ccd_reduce *ccdr)
 		} else {
 			ccdr->ops &= ~IMG_OP_BG_ALIGN_MUL;
 		}
-		P_DBL(CCDRED_SIGMAS) = named_spin_get_value(dialog, 
+		P_DBL(CCDRED_SIGMAS) = named_spin_get_value(dialog,
 							    "stack_sigmas_spin");
 		par_touch(CCDRED_SIGMAS);
-		P_INT(CCDRED_ITER) = named_spin_get_value(dialog, 
+		P_INT(CCDRED_ITER) = named_spin_get_value(dialog,
 							  "stack_iter_spin");
 		par_touch(CCDRED_ITER);
 	} else {
@@ -1172,7 +1174,7 @@ static void dialog_to_ccdr(GtkWidget *dialog, struct ccd_reduce *ccdr)
 
 static void ccdred_run_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 {
-	struct ccd_reduce *ccdr;	
+	struct ccd_reduce *ccdr;
 	struct image_file_list *imfl;
 	int ret, nframes;
 	struct image_file *imf;
@@ -1236,13 +1238,13 @@ static void ccdred_run_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 				release_frame(imf->fr);
 				imf->fr = NULL;
 			} else if (outf && outf[0]) {
-				save_image_file(imf, outf, 0, 
-						(nframes == 1 ? NULL : &seq), 
+				save_image_file(imf, outf, 0,
+						(nframes == 1 ? NULL : &seq),
 						progress_pr, dialog);
 				imf->flags &= ~(IMG_LOADED);
 				release_frame(imf->fr);
 				imf->fr = NULL;
-			} else if ( ((ccdr->ops & (IMG_OP_ALIGN)) == 0) && 
+			} else if ( ((ccdr->ops & (IMG_OP_ALIGN)) == 0) &&
 				   (ccdr->ops & IMG_OP_PHOT) ) {
 				imf->flags &= ~(IMG_LOADED);
 				release_frame(imf->fr);
@@ -1267,9 +1269,9 @@ static void ccdred_run_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 		imf->fr = fr;
 		imf->flags |= IMG_LOADED;
 		get_frame(fr);
-		snprintf(fr->name, 254, "%s", outf); 
+		snprintf(fr->name, 254, "%s", outf);
 		d3_printf("Writing %s\n", outf);
-		save_image_file(imf, outf, 0, &seq, 
+		save_image_file(imf, outf, 0, &seq,
 				progress_pr, dialog);
 		image_file_release(imf);
 	}
@@ -1299,7 +1301,7 @@ static struct image_file * current_imf(gpointer dialog)
 	list = gtk_object_get_data(GTK_OBJECT(dialog), "image_file_list");
 	g_return_val_if_fail(list != NULL, NULL);
 
-	if (list->selection == NULL) 
+	if (list->selection == NULL)
 		gtk_list_select_item(list, 0);
 
 	if (list->selection != NULL) {
@@ -1335,7 +1337,7 @@ static void select_next_imf(gpointer dialog)
 	sel = gtk_container_children(GTK_CONTAINER(list));
 	len = g_list_length(sel);
 	g_list_free(sel);
-	if (index + 1 < len) { 
+	if (index + 1 < len) {
 		gtk_list_unselect_all(list);
 		index ++;
 		gtk_list_select_item(list, index);
@@ -1360,7 +1362,7 @@ static void select_next_imf(gpointer dialog)
 
 static void ccdred_one_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 {
-	struct ccd_reduce *ccdr;	
+	struct ccd_reduce *ccdr;
 	struct image_file_list *imfl;
 	int ret;
 	struct image_file *imf;
@@ -1424,7 +1426,7 @@ static void ccdred_one_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 			imf->flags &= ~(IMG_LOADED);
 			release_frame(imf->fr);
 			imf->fr = NULL;
-		} else if ( ((ccdr->ops & (IMG_OP_ALIGN)) == 0) && 
+		} else if ( ((ccdr->ops & (IMG_OP_ALIGN)) == 0) &&
 			    (ccdr->ops & IMG_OP_PHOT) ) {
 			imf->flags &= ~(IMG_LOADED);
 			release_frame(imf->fr);
@@ -1442,7 +1444,7 @@ static void ccdred_one_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 /* run quick phot on one frame */
 static void ccdred_qphotone_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 {
-	struct ccd_reduce *ccdr;	
+	struct ccd_reduce *ccdr;
 	struct image_file_list *imfl;
 	int ret;
 	struct image_file *imf;
@@ -1492,7 +1494,7 @@ static void ccdred_qphotone_cb(gpointer dialog, guint action, GtkWidget *menu_it
 
 static void show_align_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 {
-	struct ccd_reduce *ccdr;	
+	struct ccd_reduce *ccdr;
 	GtkWidget *im_window;
 
 	ccdr = gtk_object_get_data(GTK_OBJECT(dialog), "ccdred");
@@ -1526,7 +1528,6 @@ static void show_align_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 /* set the enable check buttons when the user activates a file entry */
 static void imf_red_activate_cb(GtkWidget *wid, gpointer dialog)
 {
-
 	if (wid == gtk_object_get_data(GTK_OBJECT(dialog), "dark_entry")) {
 		set_named_checkb_val(dialog, "dark_checkb", 1);
 	}
@@ -1535,6 +1536,9 @@ static void imf_red_activate_cb(GtkWidget *wid, gpointer dialog)
 	}
 	if (wid == gtk_object_get_data(GTK_OBJECT(dialog), "bias_entry")) {
 		set_named_checkb_val(dialog, "bias_checkb", 1);
+	}
+	if (wid == gtk_object_get_data(GTK_OBJECT(dialog), "badpix_entry")) {
+		set_named_checkb_val(dialog, "badpix_checkb", 1);
 	}
 	if (wid == gtk_object_get_data(GTK_OBJECT(dialog), "align_entry")) {
 		set_named_checkb_val(dialog, "align_checkb", 1);
