@@ -2,7 +2,8 @@
 
 	* removed deprecated GtkList usage for the image_processing dialog
 	  and restored image navigation functionality which was broken
-	* TODO: cameragui.c, obslist.c
+	* changed from gtk_object_* to g_object_* 
+	* remaining deprecated stuff: GtkCombo, GtkList, GtkItemFactory
 
 2009-11-15  riccardo <unriccio@email.it>
 	
