@@ -1,23 +1,23 @@
 /*******************************************************************************
   Copyright(c) 2000 - 2003 Radu Corlan. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: radu@corlan.net
 *******************************************************************************/
 
@@ -106,7 +106,7 @@ static int temperature_cb(GtkWidget *dialog)
 	camera = camera_find(main_window, CAMERA_MAIN);
 	if (! camera)
 		return TRUE;
-	
+
 	camera_get_temperature(camera, &fvalue, &fmin, &fmax);
 	sprintf(buf, "%.1f", fvalue);
 	named_entry_set(dialog, "cooler_temp_entry", buf);
@@ -189,7 +189,7 @@ void save_frame_auto_name(struct ccd_frame *fr, GtkWidget *dialog)
 	status_message(dialog, mb);
 	d1_printf("%s\n", mb);
 	wcs_to_fits_header(fr);
-	if (get_named_checkb_val(GTK_WIDGET(dialog), 
+	if (get_named_checkb_val(GTK_WIDGET(dialog),
 				 "file_compress_checkb")) {
 		write_gz_fits_frame(fr, fn, P_STR(FILE_COMPRESS));
 	} else {
@@ -234,7 +234,7 @@ static void maybe_save_frame(struct ccd_frame *fr, GtkWidget *dialog)
 	imwin = gtk_object_get_data(GTK_OBJECT(dialog), "image_window");
 	togb = gtk_object_get_data(GTK_OBJECT(dialog), "img_get_multiple_button");
 	if (togb != NULL && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(togb))) {
-		if (imwin != NULL 
+		if (imwin != NULL
 		    && get_named_checkb_val(GTK_WIDGET(dialog), "file_match_wcs_checkb")
 		    && !get_named_checkb_val(GTK_WIDGET(dialog), "img_dark_checkb"))
 			match_field_in_window_quiet(imwin);
@@ -249,7 +249,7 @@ static void maybe_save_frame(struct ccd_frame *fr, GtkWidget *dialog)
 		if (seq > 0) {
 			seq --;
 			if (seq > 0) {
-				if (capture_image(dialog)) 
+				if (capture_image(dialog))
 					seq = 0;
 			}
 			sprintf(mb, "%d", seq);
@@ -286,7 +286,7 @@ static void set_filter_list(GtkWidget *dialog, struct fwheel_t *fw)
 	}
 	if (filter_list != NULL) {
 		gtk_signal_handler_block_by_data(GTK_OBJECT(GTK_COMBO(combo)->list), dialog);
-		gtk_list_clear_items(GTK_LIST(GTK_COMBO(combo) -> list), 0, -1); 
+		gtk_list_clear_items(GTK_LIST(GTK_COMBO(combo) -> list), 0, -1);
 		gtk_combo_set_popdown_strings(GTK_COMBO(combo), filter_list);
 		gtk_list_select_item(GTK_LIST(GTK_COMBO(combo) -> list), fw->filter);
 		gtk_editable_set_editable(GTK_EDITABLE(GTK_COMBO(combo)->entry), 0);
@@ -295,7 +295,7 @@ static void set_filter_list(GtkWidget *dialog, struct fwheel_t *fw)
 #endif
 }
 
-static void filter_list_select_cb(GtkList *list, GtkWidget *widget, 
+static void filter_list_select_cb(gpointer list, GtkWidget *widget,
 				  gpointer dialog)
 {
 	printf("filter_list_select_cb is not yet implemented\n");
@@ -306,7 +306,7 @@ static void filter_list_select_cb(GtkList *list, GtkWidget *widget,
 	char msg[128];
 
 	fw = gtk_object_get_data(GTK_OBJECT(dialog), "open_fwheel");
-	if (fw == NULL) 
+	if (fw == NULL)
 		return;
 	pos = gtk_list_child_position(list, widget);
 	if (pos == fw->filter)
@@ -345,7 +345,7 @@ gint delete_event( GtkWidget *widget, GdkEvent  *event, gpointer data )
 }
 
 
-/* convert a bin string like "1 1" or "1,1" or "1x2" to 
+/* convert a bin string like "1 1" or "1,1" or "1x2" to
  * two ints; return 0 if successfull, -1 if couldn't parse
  */
 static int parse_bin_string(char *text, int *bx, int *by)
@@ -509,7 +509,7 @@ static void update_obs_entries( GtkWidget *dialog, struct obs_data *obs)
 }
 
 
-/* if we are in auto filename mode, generate a new name based on the 
+/* if we are in auto filename mode, generate a new name based on the
  * current obs. Reset the sequence number if the name has changed */
 static void auto_filename(GtkWidget *dialog)
 {
@@ -561,13 +561,13 @@ static void obsdata_cb( GtkWidget *widget, gpointer data )
 	double d;
 
 	obs = gtk_object_get_data(GTK_OBJECT(data), "obs_data");
-	if (obs == NULL) { 
+	if (obs == NULL) {
 		obs = obs_data_new();
 		if (obs == NULL) {
 			err_printf("cannot create new obs\n");
 			return;
 		}
-		gtk_object_set_data_full(GTK_OBJECT(data), "obs_data", obs, 
+		gtk_object_set_data_full(GTK_OBJECT(data), "obs_data", obs,
 					 (GtkDestroyNotify)(obs_data_release));
 		combo = (GtkComboBox *)g_object_get_data(G_OBJECT(data), "obs_filter_combo");
 		text = gtk_combo_box_get_active_text(combo);
@@ -759,7 +759,7 @@ static int scope_goto_cb( GtkWidget *widget, gpointer data )
 	if (ret) {
 		snprintf(msg, 511, "Object %s (ha=%.2f dec=%.2f)\n"
 			 "is outside slew limits\n"
-			 "%s\nStart slew?", obs->objname, 
+			 "%s\nStart slew?", obs->objname,
 			 obs_current_hour_angle(obs), obs->dec, last_err());
 		if (modal_yes_no(msg, NULL) != 1)
 			return -1;
@@ -808,7 +808,7 @@ int goto_dialog_obs(GtkWidget *dialog)
 }
 
 
-/* correct the scope's pointing with the difference between 
+/* correct the scope's pointing with the difference between
  * the current image window wcs (if fitted) and the telescope
  * position.  Note that this function returns once the movement
  * has been submitted, and does not wait for movement to complete */
@@ -845,7 +845,7 @@ int center_matched_field(GtkWidget *dialog)
 
 static void enable_camera_widgets(GtkWidget *dialog, int state)
 {
-	
+
 	gtk_widget_set_sensitive(
 		GTK_WIDGET(gtk_object_get_data(GTK_OBJECT(dialog), "img_get_img_button")),
 		state);
@@ -856,7 +856,7 @@ static void enable_camera_widgets(GtkWidget *dialog, int state)
 
 static void enable_telescope_widgets(GtkWidget *dialog, int state)
 {
-	
+
 	gtk_widget_set_sensitive(
 		GTK_WIDGET(gtk_object_get_data(GTK_OBJECT(dialog), "scope_goto_button")),
 		state);
@@ -883,7 +883,7 @@ static gboolean cam_ready_cb(gpointer data)
 		INDI_set_callback(INDI_COMMON (camera), CAMERA_CALLBACK_TEMPERATURE, temperature_cb, dialog);
 		enable_camera_widgets(dialog, TRUE);
 		cam_to_img(dialog);
-		
+
 	}
 	//Return FALSE to remove the callback event
 	return FALSE;
@@ -953,16 +953,16 @@ void cam_set_callbacks(GtkWidget *dialog)
 	gtk_signal_connect (GTK_OBJECT (combo), "changed",
 			    GTK_SIGNAL_FUNC (filter_list_select_cb), dialog);
 	set_named_callback(dialog, "obs_object_entry", "activate", obsdata_cb);
-	set_named_callback(dialog, "obs_object_entry", "focus-out-event", 
+	set_named_callback(dialog, "obs_object_entry", "focus-out-event",
 			   obsdata_focus_out_cb);
 	set_named_callback(dialog, "obs_ra_entry", "activate", obsdata_cb);
-	set_named_callback(dialog, "obs_ra_entry", "focus-out-event", 
+	set_named_callback(dialog, "obs_ra_entry", "focus-out-event",
 			   obsdata_focus_out_cb);
 	set_named_callback(dialog, "obs_dec_entry", "activate", obsdata_cb);
-	set_named_callback(dialog, "obs_dec_entry", "focus-out-event", 
+	set_named_callback(dialog, "obs_dec_entry", "focus-out-event",
 			   obsdata_focus_out_cb);
 	set_named_callback(dialog, "obs_epoch_entry", "activate", obsdata_cb);
-	set_named_callback(dialog, "obs_epoch_entry", "focus-out-event", 
+	set_named_callback(dialog, "obs_epoch_entry", "focus-out-event",
 			   obsdata_focus_out_cb);
 	set_named_callback(dialog, "obs_list_fname", "activate", obs_list_fname_cb);
 	set_named_callback(dialog, "cooler_tempset_spin", "changed", cooler_temp_cb);
@@ -994,7 +994,7 @@ void camera_cb(gpointer data, guint action, GtkWidget *menu_item)
 		gtk_widget_ref(dialog);
 		gtk_object_set_data_full(GTK_OBJECT(window), "cam_dialog", dialog,
 					 (GtkDestroyNotify)gtk_widget_destroy);
-		gtk_object_set_data(GTK_OBJECT(dialog), "image_window", window); 
+		gtk_object_set_data(GTK_OBJECT(dialog), "image_window", window);
 		gtk_signal_connect (GTK_OBJECT (dialog), "destroy",
 				    GTK_SIGNAL_FUNC (close_cam_dialog), window);
 //		set_filter_list(dialog);
