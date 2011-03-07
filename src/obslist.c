@@ -769,6 +769,7 @@ static void browse_cb( GtkWidget *widget, gpointer dialog)
 
 	entry = g_object_get_data(G_OBJECT(dialog), "obs_list_fname");
 	g_return_if_fail(entry != NULL);
+
 	file_select_to_entry(dialog, entry, "Select Obslist File Name", "*.obs", 1);
 }
 

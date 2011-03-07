@@ -634,6 +634,7 @@ void file_select_to_entry(gpointer data, GtkWidget *entry, char *title, char *fi
 		gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(chooser), lastopen);
 }
 
+
 /* run the file selector configured to call cb on ok with the
  * selected file; arg is passed on to the called function
  * the file selector is run in a modal window */

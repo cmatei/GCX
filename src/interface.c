@@ -530,6 +530,7 @@ create_camera_control (void)
   gtk_table_attach (GTK_TABLE (table2), img_bin_combo, 0, 1, 0, 1,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
+
   gtk_combo_box_append_text(GTK_COMBO_BOX (img_bin_combo), "1x1");
   gtk_combo_box_append_text(GTK_COMBO_BOX (img_bin_combo), "2x2");
   gtk_combo_box_append_text(GTK_COMBO_BOX (img_bin_combo), "3x3");
@@ -959,7 +960,7 @@ create_camera_control (void)
   gtk_widget_show (table4);
   gtk_box_pack_start (GTK_BOX (vbox6), table4, FALSE, TRUE, 2);
 
-  obs_list_fname_combo = gtk_combo_new ();
+  obs_list_fname_combo = gtk_combo_box_entry_new_text ();
   g_object_ref (obs_list_fname_combo);
   g_object_set_data_full (G_OBJECT (camera_control), "obs_list_fname_combo", obs_list_fname_combo,
                             (GDestroyNotify) g_object_unref);
@@ -968,10 +969,11 @@ create_camera_control (void)
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
-  obs_list_fname = GTK_COMBO (obs_list_fname_combo)->entry;
+  obs_list_fname = GTK_WIDGET (GTK_BIN (obs_list_fname_combo)->child);
+
   g_object_ref (obs_list_fname);
   g_object_set_data_full (G_OBJECT (camera_control), "obs_list_fname", obs_list_fname,
-                            (GDestroyNotify) g_object_unref);
+			  (GDestroyNotify) g_object_unref);
   gtk_widget_show (obs_list_fname);
 
   obs_list_file_button = gtk_button_new_with_label (" ... ");
@@ -1072,19 +1074,19 @@ create_camera_control (void)
                     (GtkAttachOptions) (0), 0, 0);
   gtk_misc_set_alignment (GTK_MISC (label27), 0, 0.5);
 
-  file_combo = gtk_combo_new ();
+  file_combo = gtk_combo_box_entry_new_text ();
   g_object_ref (file_combo);
   g_object_set_data_full (G_OBJECT (camera_control), "file_combo", file_combo,
-                            (GDestroyNotify) g_object_unref);
+			  (GDestroyNotify) g_object_unref);
   gtk_widget_show (file_combo);
   gtk_table_attach (GTK_TABLE (table5), file_combo, 0, 1, 1, 2,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
-  file_entry = GTK_COMBO (file_combo)->entry;
+  file_entry = GTK_WIDGET (GTK_BIN(file_combo)->child);
   g_object_ref (file_entry);
   g_object_set_data_full (G_OBJECT (camera_control), "file_entry", file_entry,
-                            (GDestroyNotify) g_object_unref);
+			  (GDestroyNotify) g_object_unref);
   gtk_widget_show (file_entry);
 
   file_auto_name_checkb = gtk_check_button_new_with_label ("Generate filenames automatically");
@@ -3201,13 +3203,13 @@ create_par_edit (void)
   gtk_label_set_line_wrap (GTK_LABEL (par_type_label), TRUE);
   gtk_misc_set_alignment (GTK_MISC (par_type_label), 7.45058e-09, 0.5);
 
-  par_combo = gtk_combo_new ();
+  par_combo = gtk_combo_box_entry_new_text ();
   g_object_ref (par_combo);
   g_object_set_data_full (G_OBJECT (par_edit), "par_combo", par_combo,
                             (GDestroyNotify) g_object_unref);
   gtk_box_pack_start (GTK_BOX (vbox29), par_combo, FALSE, FALSE, 0);
 
-  par_combo_entry = GTK_COMBO (par_combo)->entry;
+  par_combo_entry = GTK_WIDGET (GTK_BIN(par_combo)->child);
   g_object_ref (par_combo_entry);
   g_object_set_data_full (G_OBJECT (par_edit), "par_combo_entry", par_combo_entry,
                             (GDestroyNotify) g_object_unref);
@@ -3390,7 +3392,6 @@ create_guide_window (void)
   GtkWidget *hseparator8;
   GtkWidget *label92;
   GtkWidget *guide_exp_combo;
-  GList *guide_exp_combo_items = NULL;
   GtkWidget *guide_exp_combo_entry;
   GtkWidget *guide_options;
   GtkWidget *alignment1;
@@ -3515,28 +3516,31 @@ create_guide_window (void)
   gtk_box_pack_start (GTK_BOX (vbox32), label92, FALSE, FALSE, 0);
   gtk_misc_set_alignment (GTK_MISC (label92), 7.45058e-09, 1);
 
-  guide_exp_combo = gtk_combo_new ();
+  guide_exp_combo = gtk_combo_box_entry_new_text ();
   g_object_ref (guide_exp_combo);
   g_object_set_data_full (G_OBJECT (guide_window), "guide_exp_combo", guide_exp_combo,
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (guide_exp_combo);
   gtk_box_pack_start (GTK_BOX (vbox32), guide_exp_combo, FALSE, FALSE, 0);
-  guide_exp_combo_items = g_list_append (guide_exp_combo_items, (gpointer) "1/8");
-  guide_exp_combo_items = g_list_append (guide_exp_combo_items, (gpointer) "1/4");
-  guide_exp_combo_items = g_list_append (guide_exp_combo_items, (gpointer) "1/2");
-  guide_exp_combo_items = g_list_append (guide_exp_combo_items, (gpointer) "1");
-  guide_exp_combo_items = g_list_append (guide_exp_combo_items, (gpointer) "2");
-  guide_exp_combo_items = g_list_append (guide_exp_combo_items, (gpointer) "4");
-  gtk_combo_set_popdown_strings (GTK_COMBO (guide_exp_combo), guide_exp_combo_items);
-  g_list_free (guide_exp_combo_items);
 
-  guide_exp_combo_entry = GTK_COMBO (guide_exp_combo)->entry;
+  gtk_combo_box_append_text (GTK_COMBO_BOX (guide_exp_combo), "1/8");
+  gtk_combo_box_append_text (GTK_COMBO_BOX (guide_exp_combo), "1/4");
+  gtk_combo_box_append_text (GTK_COMBO_BOX (guide_exp_combo), "1/2");
+  gtk_combo_box_append_text (GTK_COMBO_BOX (guide_exp_combo), "1");
+  gtk_combo_box_append_text (GTK_COMBO_BOX (guide_exp_combo), "2");
+  gtk_combo_box_append_text (GTK_COMBO_BOX (guide_exp_combo), "4");
+
+  //gtk_combo_box_set_active(GTK_COMBO_BOX (guide_exp_combo), 0);
+
+  guide_exp_combo_entry = GTK_WIDGET (GTK_BIN(guide_exp_combo)->child);
   g_object_ref (guide_exp_combo_entry);
   g_object_set_data_full (G_OBJECT (guide_window), "guide_exp_combo_entry", guide_exp_combo_entry,
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (guide_exp_combo_entry);
   gtk_widget_set_size_request (guide_exp_combo_entry, 64, -2);
   gtk_entry_set_text (GTK_ENTRY (guide_exp_combo_entry), "2");
+
+
 
   guide_options = gtk_button_new_with_label ("Options");
   g_object_ref (guide_options);
