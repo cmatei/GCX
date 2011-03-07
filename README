@@ -1,3 +1,16 @@
+
+IMPORTANT: this is not the official development tree for GCX, which is
+at https://sourceforge.net/projects/gcx/
+
+I'm pushing my modifications in that CVS tree, so better get it from there.
+
+Let me say that again: not the official tree :-) This is here for my
+own convenience, as I don't enjoy working with CVS that much.
+
+
+And now for the regularly scheduled programming.
+
+
 =====================================
 Building and running gcx
 
