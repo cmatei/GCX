@@ -3206,7 +3206,8 @@ create_par_edit (void)
   par_combo = gtk_combo_box_entry_new_text ();
   g_object_ref (par_combo);
   g_object_set_data_full (G_OBJECT (par_edit), "par_combo", par_combo,
-                            (GDestroyNotify) g_object_unref);
+			  (GDestroyNotify) g_object_unref);
+  g_object_set_data (G_OBJECT(par_combo), "nvals", (gpointer) 0);
   gtk_box_pack_start (GTK_BOX (vbox29), par_combo, FALSE, FALSE, 0);
 
   par_combo_entry = GTK_WIDGET (GTK_BIN(par_combo)->child);

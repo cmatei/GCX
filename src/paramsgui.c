@@ -319,34 +319,40 @@ static void setup_par_combo(gpointer parwin, GtkWidget *combo, GcxPar p)
 	GtkWidget *entry;
 	char val[256];
 	char ** c;
-	GList *cl = NULL;
+	unsigned long i, nvals;
+
 
 	d4_printf("setup_par_combo\n");
-	entry = GTK_COMBO(combo)->entry;
+	entry = GTK_WIDGET (GTK_BIN(combo)->child);
 	g_signal_handlers_block_by_func(G_OBJECT(entry), par_edit_changed, parwin);
 
-	if (PAR_FORMAT(p) == FMT_OPTION
-	    && PAR(p)->choices != NULL) {
+	/* clear previous combo box entries */
+	nvals = (unsigned long) g_object_get_data (G_OBJECT(combo), "nvals");
+	for (i = 0; i < nvals; i++) {
+		gtk_combo_box_remove_text (GTK_COMBO_BOX(combo), 0);
+	}
+
+	nvals = 0;
+
+	if ((PAR_FORMAT(p) == FMT_OPTION) && PAR(p)->choices != NULL) {
 		c = PAR(p)->choices;
-		while(*c != NULL) {
-			cl = g_list_append(cl, *c);
+		while (*c != NULL) {
+			gtk_combo_box_append_text (GTK_COMBO_BOX (combo), *c);
 			c++;
+			nvals++;
 		}
 	} else if (PAR_FORMAT(p) == FMT_BOOL) {
-		cl = g_list_append(cl, "yes");
-		cl = g_list_append(cl, "no");
+		gtk_combo_box_append_text (GTK_COMBO_BOX (combo), "yes");
+		gtk_combo_box_append_text (GTK_COMBO_BOX (combo), "no");
+		nvals = 2;
 	}
-	if (!cl) {
-		gtk_entry_set_editable(GTK_ENTRY(entry), 1);
-		make_defval_string(p, val, 255);
-		cl = g_list_append(cl, val);
-		gtk_combo_disable_activate(GTK_COMBO(combo));
-		gtk_combo_set_value_in_list(GTK_COMBO(combo), 0, 0);
-	} else {
-		gtk_entry_set_editable(GTK_ENTRY(entry), 0);
-		gtk_combo_set_value_in_list(GTK_COMBO(combo), 1, 0);
-	}
-	gtk_combo_set_popdown_strings(GTK_COMBO(combo), cl);
+
+	g_object_set_data (G_OBJECT(combo), "nvals", (gpointer) nvals);
+
+	if (nvals == 0)
+		gtk_editable_set_editable(GTK_EDITABLE(entry), 1);
+	else
+		gtk_editable_set_editable(GTK_EDITABLE(entry), 0);
 
 	make_value_string(p, val, 255);
 	gtk_entry_set_text (GTK_ENTRY (entry), (val));
