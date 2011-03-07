@@ -53,28 +53,28 @@
 
 static int progress_pr(char *msg, void *dialog);
 static int log_msg(char *msg, void *dialog);
-static void imf_display_cb(gpointer dialog, guint action, GtkWidget *menu_item);
-static void imf_prev_cb(gpointer dialog, guint action, GtkWidget *menu_item);
-static void imf_next_cb(gpointer dialog, guint action, GtkWidget *menu_item);
-static void imf_rm_cb(gpointer dialog, guint action, GtkWidget *menu_item);
-static void imf_reload_cb(gpointer dialog, guint action, GtkWidget *menu_item);
-static void imf_skip_cb(gpointer dialog, guint action, GtkWidget *menu_item);
-static void imf_unskip_cb(gpointer dialog, guint action, GtkWidget *menu_item);
-static void imf_selall_cb(gpointer dialog, guint action, GtkWidget *menu_item);
-static void imf_add_cb(gpointer dialog, guint action, GtkWidget *menu_item);
 
-//static void list_button_cb(GtkWidget *wid, GdkEventButton *event, gpointer dialog);
-static void imf_update_status_label(GtkTreeModel *list, GtkTreeIter *iter);
-static void imf_red_browse_cb(GtkWidget *wid, gpointer dialog);
-static void ccdred_run_cb(gpointer dialog, guint action, GtkWidget *menu_item);
-static void ccdred_one_cb(gpointer dialog, guint action, GtkWidget *menu_item);
-static void ccdred_qphotone_cb(gpointer dialog, guint action, GtkWidget *menu_item);
-static void show_align_cb(gpointer dialog, guint action, GtkWidget *menu_item);
+static void imf_display_cb (GtkAction *action, gpointer dialog);
+static void imf_prev_cb(GtkAction *action, gpointer dialog);
+static void imf_next_cb(GtkAction *action, gpointer dialog);
+static void imf_rm_cb(GtkAction *action, gpointer dialog);
+static void imf_reload_cb(GtkAction *action, gpointer dialog);
+static void imf_skip_cb(GtkAction *action, gpointer dialog);
+static void imf_unskip_cb(GtkAction *action, gpointer dialog);
+static void imf_selall_cb(GtkAction *action, gpointer dialog);
+static void imf_add_cb (GtkAction *action, gpointer dialog);
+static void ccdred_run_cb(GtkAction *action, gpointer dialog);
+static void ccdred_one_cb(GtkAction *action, gpointer dialog);
+static void ccdred_qphotone_cb(GtkAction *action, gpointer dialog);
+static void show_align_cb(GtkAction *action, gpointer dialog);
+static void mframe_cb(GtkAction *action, gpointer dialog);
+
 static void update_selected_status_label(gpointer dialog);
 static void update_status_labels(gpointer dialog);
 static void imf_red_activate_cb(GtkWidget *wid, gpointer dialog);
 static void set_processing_dialog_ccdr(GtkWidget *dialog, struct ccd_reduce *ccdr);
-static void mframe_cb(gpointer dialog, guint action, GtkWidget *menu_item);
+static void imf_update_status_label(GtkTreeModel *list, GtkTreeIter *iter);
+static void imf_red_browse_cb(GtkWidget *wid, gpointer dialog);
 
 
 static gboolean close_processing_window( GtkWidget *widget, gpointer data )
@@ -85,7 +85,7 @@ static gboolean close_processing_window( GtkWidget *widget, gpointer data )
 	return TRUE;
 }
 
-static void mframe_cb(gpointer dialog, guint action, GtkWidget *menu_item)
+static void mframe_cb(GtkAction *action, gpointer dialog)
 {
 	gpointer im_window;
 
@@ -95,60 +95,84 @@ static void mframe_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 	mband_open_cb(im_window, 1, NULL);
 }
 
+/* name, stock id, label, accel, tooltip, callback */
+static GtkActionEntry reduce_menu_actions[] = {
+	{ "reduce-file",   NULL, "_File" },
+	{ "reduce-edit",   NULL, "_Edit" },
+	{ "reduce-reduce", NULL, "_Reduce" },
 
+	{ "reduce-add-files",            NULL, "_Add Files",
+	  "<control>O", NULL, G_CALLBACK (imf_add_cb) },
 
-static GtkItemFactoryEntry reduce_menu_items[] = {
-	{ "/_File",		NULL,         	NULL,  		0, "<Branch>" },
-	{ "/_File/_Add Files", "<control>O", imf_add_cb, 0, "<Item>" },
-	{ "/_File/Remove Selecte_d Files", "<control>D", imf_rm_cb, 0, "<Item>" },
-	{ "/_File/Reload Selected Files", "<control>R", imf_reload_cb, 0, "<Item>" },
-	{ "/File/Sep", NULL, NULL,	0, "<Separator>" },
-	{ "/_File/_Display Frame", "D", imf_display_cb, 0, "<Item>" },
-	{ "/_File/_Next Frame", "N", imf_next_cb, 0, "<Item>" },
-	{ "/_File/_Previous Frame", "J", imf_prev_cb, 0, "<Item>" },
-	{ "/File/Sep", NULL, NULL,	0, "<Separator>" },
-	{ "/_File/Sk_ip Selected Frames", "K", imf_skip_cb, 0, "<Item>" },
-	{ "/_File/_Unskip Selected Frames", "U", imf_unskip_cb, 0, "<Item>" },
+	{ "reduce-remove-selected",      NULL, "Remove Selecte_d Files",
+	  "<control>D", NULL, G_CALLBACK (imf_rm_cb) },
 
+	{ "reduce-reload-selected",      NULL, "Reload Selected Files",
+	  "<control>R", NULL, G_CALLBACK (imf_reload_cb) },
 
-	{ "/_Edit", NULL, NULL,	0, "<Branch>" },
-	{ "/_Edit/Select _All", "<control>A", imf_selall_cb, 0, "<Item>" },
-//	{ "/_Edit/_Unselect All", "<control>U", NULL, 0, "<Item>" },
+	{ "reduce-display-frame",        NULL, "_Display Frame",
+	  "D", NULL, G_CALLBACK (imf_display_cb) },
 
-	{ "/_Reduce", NULL, NULL,	0, "<Branch>" },
-	{ "/_Reduce/Reduce All", "<shift>R", ccdred_run_cb, 0, "<Item>" },
-	{ "/_Reduce/Reduce One Frame", "y", ccdred_one_cb, 0, "<Item>" },
-	{ "/_Reduce/Qphot One Frame", "t", ccdred_qphotone_cb, 0, "<Item>" },
-	{ "/Reduce/Sep", NULL, NULL,	0, "<Separator>" },
-	{ "/_Reduce/Show Alignment Stars", "A", show_align_cb, 0, "<Item>" },
-	{ "/Reduce/Sep", NULL, NULL,	0, "<Separator>" },
-	{ "/Reduce/_Multi-frame Photometry...", "<control>m", mframe_cb, 1, "<Item>" },
+	{ "reduce-next-frame",           NULL, "_Next Frame",
+	  "N", NULL, G_CALLBACK (imf_next_cb) },
+
+	{ "reduce-prev-frame",           NULL, "_Previous Frame",
+	  "J", NULL, G_CALLBACK (imf_prev_cb) },
+
+	{ "reduce-skip-selected",        NULL, "S_kip Selected Frames",
+	  "K", NULL, G_CALLBACK (imf_skip_cb) },
+
+	{ "reduce-unskip-selected",      NULL, "_Unskip Selected Frames",
+	  "U", NULL, G_CALLBACK (imf_unskip_cb) },
+
+	{ "reduce-select-all",           NULL, "Select _All",
+	  "<control>A", NULL, G_CALLBACK (imf_selall_cb) },
+
+	{ "reduce-reduce-all",           NULL, "Reduce All",
+	  "<shift>R", NULL, G_CALLBACK (ccdred_run_cb) },
+
+	{ "reduce-reduce-one",           NULL, "Reduce One Frame",
+	  "y", NULL, G_CALLBACK (ccdred_one_cb) },
+
+	{ "reduce-qphot-one",            NULL, "Qphot One Frame",
+	  "t", NULL, G_CALLBACK (ccdred_qphotone_cb) },
+
+	{ "reduce-show-alignment-stars", NULL, "Show Alignment Stars",
+	  "A", NULL, G_CALLBACK (show_align_cb) },
+
+	{ "reduce-multi-frame", NULL, "_Multi-frame Photometry...",
+	  "<control>m", NULL, G_CALLBACK (mframe_cb) },
 
 };
-
 
 /* create the menu bar */
 static GtkWidget *get_main_menu_bar(GtkWidget *window)
 {
 	GtkWidget *ret;
-	GtkItemFactory *item_factory;
-	GtkAccelGroup *accel_group;
-	gint nmenu_items = sizeof (reduce_menu_items) /
-		sizeof (reduce_menu_items[0]);
-	accel_group = gtk_accel_group_new ();
+	GtkUIManager *ui;
+	GError *error;
+	GtkActionGroup *action_group;
 
-	item_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR,
-					     "<main_menu>", accel_group);
-	g_object_set_data_full(G_OBJECT(window), "main_menu_if", item_factory,
-				 (GDestroyNotify) g_object_unref);
-	gtk_item_factory_create_items (item_factory, nmenu_items,
-				       reduce_menu_items, window);
+	action_group = gtk_action_group_new ("ReduceActions");
+	gtk_action_group_add_actions (action_group, reduce_menu_actions,
+				      G_N_ELEMENTS (reduce_menu_actions), window);
 
-	/* Attach the new accelerator group to the window. */
-	gtk_window_add_accel_group (GTK_WINDOW (window), accel_group);
+	ui = gtk_ui_manager_new ();
+	gtk_ui_manager_insert_action_group (ui, action_group, 0);
 
-	/* Finally, return the actual menu bar created by the item factory. */
-	ret = gtk_item_factory_get_widget (item_factory, "<main_menu>");
+	error = NULL;
+	gtk_ui_manager_add_ui_from_file (ui, "menus.ui", &error);
+	if (error) {
+		g_message ("building menus failed: %s", error->message);
+		g_error_free (error);
+		return NULL;
+	}
+
+	ret = gtk_ui_manager_get_widget (ui, "/reduce-menubar");
+
+        /* Make sure that the accelerators work */
+	gtk_window_add_accel_group (GTK_WINDOW (window),
+				    gtk_ui_manager_get_accel_group (ui));
 
 	return ret;
 }
@@ -199,7 +223,6 @@ static GtkWidget *make_image_processing(gpointer window)
 
 	menubar = get_main_menu_bar(dialog);
 	g_object_set_data(G_OBJECT(dialog), "menubar", menubar);
-	//gtk_menu_bar_set_shadow_type(GTK_MENU_BAR(menubar), GTK_SHADOW_NONE);
 
 	top_hb = g_object_get_data(G_OBJECT(dialog), "top_hbox");
 	gtk_box_pack_start(GTK_BOX(top_hb), menubar, TRUE, TRUE, 0);
@@ -228,6 +251,7 @@ static void stack_method_activate(GtkWidget *wid, gpointer data)
 /* in ccdr is null, just update the settings from the pars */
 static void set_processing_dialog_ccdr(GtkWidget *dialog, struct ccd_reduce *ccdr)
 {
+	GtkWidget *stack_combo, *demosaic_combo;
 	GtkWidget *menu, *omenu;
 	GtkWidget *menuitem;
 	char **c;
@@ -235,6 +259,7 @@ static void set_processing_dialog_ccdr(GtkWidget *dialog, struct ccd_reduce *ccd
 
 	omenu = g_object_get_data(G_OBJECT(dialog), "stack_method_optmenu");
 	g_return_if_fail(omenu != NULL);
+
 	menu = gtk_menu_new();
 	g_return_if_fail(menu != NULL);
 
@@ -389,7 +414,7 @@ void set_imfl_ccdr(gpointer window, struct ccd_reduce *ccdr,
 }
 
 /* mark selected files to be skipped */
-static void imf_skip_cb(gpointer dialog, guint action, GtkWidget *menu_item)
+static void imf_skip_cb(GtkAction *action, gpointer dialog)
 {
 	GtkTreeModel *list;
 	GtkTreeView *view;
@@ -421,7 +446,7 @@ static void imf_skip_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 }
 
 /* remove skip marks from selected files */
-static void imf_unskip_cb(gpointer dialog, guint action, GtkWidget *menu_item)
+static void imf_unskip_cb(GtkAction *action, gpointer dialog)
 {
 	GtkTreeModel *list;
 	GtkTreeView *view;
@@ -453,7 +478,7 @@ static void imf_unskip_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 }
 
 /* remove selected files */
-static void imf_rm_cb(gpointer dialog, guint action, GtkWidget *menu_item)
+static void imf_rm_cb(GtkAction *action, gpointer dialog)
 {
 	GtkTreeModel *list;
 	GtkTreeView *view;
@@ -507,7 +532,7 @@ static void imf_rm_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 }
 
 /* select and display next frame in list */
-static void imf_next_cb(gpointer dialog, guint action, GtkWidget *menu_item)
+static void imf_next_cb(GtkAction *action, gpointer dialog)
 {
 	GtkTreeModel *list;
 	GtkTreeView *view;
@@ -540,7 +565,7 @@ static void imf_next_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 			gtk_tree_path_free(path);
 		}
 
-		imf_display_cb (dialog, 0, NULL);
+		imf_display_cb (NULL, dialog);
 		return;
 	}
 
@@ -560,7 +585,7 @@ static void imf_next_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 		gtk_tree_selection_unselect_all (selection);
 		gtk_tree_selection_select_path (selection, path);
 
-		imf_display_cb (dialog, 0, NULL);
+		imf_display_cb (NULL, dialog);
 	}
 
 	g_list_foreach (sel, (GFunc) gtk_tree_path_free, NULL);
@@ -587,7 +612,7 @@ static void imf_next_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 
 
 /* select and display previous frame in list */
-static void imf_prev_cb(gpointer dialog, guint action, GtkWidget *menu_item)
+static void imf_prev_cb(GtkAction *action, gpointer dialog)
 {
 	GtkTreeModel *list;
 	GtkTreeView *view;
@@ -620,7 +645,7 @@ static void imf_prev_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 			gtk_tree_path_free(path);
 		}
 
-		imf_display_cb (dialog, 0, NULL);
+		imf_display_cb (NULL, dialog);
 		return;
 	}
 
@@ -637,7 +662,7 @@ static void imf_prev_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 		gtk_tree_selection_unselect_all (selection);
 		gtk_tree_selection_select_path (selection, path);
 
-		imf_display_cb (dialog, 0, NULL);
+		imf_display_cb (NULL, dialog);
 	}
 
 	g_list_foreach (sel, (GFunc) gtk_tree_path_free, NULL);
@@ -662,7 +687,7 @@ static void imf_prev_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 }
 
 
-static void imf_display_cb(gpointer dialog, guint action, GtkWidget *menu_item)
+static void imf_display_cb(GtkAction *action, gpointer dialog)
 {
 	GtkWidget *im_window;
 	GtkTreeModel *list;
@@ -721,7 +746,7 @@ out:
 }
 
 /* select all files */
-static void imf_selall_cb(gpointer dialog, guint action, GtkWidget *menu_item)
+static void imf_selall_cb(GtkAction *action, gpointer dialog)
 {
 	GtkTreeView *view;
 	GtkTreeSelection *selection;
@@ -741,6 +766,7 @@ static void imf_add_files(GSList *files, gpointer dialog)
 	struct image_file_list *imfl;
 	char *text;
 
+	d4_printf("imf_add_files, dialog %p\n", dialog);
 	list = g_object_get_data(G_OBJECT(dialog), "image_file_list");
 	g_return_if_fail(list != NULL);
 
@@ -773,14 +799,13 @@ static void imf_add_files(GSList *files, gpointer dialog)
 	}
 }
 
-static void imf_add_cb(gpointer dialog, guint action, GtkWidget *menu_item)
+static void imf_add_cb(GtkAction *action, gpointer dialog)
 {
-	d3_printf("imf add\n");
 	file_select_list(dialog, "Select files", "*.fits", imf_add_files);
 }
 
 /* reload selected files */
-static void imf_reload_cb(gpointer dialog, guint action, GtkWidget *menu_item)
+static void imf_reload_cb(GtkAction *action, gpointer dialog)
 {
 
 	GtkTreeModel *list;
@@ -830,19 +855,19 @@ void switch_frame_cb(gpointer window, guint action, GtkWidget *menu_item)
 
 	switch(action) {
 	case SWF_NEXT:
-		imf_next_cb(dialog, 0, NULL);
+		imf_next_cb(NULL, dialog);
 		break;
 	case SWF_SKIP:
-		imf_skip_cb(dialog, 0, NULL);
+		imf_skip_cb(NULL, dialog);
 		break;
 	case SWF_PREV:
-		imf_prev_cb(dialog, 0, NULL);
+		imf_prev_cb(NULL, dialog);
 		break;
 	case SWF_QPHOT:
-		ccdred_qphotone_cb(dialog, 0, NULL);
+		ccdred_qphotone_cb(NULL, dialog);
 		break;
 	case SWF_RED:
-		ccdred_one_cb(dialog, 0, NULL);
+		ccdred_one_cb(NULL, dialog);
 		break;
 	}
 	update_selected_status_label(dialog);
@@ -1212,7 +1237,7 @@ static void dialog_to_ccdr(GtkWidget *dialog, struct ccd_reduce *ccdr)
 	}
 }
 
-static void ccdred_run_cb(gpointer dialog, guint action, GtkWidget *menu_item)
+static void ccdred_run_cb(GtkAction *action, gpointer dialog)
 {
 	struct ccd_reduce *ccdr;
 	struct image_file_list *imfl;
@@ -1447,7 +1472,7 @@ static void select_next_imf(gpointer dialog)
 }
 
 
-static void ccdred_one_cb(gpointer dialog, guint action, GtkWidget *menu_item)
+static void ccdred_one_cb(GtkAction *action, gpointer dialog)
 {
 	struct ccd_reduce *ccdr;
 	struct image_file_list *imfl;
@@ -1500,7 +1525,7 @@ static void ccdred_one_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 
 	ret = reduce_frame(imf, ccdr, progress_pr, dialog);
 	if ((ccdr->ops & IMG_OP_PHOT) == 0) {
-		imf_display_cb(dialog, 0, NULL);
+		imf_display_cb(NULL, dialog);
 	}
 	if (ret >= 0) {
 		if (ccdr->ops & IMG_OP_INPLACE) {
@@ -1523,13 +1548,13 @@ static void ccdred_one_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 	update_selected_status_label(dialog);
 	select_next_imf(dialog);
 	if ((ccdr->ops & IMG_OP_PHOT)) {
-		imf_display_cb(dialog, 0, NULL);
+		imf_display_cb(NULL, dialog);
 	}
 	gtk_widget_set_sensitive(menubar, 1);
 }
 
 /* run quick phot on one frame */
-static void ccdred_qphotone_cb(gpointer dialog, guint action, GtkWidget *menu_item)
+static void ccdred_qphotone_cb(GtkAction *action, gpointer dialog)
 {
 	struct ccd_reduce *ccdr;
 	struct image_file_list *imfl;
@@ -1570,7 +1595,7 @@ static void ccdred_qphotone_cb(gpointer dialog, guint action, GtkWidget *menu_it
 	ccdr->ops |= IMG_QUICKPHOT;
 	ret = reduce_frame(imf, ccdr, progress_pr, dialog);
 	if ((ccdr->ops & IMG_OP_PHOT) == 0) {
-		imf_display_cb(dialog, 0, NULL);
+		imf_display_cb(NULL, dialog);
 	}
 	ccdr->ops &= ~IMG_QUICKPHOT;
 	imf->flags &= ~IMG_OP_PHOT;
@@ -1579,7 +1604,7 @@ static void ccdred_qphotone_cb(gpointer dialog, guint action, GtkWidget *menu_it
 }
 
 
-static void show_align_cb(gpointer dialog, guint action, GtkWidget *menu_item)
+static void show_align_cb(GtkAction *action, gpointer dialog)
 {
 	struct ccd_reduce *ccdr;
 	GtkWidget *im_window;
