@@ -71,7 +71,7 @@
 #define STAR_RM_OFF 10
 
 /* Pairs actions */
-#define PAIRS_AUTO 1 
+#define PAIRS_AUTO 1
 
 /* wcs actions */
 #define WCS_FIT 1
@@ -147,7 +147,7 @@ struct status_ref
 
 /* LUT modes */
 #define LUT_MODE_DIRECT 1 /* for 8-bit frames, and
-			     16-bit frames we know have values < LUT_SIZE 
+			     16-bit frames we know have values < LUT_SIZE
 			     output = lut[input], cuts ignored */
 #define LUT_MODE_FULL 0   /* output = lut[(input - lcut)/(hcut - lcut) * LUT_SIZE] */
 
@@ -161,7 +161,7 @@ struct image_channel {
 	double gamma; /* gamma setting for image */
 	double toe; /* toe setting for image */
 	double offset; /* toe setting for image */
-	unsigned short lut[LUT_SIZE]; 
+	unsigned short lut[LUT_SIZE];
 	int lut_mode; /* the way the lut is set up */
 	double dsigma; /* sigma used for cut calculation */
 	double davg; /* image average used for display calculations */
@@ -175,7 +175,7 @@ struct image_channel {
 };
 
 /* we keep a cache of the already trasformed image for quick expose
- * redraws. 
+ * redraws.
  */
 #define MAP_CACHE_GRAY 0
 #define MAP_CACHE_RGB 1
@@ -185,7 +185,7 @@ struct map_cache {
 	int type; /* type of cache: gray or rgb */
 	double zoom; /* zoom level of the cache */
 	int x; /* coordinate of top-left corner of cache (in display space) */
-	int y; 
+	int y;
 	int w; /* width of cache (in display pixels) */
 	int h; /* height of cache (in display pixels) */
 	unsigned size; /* size of cache (in bytes) */
@@ -212,7 +212,7 @@ void cam_to_img(GtkWidget *dialog);
 struct map_cache *new_map_cache(int size, int type);
 void release_map_cache(struct map_cache *cache);
 void paint_from_gray_cache(GtkWidget *widget, struct map_cache *cache, GdkRectangle *area);
-void image_box_to_cache(struct map_cache *cache, struct image_channel *channel, 
+void image_box_to_cache(struct map_cache *cache, struct image_channel *channel,
 			double zoom, int x, int y, int w, int h);
 
 

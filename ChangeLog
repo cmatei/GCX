@@ -1,3 +1,9 @@
+2011-03-07 matei conovici <mconovici@gmail.com>
+
+	* removed deprecated GtkList usage for the image_processing dialog
+	  and restored image navigation functionality which was broken
+	* TODO: cameragui.c, obslist.c
+
 2009-11-15  riccardo <unriccio@email.it>
 	
 	* typos in source code

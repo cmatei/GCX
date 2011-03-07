@@ -50,26 +50,28 @@
 #include "multiband.h"
 #include "wcs.h"
 
+
 static int progress_pr(char *msg, void *dialog);
 static int log_msg(char *msg, void *dialog);
 static void imf_display_cb(gpointer dialog, guint action, GtkWidget *menu_item);
 static void imf_prev_cb(gpointer dialog, guint action, GtkWidget *menu_item);
 static void imf_next_cb(gpointer dialog, guint action, GtkWidget *menu_item);
-static void imf_skip_cb(gpointer dialog, guint action, GtkWidget *menu_item);
 static void imf_rm_cb(gpointer dialog, guint action, GtkWidget *menu_item);
+static void imf_reload_cb(gpointer dialog, guint action, GtkWidget *menu_item);
+static void imf_skip_cb(gpointer dialog, guint action, GtkWidget *menu_item);
 static void imf_unskip_cb(gpointer dialog, guint action, GtkWidget *menu_item);
 static void imf_selall_cb(gpointer dialog, guint action, GtkWidget *menu_item);
 static void imf_add_cb(gpointer dialog, guint action, GtkWidget *menu_item);
-static void imf_reload_cb(gpointer dialog, guint action, GtkWidget *menu_item);
-static void select_cb(GtkList *list, GtkWidget *wid, gpointer dialog);
+
 //static void list_button_cb(GtkWidget *wid, GdkEventButton *event, gpointer dialog);
-static void imf_update_status_label(GtkWidget *label, struct image_file *imf);
+static void imf_update_status_label(GtkTreeModel *list, GtkTreeIter *iter);
 static void imf_red_browse_cb(GtkWidget *wid, gpointer dialog);
 static void ccdred_run_cb(gpointer dialog, guint action, GtkWidget *menu_item);
 static void ccdred_one_cb(gpointer dialog, guint action, GtkWidget *menu_item);
 static void ccdred_qphotone_cb(gpointer dialog, guint action, GtkWidget *menu_item);
 static void show_align_cb(gpointer dialog, guint action, GtkWidget *menu_item);
 static void update_selected_status_label(gpointer dialog);
+static void update_status_labels(gpointer dialog);
 static void imf_red_activate_cb(GtkWidget *wid, gpointer dialog);
 static void set_processing_dialog_ccdr(GtkWidget *dialog, struct ccd_reduce *ccdr);
 static void mframe_cb(gpointer dialog, guint action, GtkWidget *menu_item);
@@ -86,6 +88,7 @@ static gboolean close_processing_window( GtkWidget *widget, gpointer data )
 static void mframe_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 {
 	gpointer im_window;
+
 	im_window = gtk_object_get_data(GTK_OBJECT(dialog), "im_window");
 	g_return_if_fail(im_window != NULL);
 
@@ -141,11 +144,12 @@ static GtkWidget *get_main_menu_bar(GtkWidget *window)
 	gtk_item_factory_create_items (item_factory, nmenu_items,
 				       reduce_menu_items, window);
 
-  /* Attach the new accelerator group to the window. */
+	/* Attach the new accelerator group to the window. */
 	gtk_window_add_accel_group (GTK_WINDOW (window), accel_group);
 
-    /* Finally, return the actual menu bar created by the item factory. */
+	/* Finally, return the actual menu bar created by the item factory. */
 	ret = gtk_item_factory_get_widget (item_factory, "<main_menu>");
+
 	return ret;
 }
 
@@ -165,26 +169,7 @@ static GtkWidget *make_image_processing(gpointer window)
 				 dialog, (GtkDestroyNotify)(gtk_widget_destroy));
 	gtk_signal_connect (GTK_OBJECT (dialog), "delete_event",
 			    GTK_SIGNAL_FUNC (close_processing_window), window);
-/*
-	set_named_callback (GTK_OBJECT (dialog), "imf_display_button", "clicked",
-			    GTK_SIGNAL_FUNC (imf_display_cb));
-	set_named_callback (GTK_OBJECT (dialog), "imf_next_button", "clicked",
-			    GTK_SIGNAL_FUNC (imf_next_cb));
-	set_named_callback (GTK_OBJECT (dialog), "imf_skip_button", "clicked",
-			    GTK_SIGNAL_FUNC (imf_skip_cb));
-	set_named_callback (GTK_OBJECT (dialog), "imf_unskip_button", "clicked",
-			    GTK_SIGNAL_FUNC (imf_unskip_cb));
-	set_named_callback (GTK_OBJECT (dialog), "imf_rm_button", "clicked",
-			    GTK_SIGNAL_FUNC (imf_rm_cb));
-	set_named_callback (GTK_OBJECT (dialog), "imf_select_all", "clicked",
-			    GTK_SIGNAL_FUNC (imf_selall_cb));
-	set_named_callback (GTK_OBJECT (dialog), "imf_add_button", "clicked",
-			    GTK_SIGNAL_FUNC (imf_add_cb));
-	set_named_callback (GTK_OBJECT (dialog), "imf_reload_button", "clicked",
-			    GTK_SIGNAL_FUNC (imf_reload_cb));
-*/
-	set_named_callback (GTK_OBJECT (dialog), "image_file_list", "select-child",
-			    GTK_SIGNAL_FUNC (select_cb));
+
 	set_named_callback (GTK_OBJECT (dialog), "bias_browse", "clicked",
 			    GTK_SIGNAL_FUNC (imf_red_browse_cb));
 	set_named_callback (GTK_OBJECT (dialog), "dark_browse", "clicked",
@@ -199,12 +184,6 @@ static GtkWidget *make_image_processing(gpointer window)
 			    GTK_SIGNAL_FUNC (imf_red_browse_cb));
 	set_named_callback (GTK_OBJECT (dialog), "recipe_browse", "clicked",
 			    GTK_SIGNAL_FUNC (imf_red_browse_cb));
-/*
-	set_named_callback (GTK_OBJECT (dialog), "run_button", "clicked",
-			    GTK_SIGNAL_FUNC (ccdred_run_cb));
-	set_named_callback (GTK_OBJECT (dialog), "show_align_button", "clicked",
-			    GTK_SIGNAL_FUNC (show_align_cb));
-*/
 	set_named_callback (GTK_OBJECT (dialog), "bias_entry", "activate",
 			    GTK_SIGNAL_FUNC (imf_red_activate_cb));
 	set_named_callback (GTK_OBJECT (dialog), "dark_entry", "activate",
@@ -217,6 +196,7 @@ static GtkWidget *make_image_processing(gpointer window)
 			    GTK_SIGNAL_FUNC (imf_red_activate_cb));
 	set_named_callback (GTK_OBJECT (dialog), "recipe_entry", "activate",
 			    GTK_SIGNAL_FUNC (imf_red_activate_cb));
+
 	menubar = get_main_menu_bar(dialog);
 	gtk_object_set_data(GTK_OBJECT(dialog), "menubar", menubar);
 	//gtk_menu_bar_set_shadow_type(GTK_MENU_BAR(menubar), GTK_SHADOW_NONE);
@@ -356,34 +336,32 @@ static void set_processing_dialog_ccdr(GtkWidget *dialog, struct ccd_reduce *ccd
 /* replace the file list in the dialog with the supplied one */
 static void set_processing_dialog_imfl(GtkWidget *dialog, struct image_file_list *imfl)
 {
-	GtkList *list;
-	GtkWidget *item;
-	GList *il = NULL;
+	GtkTreeIter iter;
+	GtkListStore *list;
 	GList *gl;
 	struct image_file *imf;
 
 	list = gtk_object_get_data(GTK_OBJECT(dialog), "image_file_list");
 	g_return_if_fail(list != NULL);
-	gtk_list_clear_items(list, -1, -1);
+
+	gtk_list_store_clear (list);
 
 	gl = imfl->imlist;
 	while (gl != NULL) {
 		imf = gl->data;
 		gl = g_list_next(gl);
 
-		item=gtk_list_item_new_with_label("");
-		imf_update_status_label(GTK_WIDGET(GTK_BIN(item)->child), imf);
 		image_file_ref(imf);
-		gtk_object_set_data_full(GTK_OBJECT(item), "imf",
-					 imf, (GtkDestroyNotify)(image_file_release));
 
-		il=g_list_append(il, item);
-		gtk_widget_show(item);
+		gtk_list_store_append (list, &iter);
+		gtk_list_store_set (list, &iter,
+				    IMFL_COL_FILENAME, basename(imf->filename),
+				    IMFL_COL_STATUS, "",
+				    IMFL_COL_IMF, imf,
+				    -1);
 
-		if (imf->flags & IMG_SKIP)
-			continue;
+		imf_update_status_label (GTK_TREE_MODEL(list), &iter);
 	}
-	gtk_list_append_items(list, il);
 }
 
 void set_imfl_ccdr(gpointer window, struct ccd_reduce *ccdr,
@@ -413,256 +391,352 @@ void set_imfl_ccdr(gpointer window, struct ccd_reduce *ccdr,
 /* mark selected files to be skipped */
 static void imf_skip_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 {
-	GList *sel = NULL;
-	GtkList *list;
-	GtkListItem *item;
+	GtkTreeModel *list;
+	GtkTreeView *view;
+	GtkTreeSelection *selection;
+	GtkTreeIter iter;
+	GList *sel, *tmp;
 	struct image_file *imf;
-//	char label[256];
 
-	list = gtk_object_get_data(GTK_OBJECT(dialog), "image_file_list");
-	g_return_if_fail(list != NULL);
+	list = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_list");
+	g_return_if_fail (list != NULL);
 
-	sel = list->selection;
-	while(sel != NULL) {
-		item = sel->data;
-		sel = g_list_next(sel);
-		imf = gtk_object_get_data(GTK_OBJECT(item), "imf");
-		if (imf == NULL) {
-			err_printf("null imf\n");
-			continue;
-		}
-		d3_printf("skipping %s\n", imf->filename);
+	view = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_view");
+	g_return_if_fail (view != NULL);
+
+	selection = gtk_tree_view_get_selection (view);
+	sel = gtk_tree_selection_get_selected_rows (selection, NULL);
+
+	for (tmp = sel; tmp; tmp = tmp->next) {
+		gtk_tree_model_get_iter (list, &iter, tmp->data);
+		gtk_tree_model_get (list, &iter, IMFL_COL_IMF, (GValue *) &imf, -1);
+
 		imf->flags |= IMG_SKIP;
-//		snprintf(label, 255, "[ %s ]", imf->filename);
-//		gtk_label_set_text(GTK_LABEL(GTK_BIN(item)->child), label);
 	}
+
+	g_list_foreach (sel, (GFunc) gtk_tree_path_free, NULL);
+	g_list_free (sel);
+
 	update_selected_status_label(dialog);
-	if (g_list_length(list->selection) == 1)
-		imf_next_cb(dialog, 0, NULL);
 }
 
 /* remove skip marks from selected files */
 static void imf_unskip_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 {
-	GList *sel = NULL;
-	GtkList *list;
-	GtkListItem *item;
+	GtkTreeModel *list;
+	GtkTreeView *view;
+	GtkTreeSelection *selection;
+	GtkTreeIter iter;
+	GList *sel, *tmp;
 	struct image_file *imf;
 
-	list = gtk_object_get_data(GTK_OBJECT(dialog), "image_file_list");
-	g_return_if_fail(list != NULL);
+	list = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_list");
+	g_return_if_fail (list != NULL);
 
-	sel = list->selection;
-	while(sel != NULL) {
-		item = sel->data;
-		sel = g_list_next(sel);
-		imf = gtk_object_get_data(GTK_OBJECT(item), "imf");
-		if (imf == NULL) {
-			err_printf("null imf\n");
-			continue;
-		}
-		d3_printf("unskipping %s\n", imf->filename);
+	view = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_view");
+	g_return_if_fail (view != NULL);
+
+	selection = gtk_tree_view_get_selection (view);
+	sel = gtk_tree_selection_get_selected_rows (selection, NULL);
+
+	for (tmp = sel; tmp; tmp = tmp->next) {
+		gtk_tree_model_get_iter (list, &iter, tmp->data);
+		gtk_tree_model_get (list, &iter, IMFL_COL_IMF, (GValue *) &imf, -1);
+
 		imf->flags &= ~IMG_SKIP;
-//		gtk_label_set_text(GTK_LABEL(GTK_BIN(item)->child), imf->filename);
 	}
+
+	g_list_foreach (sel, (GFunc) gtk_tree_path_free, NULL);
+	g_list_free (sel);
+
 	update_selected_status_label(dialog);
 }
 
 /* remove selected files */
 static void imf_rm_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 {
-	GList *sel = NULL;
-	GList *sel2 = NULL;
-	GtkList *list;
-	GtkListItem *item;
+	GtkTreeModel *list;
+	GtkTreeView *view;
+	GtkTreeSelection *selection;
+	GtkTreePath *path;
+	GtkTreeIter iter;
+	GList *sel, *tmp;
 	struct image_file *imf;
 	struct image_file_list *imfl;
 
-	list = gtk_object_get_data(GTK_OBJECT(dialog), "image_file_list");
-	g_return_if_fail(list != NULL);
+	list = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_list");
+	g_return_if_fail (list != NULL);
 
-	imfl = gtk_object_get_data(GTK_OBJECT(dialog), "imfl");
-	g_return_if_fail(imfl != NULL);
+	view = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_view");
+	g_return_if_fail (view != NULL);
 
-	sel = list->selection;
-	sel2 = g_list_copy(list->selection);
-	while(sel != NULL) {
-		item = sel->data;
-		sel = g_list_next(sel);
-		imf = gtk_object_get_data(GTK_OBJECT(item), "imf");
-		if (imf == NULL) {
-			err_printf("null imf\n");
-			continue;
-		}
+	imfl = gtk_object_get_data (GTK_OBJECT(dialog), "imfl");
+	g_return_if_fail (imfl != NULL);
+
+	selection = gtk_tree_view_get_selection (view);
+
+	/* returns a list of GtkTreePaths, which ... */
+	sel = gtk_tree_selection_get_selected_rows (selection, NULL);
+
+	/* ... must be converted to GtkTreeRowReferences,
+	   so we can change the underlying model by ... */
+	for (tmp = sel; tmp; tmp = tmp->next) {
+		path = tmp->data;
+		tmp->data = gtk_tree_row_reference_new (list, path);
+		gtk_tree_path_free (path);
+	}
+
+	/* ... converting them back into GtkTreePaths, out of which
+	   we can get the GtkTreeIters which we can actualy
+	   remove from the GtkListStore */
+	for (tmp = sel; tmp; tmp = tmp->next) {
+		path = gtk_tree_row_reference_get_path (tmp->data);
+		gtk_tree_model_get_iter (list, &iter, path);
+
+		gtk_tree_model_get (list, &iter, IMFL_COL_IMF, (GValue *) &imf, -1);
 		d3_printf("removing %s\n", imf->filename);
+
 		imfl->imlist = g_list_remove(imfl->imlist, imf);
 		image_file_release(imf);
+
+		gtk_list_store_remove (GTK_LIST_STORE(list), &iter);
 	}
-	gtk_list_unselect_all(list);
-	gtk_list_remove_items(list, sel2);
-	g_list_free(sel2);
-	update_selected_status_label(dialog);
+
+	g_list_foreach (sel, (GFunc) gtk_tree_row_reference_free, NULL);
+	g_list_free (sel);
 }
 
 /* select and display next frame in list */
 static void imf_next_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 {
-	GList *sel = NULL;
-	GtkList *list;
+	GtkTreeModel *list;
+	GtkTreeView *view;
+	GtkTreeSelection *selection;
+	GtkTreeIter iter;
+	GtkTreePath *path;
+	GList *sel;
+	int *indices;
 	int index, len;
 	GtkWidget *scw;
 	GtkAdjustment *vadj;
 	double nv;
 
-	d3_printf("next\n");
+	list = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_list");
+	g_return_if_fail (list != NULL);
 
-	list = gtk_object_get_data(GTK_OBJECT(dialog), "image_file_list");
-	g_return_if_fail(list != NULL);
+	view = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_view");
+	g_return_if_fail (view != NULL);
 
-	sel = list->selection;
+	selection = gtk_tree_view_get_selection (view);
+	sel = gtk_tree_selection_get_selected_rows (selection, NULL);
+
 	if (sel == NULL) {
-		gtk_list_select_item(list, 0);
-		imf_display_cb(dialog, 0, NULL);
+		if (gtk_tree_model_get_iter_first (list, &iter)) {
+			path = gtk_tree_model_get_path (list, &iter);
+
+			gtk_tree_selection_unselect_all (selection);
+			gtk_tree_selection_select_path (selection, path);
+
+			gtk_tree_path_free(path);
+		}
+
+		imf_display_cb (dialog, 0, NULL);
 		return;
 	}
-	index = gtk_list_child_position(list, GTK_WIDGET(sel->data));
-	d3_printf("initial position is %d\n", index);
-	/* we reuse sel here! */
-	sel = gtk_container_children(GTK_CONTAINER(list));
-	len = g_list_length(sel);
-	g_list_free(sel);
+
+
+	path = sel->data;
+
+        /* the array should not be freed */
+	indices = gtk_tree_path_get_indices (path);
+	index = indices[0];
+
+	len = gtk_tree_model_iter_n_children (list, NULL);
+
+	/* unlike gtk_tree_path_prev, there is no 'if exists' choice for _next */
 	if (index + 1 < len) {
-		gtk_list_unselect_all(list);
-		index ++;
-		gtk_list_select_item(list, index);
-		imf_display_cb(dialog, 0, NULL);
-	} else if (index + 1 == len) {
-		gtk_list_unselect_all(list);
-		gtk_list_select_item(list, index);
-		imf_display_cb(dialog, 0, NULL);
+		gtk_tree_path_next (path);
+
+		gtk_tree_selection_unselect_all (selection);
+		gtk_tree_selection_select_path (selection, path);
+
+		imf_display_cb (dialog, 0, NULL);
 	}
+
+	g_list_foreach (sel, (GFunc) gtk_tree_path_free, NULL);
+	g_list_free (sel);
+
+
+	d3_printf("initial position is %d\n", index);
 
 	scw = gtk_object_get_data(GTK_OBJECT(dialog), "scrolledwindow");
 	g_return_if_fail(scw != NULL);
-	vadj =  gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(scw));
+
+	vadj =  gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW(scw));
 	d3_printf("vadj at %.3f\n", vadj->value);
+
 	if (len != 0) {
 		nv = (vadj->upper + vadj->lower) * index / len - vadj->page_size / 2;
 		clamp_double(&nv, vadj->lower, vadj->upper - vadj->page_size);
 		gtk_adjustment_set_value(vadj, nv);
 		d3_printf("vadj set to %.3f\n", vadj->value);
 	}
-	update_selected_status_label(dialog);
+
+	update_selected_status_label (dialog);
 }
 
 
 /* select and display previous frame in list */
 static void imf_prev_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 {
-	GList *sel = NULL;
-	GtkList *list;
+	GtkTreeModel *list;
+	GtkTreeView *view;
+	GtkTreeSelection *selection;
+	GtkTreeIter iter;
+	GtkTreePath *path;
+	GList *sel;
+	int *indices;
 	int index, len;
 	GtkWidget *scw;
 	GtkAdjustment *vadj;
 	double nv;
 
-	d3_printf("prev\n");
+	list = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_list");
+	g_return_if_fail (list != NULL);
 
-	list = gtk_object_get_data(GTK_OBJECT(dialog), "image_file_list");
-	g_return_if_fail(list != NULL);
+	view = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_view");
+	g_return_if_fail (view != NULL);
 
-	sel = list->selection;
+	selection = gtk_tree_view_get_selection (view);
+	sel = gtk_tree_selection_get_selected_rows (selection, NULL);
+
 	if (sel == NULL) {
-		gtk_list_select_item(list, 0);
-		imf_display_cb(dialog, 0, NULL);
+		if (gtk_tree_model_get_iter_first (list, &iter)) {
+			path = gtk_tree_model_get_path (list, &iter);
+
+			gtk_tree_selection_unselect_all (selection);
+			gtk_tree_selection_select_path (selection, path);
+
+			gtk_tree_path_free(path);
+		}
+
+		imf_display_cb (dialog, 0, NULL);
 		return;
 	}
-	index = gtk_list_child_position(list, GTK_WIDGET(sel->data));
-	d3_printf("initial position is %d\n", index);
-	/* we reuse sel here! */
-	sel = gtk_container_children(GTK_CONTAINER(list));
-	len = g_list_length(sel);
-	g_list_free(sel);
-	if (index > 0) {
-		gtk_list_unselect_all(list);
-		index --;
-		gtk_list_select_item(list, index);
-		imf_display_cb(dialog, 0, NULL);
-	} else if (index == 0) {
-		gtk_list_unselect_all(list);
-		gtk_list_select_item(list, index);
-		imf_display_cb(dialog, 0, NULL);
+
+	path = sel->data;
+
+        /* the array should not be freed */
+	indices = gtk_tree_path_get_indices (path);
+	index = indices[0];
+
+	len = gtk_tree_model_iter_n_children (list, NULL);
+
+	if (gtk_tree_path_prev (path)) {
+
+		gtk_tree_selection_unselect_all (selection);
+		gtk_tree_selection_select_path (selection, path);
+
+		imf_display_cb (dialog, 0, NULL);
 	}
+
+	g_list_foreach (sel, (GFunc) gtk_tree_path_free, NULL);
+	g_list_free (sel);
+
+	d3_printf("initial position is %d\n", index);
 
 	scw = gtk_object_get_data(GTK_OBJECT(dialog), "scrolledwindow");
 	g_return_if_fail(scw != NULL);
-	vadj =  gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(scw));
+
+	vadj =  gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW(scw));
 	d3_printf("vadj at %.3f\n", vadj->value);
+
 	if (len != 0) {
 		nv = (vadj->upper + vadj->lower) * index / len - vadj->page_size / 2;
 		clamp_double(&nv, vadj->lower, vadj->upper - vadj->page_size);
 		gtk_adjustment_set_value(vadj, nv);
 		d3_printf("vadj set to %.3f\n", vadj->value);
 	}
-	update_selected_status_label(dialog);
+
+	update_selected_status_label (dialog);
 }
 
 
 static void imf_display_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 {
 	GtkWidget *im_window;
-	GtkList *list;
-	GtkListItem *item;
+	GtkTreeModel *list;
+	GtkTreeView *view;
+	GtkTreeIter iter;
+	GtkTreeSelection *selection;
+	GList *sel;
 	struct image_file *imf;
 	struct image_file_list *imfl;
 
 	d3_printf("display\n");
 
 	im_window = gtk_object_get_data(GTK_OBJECT(dialog), "im_window");
-	g_return_if_fail(im_window != NULL);
-	list = gtk_object_get_data(GTK_OBJECT(dialog), "image_file_list");
-	g_return_if_fail(list != NULL);
+	g_return_if_fail (im_window != NULL);
 
-	if (list->selection != NULL) {
-		item = list->selection->data;
-		imf = gtk_object_get_data(GTK_OBJECT(item), "imf");
+	list = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_list");
+	g_return_if_fail (list != NULL);
+
+	view = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_view");
+	g_return_if_fail (view != NULL);
+
+	selection = gtk_tree_view_get_selection (view);
+	sel = gtk_tree_selection_get_selected_rows (selection, NULL);
+
+	if (sel != NULL) {
+		gtk_tree_model_get_iter (list, &iter, sel->data);
+		gtk_tree_model_get (list, &iter, IMFL_COL_IMF, &imf, -1);
+
 		if (imf == NULL) {
-			err_printf("null imf\n");
-			return;
+			err_printf("NULL imf\n");
+			goto out;
 		}
-		if (load_image_file(imf)) {
-			return;
-		}
-		g_return_if_fail(imf->fr != NULL);
+
+		if (load_image_file(imf))
+			goto out;
+
 		frame_to_channel(imf->fr, im_window, "i_channel");
-//		imf_update_status_label(dialog, imf);
 	} else {
 		error_beep();
 		log_msg("\nNo Frame selected\n", dialog);
 	}
+
 	if (P_INT(FILE_SAVE_MEM)) {
 		imfl = gtk_object_get_data(GTK_OBJECT(dialog), "imfl");
 		if (imfl)
 			unload_clean_frames(imfl);
 	}
+
 	update_selected_status_label(dialog);
+
+out:
+	g_list_foreach (sel, (GFunc) gtk_tree_path_free, NULL);
+	g_list_free (sel);
+
+	return;
 }
 
+/* select all files */
 static void imf_selall_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 {
-	GtkList *list;
+	GtkTreeView *view;
+	GtkTreeSelection *selection;
 
-	list = gtk_object_get_data(GTK_OBJECT(dialog), "image_file_list");
-	g_return_if_fail(list != NULL);
+	view = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_view");
+	g_return_if_fail (view != NULL);
 
-	gtk_list_select_all(list);
+	selection = gtk_tree_view_get_selection (view);
+	gtk_tree_selection_select_all (selection);
 }
 
 static void imf_add_files(GSList *files, gpointer dialog)
 {
-	GtkList *list;
-	GtkWidget *item;
-	GList *il = NULL;
+	GtkListStore *list;
+	GtkTreeIter iter;
 	struct image_file *imf;
 	struct image_file_list *imfl;
 	char *text;
@@ -673,74 +747,75 @@ static void imf_add_files(GSList *files, gpointer dialog)
 	imfl = gtk_object_get_data(GTK_OBJECT(dialog), "imfl");
 	if (imfl == NULL) {
 		imfl = image_file_list_new();
-		gtk_object_set_data_full(GTK_OBJECT(dialog), "imfl",
-					 imfl, (GtkDestroyNotify)(image_file_list_release));
+		gtk_object_set_data_full (GTK_OBJECT(dialog), "imfl", imfl,
+					  (GtkDestroyNotify) (image_file_list_release));
 	}
 
 	while (files != NULL) {
 		imf = image_file_new();
 		text = files->data;
 		files = g_slist_next(files);
-
 		imf->filename = strdup(text);
-		item=gtk_list_item_new_with_label(imf->filename);
 		image_file_ref(imf);
-		gtk_object_set_data_full(GTK_OBJECT(item), "imf",
-					 imf, (GtkDestroyNotify)(image_file_release));
-		image_file_ref(imf);
+
 		imfl->imlist = g_list_append(imfl->imlist, imf);
 
-		il=g_list_append(il, item);
-		gtk_widget_show(item);
+		gtk_list_store_append (list, &iter);
+		gtk_list_store_set (list, &iter,
+				    IMFL_COL_FILENAME, basename(imf->filename),
+				    IMFL_COL_STATUS, "",
+				    IMFL_COL_IMF, imf,
+				    -1);
+
+		imf_update_status_label (GTK_TREE_MODEL(list), &iter);
+
 		d3_printf("adding %s\n", text);
 	}
-	gtk_list_append_items(list, il);
-	update_selected_status_label(dialog);
 }
 
 static void imf_add_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 {
-	GtkList *list;
-
-	list = gtk_object_get_data(GTK_OBJECT(dialog), "image_file_list");
-	g_return_if_fail(list != NULL);
-
 	d3_printf("imf add\n");
-
 	file_select_list(dialog, "Select files", "*.fits", imf_add_files);
 }
 
 /* reload selected files */
 static void imf_reload_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 {
-	GList *sel = NULL;
-	GtkList *list;
-	GtkListItem *item;
+
+	GtkTreeModel *list;
+	GtkTreeView *view;
+	GtkTreeSelection *selection;
+	GtkTreeIter iter;
+	GList *sel, *tmp;
 	struct image_file *imf;
-	struct image_file_list *imfl;
 
-	list = gtk_object_get_data(GTK_OBJECT(dialog), "image_file_list");
-	g_return_if_fail(list != NULL);
+	list = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_list");
+	g_return_if_fail (list != NULL);
 
-	imfl = gtk_object_get_data(GTK_OBJECT(dialog), "imfl");
-	g_return_if_fail(imfl != NULL);
+	view = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_view");
+	g_return_if_fail (view != NULL);
 
-	sel = list->selection;
-	while(sel != NULL) {
-		item = sel->data;
-		sel = g_list_next(sel);
-		imf = gtk_object_get_data(GTK_OBJECT(item), "imf");
-		if (imf == NULL) {
-			err_printf("null imf\n");
-			continue;
-		}
+	selection = gtk_tree_view_get_selection (view);
+	sel = gtk_tree_selection_get_selected_rows (selection, NULL);
+
+	for (tmp = sel; tmp; tmp = tmp->next) {
+		gtk_tree_model_get_iter (list, &iter, tmp->data);
+		gtk_tree_model_get (list, &iter, IMFL_COL_IMF, (GValue *) &imf, -1);
+
 		d3_printf("unloading %s\n", imf->filename);
-		if ((imf->flags & IMG_LOADED) && (imf->fr)) {
-			release_frame(imf->fr);
+
+		if ((imf->flags & IMG_LOADED) && imf->fr) {
+			release_frame (imf->fr);
 			imf->fr = NULL;
 		}
+
 		imf->flags &= IMG_SKIP; /* we keep the skip flag */
 	}
+
+	g_list_foreach (sel, (GFunc) gtk_tree_path_free, NULL);
+	g_list_free (sel);
+
 	update_selected_status_label(dialog);
 }
 
@@ -773,21 +848,17 @@ void switch_frame_cb(gpointer window, guint action, GtkWidget *menu_item)
 	update_selected_status_label(dialog);
 }
 
-static void imf_update_status_label(GtkWidget *label, struct image_file *imf)
+static void imf_update_status_label(GtkTreeModel *list, GtkTreeIter *iter)
 {
-	char *fn;
 	char msg[128];
-	int i;
+	int i = 0;
+	struct image_file *imf;
 
-	if (imf == NULL) {
-		gtk_label_set_text(GTK_LABEL(label), "");
-		return;
-	}
+	gtk_tree_model_get (list, iter, IMFL_COL_IMF, (GValue *) &imf, -1);
+	g_return_if_fail(imf != NULL);
 
-	fn = strdup(imf->filename);
+	msg[0] = 0;
 
-	i = snprintf(msg, 127, "%s", basename(fn));
-	free(fn);
 	if (imf->flags & IMG_SKIP)
 		i += snprintf(msg+i, 127-i, " SKIP");
 	clamp_int(&i, 0, 127);
@@ -820,70 +891,54 @@ static void imf_update_status_label(GtkWidget *label, struct image_file *imf)
 	clamp_int(&i, 0, 127);
 	if (imf->flags & IMG_OP_PHOT)
 		i += snprintf(msg+i, 127-i, " PHOT");
-	gtk_label_set_text(GTK_LABEL(label), msg);
+
+	d3_printf("updating status to %s\n", msg);
+	gtk_list_store_set (GTK_LIST_STORE(list), iter, IMFL_COL_STATUS, msg, -1);
 }
 
 static void update_selected_status_label(gpointer dialog)
 {
-	GtkWidget *im_window;
-	GtkList *list;
-	GtkListItem *item;
-	GList *sel;
-	struct image_file *imf;
+	GtkTreeModel *list;
+	GtkTreeView *view;
+	GtkTreeSelection *selection;
+	GtkTreeIter iter;
+	GList *sel, *tmp;
 
-	d3_printf("update selected status\n");
+	list = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_list");
+	g_return_if_fail (list != NULL);
 
-	im_window = gtk_object_get_data(GTK_OBJECT(dialog), "im_window");
-	g_return_if_fail(im_window != NULL);
-	list = gtk_object_get_data(GTK_OBJECT(dialog), "image_file_list");
-	g_return_if_fail(list != NULL);
+	view = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_view");
+	g_return_if_fail (view != NULL);
 
-	for (sel = list->selection; sel != NULL; sel = sel->next) {
-		item = sel->data;
-		imf = gtk_object_get_data(GTK_OBJECT(item), "imf");
-		imf_update_status_label(GTK_WIDGET(GTK_BIN(item)->child), imf);
+	selection = gtk_tree_view_get_selection (view);
+	sel = gtk_tree_selection_get_selected_rows (selection, NULL);
+
+	for (tmp = sel; tmp; tmp = tmp->next) {
+		gtk_tree_model_get_iter (list, &iter, tmp->data);
+		imf_update_status_label (list, &iter);
 	}
+
+	g_list_foreach (sel, (GFunc) gtk_tree_path_free, NULL);
+	g_list_free (sel);
 }
 
 static void update_status_labels(gpointer dialog)
 {
-	GtkWidget *im_window;
-	GtkList *list;
-	GtkListItem *item;
-	GList *sel;
-	struct image_file *imf;
+	GtkTreeModel *list;
+	GtkTreeIter iter;
+	gboolean valid;
 
-	d3_printf("update selected status\n");
-
-	im_window = gtk_object_get_data(GTK_OBJECT(dialog), "im_window");
-	g_return_if_fail(im_window != NULL);
 	list = gtk_object_get_data(GTK_OBJECT(dialog), "image_file_list");
 	g_return_if_fail(list != NULL);
 
-	for (sel = gtk_container_children(GTK_CONTAINER(list)); sel != NULL; sel = sel->next) {
-		item = sel->data;
-		imf = gtk_object_get_data(GTK_OBJECT(item), "imf");
-		imf_update_status_label(GTK_WIDGET(GTK_BIN(item)->child), imf);
+	valid = gtk_tree_model_get_iter_first (list, &iter);
+	while (valid) {
+		imf_update_status_label (list, &iter);
+
+		valid = gtk_tree_model_iter_next (list, &iter);
 	}
 }
 
-
-
-
-
-static void select_cb(GtkList *list, GtkWidget *wid, gpointer dialog)
-{
-	char *text;
-	struct image_file *imf;
-
-	return;
-	gtk_label_get(GTK_LABEL(GTK_BIN(wid)->child), &text);
-	d3_printf("select: %s\n", text);
-
-	imf = gtk_object_get_data(GTK_OBJECT(wid), "imf");
-	g_return_if_fail(imf != NULL);
-//	update_status_label(dialog, imf);
-}
 
 /*
 static void list_button_cb(GtkWidget *wid, GdkEventButton *event, gpointer dialog)
@@ -936,34 +991,9 @@ static void imf_red_browse_cb(GtkWidget *wid, gpointer dialog)
 	}
 }
 
-static int progress_pr(char *msg, void *dialog)
-{
-	GtkWidget *text;
-//	GdkFont *font = NULL;
-
-//	d1_printf("*%s", msg);
-
-	text = gtk_object_get_data(GTK_OBJECT(dialog), "processing_log_text");
-	g_return_val_if_fail(text != NULL, 0);
-
-	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW (text), GTK_WRAP_CHAR);
-	gtk_text_buffer_insert_at_cursor(
-		gtk_text_view_get_buffer (GTK_TEXT_VIEW(text)),
-		msg, -1);
-
-	while(gtk_events_pending())
-		gtk_main_iteration();
-
-	return 0;
-}
-
-
 static int log_msg(char *msg, void *dialog)
 {
 	GtkWidget *text;
-//	GdkFont *font = NULL;
-
-//	d1_printf("*%s", msg);
 
 	text = gtk_object_get_data(GTK_OBJECT(dialog), "processing_log_text");
 	g_return_val_if_fail(text != NULL, 0);
@@ -972,6 +1002,16 @@ static int log_msg(char *msg, void *dialog)
 	gtk_text_buffer_insert_at_cursor(
 		gtk_text_view_get_buffer (GTK_TEXT_VIEW(text)),
 		msg, -1);
+
+	return 0;
+}
+
+static int progress_pr(char *msg, void *dialog)
+{
+	log_msg (msg, dialog);
+
+	while (gtk_events_pending())
+		gtk_main_iteration();
 
 	return 0;
 }
@@ -1289,74 +1329,121 @@ end:
 
 static struct image_file * current_imf(gpointer dialog)
 {
-	GtkWidget *im_window;
-	GtkList *list;
-	GtkListItem *item;
+	GtkTreeModel *list;
+	GtkTreeView *view;
+	GtkTreeSelection *selection;
+	GtkTreeIter iter;
+	GtkTreePath *path;
+	GList *sel;
 	struct image_file *imf = NULL;
 
-	d3_printf("get current imf\n");
+	list = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_list");
+	g_return_val_if_fail (list != NULL, NULL);
 
-	im_window = gtk_object_get_data(GTK_OBJECT(dialog), "im_window");
-	g_return_val_if_fail(im_window != NULL, NULL);
-	list = gtk_object_get_data(GTK_OBJECT(dialog), "image_file_list");
-	g_return_val_if_fail(list != NULL, NULL);
+	view = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_view");
+	g_return_val_if_fail (view != NULL, NULL);
 
-	if (list->selection == NULL)
-		gtk_list_select_item(list, 0);
+	selection = gtk_tree_view_get_selection (view);
+	sel = gtk_tree_selection_get_selected_rows (selection, NULL);
 
-	if (list->selection != NULL) {
-		item = list->selection->data;
-		imf = gtk_object_get_data(GTK_OBJECT(item), "imf");
+	if (sel == NULL) {
+		if (gtk_tree_model_get_iter_first (list, &iter)) {
+			gtk_tree_model_get (list, &iter, IMFL_COL_IMF, (GValue *) &imf, -1);
+
+			path = gtk_tree_model_get_path (list, &iter);
+
+			gtk_tree_selection_unselect_all (selection);
+			gtk_tree_selection_select_path (selection, path);
+
+			gtk_tree_path_free(path);
+		}
+
+		return imf;
 	}
+
+	gtk_tree_model_get_iter (list, &iter, sel->data);
+	gtk_tree_model_get (list, &iter, IMFL_COL_IMF, (GValue *) &imf, -1);
+
+	g_list_foreach (sel, (GFunc) gtk_tree_path_free, NULL);
+	g_list_free (sel);
+
 	return imf;
 }
 
 static void select_next_imf(gpointer dialog)
 {
-	GList *sel = NULL;
-	GtkList *list;
+	GtkTreeModel *list;
+	GtkTreeView *view;
+	GtkTreeSelection *selection;
+	GtkTreeIter iter;
+	GtkTreePath *path;
+	GList *sel;
+	int *indices;
 	int index, len;
 	GtkWidget *scw;
 	GtkAdjustment *vadj;
 	double nv;
 
-	d3_printf("select next\n");
+	list = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_list");
+	g_return_if_fail (list != NULL);
 
-	list = gtk_object_get_data(GTK_OBJECT(dialog), "image_file_list");
-	g_return_if_fail(list != NULL);
+	view = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_view");
+	g_return_if_fail (view != NULL);
 
-	sel = list->selection;
+	selection = gtk_tree_view_get_selection (view);
+	sel = gtk_tree_selection_get_selected_rows (selection, NULL);
+
 	if (sel == NULL) {
-		gtk_list_select_item(list, 0);
-		update_selected_status_label(dialog);
+		if (gtk_tree_model_get_iter_first (list, &iter)) {
+			path = gtk_tree_model_get_path (list, &iter);
+
+			gtk_tree_selection_unselect_all (selection);
+			gtk_tree_selection_select_path (selection, path);
+
+			gtk_tree_path_free(path);
+		}
+
+		update_selected_status_label (dialog);
 		return;
 	}
-	index = gtk_list_child_position(list, GTK_WIDGET(sel->data));
-	d3_printf("initial position is %d\n", index);
-	/* we reuse sel here! */
-	sel = gtk_container_children(GTK_CONTAINER(list));
-	len = g_list_length(sel);
-	g_list_free(sel);
+
+
+	path = sel->data;
+
+        /* the array should not be freed */
+	indices = gtk_tree_path_get_indices (path);
+	index = indices[0];
+
+	len = gtk_tree_model_iter_n_children (list, NULL);
+
+	/* unlike gtk_tree_path_prev, there is no 'if exists' choice for _next */
 	if (index + 1 < len) {
-		gtk_list_unselect_all(list);
-		index ++;
-		gtk_list_select_item(list, index);
-	} else if (index + 1 == len) {
-		gtk_list_unselect_all(list);
-		gtk_list_select_item(list, index);
+		gtk_tree_path_next (path);
+
+		gtk_tree_selection_unselect_all (selection);
+		gtk_tree_selection_select_path (selection, path);
 	}
+
+	g_list_foreach (sel, (GFunc) gtk_tree_path_free, NULL);
+	g_list_free (sel);
+
+
+	d3_printf("initial position is %d\n", index);
 
 	scw = gtk_object_get_data(GTK_OBJECT(dialog), "scrolledwindow");
 	g_return_if_fail(scw != NULL);
-	vadj =  gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(scw));
+
+	vadj =  gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW(scw));
 	d3_printf("vadj at %.3f\n", vadj->value);
+
 	if (len != 0) {
 		nv = (vadj->upper + vadj->lower) * index / len - vadj->page_size / 2;
 		clamp_double(&nv, vadj->lower, vadj->upper - vadj->page_size);
 		gtk_adjustment_set_value(vadj, nv);
 		d3_printf("vadj set to %.3f\n", vadj->value);
 	}
-	update_selected_status_label(dialog);
+
+	update_selected_status_label (dialog);
 }
 
 

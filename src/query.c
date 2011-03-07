@@ -1,23 +1,23 @@
 /*******************************************************************************
   Copyright(c) 2000 - 2003 Radu Corlan. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: radu@corlan.net
 *******************************************************************************/
 
@@ -88,7 +88,7 @@ static struct cat_star * parse_cat_line_ucac2_main(char *line)
 	double uc, m, j, k;
 	char *endp;
 	int ret = 0;
-	
+
 	nc = detabify(line, cols, 32);
 
 	d4_printf("[ucac2-%d]%s\n", nc, line);
@@ -131,7 +131,7 @@ static struct cat_star * parse_cat_line_ucac2_main(char *line)
 				cats->comments = NULL;
 			if (uc == 0)
 				ret = asprintf(&cats->smags, "j=%.3f k=%.3f", j, k);
-			else 
+			else
 				ret = asprintf(&cats->smags, "uc=%.3f j=%.3f k=%.3f", uc, j, k);
 		}
 	}
@@ -172,7 +172,7 @@ static struct cat_star * parse_cat_line_ucac2_bss(char *line)
 	int n;
 
 //	d3_printf("%s", line);
-	
+
 	nc = detabify(line, cols, 32);
 
 	d4_printf("[ucac2bss-%d]%s\n", nc, line);
@@ -273,7 +273,7 @@ static struct cat_star * parse_cat_line_gsc2(char *line)
 	char *endp;
 	char buf[256];
 	int n;
-	
+
 	nc = detabify(line, cols, 32);
 
 	d4_printf("[gsc2-%d]%s\n", nc, line);
@@ -337,7 +337,7 @@ static struct cat_star * parse_cat_line_gsc_act(char *line)
 	double p, pe, ep, class;
 	char *endp;
 	int ret = 0;
-	
+
 	nc = detabify(line, cols, 32);
 
 	d4_printf("[gsc_act-%d]%s\n", nc, line);
@@ -414,7 +414,7 @@ static struct cat_star * parse_cat_line_usnob(char *line)
 	int n;
 
 	d4_printf("%s", line);
-	
+
 	nc = detabify(line, cols, 32);
 
 	d4_printf("[usnob-%d]%s\n", nc, line);
@@ -443,7 +443,7 @@ static struct cat_star * parse_cat_line_usnob(char *line)
 	} else {
 		cats->perr = BIG_ERR;
 	}
-	
+
 	if (nc >= 14) {
 		b2 = strtod(line+cols[11], &endp);
 		r2 = strtod(line+cols[12], &endp);
@@ -462,7 +462,7 @@ static struct cat_star * parse_cat_line_usnob(char *line)
 		cats->mag = b1;
 	else if (b2 > 0)
 		cats->mag = r2;
-	else 
+	else
 		cats->mag = 20.0;
 
 	if (r1 > 0 && r2 > 0)
@@ -561,7 +561,7 @@ static int table_code(char *table)
 
 
 /* return a list of catalog stars obtained by querying an on-line catalog */
-GList *query_catalog(char *catalog, double ra, double dec, double w, double h, 
+GList *query_catalog(char *catalog, double ra, double dec, double w, double h,
 		     int (* progress)(char *msg, void *data), void *data)
 {
 	FILE *vq;
@@ -647,7 +647,7 @@ GList *query_catalog(char *catalog, double ra, double dec, double w, double h,
 					(* progress)(line, data);
 				}
 			}
-			if ((!strncasecmp(line, "#++++", 5)) 
+			if ((!strncasecmp(line, "#++++", 5))
 			    || (!strncasecmp(line, "#****", 5))) {
 				if (progress) {
 					(* progress)(line, data);
@@ -657,7 +657,7 @@ GList *query_catalog(char *catalog, double ra, double dec, double w, double h,
 			if (strncasecmp(line, "#Table", 6))
 				break;
 			p = line+6;
-			while (*p && isspace(*p)) 
+			while (*p && isspace(*p))
 				p++;
 			tnum = table_code(p);
 			if (tnum < 0) {
@@ -676,7 +676,7 @@ GList *query_catalog(char *catalog, double ra, double dec, double w, double h,
 			qstat = 2;
 			break;
 		case 2:
-			if ((!strncasecmp(line, "#++++", 5)) 
+			if ((!strncasecmp(line, "#++++", 5))
 			    || (!strncasecmp(line, "#****", 5))) {
 				if (progress) {
 					(* progress)(line, data);
@@ -719,13 +719,13 @@ static int progress_pr(char *msg, void *data)
 
 
 /* create a rcp using starts returned by a catalog query */
-int make_cat_rcp(char *obj, char *catalog, double box, FILE *outf, double mag_limit) 
+int make_cat_rcp(char *obj, char *catalog, double box, FILE *outf, double mag_limit)
 {
 	GList *tsl = NULL;
 	struct cat_star *cats;
 	struct stf *st, *stf;
 	char ras[64], decs[64];
-		
+
 	cats = get_object_by_name(obj);
 	cats->flags = (cats->flags & ~CAT_STAR_TYPE_MASK) | CAT_STAR_TYPE_APSTAR;
 	if (cats == NULL) {
@@ -778,7 +778,7 @@ static int logw_print(char *msg, void *data)
 	text = gtk_object_get_data(GTK_OBJECT(logw), "query_log_text");
 	g_return_val_if_fail(text != NULL, 0);
 	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW (text), GTK_WRAP_CHAR);
-	
+
 	gtk_text_buffer_insert_at_cursor(gtk_text_view_get_buffer(GTK_TEXT_VIEW(text)),
 					 msg, -1);
 
@@ -803,7 +803,7 @@ void cds_query_cb(gpointer window, guint action, GtkWidget *menu_item)
 	GList *tsl = NULL;
 
 	g_return_if_fail(action < QUERY_CATALOGS);
-	
+
 	i_ch = gtk_object_get_data(GTK_OBJECT(window), "i_channel");
 
 	if (i_ch == NULL || i_ch->fr == NULL) {
@@ -819,8 +819,8 @@ void cds_query_cb(gpointer window, guint action, GtkWidget *menu_item)
 	}
 	w = 60.0*fabs(i_ch->fr->w * wcs->xinc);
 	h = 60.0*fabs(i_ch->fr->h * wcs->yinc);
-	clamp_double(&w, 1.0, 2 * P_DBL(QUERY_MAX_RADIUS)); 
-	clamp_double(&h, 1.0, 2 * P_DBL(QUERY_MAX_RADIUS)); 
+	clamp_double(&w, 1.0, 2 * P_DBL(QUERY_MAX_RADIUS));
+	clamp_double(&h, 1.0, 2 * P_DBL(QUERY_MAX_RADIUS));
 
 	logw = create_query_log_window();
 	gtk_object_set_data_full(GTK_OBJECT(window), "cdsquery",
@@ -830,13 +830,13 @@ void cds_query_cb(gpointer window, guint action, GtkWidget *menu_item)
 			    GTK_SIGNAL_FUNC (delete_cdsquery), window);
 	gtk_widget_show(logw);
 
-	tsl = query_catalog(query_catalog_names[action], wcs->xref, wcs->yref, 
+	tsl = query_catalog(query_catalog_names[action], wcs->xref, wcs->yref,
 			    w, h, logw_print, logw);
 
-	info_printf_sb2(window, "Received %d %s stars", g_list_length(tsl), 
+	info_printf_sb2(window, "Received %d %s stars", g_list_length(tsl),
 			query_catalog_names[action]);
 	gtk_object_set_data(GTK_OBJECT(window), "cdsquery", NULL);
-	
+
 	merge_cat_star_list_to_window(window, tsl);
 	gtk_widget_queue_draw(window);
 	g_list_free(tsl);
