@@ -44,7 +44,7 @@
 static void yes_no_yes( GtkWidget *widget, gpointer data )
 {
 	int *retv;
-	retv = gtk_object_get_data(GTK_OBJECT(data), "return_val");
+	retv = g_object_get_data(G_OBJECT(data), "return_val");
 	if (retv != NULL)
 		*retv = 1;
 	gtk_widget_destroy(data);
@@ -71,23 +71,23 @@ int modal_yes_no(char *text, char *title)
 
 	GtkWidget *dialog, *label, *vbox;
 	dialog = create_yes_no();
-	gtk_object_set_data(GTK_OBJECT(dialog), "return_val", &retval);
-	vbox = gtk_object_get_data(GTK_OBJECT(dialog), "vbox");
+	g_object_set_data(G_OBJECT(dialog), "return_val", &retval);
+	vbox = g_object_get_data(G_OBJECT(dialog), "vbox");
 	g_return_val_if_fail(vbox != NULL, 0);
-	gtk_signal_connect (GTK_OBJECT (dialog), "destroy",
-			    GTK_SIGNAL_FUNC (close_yes_no), dialog);
-	set_named_callback (GTK_OBJECT (dialog), "yes_button", "clicked",
-			    GTK_SIGNAL_FUNC (yes_no_yes));
-	set_named_callback (GTK_OBJECT (dialog), "no_button", "clicked",
-			    GTK_SIGNAL_FUNC (yes_no_no));
+	g_signal_connect (G_OBJECT (dialog), "destroy",
+			    G_CALLBACK (close_yes_no), dialog);
+	set_named_callback (G_OBJECT (dialog), "yes_button", "clicked",
+			    G_CALLBACK (yes_no_yes));
+	set_named_callback (G_OBJECT (dialog), "no_button", "clicked",
+			    G_CALLBACK (yes_no_no));
 	if (title != NULL) {
 		gtk_window_set_title(GTK_WINDOW(dialog), title);
 	}
 	if (text != NULL) { /* add the message */
 		label = gtk_label_new (text);
-		gtk_widget_ref (label);
-		gtk_object_set_data_full (GTK_OBJECT (dialog), "message", label,
-					  (GtkDestroyNotify) gtk_widget_unref);
+		g_object_ref (label);
+		g_object_set_data_full (G_OBJECT (dialog), "message", label,
+					(GDestroyNotify) g_object_unref);
 		gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
 		gtk_misc_set_alignment (GTK_MISC (label), 0.5, 1);
 		gtk_widget_show (label);
@@ -103,13 +103,13 @@ static void entry_prompt_yes( GtkWidget *widget, gpointer data )
 	char **value;
 	GtkWidget *entry;
 
-	entry = gtk_object_get_data(GTK_OBJECT(data), "entry");
+	entry = g_object_get_data(G_OBJECT(data), "entry");
 	g_return_if_fail(entry != NULL);
-	value = gtk_object_get_data(GTK_OBJECT(data), "entry_val");
+	value = g_object_get_data(G_OBJECT(data), "entry_val");
 	if (value != NULL) {
 		*value = strdup(gtk_entry_get_text(GTK_ENTRY(entry)));
 	}
-	retv = gtk_object_get_data(GTK_OBJECT(data), "return_val");
+	retv = g_object_get_data(G_OBJECT(data), "return_val");
 	if (retv != NULL)
 		*retv = 1;
 
@@ -126,20 +126,20 @@ int modal_entry_prompt(char *text, char *title, char *initial, char **value)
 
 	GtkWidget *dialog, *label, *entry;
 	dialog = create_entry_prompt();
-	gtk_object_set_data(GTK_OBJECT(dialog), "return_val", &retval);
-	gtk_object_set_data(GTK_OBJECT(dialog), "entry_val", value);
-	entry = gtk_object_get_data(GTK_OBJECT(dialog), "entry");
+	g_object_set_data(G_OBJECT(dialog), "return_val", &retval);
+	g_object_set_data(G_OBJECT(dialog), "entry_val", value);
+	entry = g_object_get_data(G_OBJECT(dialog), "entry");
 	g_return_val_if_fail(entry != NULL, 0);
-	label = gtk_object_get_data(GTK_OBJECT(dialog), "label");
+	label = g_object_get_data(G_OBJECT(dialog), "label");
 	g_return_val_if_fail(entry != NULL, 0);
-	gtk_signal_connect (GTK_OBJECT (dialog), "destroy",
-			    GTK_SIGNAL_FUNC (close_yes_no), dialog);
-	set_named_callback (GTK_OBJECT (dialog), "ok_button", "clicked",
-			    GTK_SIGNAL_FUNC (entry_prompt_yes));
-	set_named_callback (GTK_OBJECT (dialog), "entry", "activate",
-			    GTK_SIGNAL_FUNC (entry_prompt_yes));
-	set_named_callback (GTK_OBJECT (dialog), "cancel_button", "clicked",
-			    GTK_SIGNAL_FUNC (yes_no_no));
+	g_signal_connect (G_OBJECT (dialog), "destroy",
+			    G_CALLBACK (close_yes_no), dialog);
+	set_named_callback (G_OBJECT (dialog), "ok_button", "clicked",
+			    G_CALLBACK (entry_prompt_yes));
+	set_named_callback (G_OBJECT (dialog), "entry", "activate",
+			    G_CALLBACK (entry_prompt_yes));
+	set_named_callback (G_OBJECT (dialog), "cancel_button", "clicked",
+			    G_CALLBACK (yes_no_no));
 	if (title != NULL) {
 		gtk_window_set_title(GTK_WINDOW(dialog), title);
 	}
@@ -191,7 +191,7 @@ int info_printf_sb2(gpointer window, const char *fmt, ...)
 	if (ret > 0 && err_string[ret-1] == '\n')
 		err_string[ret-1] = 0;
 	d1_printf("%s\n", err_string);
-	label = gtk_object_get_data(GTK_OBJECT(window), "statuslabel2");
+	label = g_object_get_data(G_OBJECT(window), "statuslabel2");
 	gtk_label_set_text(GTK_LABEL(label), err_string);
 	va_end(ap);
 	return ret;
@@ -218,7 +218,7 @@ int err_printf_sb2(gpointer window, const char *fmt, ...)
 	if (ret > 0 && err_string[ret-1] == '\n')
 		err_string[ret-1] = 0;
 	err_printf("%s\n", err_string);
-	label = gtk_object_get_data(GTK_OBJECT(window), "statuslabel2");
+	label = g_object_get_data(G_OBJECT(window), "statuslabel2");
 	gtk_label_set_text(GTK_LABEL(label), err_string);
 	va_end(ap);
 	return ret;
@@ -229,7 +229,7 @@ static void about_cx(gpointer data)
 {
 	GtkWidget *about_cx;
 	about_cx = create_about_cx();
-	gtk_widget_ref(about_cx);
+	g_object_ref(about_cx);
 	gtk_widget_show(about_cx);
 }
 
@@ -255,7 +255,7 @@ int window_auto_pairs(gpointer window)
 	struct gui_star_list *gsl;
 	int ret;
 
-	gsl = gtk_object_get_data(GTK_OBJECT(window), "gui_star_list");
+	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl == NULL)
 		return -1;
 	info_printf_sb2(window, "Looking for Star Pairs...");
@@ -525,8 +525,8 @@ static gboolean image_clicked_cb(GtkWidget *w, GdkEventButton *event, gpointer d
 		if (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK))
 		    return FALSE;
 		found = stars_under_click(GTK_WIDGET(data), event);
-		star_if = gtk_object_get_data(GTK_OBJECT(data), "star_popup_if");
-		menu = gtk_object_get_data(GTK_OBJECT(data), "image_popup");
+		star_if = g_object_get_data(G_OBJECT(data), "star_popup_if");
+		menu = g_object_get_data(G_OBJECT(data), "image_popup");
 		if (found != NULL && star_if != NULL) {
 			if (found != NULL)
 				g_slist_free(found);
@@ -631,8 +631,8 @@ GtkWidget *get_image_popup_menu(GtkWidget *window)
 
 	item_factory = gtk_item_factory_new (GTK_TYPE_MENU,
 					     "<image_popup>", accel_group);
-	gtk_object_set_data_full(GTK_OBJECT(window), "image_popup_if", item_factory,
-				 (GtkDestroyNotify) gtk_object_unref);
+	g_object_set_data_full(G_OBJECT(window), "image_popup_if", item_factory,
+				 (GDestroyNotify) g_object_unref);
 	gtk_item_factory_create_items (item_factory, nmenu_items,
 				       image_popup_menu_items, window);
 
@@ -655,8 +655,8 @@ static GtkWidget *get_main_menu_bar(GtkWidget *window)
 
 	item_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR,
 					     "<main_menu>", accel_group);
-	gtk_object_set_data_full(GTK_OBJECT(window), "main_menu_if", item_factory,
-				 (GtkDestroyNotify) gtk_object_unref);
+	g_object_set_data_full(G_OBJECT(window), "main_menu_if", item_factory,
+				 (GDestroyNotify) g_object_unref);
 	gtk_item_factory_create_items (item_factory, nmenu_items,
 				       image_popup_menu_items, window);
 
@@ -689,8 +689,8 @@ GtkWidget * create_image_window()
 	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	g_object_ref_sink(window);
 
-	gtk_signal_connect (GTK_OBJECT (window), "destroy",
-			  GTK_SIGNAL_FUNC (destroy_cb), NULL);
+	g_signal_connect (G_OBJECT (window), "destroy",
+			  G_CALLBACK (destroy_cb), NULL);
 
 	gtk_window_set_title (GTK_WINDOW (window), "gcx");
 	gtk_container_set_border_width (GTK_CONTAINER (window), 0);
@@ -706,18 +706,18 @@ GtkWidget * create_image_window()
 	gtk_widget_show(alignment);
 
 	statuslabel1 = gtk_label_new ("");
-	gtk_widget_ref (statuslabel1);
+	g_object_ref (statuslabel1);
 	gtk_misc_set_padding (GTK_MISC (statuslabel1), 6, 0);
-	gtk_object_set_data_full (GTK_OBJECT (window), "statuslabel1", statuslabel1,
-				  (GtkDestroyNotify) gtk_widget_unref);
+	g_object_set_data_full (G_OBJECT (window), "statuslabel1", statuslabel1,
+				  (GDestroyNotify) g_object_unref);
 	gtk_widget_show (statuslabel1);
 
 	statuslabel2 = gtk_label_new ("");
-	gtk_widget_ref (statuslabel2);
+	g_object_ref (statuslabel2);
 	gtk_misc_set_padding (GTK_MISC (statuslabel2), 3, 3);
 	gtk_misc_set_alignment (GTK_MISC (statuslabel2), 0, 0.5);
-	gtk_object_set_data_full (GTK_OBJECT (window), "statuslabel2", statuslabel2,
-				  (GtkDestroyNotify) gtk_widget_unref);
+	g_object_set_data_full (G_OBJECT (window), "statuslabel2", statuslabel2,
+				  (GDestroyNotify) g_object_unref);
 	gtk_widget_show (statuslabel1);
 
 	menubar = get_main_menu_bar(window);
@@ -734,22 +734,22 @@ GtkWidget * create_image_window()
 	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled_window), alignment);
 	gtk_container_add(GTK_CONTAINER(alignment), image);
 
-	gtk_signal_connect(GTK_OBJECT(scrolled_window), "button_press_event",
-			 GTK_SIGNAL_FUNC(sources_clicked_cb), window);
-	gtk_signal_connect(GTK_OBJECT(scrolled_window), "button_press_event",
-			 GTK_SIGNAL_FUNC(image_clicked_cb), window);
-	gtk_signal_connect(GTK_OBJECT(image), "motion_notify_event",
-			 GTK_SIGNAL_FUNC(motion_event_cb), window);
-	gtk_signal_connect(GTK_OBJECT(image), "expose_event",
-			 GTK_SIGNAL_FUNC(image_expose_cb), window);
+	g_signal_connect(G_OBJECT(scrolled_window), "button_press_event",
+			 G_CALLBACK(sources_clicked_cb), window);
+	g_signal_connect(G_OBJECT(scrolled_window), "button_press_event",
+			 G_CALLBACK(image_clicked_cb), window);
+	g_signal_connect(G_OBJECT(image), "motion_notify_event",
+			 G_CALLBACK(motion_event_cb), window);
+	g_signal_connect(G_OBJECT(image), "expose_event",
+			 G_CALLBACK(image_expose_cb), window);
 
 	gtk_widget_set_events(image,  GDK_BUTTON_PRESS_MASK
 			      | GDK_POINTER_MOTION_MASK
 			      | GDK_POINTER_MOTION_HINT_MASK);
 
-	gtk_object_set_data(GTK_OBJECT(window), "scrolled_window", scrolled_window);
-	gtk_object_set_data(GTK_OBJECT(window), "image_alignment", alignment);
-	gtk_object_set_data(GTK_OBJECT(window), "image", image);
+	g_object_set_data(G_OBJECT(window), "scrolled_window", scrolled_window);
+	g_object_set_data(G_OBJECT(window), "image_alignment", alignment);
+	g_object_set_data(G_OBJECT(window), "image", image);
 
   	gtk_window_set_default_size(GTK_WINDOW(window), 700, 500);
 
@@ -758,15 +758,15 @@ GtkWidget * create_image_window()
 	gtk_widget_show(vbox);
 
 	image_popup = get_image_popup_menu(window);
-	gtk_object_set_data_full(GTK_OBJECT(window), "image_popup", image_popup,
-			    (GtkDestroyNotify) gtk_widget_unref);
+	g_object_set_data_full(G_OBJECT(window), "image_popup", image_popup,
+			       (GDestroyNotify) g_object_unref);
 	star_popup_factory = get_star_popup_menu(window);
-	gtk_object_set_data_full(GTK_OBJECT(window), "star_popup_if", star_popup_factory,
-			    (GtkDestroyNotify) gtk_object_unref);
+	g_object_set_data_full(G_OBJECT(window), "star_popup_if", star_popup_factory,
+			       (GDestroyNotify) g_object_unref);
 
 //	gtk_widget_show_all(window);
 	gtk_widget_show(image_popup);
-	gdk_rgb_init();
+
 	return window;
 }
 
@@ -795,151 +795,153 @@ GtkWidget* create_about_cx (void)
 	GtkWidget *button1;
 
 	about_cx = gtk_dialog_new ();
-	gtk_object_set_data (GTK_OBJECT (about_cx), "about_cx", about_cx);
+	g_object_set_data (G_OBJECT (about_cx), "about_cx", about_cx);
 	gtk_window_set_title (GTK_WINDOW (about_cx), ("About gcx"));
 	GTK_WINDOW (about_cx)->type = GTK_WINDOW_TOPLEVEL;
 	gtk_window_set_position (GTK_WINDOW (about_cx), GTK_WIN_POS_CENTER);
-	gtk_window_set_policy (GTK_WINDOW (about_cx), TRUE, TRUE, FALSE);
+
+	//deprecated gtk_window_set_policy (GTK_WINDOW (about_cx), TRUE, TRUE, FALSE);
+	gtk_window_set_resizable (GTK_WINDOW (about_cx), TRUE);
 
 	dialog_vbox1 = GTK_DIALOG (about_cx)->vbox;
-	gtk_object_set_data (GTK_OBJECT (about_cx), "dialog_vbox1", dialog_vbox1);
+	g_object_set_data (G_OBJECT (about_cx), "dialog_vbox1", dialog_vbox1);
 	gtk_widget_show (dialog_vbox1);
 
 	vbox1 = gtk_vbox_new (FALSE, 0);
-	gtk_widget_ref (vbox1);
-	gtk_object_set_data_full (GTK_OBJECT (about_cx), "vbox1", vbox1,
-				  (GtkDestroyNotify) gtk_widget_unref);
+	g_object_ref (vbox1);
+	g_object_set_data_full (G_OBJECT (about_cx), "vbox1", vbox1,
+				  (GDestroyNotify) g_object_unref);
 	gtk_widget_show (vbox1);
 	gtk_box_pack_start (GTK_BOX (dialog_vbox1), vbox1, TRUE, TRUE, 0);
 
 	frame1 = gtk_frame_new ("gcx version " VERSION);
-	gtk_widget_ref (frame1);
-	gtk_object_set_data_full (GTK_OBJECT (about_cx), "frame1", frame1,
-				  (GtkDestroyNotify) gtk_widget_unref);
+	g_object_ref (frame1);
+	g_object_set_data_full (G_OBJECT (about_cx), "frame1", frame1,
+				  (GDestroyNotify) g_object_unref);
 	gtk_widget_show (frame1);
 	gtk_box_pack_start (GTK_BOX (vbox1), frame1, TRUE, TRUE, 0);
 	gtk_container_set_border_width (GTK_CONTAINER (frame1), 5);
 
 	vbox2 = gtk_vbox_new (TRUE, 0);
-	gtk_widget_ref (vbox2);
-	gtk_object_set_data_full (GTK_OBJECT (about_cx), "vbox2", vbox2,
-				  (GtkDestroyNotify) gtk_widget_unref);
+	g_object_ref (vbox2);
+	g_object_set_data_full (G_OBJECT (about_cx), "vbox2", vbox2,
+				  (GDestroyNotify) g_object_unref);
 	gtk_widget_show (vbox2);
 	gtk_container_add (GTK_CONTAINER (frame1), vbox2);
 	gtk_container_set_border_width (GTK_CONTAINER (vbox2), 5);
 
 	label3 = gtk_label_new (("A program that controls astronomical"));
-	gtk_widget_ref (label3);
-	gtk_object_set_data_full (GTK_OBJECT (about_cx), "label3", label3,
-				  (GtkDestroyNotify) gtk_widget_unref);
+	g_object_ref (label3);
+	g_object_set_data_full (G_OBJECT (about_cx), "label3", label3,
+				  (GDestroyNotify) g_object_unref);
 	gtk_widget_show (label3);
 	gtk_box_pack_start (GTK_BOX (vbox2), label3, FALSE, FALSE, 0);
 
 	label4 = gtk_label_new (("CCD cameras and does things on images."));
-	gtk_widget_ref (label4);
-	gtk_object_set_data_full (GTK_OBJECT (about_cx), "label4", label4,
-				  (GtkDestroyNotify) gtk_widget_unref);
+	g_object_ref (label4);
+	g_object_set_data_full (G_OBJECT (about_cx), "label4", label4,
+				  (GDestroyNotify) g_object_unref);
 	gtk_widget_show (label4);
 	gtk_box_pack_start (GTK_BOX (vbox2), label4, FALSE, FALSE, 0);
 
 	label5 = gtk_label_new (("(c) 2002-2009 Radu Corlan"));
-	gtk_widget_ref (label5);
-	gtk_object_set_data_full (GTK_OBJECT (about_cx), "label5", label5,
-				  (GtkDestroyNotify) gtk_widget_unref);
+	g_object_ref (label5);
+	g_object_set_data_full (G_OBJECT (about_cx), "label5", label5,
+				  (GDestroyNotify) g_object_unref);
 	gtk_widget_show (label5);
 	gtk_box_pack_start (GTK_BOX (vbox2), label5, FALSE, FALSE, 0);
 
 	label6 = gtk_label_new (("Tycho2 routines (c) 2002, 2003 Alexandru Dan Corlan"));
-	gtk_widget_ref (label6);
-	gtk_object_set_data_full (GTK_OBJECT (about_cx), "label6", label6,
-				  (GtkDestroyNotify) gtk_widget_unref);
+	g_object_ref (label6);
+	g_object_set_data_full (G_OBJECT (about_cx), "label6", label6,
+				  (GDestroyNotify) g_object_unref);
 	gtk_widget_show (label6);
 	gtk_box_pack_start (GTK_BOX (vbox2), label6, FALSE, FALSE, 0);
 
 	label12 = gtk_label_new (("WCS conversion routines from Classic AIPS"));
-	gtk_widget_ref (label12);
-	gtk_object_set_data_full (GTK_OBJECT (about_cx), "label12", label12,
-				  (GtkDestroyNotify) gtk_widget_unref);
+	g_object_ref (label12);
+	g_object_set_data_full (G_OBJECT (about_cx), "label12", label12,
+				  (GDestroyNotify) g_object_unref);
 	gtk_widget_show (label12);
 	gtk_box_pack_start (GTK_BOX (vbox2), label12, FALSE, FALSE, 0);
 
 	label7 = gtk_label_new (("Sidereal time routines from libnova (c) 2000 Liam Girdwood"));
-	gtk_widget_ref (label7);
-	gtk_object_set_data_full (GTK_OBJECT (about_cx), "label7", label7,
-				  (GtkDestroyNotify) gtk_widget_unref);
+	g_object_ref (label7);
+	g_object_set_data_full (G_OBJECT (about_cx), "label7", label7,
+				  (GDestroyNotify) g_object_unref);
 	gtk_widget_show (label7);
 	gtk_box_pack_start (GTK_BOX (vbox2), label7, FALSE, FALSE, 0);
 
 	label13 = gtk_label_new (("GUI improvements (c) 2005 Pertti Paakkonen"));
-	gtk_widget_ref (label13);
-	gtk_object_set_data_full (GTK_OBJECT (about_cx), "label13", label13,
-				  (GtkDestroyNotify) gtk_widget_unref);
+	g_object_ref (label13);
+	g_object_set_data_full (G_OBJECT (about_cx), "label13", label13,
+				  (GDestroyNotify) g_object_unref);
 	gtk_widget_show (label13);
 	gtk_box_pack_start (GTK_BOX (vbox2), label13, FALSE, FALSE, 0);
 
 	label14 = gtk_label_new (("gtk2 port and DSLR raw file support (c) 2009 Matei Conovici"));
-	gtk_widget_ref (label14);
-	gtk_object_set_data_full (GTK_OBJECT (about_cx), "label14", label14,
-				  (GtkDestroyNotify) gtk_widget_unref);
+	g_object_ref (label14);
+	g_object_set_data_full (G_OBJECT (about_cx), "label14", label14,
+				  (GDestroyNotify) g_object_unref);
 	gtk_widget_show (label14);
 	gtk_box_pack_start (GTK_BOX (vbox2), label14, FALSE, FALSE, 0);
 
 	label15 = gtk_label_new (("Full-color enhancements (c) 2009 Geoffrey Hausheer"));
-	gtk_widget_ref (label15);
-	gtk_object_set_data_full (GTK_OBJECT (about_cx), "label15", label15,
-				  (GtkDestroyNotify) gtk_widget_unref);
+	g_object_ref (label15);
+	g_object_set_data_full (G_OBJECT (about_cx), "label15", label15,
+				  (GDestroyNotify) g_object_unref);
 	gtk_widget_show (label15);
 	gtk_box_pack_start (GTK_BOX (vbox2), label15, FALSE, FALSE, 0);
 
 	hseparator1 = gtk_hseparator_new ();
-	gtk_widget_ref (hseparator1);
-	gtk_object_set_data_full (GTK_OBJECT (about_cx), "hseparator1", hseparator1,
-				  (GtkDestroyNotify) gtk_widget_unref);
+	g_object_ref (hseparator1);
+	g_object_set_data_full (G_OBJECT (about_cx), "hseparator1", hseparator1,
+				  (GDestroyNotify) g_object_unref);
 	gtk_widget_show (hseparator1);
 	gtk_box_pack_start (GTK_BOX (vbox2), hseparator1, FALSE, FALSE, 0);
 
 	label8 = gtk_label_new (("gcx comes with ABSOLUTELY NO WARRANTY"));
-	gtk_widget_ref (label8);
-	gtk_object_set_data_full (GTK_OBJECT (about_cx), "label8", label8,
-				  (GtkDestroyNotify) gtk_widget_unref);
+	g_object_ref (label8);
+	g_object_set_data_full (G_OBJECT (about_cx), "label8", label8,
+				  (GDestroyNotify) g_object_unref);
 	gtk_widget_show (label8);
 	gtk_box_pack_start (GTK_BOX (vbox2), label8, FALSE, FALSE, 0);
 
 	label9 = gtk_label_new (("This is free software, distributed under"));
-	gtk_widget_ref (label9);
-	gtk_object_set_data_full (GTK_OBJECT (about_cx), "label9", label9,
-				  (GtkDestroyNotify) gtk_widget_unref);
+	g_object_ref (label9);
+	g_object_set_data_full (G_OBJECT (about_cx), "label9", label9,
+				  (GDestroyNotify) g_object_unref);
 	gtk_widget_show (label9);
 	gtk_box_pack_start (GTK_BOX (vbox2), label9, FALSE, FALSE, 0);
 
 	label10 = gtk_label_new (("the GNU General Public License v2 or later;"));
-	gtk_widget_ref (label10);
-	gtk_object_set_data_full (GTK_OBJECT (about_cx), "label10", label10,
-				  (GtkDestroyNotify) gtk_widget_unref);
+	g_object_ref (label10);
+	g_object_set_data_full (G_OBJECT (about_cx), "label10", label10,
+				  (GDestroyNotify) g_object_unref);
 	gtk_widget_show (label10);
 	gtk_box_pack_start (GTK_BOX (vbox2), label10, FALSE, FALSE, 0);
 
 	label11 = gtk_label_new (("See file 'COPYING' for details."));
-	gtk_widget_ref (label11);
-	gtk_object_set_data_full (GTK_OBJECT (about_cx), "label11", label11,
-				  (GtkDestroyNotify) gtk_widget_unref);
+	g_object_ref (label11);
+	g_object_set_data_full (G_OBJECT (about_cx), "label11", label11,
+				  (GDestroyNotify) g_object_unref);
 	gtk_widget_show (label11);
 	gtk_box_pack_start (GTK_BOX (vbox2), label11, FALSE, FALSE, 0);
 
 	dialog_action_area1 = GTK_DIALOG (about_cx)->action_area;
-	gtk_object_set_data (GTK_OBJECT (about_cx), "dialog_action_area1", dialog_action_area1);
+	g_object_set_data (G_OBJECT (about_cx), "dialog_action_area1", dialog_action_area1);
 	gtk_widget_show (dialog_action_area1);
 	gtk_container_set_border_width (GTK_CONTAINER (dialog_action_area1), 10);
 
 	button1 = gtk_button_new_with_label("Close");
-	gtk_widget_ref (button1);
-	gtk_object_set_data_full (GTK_OBJECT (about_cx), "button1", button1,
-				  (GtkDestroyNotify) gtk_widget_unref);
+	g_object_ref (button1);
+	g_object_set_data_full (G_OBJECT (about_cx), "button1", button1,
+				(GDestroyNotify) g_object_unref);
 	gtk_widget_show (button1);
 	gtk_box_pack_start (GTK_BOX (dialog_action_area1), button1, FALSE, FALSE, 0);
 
-	gtk_signal_connect (GTK_OBJECT (button1), "clicked",
-			    GTK_SIGNAL_FUNC (close_about_cx),
+	g_signal_connect (G_OBJECT (button1), "clicked",
+			    G_CALLBACK (close_about_cx),
 			    about_cx);
 
 	return about_cx;

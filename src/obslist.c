@@ -1,23 +1,23 @@
 /*******************************************************************************
   Copyright(c) 2000 - 2003 Radu Corlan. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: radu@corlan.net
 *******************************************************************************/
 
@@ -114,8 +114,8 @@ static struct command cmd_table[] = {
 };
 
 
-/* parse a command header, and update the cmd and arg pointers with 
- * the command name and args, respectively. If args or name cannot be 
+/* parse a command header, and update the cmd and arg pointers with
+ * the command name and args, respectively. If args or name cannot be
  * found, the pointers are set to null. return the length of the
  * command name, or a negative error code.
  */
@@ -220,14 +220,14 @@ static int obs_list_cmd_done(GtkWidget *dialog)
 	return FALSE;
 }
 
-/* actual obs commands - which are really parts of the state machine 
+/* actual obs commands - which are really parts of the state machine
  * they all get called from the OBS_DO_COMMAND state, and return the state
  * the machine should jump to. The commands generally manipulate the cam_control
  * widgets */
 
 static int do_get_cmd (char *args, GtkWidget *dialog)
 {
-	GtkWidget *main_window = gtk_object_get_data(GTK_OBJECT(dialog), "image_window");
+	GtkWidget *main_window = g_object_get_data(G_OBJECT(dialog), "image_window");
 	struct camera_t *camera = camera_find(main_window, CAMERA_MAIN);
 	if(! camera) {
 		err_printf("no camera connected\n");
@@ -253,7 +253,7 @@ static int do_filter_cmd (char *args, GtkWidget *dialog)
 	int i;
 	char **filters;
 
-	window = gtk_object_get_data(GTK_OBJECT(dialog), "image_window");
+	window = g_object_get_data(G_OBJECT(dialog), "image_window");
 	fwheel = fwheel_find(window);
 	if (! fwheel) {
 		err_printf("No filter wheel detected\n");
@@ -267,11 +267,11 @@ static int do_filter_cmd (char *args, GtkWidget *dialog)
 			break;
 		}
 		i++;
-	} 
+	}
 	i = 0;
 	while (*filters != NULL) {
 		if (!strcasecmp(*filters, args)) {
-			combo = gtk_object_get_data(GTK_OBJECT(dialog), "obs_filter_combo");
+			combo = g_object_get_data(G_OBJECT(dialog), "obs_filter_combo");
 			gtk_list_select_item(GTK_LIST(GTK_COMBO(combo) -> list), i);
 			INDI_set_callback(INDI_COMMON (fwheel), FWHEEL_CALLBACK_DONE,
 			                  obs_list_cmd_done, dialog);
@@ -301,7 +301,7 @@ static int do_exp_cmd (char *args, GtkWidget *dialog)
 
 static int do_dark_cmd (char *args, GtkWidget *dialog)
 {
-	GtkWidget *main_window = gtk_object_get_data(GTK_OBJECT(dialog), "image_window");
+	GtkWidget *main_window = g_object_get_data(G_OBJECT(dialog), "image_window");
 	struct camera_t *camera = camera_find(main_window, CAMERA_MAIN);
 	if(! camera) {
 		err_printf("no camera connected\n");
@@ -395,7 +395,7 @@ static int do_goto_cmd (char *args, GtkWidget *dialog)
 	set_obs_object(dialog, start);
 	if (token == TOK_WORD || token == TOK_STRING) {
 		*(end2) = 0;
-		window =  gtk_object_get_data(GTK_OBJECT(dialog), "image_window");
+		window =  g_object_get_data(G_OBJECT(dialog), "image_window");
 		if (window == NULL) {
 			err_printf("no image window\n");
 			return OBS_CMD_ERROR;
@@ -417,7 +417,7 @@ static int do_match_cmd (char *args, GtkWidget *dialog)
 	void *imw;
 	struct tele_t *tele;
 	int ret;
-	imw = gtk_object_get_data(GTK_OBJECT(dialog), "image_window");
+	imw = g_object_get_data(G_OBJECT(dialog), "image_window");
 	g_return_val_if_fail(imw != NULL, OBS_CMD_ERROR);
 	tele = tele_find(imw);
 	if(! tele) {
@@ -441,7 +441,7 @@ static int do_mget_cmd (char *args, GtkWidget *dialog)
 	char *text, *start, *end;
 	int token, n;
 
-	GtkWidget *main_window = gtk_object_get_data(GTK_OBJECT(dialog), "image_window");
+	GtkWidget *main_window = g_object_get_data(G_OBJECT(dialog), "image_window");
 	struct camera_t *camera = camera_find(main_window, CAMERA_MAIN);
 	if(! camera) {
 		err_printf("no camera connected\n");
@@ -498,7 +498,7 @@ static int do_ckpoint_cmd (char *args, GtkWidget *dialog)
 	double cerr;
 	struct tele_t *tele;
 
-	imw = gtk_object_get_data(GTK_OBJECT(dialog), "image_window");
+	imw = g_object_get_data(G_OBJECT(dialog), "image_window");
 	g_return_val_if_fail(imw != NULL, OBS_CMD_ERROR);
 	tele = tele_find(imw);
 	if(! tele) {
@@ -512,12 +512,12 @@ static int do_ckpoint_cmd (char *args, GtkWidget *dialog)
 		return OBS_CMD_ERROR;
 	}
 
-	obs = gtk_object_get_data(GTK_OBJECT(dialog), "obs_data");
+	obs = g_object_get_data(G_OBJECT(dialog), "obs_data");
 	if (obs == NULL) {
 		err_printf("No obs data for centering\n");
 		return OBS_CMD_ERROR;
 	}
-	wcs = gtk_object_get_data(GTK_OBJECT(imw), "wcs_of_window");
+	wcs = g_object_get_data(G_OBJECT(imw), "wcs_of_window");
 	if (wcs == NULL || wcs->wcsset == WCS_INVALID) {
 		err_printf("No wcs for centering\n");
 		return OBS_CMD_ERROR;
@@ -540,7 +540,7 @@ static int do_phot_cmd (char *args, GtkWidget *dialog)
 	FILE *fp;
 	int ret;
 
-	imw = gtk_object_get_data(GTK_OBJECT(dialog), "image_window");
+	imw = g_object_get_data(G_OBJECT(dialog), "image_window");
 	if (imw == NULL) {
 		err_printf("No image window\n");
 		return OBS_CMD_ERROR;
@@ -566,16 +566,16 @@ static int do_phot_cmd (char *args, GtkWidget *dialog)
 }
 
 static int do_save_cmd (char *args, GtkWidget *dialog)
-{	
+{
 	void *imw;
 	struct image_channel *imch;
 
-	imw = gtk_object_get_data(GTK_OBJECT(dialog), "image_window");
+	imw = g_object_get_data(G_OBJECT(dialog), "image_window");
 	if (imw == NULL) {
 		err_printf("No image window\n");
 		return OBS_CMD_ERROR;
 	}
-	imch = gtk_object_get_data(GTK_OBJECT(imw), "i_channel");
+	imch = g_object_get_data(G_OBJECT(imw), "i_channel");
 	if ((imch == NULL) || (imch->fr == NULL)) {
 		err_printf("No frame to save\n");
 		return OBS_CMD_ERROR;
@@ -594,7 +594,7 @@ static int do_qmatch_cmd (char *args, GtkWidget *dialog)
 {
 	void *imw;
 	int ret;
-	imw = gtk_object_get_data(GTK_OBJECT(dialog), "image_window");
+	imw = g_object_get_data(G_OBJECT(dialog), "image_window");
 	g_return_val_if_fail(imw != NULL, OBS_CMD_ERROR);
 	ret = match_field_in_window_quiet(imw);
 	if (ret < 0) {
@@ -612,7 +612,7 @@ static int lx_sync_to_obs(gpointer dialog)
 	int ret;
 	GtkWidget *main_window = g_object_get_data(G_OBJECT (dialog), "image_window");
 
-	obs = gtk_object_get_data(GTK_OBJECT(dialog), "obs_data");
+	obs = g_object_get_data(G_OBJECT(dialog), "obs_data");
 	if (obs == NULL) {
 		err_printf("No obs data for syncing\n");
 		return -1;
@@ -632,8 +632,8 @@ static void center_selected(gpointer user_data, GtkList *list, int index)
 	double nv;
 	int all;
 
-	all = GPOINTER_TO_INT(gtk_object_get_data(GTK_OBJECT(user_data), "commands"));
-	scw = gtk_object_get_data(GTK_OBJECT(user_data), "obs_list_scrolledwin");
+	all = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(user_data), "commands"));
+	scw = g_object_get_data(G_OBJECT(user_data), "obs_list_scrolledwin");
 	vadj =  gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(scw));
 	d3_printf("vadj at %.3f\n", vadj->value);
 	if (all != 0) {
@@ -649,7 +649,7 @@ void obs_list_start_cb(GtkWidget *widget, gpointer data)
 	GtkWidget *dialog = (GtkWidget *)data;
 	GtkWidget *list;
 
-	list = gtk_object_get_data(GTK_OBJECT(dialog), "list1");
+	list = g_object_get_data(G_OBJECT(dialog), "list1");
 	g_return_if_fail(list != NULL);
 	if (get_named_checkb_val(dialog, "obs_list_run_button")) {
 		obs_list_set_state(dialog, OBS_DO_COMMAND);
@@ -669,13 +669,13 @@ void obs_list_sm(GtkWidget *dialog)
 	long state;
 
 	state = (long)g_object_get_data(G_OBJECT (dialog), "obs_list_state");
-	list = gtk_object_get_data(GTK_OBJECT(dialog), "list1");
+	list = g_object_get_data(G_OBJECT(dialog), "list1");
 	g_return_if_fail(list != NULL);
 
 	d4_printf("obs_list_sm state: %d\n", state);
 	switch(state) {
 	case OBS_DO_COMMAND:
-		index = GPOINTER_TO_INT(gtk_object_get_data(GTK_OBJECT(dialog), "index"));
+		index = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(dialog), "index"));
 		obslist_background(dialog, OBSLIST_BACKGROUND_RUNNING);
 		cmd = get_cmd_line(GTK_LIST(list), index);
 		d3_printf("Command: %s\n", cmd);
@@ -693,7 +693,7 @@ void obs_list_sm(GtkWidget *dialog)
 			//There isn't ever a reason to set the state to START, since this
 			//state machine is event driven
 			//state = OBS_START;
-//			if (gtk_object_get_data(GTK_OBJECT(dialog), "batch_mode")) {
+//			if (g_object_get_data(G_OBJECT(dialog), "batch_mode")) {
 //				err_printf("Error in obs file processing, exiting\n");
 //				gtk_exit(2);
 //			}
@@ -704,8 +704,8 @@ void obs_list_sm(GtkWidget *dialog)
 	case OBS_SKIP_OBJECT:
 		error_beep();
 		status_message(dialog, last_err());
-		index = GPOINTER_TO_INT(gtk_object_get_data(GTK_OBJECT(dialog), "index"));
-		all = GPOINTER_TO_INT(gtk_object_get_data(GTK_OBJECT(dialog), "commands"));
+		index = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(dialog), "index"));
+		all = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(dialog), "commands"));
 		cmdo = get_cmd_line(GTK_LIST(list), index);
 		clo = cmd_head(cmdo, &cmdho, NULL);
 		index ++;
@@ -730,25 +730,25 @@ void obs_list_sm(GtkWidget *dialog)
 			//There isn't ever a reason to set the state to START, since this
 			//state machine is event driven
 			//state = OBS_START;
-			if (gtk_object_get_data(GTK_OBJECT(dialog), "batch_mode")) {
+			if (g_object_get_data(G_OBJECT(dialog), "batch_mode")) {
 				err_printf("obs file processing finished successfully\n");
-				gtk_exit(0);
+				exit(0);
 			}
 			break;
 		}
 		break;
 	case OBS_NEXT_COMMAND:
-		index = GPOINTER_TO_INT(gtk_object_get_data(GTK_OBJECT(dialog), "index"));
-		all = GPOINTER_TO_INT(gtk_object_get_data(GTK_OBJECT(dialog), "commands"));
+		index = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(dialog), "index"));
+		all = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(dialog), "commands"));
 		if (index + 1 >= all) {
 			set_named_checkb_val(dialog, "obs_list_run_button", 0);
 			obslist_background(dialog, OBSLIST_BACKGROUND_DONE);
 			//There isn't ever a reason to set the state to START, since this
 			//state machine is event driven
 			//state = OBS_START;
-			if (gtk_object_get_data(GTK_OBJECT(dialog), "batch_mode")) {
+			if (g_object_get_data(G_OBJECT(dialog), "batch_mode")) {
 				err_printf("obs file processing finished successfully\n");
-				gtk_exit(0);
+				exit(0);
 			}
 			break;
 		}
@@ -767,7 +767,7 @@ static void browse_cb( GtkWidget *widget, gpointer dialog)
 {
 	GtkWidget *entry;
 
-	entry = gtk_object_get_data(GTK_OBJECT(dialog), "obs_list_fname");
+	entry = g_object_get_data(G_OBJECT(dialog), "obs_list_fname");
 	g_return_if_fail(entry != NULL);
 	file_select_to_entry(dialog, entry, "Select Obslist File Name", "*.obs", 1);
 }
@@ -778,7 +778,7 @@ void obs_list_callbacks(GtkWidget *dialog)
 	GtkWidget *combo;
 	set_named_callback(dialog, "list1", "select-child", obs_list_select_cb);
 	set_named_callback(dialog, "obs_list_file_button", "clicked", browse_cb);
-	combo = gtk_object_get_data(GTK_OBJECT(dialog), "obs_list_fname_combo");
+	combo = g_object_get_data(G_OBJECT(dialog), "obs_list_fname_combo");
 	gtk_combo_disable_activate(GTK_COMBO(combo));
 	set_named_callback(dialog, "obs_list_run_button", "clicked", obs_list_start_cb);
 	set_named_callback(dialog, "obs_list_step_button", "clicked", obs_list_start_cb);
@@ -818,8 +818,8 @@ static void obs_list_select_cb (GtkList *list, GtkWidget *widget, gpointer user_
 
 	gtk_label_get(GTK_LABEL(GTK_BIN(widget)->child), &text);
 	index = gtk_list_child_position(list, widget);
-	gtk_object_set_data(GTK_OBJECT(user_data), "index", GINT_TO_POINTER(index));
-	all = GPOINTER_TO_INT(gtk_object_get_data(GTK_OBJECT(user_data), "commands"));
+	g_object_set_data(G_OBJECT(user_data), "index", GINT_TO_POINTER(index));
+	all = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(user_data), "commands"));
 	d3_printf("obslist cmd[%d/%d]: %s\n", index, all, text);
 }
 
@@ -836,13 +836,14 @@ static int obs_list_load_file(GtkWidget *dialog, char *name)
 	size_t len = 0, ret, items = 0;
 
 	d3_printf("obs filename: %s\n", name);
-	list = gtk_object_get_data(GTK_OBJECT(dialog), "list1");
+
+	list = g_object_get_data(G_OBJECT(dialog), "list1");
 	g_return_val_if_fail(list != NULL, -1);
 
 	gtk_widget_restore_default_style(GTK_WIDGET(list));
 	gtk_widget_hide(GTK_WIDGET(list));
 	gtk_widget_show(GTK_WIDGET(list));
-		
+
 	fp = fopen(name, "r");
 	if (fp == NULL) {
 		error_beep();
@@ -852,23 +853,23 @@ static int obs_list_load_file(GtkWidget *dialog, char *name)
 	gtk_list_clear_items(GTK_LIST(list), 0, -1);
 	while ((ret = getline(&line, &len, fp)) > 0) {
 		if (line[ret-1] == '\n')
-			line[ret-1] = 0; 
+			line[ret-1] = 0;
 		list_item=gtk_list_item_new_with_label(line);
 		dlist=g_list_append(dlist, list_item);
 		gtk_widget_show(list_item);
 		items ++;
 	}
 	gtk_list_append_items(GTK_LIST(list), dlist);
-	gtk_object_set_data(GTK_OBJECT(dialog), "commands", (gpointer)items);
-//	gtk_list_select_item(GTK_LIST(list), 0);
+	g_object_set_data(G_OBJECT(dialog), "commands", (gpointer)items);
+
 	fclose(fp);
-	if (line)
-		free(line);
+
+	free(line);
 	return 0;
 }
 
 /* run an obs file; return 0 if the file launches successfuly
- * the obs state machine is instructed to exit the main loop 
+ * the obs state machine is instructed to exit the main loop
  * when the obs list is finished */
 
 int run_obs_file(gpointer window, char *obsf)
@@ -880,7 +881,7 @@ int run_obs_file(gpointer window, char *obsf)
 
 /* launch the cam dialog */
 	camera_cb(window, 0, NULL);
-	dialog = gtk_object_get_data(GTK_OBJECT(window), "cam_dialog");
+	dialog = g_object_get_data(G_OBJECT(window), "cam_dialog");
 	if (dialog == NULL) {
 		err_printf("Could not create camera dialog\n");
 		return -1;
@@ -890,7 +891,7 @@ int run_obs_file(gpointer window, char *obsf)
 		err_printf("Could not load obs file %s\n", obsf);
 		return ret;
 	}
-	gtk_object_set_data(GTK_OBJECT(dialog), "batch_mode", (void *) 1);
+	g_object_set_data(G_OBJECT(dialog), "batch_mode", (void *) 1);
 	set_named_checkb_val(dialog, "obs_list_run_button", 1);
 	return 0;
 }
@@ -919,7 +920,7 @@ static void get_color_action(int action, GdkColor *color, GdkColormap *cmap)
 		color->blue = 0;
 		break;
 	}
-	if (!gdk_color_alloc(cmap, color)) {
+	if (!gdk_colormap_alloc_color(cmap, color, FALSE, TRUE)) {
 		g_error("couldn't allocate color");
 	}
 }
@@ -935,7 +936,7 @@ static void obslist_background(gpointer window, int action)
 	cmap = gdk_colormap_get_system();
 	get_color_action(action, &color, cmap);
 
-	list = gtk_object_get_data(GTK_OBJECT(window), "list1");
+	list = g_object_get_data(G_OBJECT(window), "list1");
 	g_return_if_fail(list != NULL);
 
 	if (action == OBSLIST_BACKGROUND_RUNNING) {
@@ -944,13 +945,13 @@ static void obslist_background(gpointer window, int action)
 		rcstyle = gtk_rc_style_new();
 		for (i = 0; i < 5; i++) {
 			get_color_action(action, &rcstyle->base[i],
-					 gdk_colormap_get_system());	
+					 gdk_colormap_get_system());
 			rcstyle->color_flags[i] = GTK_RC_BASE;
 		}
 		gtk_widget_modify_style(list, rcstyle);
-		gtk_rc_style_unref(rcstyle);
+		g_object_unref(rcstyle);
 	}
-		
+
 	gtk_widget_hide(GTK_WIDGET(list));
 	gtk_widget_show(GTK_WIDGET(list));
 }

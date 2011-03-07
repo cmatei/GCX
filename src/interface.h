@@ -8,6 +8,12 @@ enum {
 	IMFL_COL_SIZE
 };
 
+/* columns for the obslist GtkListStore */
+enum {
+	OBSL_COL_COMMAND = 0,
+
+	OBSL_COL_SIZE
+};
 
 
 GtkWidget* create_pstar (void);

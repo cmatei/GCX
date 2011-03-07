@@ -1,23 +1,23 @@
 /*******************************************************************************
   Copyright(c) 2000 - 2003 Radu Corlan. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: radu@corlan.net
 *******************************************************************************/
 
@@ -51,33 +51,33 @@ void try_wcs_from_frame_obs(struct ccd_frame *fr, struct wcs *wcs)
 	char name[80];
 	int w_ref_count;
 
-	if (fits_get_double(fr, P_STR(FN_RA), &ra) > 0) 
+	if (fits_get_double(fr, P_STR(FN_RA), &ra) > 0)
 		havera = 1;
 	else if (fits_get_dms(fr, P_STR(FN_RA), &ra) > 0) {
 		havera = 1;
 		ra *= 15.0;
-	} else if (fits_get_double(fr, P_STR(FN_OBJCTRA), &ra) > 0) 
+	} else if (fits_get_double(fr, P_STR(FN_OBJCTRA), &ra) > 0)
 		havera = 1;
 	else if (fits_get_dms(fr, P_STR(FN_OBJCTRA), &ra) > 0) {
 		havera = 1;
 		ra *= 15.0;
-	} 
+	}
 
-	if (fits_get_double(fr, P_STR(FN_DEC), &dec) > 0) 
+	if (fits_get_double(fr, P_STR(FN_DEC), &dec) > 0)
 		havedec = 1;
 	else if (fits_get_dms(fr, P_STR(FN_DEC), &dec) > 0)
 		havedec = 1;
-	else if (fits_get_double(fr, P_STR(FN_OBJCTDEC), &dec) > 0) 
+	else if (fits_get_double(fr, P_STR(FN_OBJCTDEC), &dec) > 0)
 		havedec = 1;
-	else if (fits_get_dms(fr, P_STR(FN_OBJCTDEC), &dec) > 0) 
+	else if (fits_get_dms(fr, P_STR(FN_OBJCTDEC), &dec) > 0)
 		havedec = 1;
 
-	if (fits_get_double(fr, P_STR(FN_EQUINOX), &eq) > 0) 
+	if (fits_get_double(fr, P_STR(FN_EQUINOX), &eq) > 0)
 		haveeq = 1;
-	else if (fits_get_double(fr, P_STR(FN_EPOCH), &eq) > 0) 
+	else if (fits_get_double(fr, P_STR(FN_EPOCH), &eq) > 0)
 		haveeq = 1;
 
-	if (fits_get_double(fr, P_STR(FN_SECPIX), &scale) > 0) 
+	if (fits_get_double(fr, P_STR(FN_SECPIX), &scale) > 0)
 		havescale = 1;
 
 	if (!havera || !havedec) {
@@ -115,7 +115,7 @@ void try_wcs_from_frame_obs(struct ccd_frame *fr, struct wcs *wcs)
 	wcs->ref_count = w_ref_count;
 }
 
-/* adjust the current wcs when a new frame is loaded 
+/* adjust the current wcs when a new frame is loaded
  */
 void wcs_from_frame(struct ccd_frame *fr, struct wcs *wcs)
 {
@@ -135,35 +135,35 @@ void wcs_from_frame(struct ccd_frame *fr, struct wcs *wcs)
 		try_wcs_from_frame_obs(fr, wcs);
 	}
 	wcs->jd = frame_jdate(fr);
-	if (wcs->jd != 0.0) 
+	if (wcs->jd != 0.0)
 		wcs->flags |= WCS_JD_VALID;
 	else
 		wcs->flags &= ~WCS_JD_VALID;
 
 	if (fits_get_double(fr, P_STR(FN_LATITUDE), &lat) > 0) {
-		d1_printf("using latitude = %.3f from %s\n", 
+		d1_printf("using latitude = %.3f from %s\n",
 			  lng, P_STR(FN_LATITUDE));
 		hla = 1;
 	} else if (fits_get_string(fr, P_STR(FN_LATITUDE), s, 79) > 0) {
 		if (!dms_to_degrees(s, &lat)) {
-			d1_printf("using latitude = %.3f from %s\n", 
+			d1_printf("using latitude = %.3f from %s\n",
 				  lat, P_STR(FN_LATITUDE));
 			hla = 1;
 		}
 	}
 	if (fits_get_double(fr, P_STR(FN_LONGITUDE), &lng) > 0) {
-		d1_printf("using %s longitude = %.3f from %s\n", 
-			  P_INT(FILE_WESTERN_LONGITUDES) ? "western" : "eastern", 
+		d1_printf("using %s longitude = %.3f from %s\n",
+			  P_INT(FILE_WESTERN_LONGITUDES) ? "western" : "eastern",
 			  lng, P_STR(FN_LONGITUDE));
 		hlo = 1;
 	} else if (fits_get_string(fr, P_STR(FN_LONGITUDE), s, 79) > 0) {
 		if (!dms_to_degrees(s, &lng)) {
-			d1_printf("using %s longitude = %.3f from %s\n", 
-				  P_INT(FILE_WESTERN_LONGITUDES) ? "western" : "eastern", 
+			d1_printf("using %s longitude = %.3f from %s\n",
+				  P_INT(FILE_WESTERN_LONGITUDES) ? "western" : "eastern",
 				  lng, P_STR(FN_LONGITUDE));
 			hlo = 1;
 		}
-	} 
+	}
 	if (hlo) {
 		if (!P_INT(FILE_WESTERN_LONGITUDES))
 			lng = -lng;
@@ -209,8 +209,8 @@ void wcs_release(struct wcs *wcs)
 /* call xypix and worldpos with wcs data from a struct wcs */
 int w_xypix(struct wcs *wcs, double xpos, double ypos, double *xpix, double *ypix)
 {
-	return xypix(xpos, ypos, wcs->xref, wcs->yref, wcs->xrefpix, 
-		     wcs->yrefpix, wcs->xinc, wcs->yinc, wcs->rot, 
+	return xypix(xpos, ypos, wcs->xref, wcs->yref, wcs->xrefpix,
+		     wcs->yrefpix, wcs->xinc, wcs->yinc, wcs->rot,
 		     "-TAN", xpix, ypix);
 }
 
@@ -230,8 +230,8 @@ void refracted_from_true(double *ra, double *dec, double jd, double lat, double 
 
 
 
-/* calculate the apparent position of a cat_star, for the epoch of jd. Nutation, 
-   abberation, obliquity, parallax and deflection are not taken into account 
+/* calculate the apparent position of a cat_star, for the epoch of jd. Nutation,
+   abberation, obliquity, parallax and deflection are not taken into account
    - their effect is supposedly  "absorbed" in the wcs fit. */
 void cats_apparent_pos(struct cat_star *cats, double *raa, double *deca, double jd)
 {
@@ -270,7 +270,7 @@ void true_from_refracted(double *ra, double *dec, double jd, double lat, double 
 			break;
 		}
 		alt = aalt - R;
-	} 
+	}
 //	d3_printf("alt:%.3f R:%.5f i=%d\n", alt, R, i);
 	get_equ_from_hrz_sidereal_time (alt, az, lng, lat, gast, ra, dec);
 }
@@ -292,7 +292,7 @@ int w_worldpos(struct wcs *wcs, double xpix, double ypix, double *xpos, double *
 			refracted_from_true(&xref, &yref, wcs->jd, wcs->lat, wcs->lng);
 		}
 	}
-	worldpos(X, E, xref, yref, 0.0, 
+	worldpos(X, E, xref, yref, 0.0,
 		 0.0, 1.0, 1.0, 0.0, "-TAN", &ra, &dec);
 //	d3_printf("pix apparent ra:%.4f dec:%.4f\n", ra, dec);
 	if (wcs->flags & WCS_JD_VALID) {
@@ -309,9 +309,9 @@ int w_worldpos(struct wcs *wcs, double xpix, double ypix, double *xpos, double *
 	return 0;
 }
 
-/* calculate the projection plane coordinates (xi, eta) of a cat_star, for the epoch of jd. 
-   If lat and lng are provided (either of them non-zero), refraction is taken into account. 
-   Nutation, abberation, obliquity, parallax and deflection are not taken into account 
+/* calculate the projection plane coordinates (xi, eta) of a cat_star, for the epoch of jd.
+   If lat and lng are provided (either of them non-zero), refraction is taken into account.
+   Nutation, abberation, obliquity, parallax and deflection are not taken into account
    - their effect is supposed to be "absorbed" in the wcs fit. */
 void cats_to_XE (struct wcs *wcs, struct cat_star *cats, double *X, double *E)
 {
@@ -336,31 +336,31 @@ void cats_to_XE (struct wcs *wcs, struct cat_star *cats, double *X, double *E)
 //	d3_printf("apparent X:%.4f E:%.4f\n", *X, *E);
 }
 
-/* calculate the pixel position of a cat_star, for the epoch of jd. If lat and lng are 
-   provided (either of them non-zero), refraction is taken into account. Nutation, 
-   abberation, obliquity, parallax and deflection are not taken into account 
+/* calculate the pixel position of a cat_star, for the epoch of jd. If lat and lng are
+   provided (either of them non-zero), refraction is taken into account. Nutation,
+   abberation, obliquity, parallax and deflection are not taken into account
    - their effect is supposed to be "absorbed" in the wcs fit. */
 void cats_xypix (struct wcs *wcs, struct cat_star *cats, double *xpix, double *ypix)
 {
-	double X, E; 
+	double X, E;
 #ifdef CHECK_WCS_CLOSURE
 	double cra, cdec, cle = 0.0;
 #endif
 	cats_to_XE(wcs, cats, &X, &E);
 	XE_to_xy(wcs, X, E, xpix, ypix);
 //	d3_printf("apparent x:%.4f y:%.4f\n", *xpix, *ypix);
-	
+
 #ifdef CHECK_WCS_CLOSURE
 	xy_to_XE(wcs, *xpix, *ypix, &cra, &cdec);
 	cle = 3600.0 * sqrt(sqr(cra - X) + sqr(cdec - E));
 #ifdef CHECK_WCS_CLOSURE_WORLD
 	w_worldpos(wcs, *xpix, *ypix, &cra, &cdec);
 	cle = 3600.0 * sqrt(sqr(cra - cats->ra) + sqr(cdec - cats->dec));
-	d4_printf("wcs closure error at %.4f, %.4f is %.3g arcsec\n", 
+	d4_printf("wcs closure error at %.4f, %.4f is %.3g arcsec\n",
 		  cats->ra, cats->dec, cle);
 #endif
 	if (cle > 0.001) {
-		err_printf("wcs closure error at %.4f, %.4f is %.3g arcsec!\n", 
+		err_printf("wcs closure error at %.4f, %.4f is %.3g arcsec!\n",
 			   cats->ra, cats->dec, cle);
 	}
 #endif
@@ -428,7 +428,7 @@ void cat_change_wcs(GSList *sl, struct wcs *wcs)
 			cats = CAT_STAR(gs->s);
 //			w_xypix(wcs, cats->ra, cats->dec, &(gs->x), &(gs->y));
 			cats_xypix(wcs, cats, &(gs->x), &(gs->y));
-		} 
+		}
 		sl = g_slist_next(sl);
 	}
 }
@@ -465,7 +465,7 @@ static void adjust_wcs(struct wcs *wcs, double dx, double dy, double ds, double 
 		  wcs->xref, wcs->yref, wcs->rot, t);
 }
 
-/* compute rms of distance between paired stars */ 
+/* compute rms of distance between paired stars */
 double pairs_fit_err(GSList *pairs)
 {
 	struct gui_star *gs, *cgs;
@@ -488,7 +488,7 @@ double pairs_fit_err(GSList *pairs)
 	}
 }
 
-/* compute rms of ra and de distances between paired stars */ 
+/* compute rms of ra and de distances between paired stars */
 void pairs_fit_errxy(GSList *pairs, struct wcs *wcs, double *ra_err, double *de_err)
 {
 	struct gui_star *gs, *cgs;
@@ -533,11 +533,11 @@ static double angular_diff(double t, double ct)
 	return diff;
 }
 
-/* Calculate dx, dy, ds and dtheta for a set of pairs 
+/* Calculate dx, dy, ds and dtheta for a set of pairs
    If scale_en is false, scale is not fitted; if rot_en
    is false, rotation is not fitted */
 
-int pairs_cs_diff(GSList *pairs, double *dxo, double *dyo, 
+int pairs_cs_diff(GSList *pairs, double *dxo, double *dyo,
 		  double *dso, double *dthetao, int scale_en, int rot_en)
 {
 	double dx=0.0;
@@ -580,8 +580,8 @@ int pairs_cs_diff(GSList *pairs, double *dxo, double *dyo,
 		t = atan2(ngs->y - gs->y, ngs->x - gs->x);
 		ct = atan2(ncgs->y - cgs->y, ncgs->x - cgs->x);
 		st_weights += sqr(cs);
-		dtheta += sqr(cs) * angular_diff(t, ct); 
-//		d4_printf("t=%.5f, ct = %.5f, dtheta: %.3f, stw: %.3f\n", 
+		dtheta += sqr(cs) * angular_diff(t, ct);
+//		d4_printf("t=%.5f, ct = %.5f, dtheta: %.3f, stw: %.3f\n",
 //			  t, ct, dtheta/st_weights, st_weights);
 		ds += sqr(cs) * (s / cs);
 	}
@@ -632,7 +632,7 @@ int pairs_cs_diff(GSList *pairs, double *dxo, double *dyo,
 		*dso = ds;
 	if (dthetao)
 		*dthetao = dtheta;
-	d4_printf("fit deltas: dx:%.5f dy: %.5f ds: %.5f dt: %.5f\n", 
+	d4_printf("fit deltas: dx:%.5f dy: %.5f ds: %.5f dt: %.5f\n",
 		  dx, dy, ds, dtheta);
 	return 0;
 }
@@ -661,7 +661,7 @@ static void fit_pairs_old(GSList *pairs, struct wcs *wcs)
 	double fit_err = HUGE;
 
 	while (iteration < MAX_ITER) {
-//		d3_printf("iteration: %d pairs: %d err: %f\n", 
+//		d3_printf("iteration: %d pairs: %d err: %f\n",
 //			  iteration, npairs, fit_err);
 		iteration ++;
 		fit_pairs_xy(pairs, wcs);
@@ -727,7 +727,7 @@ static int fit_pairs(GSList *pairs, struct wcs *wcs)
 fexit:
 	free(fpairs);
 	return ret;
-		
+
 
 }
 
@@ -743,13 +743,13 @@ int window_fit_wcs(GtkWidget *window)
 	char buf[256];
 	struct image_channel *i_chan;
 
-	wcs = gtk_object_get_data(GTK_OBJECT(window), "wcs_of_window");
+	wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
 	if (wcs == NULL || wcs->wcsset == WCS_INVALID) {
 		err_printf_sb2(window, "Need an Initial WCS to Attempt Fit");
 		error_beep();
 		return -1;
 	}
-	gsl = gtk_object_get_data(GTK_OBJECT(window), "gui_star_list");
+	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl == NULL) {
 		err_printf_sb2(window, "Need Sources Pairs to Attempt WCS Fit");
 		error_beep();
@@ -794,17 +794,17 @@ int window_fit_wcs(GtkWidget *window)
 	if (npairs >= VLD_PAIRS && wcs->fit_err < VLD_ERR) {
 		wcs->wcsset = WCS_VALID;
 		wcs->flags &= ~WCS_HINTED;
-		sprintf(buf, "Fitted %d pairs, Error in R.A.: %.2f\", Error in dec: %.2f\". Fit Validated", 
+		sprintf(buf, "Fitted %d pairs, Error in R.A.: %.2f\", Error in dec: %.2f\". Fit Validated",
 			npairs, ra_err*3600.0, de_err*3600.0);
 	} else {
-		sprintf(buf, "Fitted %d pairs, Error in R.A.: %.2f\", Error in dec: %.2f\". Fit Not Validated", 
+		sprintf(buf, "Fitted %d pairs, Error in R.A.: %.2f\", Error in dec: %.2f\". Fit Not Validated",
 			npairs, ra_err*3600.0, de_err*3600.0);
 	}
 	g_slist_free(pairs);
 	info_printf_sb2(window, buf);
 	cat_change_wcs(gsl->sl, wcs);
 
-	i_chan = gtk_object_get_data(GTK_OBJECT(window), "i_channel");
+	i_chan = g_object_get_data(G_OBJECT(window), "i_channel");
 	if (wcs == NULL || i_chan == NULL || i_chan->fr == NULL)
 		return 0;
 	memcpy(&(i_chan->fr->fim), wcs, sizeof (struct wcs));
@@ -843,7 +843,7 @@ int auto_pairs(struct gui_star_list *gsl)
 		if ((TYPE_MASK_GSTAR(gs)) & TYPE_MASK_CATREF) {
 			if (gs->s == NULL)
 				continue;
-			if (P_INT(AP_MOVE_TARGETS) && 
+			if (P_INT(AP_MOVE_TARGETS) &&
 			    ((CAT_STAR(gs->s)->flags & CAT_ASTROMET) == 0))
 				continue;
 			cat = g_slist_prepend(cat, gs);
@@ -864,11 +864,11 @@ int auto_pairs(struct gui_star_list *gsl)
 /*
 	for (sl = cat; sl != NULL; sl = sl->next)
 		d3_printf("%s: size: %.3f mag:%.3f\n",
-			  CAT_STAR(GUI_STAR(sl->data)->s)->name, 
-			  GUI_STAR(sl->data)->size, 
+			  CAT_STAR(GUI_STAR(sl->data)->s)->name,
+			  GUI_STAR(sl->data)->size,
 			  CAT_STAR(GUI_STAR(sl->data)->s)->mag);
 */
-	
+
 
 	if (cat == NULL || field == NULL) {
 		g_slist_free(cat);
@@ -891,7 +891,7 @@ int auto_pairs(struct gui_star_list *gsl)
 #define MIN_AB_DISTANCE P_DBL(FIT_MIN_AB_DIST)  /* min distance between the first two field star to
 						 * consider for matching */
 
-static double gui_star_pa(struct gui_star *b, struct gui_star *a) 
+static double gui_star_pa(struct gui_star *b, struct gui_star *a)
 {
 	return atan2((b->y - a->y), b->x - a->x);
 }
@@ -937,9 +937,9 @@ struct gui_star * find_cc(struct gui_star *a, struct gui_star *b,
 }
 
 
-/* find stars that are positioned relative to ca as b is to a (taking the 
+/* find stars that are positioned relative to ca as b is to a (taking the
  * tolerances into account) */
-GSList * find_likely_cb(struct gui_star *a, struct gui_star *b, 
+GSList * find_likely_cb(struct gui_star *a, struct gui_star *b,
 			struct gui_star *ca, GSList *cat)
 {
 	GSList *ret = NULL;
@@ -1007,7 +1007,7 @@ int more_pairs(struct gui_star *a, struct gui_star *b,
 		return 0;
 
 	do {
-		cc = find_cc(a, b, ca, cb, 
+		cc = find_cc(a, b, ca, cb,
 			     GUI_STAR(field_c->data), cat);
 		if (cc != NULL) {
 			*m = g_slist_append(*m, GUI_STAR(field_c->data));
@@ -1039,7 +1039,7 @@ static void make_pairs_from_list(GSList *cm, GSList *m)
 }
 
 
-/* try to match strting with the first two stars in field 
+/* try to match strting with the first two stars in field
  * return number of stars matched
  */
 int match_from(GSList *field, GSList *cat)
@@ -1058,8 +1058,8 @@ int match_from(GSList *field, GSList *cat)
 /*
 	for (sl = field; sl != NULL; sl = sl->next)
 		d3_printf("FIELD: %.0f, %.0f: size: \n",
-			  GUI_STAR(sl->data)->x, 
-			  GUI_STAR(sl->data)->y, 
+			  GUI_STAR(sl->data)->x,
+			  GUI_STAR(sl->data)->y,
 			  GUI_STAR(sl->data)->size);
 */
 
@@ -1070,7 +1070,7 @@ int match_from(GSList *field, GSList *cat)
 		b = GUI_STAR(field->next->data);
 		fc = field->next->next;
 		field = g_slist_next(field);
-	} while (field->next->next != NULL && 
+	} while (field->next->next != NULL &&
 		 gui_star_distance(a, b) < MIN_AB_DISTANCE);
 
 /* this is a n**3 algorithm, which really should be optimised */
@@ -1091,7 +1091,7 @@ int match_from(GSList *field, GSList *cat)
 		while (cat_b != NULL && field_c != NULL) {
 			cb = GUI_STAR(cat_b->data);
 //			d3_printf("a: %.1f %.1f, b: %.1f. %.1f\n", a->x, a->y, b->x, b->y);
-//			d3_printf("ca: %.1f %.1f, cb: %.1f %.1f\n", ca->x, ca->y, 
+//			d3_printf("ca: %.1f %.1f, cb: %.1f %.1f\n", ca->x, ca->y,
 //				  cb->x, cb->y);
 			cc = find_cc(a, b, ca, cb,
 				     GUI_STAR(field_c->data), cat);
@@ -1143,7 +1143,7 @@ int match_from(GSList *field, GSList *cat)
 
 
 /*
- * match the field stars to the catalog. create pairs in field 
+ * match the field stars to the catalog. create pairs in field
  * for the stars that are matched. Return the number of matches found
  * for best performance, the field list should be sorted by flux, so the first
  * stars are likely to be in the catalog.

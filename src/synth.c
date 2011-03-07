@@ -1,23 +1,23 @@
 /*******************************************************************************
   Copyright(c) 2000 - 2003 Radu Corlan. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: radu@corlan.net
 *******************************************************************************/
 
@@ -45,7 +45,7 @@
 
 /* fill the rectangular data area with a gaussian profile with a sigma of s, centered on
    xc, yc. the total generated volume is returned. */
-static double create_gaussian_psf(float *data, int pw, int ph, 
+static double create_gaussian_psf(float *data, int pw, int ph,
 				  double xc, double yc, double s)
 {
 	int i, j;
@@ -64,7 +64,7 @@ static double create_gaussian_psf(float *data, int pw, int ph,
 
 /* fill the rectangular data area with a moffat profile with a fwhm of s and beta of b,
    centered on xc, yc. the total generated volume is returned. */
-static double create_moffat_psf(float *data, int pw, int ph, 
+static double create_moffat_psf(float *data, int pw, int ph,
 				double xc, double yc, double s, double b)
 {
 	int i, j;
@@ -84,12 +84,12 @@ static double create_moffat_psf(float *data, int pw, int ph,
 }
 
 
-/* downscale and add a psf profile to a image frame. the psf has dimensions pw and ph, 
-   it's center is at xc, yc, and will be placed onto the frame at x, y. 
+/* downscale and add a psf profile to a image frame. the psf has dimensions pw and ph,
+   it's center is at xc, yc, and will be placed onto the frame at x, y.
    An amplitude scale of g is applied. The psf is geometrically downscaled
    by a factor of d; return the resulting volume */
 
-double add_psf_to_frame(struct ccd_frame *fr, float *psf, int pw, int ph, int xc, int yc, 
+double add_psf_to_frame(struct ccd_frame *fr, float *psf, int pw, int ph, int xc, int yc,
 		     double x, double y, double g, int d)
 {
 	int xf, yf;
@@ -116,7 +116,7 @@ double add_psf_to_frame(struct ccd_frame *fr, float *psf, int pw, int ph, int xc
 	ys = yc - d * (yc / d);
 	ye = yc + d * ((ph - yc) / d);
 
-	if (xf - xc / d < 0 || xf + ((pw - xc) / d) >= fr->w 
+	if (xf - xc / d < 0 || xf + ((pw - xc) / d) >= fr->w
 	    || yf - yc / d < 0 || yf + ((ph - yc) / d) >= fr->h) {
 		d4_printf("synthetic star too close to frame edge\n");
 		return 0;
@@ -174,11 +174,11 @@ int synth_stars_to_frame(struct ccd_frame * fr, struct wcs *wcs, GList *sl)
 
 	switch(P_INT(SYNTH_PROFILE)) {
 	case PAR_SYNTH_GAUSSIAN:
-		vol = create_gaussian_psf(psf, pw, ph, xc, yc, 0.4246 * 
+		vol = create_gaussian_psf(psf, pw, ph, xc, yc, 0.4246 *
 					  P_DBL(SYNTH_FWHM) * P_INT(SYNTH_OVSAMPLE));
 		break;
 	case PAR_SYNTH_MOFFAT:
-		vol = create_moffat_psf(psf, pw, ph, xc, yc, 
+		vol = create_moffat_psf(psf, pw, ph, xc, yc,
 					P_DBL(SYNTH_FWHM) * P_INT(SYNTH_OVSAMPLE),
 					P_DBL(SYNTH_MOFFAT_BETA));
 		break;
@@ -202,19 +202,19 @@ int synth_stars_to_frame(struct ccd_frame * fr, struct wcs *wcs, GList *sl)
 		cats->pos[POS_DY] = 0.0;
 		cats->pos[POS_XERR] = 0.0;
 		cats->pos[POS_YERR] = 0.0;
-		
+
 		if (get_band_by_name(cats->smags, P_STR(AP_IBAND_NAME),
 				     &mag, NULL))
 			mag = cats->mag;
 		flux = absmag_to_flux(mag - P_DBL(SYNTH_ZP));
-		vv = v = add_psf_to_frame(fr, psf, pw, ph, xc, yc, 
+		vv = v = add_psf_to_frame(fr, psf, pw, ph, xc, yc,
 				      x, y, flux / vol,
 				      P_INT(SYNTH_OVSAMPLE));
 		if (vv == 0)
 			continue;
 /*
 		while (v > 0 && (flux - vv > flux / 10000.0)) {
-			v = add_psf_to_frame(fr, psf, pw, ph, xc, yc, 
+			v = add_psf_to_frame(fr, psf, pw, ph, xc, yc,
 					     x, y, (flux - vv) / vol,
 					     P_INT(SYNTH_OVSAMPLE));
 			vv += v;
@@ -235,16 +235,16 @@ void add_synth_stars_cb(gpointer window, guint action, GtkWidget *menu_item)
 	GList *ssl = NULL;
 	GSList *sl;
 
-	i_ch = gtk_object_get_data(GTK_OBJECT(window), "i_channel");
+	i_ch = g_object_get_data(G_OBJECT(window), "i_channel");
 	if (i_ch == NULL || i_ch->fr == NULL)
 		return;
-	wcs = gtk_object_get_data(GTK_OBJECT(window), "wcs_of_window");
+	wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
 	if (wcs == NULL || wcs->wcsset == WCS_INVALID) {
 		err_printf_sb2(window, "Need a WCS to Create Synthetic Stars");
 		error_beep();
 		return;
 	}
-	gsl = gtk_object_get_data(GTK_OBJECT(window), "gui_star_list");
+	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl == NULL) {
 		err_printf_sb2(window, "Need Some Catalog Stars");
 		error_beep();
@@ -253,7 +253,7 @@ void add_synth_stars_cb(gpointer window, guint action, GtkWidget *menu_item)
 	sl = gsl->sl;
 	for (; sl != NULL; sl = sl->next) {
 		gs = GUI_STAR(sl->data);
-		if (gs->s != NULL && 
+		if (gs->s != NULL &&
 		    (TYPE_MASK_GSTAR(gs) & TYPE_MASK_CATREF))
 			ssl = g_list_prepend(ssl, gs->s);
 	}

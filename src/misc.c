@@ -1,24 +1,23 @@
-
 /*******************************************************************************
   Copyright(c) 2000 - 2003 Radu Corlan. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: radu@corlan.net
 *******************************************************************************/
 
@@ -55,7 +54,7 @@ void named_entry_set(GtkWidget *dialog, char *name, char *text)
 {
 	GtkWidget *entry;
 	g_return_if_fail(dialog != NULL);
-	entry = gtk_object_get_data(GTK_OBJECT(dialog), name);
+	entry = g_object_get_data(G_OBJECT(dialog), name);
 	g_return_if_fail(entry != NULL);
 	gtk_entry_set_text(GTK_ENTRY(entry), text);
 }
@@ -93,7 +92,7 @@ void named_label_set(GtkWidget *dialog, char *name, char *text)
 {
 	GtkWidget *label;
 	g_return_if_fail(dialog != NULL);
-	label = gtk_object_get_data(GTK_OBJECT(dialog), name);
+	label = g_object_get_data(G_OBJECT(dialog), name);
 	g_return_if_fail(label != NULL);
 	gtk_label_set_text(GTK_LABEL(label), text);
 }
@@ -106,7 +105,7 @@ char * named_entry_text(GtkWidget *dialog, char *name)
 	char *text;
 
 	g_return_val_if_fail(dialog != NULL, NULL);
-	entry = gtk_object_get_data(GTK_OBJECT(dialog), name);
+	entry = g_object_get_data(G_OBJECT(dialog), name);
 	g_return_val_if_fail(entry != NULL, NULL);
 	text = gtk_editable_get_chars(GTK_EDITABLE(entry), 0, -1);
 	return text;
@@ -132,7 +131,7 @@ int check_seq_number(char *file, int *sqn)
 	dir = opendir(dirn);
 	if (dir == NULL) {
 		/* no directory, but we still return ok,
-		 * since the point here is to make sure we 
+		 * since the point here is to make sure we
 		 * don;t overwrite files */
 		d3_printf("check_seq_number: funny dir: %s\n", dirn);
 		return 0;
@@ -158,9 +157,9 @@ void named_spin_set(GtkWidget *dialog, char *name, double val)
 {
 	GtkWidget *spin;
 	g_return_if_fail(dialog != NULL);
-	spin = gtk_object_get_data(GTK_OBJECT(dialog), name);
+	spin = g_object_get_data(G_OBJECT(dialog), name);
 	g_return_if_fail(spin != NULL);
-	if (val != gtk_spin_button_get_value_as_float(GTK_SPIN_BUTTON(spin))) {
+	if (val != gtk_spin_button_get_value(GTK_SPIN_BUTTON(spin))) {
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin), val);
 	}
 	clamp_spin_value(GTK_SPIN_BUTTON(spin));
@@ -169,16 +168,16 @@ void named_spin_set(GtkWidget *dialog, char *name, double val)
 double named_spin_get_value(GtkWidget *dialog, char *name)
 {
 	GtkWidget *spin;
-	spin = gtk_object_get_data(GTK_OBJECT(dialog), name);
+	spin = g_object_get_data(G_OBJECT(dialog), name);
 	g_return_val_if_fail(spin != NULL, 0.0);
-	return gtk_spin_button_get_value_as_float(GTK_SPIN_BUTTON(spin));
+	return gtk_spin_button_get_value(GTK_SPIN_BUTTON(spin));
 }
 
 /* return the value of a named checkbutton */
 int get_named_checkb_val(GtkWidget *dialog, char *name)
 {
 	GtkWidget * wid;
-	wid = gtk_object_get_data(GTK_OBJECT(dialog), name);
+	wid = g_object_get_data(G_OBJECT(dialog), name);
 	g_return_val_if_fail(wid != NULL, 0);
 	return gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(wid));
 }
@@ -187,7 +186,7 @@ int get_named_checkb_val(GtkWidget *dialog, char *name)
 void set_named_checkb_val(GtkWidget *dialog, char *name, int val)
 {
 	GtkWidget * wid;
-	wid = gtk_object_get_data(GTK_OBJECT(dialog), name);
+	wid = g_object_get_data(G_OBJECT(dialog), name);
 	g_return_if_fail(wid != NULL);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(wid), val);
 }
@@ -195,26 +194,26 @@ void set_named_checkb_val(GtkWidget *dialog, char *name, int val)
 long set_named_callback(void *dialog, char *name, char *callback, void *func)
 {
 	GtkObject *wid;
-	wid = gtk_object_get_data(GTK_OBJECT(dialog), name);
+	wid = g_object_get_data(G_OBJECT(dialog), name);
 	if (wid == NULL) {
 		err_printf("cannot find object : %s\n", name);
 		return 0;
 	}
-	return gtk_signal_connect (GTK_OBJECT (wid), callback,
-			    GTK_SIGNAL_FUNC (func), dialog);
+	return g_signal_connect (G_OBJECT (wid), callback,
+				 G_CALLBACK (func), dialog);
 }
 
-long set_named_callback_data(void *dialog, char *name, char *callback, 
+long set_named_callback_data(void *dialog, char *name, char *callback,
 			     void *func, gpointer data)
 {
 	GtkObject *wid;
-	wid = gtk_object_get_data(GTK_OBJECT(dialog), name);
+	wid = g_object_get_data(G_OBJECT(dialog), name);
 	if (wid == NULL) {
 		err_printf("cannot find object : %s\n", name);
 		return 0;
 	}
-	return gtk_signal_connect (GTK_OBJECT (wid), callback,
-			    GTK_SIGNAL_FUNC (func), data);
+	return g_signal_connect (G_OBJECT (wid), callback,
+				 G_CALLBACK (func), data);
 }
 
 /* make sure our value is properly clamped */
@@ -287,7 +286,7 @@ General Public License for more details.  */
    read no more than LIMIT chars.
 
    *LINEPTR is a pointer returned from malloc (or NULL), pointing to
-   *N characters of space.  It is realloc'd as necessary.  
+   *N characters of space.  It is realloc'd as necessary.
 
    Return the number of characters read (not including the null
    terminator), or -1 on error or EOF.  On a -1 return, the caller
@@ -424,8 +423,8 @@ getline_safe (lineptr, n, stream, limit)
 
 #endif
 
-	
-char *lstrndup(char *str, int n) 
+
+char *lstrndup(char *str, int n)
 {
 	char *r;
 	r = malloc(n+1);

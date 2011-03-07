@@ -766,7 +766,7 @@ int make_cat_rcp(char *obj, char *catalog, double box, FILE *outf, double mag_li
 static void delete_cdsquery(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
 	g_return_if_fail(data != NULL);
-	gtk_object_set_data(GTK_OBJECT(data), "cdsquery", NULL);
+	g_object_set_data(G_OBJECT(data), "cdsquery", NULL);
 }
 
 static int logw_print(char *msg, void *data)
@@ -775,7 +775,7 @@ static int logw_print(char *msg, void *data)
 	GtkWidget *text;
 	GtkToggleButton *stopb;
 
-	text = gtk_object_get_data(GTK_OBJECT(logw), "query_log_text");
+	text = g_object_get_data(G_OBJECT(logw), "query_log_text");
 	g_return_val_if_fail(text != NULL, 0);
 	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW (text), GTK_WRAP_CHAR);
 
@@ -785,7 +785,7 @@ static int logw_print(char *msg, void *data)
 	while (gtk_events_pending())
 		gtk_main_iteration();
 
-	stopb = gtk_object_get_data(GTK_OBJECT(logw), "query_stop_toggle");
+	stopb = g_object_get_data(G_OBJECT(logw), "query_stop_toggle");
 	if (gtk_toggle_button_get_active(stopb)) {
 		gtk_toggle_button_set_active(stopb, 0);
 		return 1;
@@ -804,14 +804,14 @@ void cds_query_cb(gpointer window, guint action, GtkWidget *menu_item)
 
 	g_return_if_fail(action < QUERY_CATALOGS);
 
-	i_ch = gtk_object_get_data(GTK_OBJECT(window), "i_channel");
+	i_ch = g_object_get_data(G_OBJECT(window), "i_channel");
 
 	if (i_ch == NULL || i_ch->fr == NULL) {
 		err_printf_sb2(window, "Load a frame or create a new one before loading stars");
 		error_beep();
 		return;
 	}
-	wcs = gtk_object_get_data(GTK_OBJECT(window), "wcs_of_window");
+	wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
 	if (wcs == NULL || wcs->wcsset == WCS_INVALID) {
 		err_printf_sb2(window, "Set an initial WCS before loading stars");
 		error_beep();
@@ -823,11 +823,11 @@ void cds_query_cb(gpointer window, guint action, GtkWidget *menu_item)
 	clamp_double(&h, 1.0, 2 * P_DBL(QUERY_MAX_RADIUS));
 
 	logw = create_query_log_window();
-	gtk_object_set_data_full(GTK_OBJECT(window), "cdsquery",
-				 logw, (GtkDestroyNotify)(gtk_widget_destroy));
-	gtk_object_set_data(GTK_OBJECT(logw), "im_window", window);
-	gtk_signal_connect (GTK_OBJECT (logw), "delete_event",
-			    GTK_SIGNAL_FUNC (delete_cdsquery), window);
+	g_object_set_data_full(G_OBJECT(window), "cdsquery",
+				 logw, (GDestroyNotify)(gtk_widget_destroy));
+	g_object_set_data(G_OBJECT(logw), "im_window", window);
+	g_signal_connect (G_OBJECT (logw), "delete_event",
+			  G_CALLBACK (delete_cdsquery), window);
 	gtk_widget_show(logw);
 
 	tsl = query_catalog(query_catalog_names[action], wcs->xref, wcs->yref,
@@ -835,7 +835,7 @@ void cds_query_cb(gpointer window, guint action, GtkWidget *menu_item)
 
 	info_printf_sb2(window, "Received %d %s stars", g_list_length(tsl),
 			query_catalog_names[action]);
-	gtk_object_set_data(GTK_OBJECT(window), "cdsquery", NULL);
+	g_object_set_data(G_OBJECT(window), "cdsquery", NULL);
 
 	merge_cat_star_list_to_window(window, tsl);
 	gtk_widget_queue_draw(window);

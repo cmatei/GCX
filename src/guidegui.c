@@ -1,23 +1,23 @@
 /*******************************************************************************
   Copyright(c) 2000 - 2003 Radu Corlan. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: radu@corlan.net
 *******************************************************************************/
 
@@ -45,6 +45,7 @@
 #define GUIDE_BOX_SIZE 96 	/* size of guide box */
 
 extern GSList *detect_frame_stars(struct ccd_frame *fr);
+
 static GtkItemFactoryEntry guide_image_menu_items[] = {
 	{ "/_File",		NULL,         	NULL,  		0, "<Branch>" },
 /*  	{ "/File/tear",  	NULL,         	NULL,  		0, "<Tearoff>" }, */
@@ -108,7 +109,7 @@ static GtkItemFactoryEntry guide_image_menu_items[] = {
 
 gboolean guide_window_delete(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
-	gtk_object_set_data(GTK_OBJECT(data), "guide_window", NULL);
+	g_object_set_data(G_OBJECT(data), "guide_window", NULL);
 	return TRUE;
 }
 
@@ -118,21 +119,21 @@ static GtkWidget *get_main_menu_bar(GtkWidget *window)
 	GtkWidget *ret;
 	GtkItemFactory *item_factory;
 	GtkAccelGroup *accel_group;
-	gint nmenu_items = sizeof (guide_image_menu_items) / 
+	gint nmenu_items = sizeof (guide_image_menu_items) /
 		sizeof (guide_image_menu_items[0]);
 	accel_group = gtk_accel_group_new ();
 
-	item_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR, 
+	item_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR,
 					     "<main_menu>", accel_group);
-	gtk_object_set_data_full(GTK_OBJECT(window), "main_menu_if", item_factory,
-				 (GtkDestroyNotify) gtk_object_unref);
-	gtk_item_factory_create_items (item_factory, nmenu_items, 
+	g_object_set_data_full(G_OBJECT(window), "main_menu_if", item_factory,
+				 (GDestroyNotify) g_object_unref);
+	gtk_item_factory_create_items (item_factory, nmenu_items,
 				       guide_image_menu_items, window);
 
   /* Attach the new accelerator group to the window. */
 	gtk_window_add_accel_group (GTK_WINDOW (window), accel_group);
 
-    /* Finally, return the actual menu bar created by the item factory. */ 
+    /* Finally, return the actual menu bar created by the item factory. */
 	ret = gtk_item_factory_get_widget (item_factory, "<main_menu>");
 	return ret;
 }
@@ -155,8 +156,8 @@ static gboolean image_clicked_cb(GtkWidget *w, GdkEventButton *event, gpointer d
 	if (event->button == 3) {
 		show_region_stats(data, event->x, event->y);
 /*		found = stars_under_click(GTK_WIDGET(data), event);
-		star_if = gtk_object_get_data(GTK_OBJECT(data), "star_popup_if");
-		menu = gtk_object_get_data(GTK_OBJECT(data), "image_popup");
+		star_if = g_object_get_data(G_OBJECT(data), "star_popup_if");
+		menu = g_object_get_data(G_OBJECT(data), "image_popup");
 		if (found != NULL && star_if != NULL) {
 			if (found != NULL)
 				g_slist_free(found);
@@ -164,7 +165,7 @@ static gboolean image_clicked_cb(GtkWidget *w, GdkEventButton *event, gpointer d
 		}
 		if(menu) {
 			printf("menu=%08x\n", (unsigned int)menu);
-			gtk_menu_popup(menu, NULL, NULL, NULL, NULL, 
+			gtk_menu_popup(menu, NULL, NULL, NULL, NULL,
 				       event->button, event->time);
 		}
 */
@@ -179,26 +180,26 @@ static gboolean image_clicked_cb(GtkWidget *w, GdkEventButton *event, gpointer d
 		reg.ys = event->y - 10;
 		reg.w = 20;
 		reg.h = 20;
-		i_ch = gtk_object_get_data(GTK_OBJECT(data), "i_channel");
+		i_ch = g_object_get_data(G_OBJECT(data), "i_channel");
 		gs = detect_guide_star(i_ch->fr, &reg);
 		if (gs) {
-			gsl = gtk_object_get_data(GTK_OBJECT(data), "gui_star_list");
-			if (gsl != NULL) 
+			gsl = g_object_get_data(G_OBJECT(data), "gui_star_list");
+			if (gsl != NULL)
 				remove_stars_of_type(gsl, TYPE_MASK(STAR_TYPE_ALIGN), 0);
 
 			sl = g_slist_prepend(sl, gs);
 			add_gui_stars_to_window(data, sl);
 			g_slist_free(sl);
 			info_printf("guide star at %.1f %.1f\n", gs->x, gs->y);
-			guider = gtk_object_get_data(GTK_OBJECT(data), "guider");
+			guider = g_object_get_data(G_OBJECT(data), "guider");
 			if (guider == NULL) {
 				guider = guider_new();
-				gtk_object_set_data_full(GTK_OBJECT(data), "guider", 
-						 guider, (GtkDestroyNotify)guider_release);
+				g_object_set_data_full(G_OBJECT(data), "guider",
+						 guider, (GDestroyNotify)guider_release);
 			}
 			guider_set_target(guider, i_ch->fr, gs);
 			gui_star_release(gs);
-			
+
 			gtk_widget_queue_draw(data);
 		}
 		show_region_stats(data, event->x, event->y);
@@ -231,20 +232,20 @@ static gint motion_event_cb (GtkWidget *widget, GdkEventMotion *event, gpointer 
 				dx -= DRAG_MIN_MOVE;
 			else if (dx < -DRAG_MIN_MOVE)
 				dx += DRAG_MIN_MOVE;
-			else 
+			else
 				dx = 0;
 			if (dy > DRAG_MIN_MOVE)
 				dy -= DRAG_MIN_MOVE;
 			else if (dy < -DRAG_MIN_MOVE)
 				dy += DRAG_MIN_MOVE;
-			else 
+			else
 				dy = 0;
 			drag_adjust_cuts(window, dx, dy);
-			ox = x; 
+			ox = x;
 			oy = y;
 		}
 	} else {
-		ox = x; 
+		ox = x;
 		oy = y;
 	}
 	return TRUE;
@@ -262,10 +263,10 @@ static void find_guide_star_cb( GtkWidget *widget, gpointer window)
 	struct gui_star_list *gsl;
 	int found = 0;
 
-	gsl = gtk_object_get_data(GTK_OBJECT(window), "gui_star_list");
-	if (gsl != NULL) 
+	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
+	if (gsl != NULL)
 		remove_stars_of_type(gsl, TYPE_MASK(STAR_TYPE_ALIGN), 0);
-	i_ch = gtk_object_get_data(GTK_OBJECT(window), "i_channel");
+	i_ch = g_object_get_data(G_OBJECT(window), "i_channel");
 	if (i_ch == NULL || i_ch->fr == NULL) {
 		err_printf("no image\n");
 		return;
@@ -294,11 +295,11 @@ static void find_guide_star_cb( GtkWidget *widget, gpointer window)
 		}
 	}
 	if (found) {
-		guider = gtk_object_get_data(GTK_OBJECT(window), "guider");
+		guider = g_object_get_data(G_OBJECT(window), "guider");
 		if (guider == NULL) {
 			guider = guider_new();
-			gtk_object_set_data_full(GTK_OBJECT(window), "guider", 
-						 guider, (GtkDestroyNotify)guider_release);
+			g_object_set_data_full(G_OBJECT(window), "guider",
+						 guider, (GDestroyNotify)guider_release);
 		}
 		guider_set_target(guider, i_ch->fr, gs);
 		gui_star_release(gs);
@@ -313,7 +314,7 @@ static float get_exposure(GtkWidget *window)
 	int num, denom;
 	const char *exp_text;
 
-	exposure = gtk_object_get_data(GTK_OBJECT(window), "guide_exp_combo_entry");
+	exposure = g_object_get_data(G_OBJECT(window), "guide_exp_combo_entry");
 	exp_text = gtk_entry_get_text (GTK_ENTRY (exposure));
 	if(sscanf(exp_text, "%d/%d", &num, &denom) == 2) {
 		return (float)num / denom;
@@ -328,7 +329,7 @@ static float get_exposure(GtkWidget *window)
 static void toggle_button_no_cb(GtkWidget *window, GtkWidget *button, const char *signame, int state)
 {
 	long signal;
-	signal = (long)gtk_object_get_data(GTK_OBJECT(window), signame);
+	signal = (long)g_object_get_data(G_OBJECT(window), signame);
 	g_signal_handler_block(G_OBJECT (button), signal);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON (button), state);
 	g_signal_handler_unblock(G_OBJECT (button), signal);
@@ -359,7 +360,7 @@ static int expose_cb(GtkWidget *window)
 	struct camera_t *camera;
 	struct ccd_frame *fr;
 
-	main_window = gtk_object_get_data(GTK_OBJECT(window), "image_window");
+	main_window = g_object_get_data(G_OBJECT(window), "image_window");
 	camera = camera_find(main_window, CAMERA_GUIDE);
 	if(strncmp(camera->image_format, ".fits", 5) == 0) {
 		// The image has already been unzipped if we get here
@@ -389,14 +390,14 @@ static int run_guider( GtkWidget *window)
 	struct camera_t *camera;
 	float exposure;
 
-	run_button = gtk_object_get_data(GTK_OBJECT(window), "guide_run");
+	run_button = g_object_get_data(G_OBJECT(window), "guide_run");
 
 	if(! GTK_TOGGLE_BUTTON (run_button)->active) {
 		// We shouldn't be guiding anymore
 		return TRUE;
 	}
 
-	main_window = gtk_object_get_data(GTK_OBJECT(window), "image_window");
+	main_window = g_object_get_data(G_OBJECT(window), "image_window");
 	camera = camera_find(main_window, CAMERA_GUIDE);
 	if(! camera) {
 		err_printf("no camera connected\n");
@@ -404,7 +405,7 @@ static int run_guider( GtkWidget *window)
 	}
 	// Call expose_cb when image is ready
 	INDI_set_callback(INDI_COMMON (camera), CAMERA_CALLBACK_EXPOSE, expose_cb, window);
-	
+
 	exposure = get_exposure(window);
 
 	camera_expose(camera, exposure);
@@ -415,7 +416,7 @@ static void run_button_cb( GtkWidget *run_button, gpointer window)
 {
 	GtkWidget *calibrate_button;
 
-	calibrate_button = gtk_object_get_data(GTK_OBJECT(window), "guide_calibrate");
+	calibrate_button = g_object_get_data(G_OBJECT(window), "guide_calibrate");
 
 	if(! GTK_TOGGLE_BUTTON (run_button)->active) {
 		return;
@@ -431,7 +432,7 @@ static void calibrate_button_cb( GtkWidget *calibrate_button, gpointer window)
 	struct guider *guider;
 	GtkWidget *run_button;
 
-	run_button = gtk_object_get_data(GTK_OBJECT(window), "guide_run");
+	run_button = g_object_get_data(G_OBJECT(window), "guide_run");
 
 	if(! GTK_TOGGLE_BUTTON (calibrate_button)->active) {
 		gtk_widget_set_sensitive(run_button, TRUE);
@@ -444,7 +445,7 @@ static void calibrate_button_cb( GtkWidget *calibrate_button, gpointer window)
 		return;
 	}
 
-	guider = gtk_object_get_data(GTK_OBJECT(window), "guider");
+	guider = g_object_get_data(G_OBJECT(window), "guider");
 	if(! guider) {
 		err_printf("Can't calibrate.  No guide-star selected\n");
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON (calibrate_button), 0);
@@ -460,7 +461,7 @@ static void calibrate_button_cb( GtkWidget *calibrate_button, gpointer window)
 static void options_button_cb( GtkWidget *options_button, gpointer window)
 {
 	GtkWidget *main_window;
-	main_window = gtk_object_get_data(GTK_OBJECT(window), "image_window");
+	main_window = g_object_get_data(G_OBJECT(window), "image_window");
 	indigui_show_dialog(g_object_get_data(G_OBJECT(main_window), "indi"));
 }
 
@@ -476,7 +477,7 @@ gboolean guide_motion_stop( gpointer data)
 void calibrate_sm( GtkWidget *window, struct guider *guider, struct tele_t *tele, double dx, double dy)
 {
 	double dist = sqrt(dx * dx + dy * dy);
-	GtkWidget *calibrate_button = gtk_object_get_data(GTK_OBJECT(window), "guide_calibrate");
+	GtkWidget *calibrate_button = g_object_get_data(G_OBJECT(window), "guide_calibrate");
 
 	if (dist < 10 && guider->cal_time > 15000) {
 		// coudn't move enough in 15 seconds, abort
@@ -484,14 +485,14 @@ void calibrate_sm( GtkWidget *window, struct guider *guider, struct tele_t *tele
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON (calibrate_button), 0);
 		return;
 	}
-		
+
 	switch(guider->cal_state) {
 	case GUIDE_START:
 		//We've taken an image, store it as the reference
 		//Now start WEST calibration
 		guider->xtgt += dx;
 		guider->ytgt += dy;
-		
+
 		guider->cal_state = GUIDE_WEST;
 		guider->cal_time = 1000;
 		info_printf("Slewing west 1000ms\n");
@@ -553,9 +554,9 @@ void guide_adjust_mount( GtkWidget *window, struct guider *guider, struct tele_t
 	double angle = asin(dy / dist);
 	double x;
 	double adjust;
-	
+
 	if (guider->cal_state != GUIDE_DONE) {
-		GtkWidget *run_button = gtk_object_get_data(GTK_OBJECT(window), "guide_run");
+		GtkWidget *run_button = g_object_get_data(G_OBJECT(window), "guide_run");
 		err_printf("Calibration is not completed\n");
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON (run_button), 0);
 		return;
@@ -591,14 +592,14 @@ void guide_image_update(GtkWidget *window)
 	struct image_channel *i_channel;
 	struct star s;
 
-	main_window = gtk_object_get_data(GTK_OBJECT(window), "image_window");
+	main_window = g_object_get_data(G_OBJECT(window), "image_window");
 
-	guider = gtk_object_get_data(GTK_OBJECT(window), "guider");
+	guider = g_object_get_data(G_OBJECT(window), "guider");
 	tele = tele_find(main_window);
-	run_button = gtk_object_get_data(GTK_OBJECT(window), "guide_run");
-	calibrate_button = gtk_object_get_data(GTK_OBJECT(window), "guide_calibrate");
+	run_button = g_object_get_data(G_OBJECT(window), "guide_run");
+	calibrate_button = g_object_get_data(G_OBJECT(window), "guide_calibrate");
 
-	i_channel = gtk_object_get_data(GTK_OBJECT(window), "i_channel");
+	i_channel = g_object_get_data(G_OBJECT(window), "i_channel");
 	if (tele == NULL || guider == NULL || ! i_channel->fr) {
 		/* No guide-star yet */
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON (run_button), 0);
@@ -646,27 +647,27 @@ gboolean gbox_expose_cb(GtkWidget *widget, GdkEventExpose *event, gpointer windo
 	struct guider *guider;
 	int s, x, y;
 	void *ret;
-	
-	cache = gtk_object_get_data(GTK_OBJECT(window), "gbox_cache");
+
+	cache = g_object_get_data(G_OBJECT(window), "gbox_cache");
 	if (cache == NULL) {
 		cache = new_map_cache(GUIDE_BOX_SIZE * GUIDE_BOX_SIZE, MAP_CACHE_GRAY);
-		gtk_object_set_data_full(GTK_OBJECT(window), "gbox_cache", 
-					 cache, (GtkDestroyNotify)release_map_cache);
+		g_object_set_data_full(G_OBJECT(window), "gbox_cache",
+					 cache, (GDestroyNotify)release_map_cache);
 	}
-	ret = gtk_object_get_data(GTK_OBJECT(window), "i_channel");
+	ret = g_object_get_data(G_OBJECT(window), "i_channel");
 	if (ret == NULL) /* no channel */
 		return TRUE;
 	i_channel = ret;
 	if (i_channel->fr == NULL) /* no frame */
 		return TRUE;
-	guider = gtk_object_get_data(GTK_OBJECT(window), "guider");
+	guider = g_object_get_data(G_OBJECT(window), "guider");
 
 	if (P_INT(GUIDE_BOX_ZOOM) < 1)
 		P_INT(GUIDE_BOX_ZOOM) = 1;
 	if (P_INT(GUIDE_BOX_ZOOM) > 16)
 		P_INT(GUIDE_BOX_ZOOM) = 16;
 	s = GUIDE_BOX_SIZE / P_INT(GUIDE_BOX_ZOOM);
-	
+
 	if (guider == NULL) {
 		x = i_channel->fr->w / 2;
 		y = i_channel->fr->h / 2;
@@ -676,7 +677,7 @@ gboolean gbox_expose_cb(GtkWidget *widget, GdkEventExpose *event, gpointer windo
 	}
 	cache->cache_valid = 0; /* until we fix all update failures */
 	if (!cache->cache_valid) {
-		image_box_to_cache(cache, i_channel, P_INT(GUIDE_BOX_ZOOM), 
+		image_box_to_cache(cache, i_channel, P_INT(GUIDE_BOX_ZOOM),
 				   x - s / 2 - 1,
 				   y - s / 2 - 1,
 				   s+1, s+1);
@@ -703,12 +704,12 @@ static gboolean wait_for_indi_cb(gpointer data)
 		tele = (void *)1;
 	camera = camera_find(window, CAMERA_GUIDE);
 	if (tele && camera) {
-		gwindow = gtk_object_get_data(GTK_OBJECT(window), "guide_window");
+		gwindow = g_object_get_data(G_OBJECT(window), "guide_window");
 		gtk_widget_set_sensitive(
-			GTK_WIDGET(gtk_object_get_data(GTK_OBJECT(gwindow), "guide_calibrate")),
+			GTK_WIDGET(g_object_get_data(G_OBJECT(gwindow), "guide_calibrate")),
 			TRUE);
 		gtk_widget_set_sensitive(
-			GTK_WIDGET(gtk_object_get_data(GTK_OBJECT(gwindow), "guide_run")),
+			GTK_WIDGET(g_object_get_data(G_OBJECT(gwindow), "guide_run")),
 			TRUE);
 		return FALSE;
 	}
@@ -725,22 +726,22 @@ void open_guide_cb(gpointer data, guint action, GtkWidget *menu_item)
 	struct camera_t *camera;
 	struct tele_t *tele;
 
-	gwindow = gtk_object_get_data(GTK_OBJECT(window), "guide_window");
+	gwindow = g_object_get_data(G_OBJECT(window), "guide_window");
 	if (gwindow == NULL) {
 		gwindow = create_guide_window();
-		gtk_object_set_data_full(GTK_OBJECT(window), "guide_window",
-					 gwindow, (GtkDestroyNotify)(gtk_widget_destroy));
-		gtk_object_set_data(GTK_OBJECT(gwindow), "image_window", window); 
+		g_object_set_data_full(G_OBJECT(window), "guide_window",
+					 gwindow, (GDestroyNotify)(gtk_widget_destroy));
+		g_object_set_data(G_OBJECT(gwindow), "image_window", window);
 
-		vb = gtk_object_get_data(GTK_OBJECT(gwindow), "guide_vbox");
+		vb = g_object_get_data(G_OBJECT(gwindow), "guide_vbox");
 		hb = gtk_hbox_new(0, 0);
 
 		menubar = get_main_menu_bar(gwindow);
 		statuslabel1 = gtk_label_new ("");
-		gtk_widget_ref (statuslabel1);
+		g_object_ref (statuslabel1);
 		gtk_misc_set_padding (GTK_MISC (statuslabel1), 6, 0);
-		gtk_object_set_data_full (GTK_OBJECT (gwindow), "statuslabel1", statuslabel1,
-					  (GtkDestroyNotify) gtk_widget_unref);
+		g_object_set_data_full (G_OBJECT (gwindow), "statuslabel1", statuslabel1,
+					  (GDestroyNotify) g_object_unref);
 		gtk_widget_show (statuslabel1);
 		gtk_widget_show(menubar);
 		gtk_box_pack_start(GTK_BOX(hb), menubar, TRUE, TRUE, 0);
@@ -748,37 +749,37 @@ void open_guide_cb(gpointer data, guint action, GtkWidget *menu_item)
 		gtk_box_pack_start(GTK_BOX(vb), hb, FALSE, TRUE, 0);
 		gtk_box_reorder_child(GTK_BOX(vb), hb, 0);
 
-		scw = gtk_object_get_data(GTK_OBJECT(gwindow), "scrolled_window");
-		im = gtk_object_get_data(GTK_OBJECT(gwindow), "image");
+		scw = g_object_get_data(G_OBJECT(gwindow), "scrolled_window");
+		im = g_object_get_data(G_OBJECT(gwindow), "image");
 		set_named_callback(gwindow, "image", "expose_event", image_expose_cb);
 		set_named_callback(gwindow, "guide_box_darea", "expose_event", gbox_expose_cb);
-		gtk_signal_connect(GTK_OBJECT(gwindow), "delete_event", 
-				   GTK_SIGNAL_FUNC(guide_window_delete), window);
-		gtk_signal_connect(GTK_OBJECT(im), "motion-notify-event", 
-				   GTK_SIGNAL_FUNC(motion_event_cb), gwindow);
-		gtk_signal_connect(GTK_OBJECT(scw), "button_press_event", 
-				   GTK_SIGNAL_FUNC(sources_clicked_cb), gwindow);
-		gtk_signal_connect(GTK_OBJECT(scw), "button_press_event", 
-				   GTK_SIGNAL_FUNC(image_clicked_cb), gwindow);
+		g_signal_connect(G_OBJECT(gwindow), "delete_event",
+				 G_CALLBACK(guide_window_delete), window);
+		g_signal_connect(G_OBJECT(im), "motion-notify-event",
+				 G_CALLBACK(motion_event_cb), gwindow);
+		g_signal_connect(G_OBJECT(scw), "button_press_event",
+				 G_CALLBACK(sources_clicked_cb), gwindow);
+		g_signal_connect(G_OBJECT(scw), "button_press_event",
+				 G_CALLBACK(image_clicked_cb), gwindow);
 		gtk_widget_add_events(im, GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK
 				      | GDK_POINTER_MOTION_HINT_MASK);
 		set_named_callback(gwindow, "guide_find_star", "clicked", find_guide_star_cb);
 		signal = set_named_callback(gwindow, "guide_run", "clicked", run_button_cb);
-		gtk_object_set_data(GTK_OBJECT(gwindow), "run_button_signal", (gpointer)signal);
+		g_object_set_data(G_OBJECT(gwindow), "run_button_signal", (gpointer)signal);
 		signal = set_named_callback(gwindow, "guide_calibrate", "clicked", calibrate_button_cb);
-		gtk_object_set_data(GTK_OBJECT(gwindow), "calibrate_button_signal", (gpointer)signal);
+		g_object_set_data(G_OBJECT(gwindow), "calibrate_button_signal", (gpointer)signal);
 		set_named_callback(gwindow, "guide_options", "clicked", options_button_cb);
-		im = gtk_object_get_data(GTK_OBJECT(gwindow), "guide_box_darea");
-		gtk_drawing_area_size(GTK_DRAWING_AREA(im), GUIDE_BOX_SIZE, GUIDE_BOX_SIZE);
+		im = g_object_get_data(G_OBJECT(gwindow), "guide_box_darea");
+		gtk_widget_set_size_request(GTK_WIDGET(im), GUIDE_BOX_SIZE, GUIDE_BOX_SIZE);
 
 		if (! (tele = tele_find(window))) {
 			gtk_widget_set_sensitive(
-				GTK_WIDGET(gtk_object_get_data(GTK_OBJECT(gwindow), "guide_calibrate")),
+				GTK_WIDGET(g_object_get_data(G_OBJECT(gwindow), "guide_calibrate")),
 				FALSE);
 		}
 		if (! (camera = camera_find(window, CAMERA_GUIDE))) {
 			gtk_widget_set_sensitive(
-				GTK_WIDGET(gtk_object_get_data(GTK_OBJECT(gwindow), "guide_run")),
+				GTK_WIDGET(g_object_get_data(G_OBJECT(gwindow), "guide_run")),
 				FALSE);
 		}
 		if (! tele || ! camera) {

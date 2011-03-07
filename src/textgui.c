@@ -46,27 +46,27 @@ static void update_help_text(GtkWidget *dialog, char * page);
 static void close_text_window( GtkWidget *widget, gpointer data )
 {
 	g_return_if_fail(data != NULL);
-	gtk_object_set_data(GTK_OBJECT(data), "text_window", NULL);
+	g_object_set_data(G_OBJECT(data), "text_window", NULL);
 }
 
 static void close_fits_dialog( GtkWidget *widget, gpointer data )
 {
 	GtkWidget *im_window;
-	im_window = gtk_object_get_data(GTK_OBJECT(data), "im_window");
+	im_window = g_object_get_data(G_OBJECT(data), "im_window");
 	g_return_if_fail(im_window != NULL);
-	gtk_object_set_data(GTK_OBJECT(im_window), "text_window", NULL);
+	g_object_set_data(G_OBJECT(im_window), "text_window", NULL);
 }
 
 static void set_named_callback(void *dialog, char *name, char *callback, void *func)
 {
 	GtkObject *wid;
-	wid = gtk_object_get_data(GTK_OBJECT(dialog), name);
+	wid = g_object_get_data(G_OBJECT(dialog), name);
 	if (wid == NULL) {
 		err_printf("cannot find object : %s\n", name);
 	}
 	g_return_if_fail(wid != NULL);
-	gtk_signal_connect (GTK_OBJECT (wid), callback,
-			    GTK_SIGNAL_FUNC (func), dialog);
+	g_signal_connect (G_OBJECT (wid), callback,
+			    G_CALLBACK (func), dialog);
 }
 
 
@@ -77,24 +77,24 @@ void fits_header_cb(gpointer window, guint action, GtkWidget *menu_item)
 	struct image_channel *i_chan;
 	char title[256];
 
-	i_chan = gtk_object_get_data(GTK_OBJECT(window), "i_channel");
+	i_chan = g_object_get_data(G_OBJECT(window), "i_channel");
 	if (i_chan == NULL || i_chan->fr == NULL) {
 		err_printf_sb2(window, "No frame loaded");
 		error_beep();
 		return;
 	}
 
-	dialog = gtk_object_get_data(GTK_OBJECT(window), "text_window");
+	dialog = g_object_get_data(G_OBJECT(window), "text_window");
 	if (dialog == NULL) {
 		dialog = create_show_text();
-		gtk_object_set_data(GTK_OBJECT(dialog), "im_window",
+		g_object_set_data(G_OBJECT(dialog), "im_window",
 					 window);
-		gtk_object_set_data_full(GTK_OBJECT(window), "text_window",
-					 dialog, (GtkDestroyNotify)(gtk_widget_destroy));
-		gtk_signal_connect (GTK_OBJECT (dialog), "destroy",
-				    GTK_SIGNAL_FUNC (close_text_window), window);
-		set_named_callback (GTK_OBJECT (dialog), "close_button", "clicked",
-				    GTK_SIGNAL_FUNC (close_fits_dialog));
+		g_object_set_data_full(G_OBJECT(window), "text_window",
+					 dialog, (GDestroyNotify)(gtk_widget_destroy));
+		g_signal_connect (G_OBJECT (dialog), "destroy",
+				    G_CALLBACK (close_text_window), window);
+		set_named_callback (G_OBJECT (dialog), "close_button", "clicked",
+				    G_CALLBACK (close_fits_dialog));
 		gtk_window_set_default_size(GTK_WINDOW(dialog), 600, 400);
 		update_fits_header_dialog(dialog, i_chan->fr);
 		gtk_widget_show(dialog);
@@ -130,17 +130,17 @@ void help_page_cb(gpointer window, guint action, GtkWidget *menu_item)
 		return;
 	}
 
-	dialog = gtk_object_get_data(GTK_OBJECT(window), "text_window");
+	dialog = g_object_get_data(G_OBJECT(window), "text_window");
 	if (dialog == NULL) {
 		dialog = create_show_text();
-		gtk_object_set_data(GTK_OBJECT(dialog), "im_window",
+		g_object_set_data(G_OBJECT(dialog), "im_window",
 					 window);
-		gtk_object_set_data_full(GTK_OBJECT(window), "text_window",
-					 dialog, (GtkDestroyNotify)(gtk_widget_destroy));
-		gtk_signal_connect (GTK_OBJECT (dialog), "destroy",
-				    GTK_SIGNAL_FUNC (close_text_window), window);
-		set_named_callback (GTK_OBJECT (dialog), "close_button", "clicked",
-				    GTK_SIGNAL_FUNC (close_fits_dialog));
+		g_object_set_data_full(G_OBJECT(window), "text_window",
+					 dialog, (GDestroyNotify)(gtk_widget_destroy));
+		g_signal_connect (G_OBJECT (dialog), "destroy",
+				    G_CALLBACK (close_text_window), window);
+		set_named_callback (G_OBJECT (dialog), "close_button", "clicked",
+				    G_CALLBACK (close_fits_dialog));
 		gtk_window_set_default_size(GTK_WINDOW(dialog), 600, 400);
 		update_help_text(dialog, page);
 		gtk_widget_show(dialog);
@@ -156,7 +156,7 @@ static void update_help_text(GtkWidget *dialog, char *page)
 	GtkWidget *text;
 	GtkTextBuffer *buffer;
 
-	text = gtk_object_get_data(GTK_OBJECT(dialog), "text1");
+	text = g_object_get_data(G_OBJECT(dialog), "text1");
 	g_return_if_fail(text != NULL);
 	g_return_if_fail(page != NULL);
 
@@ -172,7 +172,7 @@ static void update_fits_header_dialog(GtkWidget *dialog, struct ccd_frame *fr)
 	char line[82];
 	int i;
 
-	text = gtk_object_get_data(GTK_OBJECT(dialog), "text1");
+	text = g_object_get_data(G_OBJECT(dialog), "text1");
 	g_return_if_fail(text != NULL);
 
         /* kill old text */

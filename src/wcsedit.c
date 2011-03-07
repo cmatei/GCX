@@ -1,23 +1,23 @@
 /*******************************************************************************
   Copyright(c) 2000 - 2003 Radu Corlan. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: radu@corlan.net
 *******************************************************************************/
 
@@ -69,15 +69,15 @@ static void wcs_ok_cb( GtkWidget *widget, gpointer data );
 static void close_wcsedit( GtkWidget *widget, gpointer data )
 {
 	g_return_if_fail(data != NULL);
-	gtk_object_set_data(GTK_OBJECT(data), "wcs_dialog", NULL);
+	g_object_set_data(G_OBJECT(data), "wcs_dialog", NULL);
 }
 
 static void close_wcs_dialog( GtkWidget *widget, gpointer data )
 {
 	GtkWidget *im_window;
-	im_window = gtk_object_get_data(GTK_OBJECT(data), "im_window");
+	im_window = g_object_get_data(G_OBJECT(data), "im_window");
 	g_return_if_fail(im_window != NULL);
-	gtk_object_set_data(GTK_OBJECT(im_window), "wcs_dialog", NULL);
+	g_object_set_data(G_OBJECT(im_window), "wcs_dialog", NULL);
 }
 
 /* show the current frame's fits header in a text window */
@@ -88,40 +88,40 @@ void wcsedit_cb(gpointer window, guint action, GtkWidget *menu_item)
 	struct wcs *wcs;
 
 /*
-	i_chan = gtk_object_get_data(GTK_OBJECT(window), "i_channel");
+	i_chan = g_object_get_data(G_OBJECT(window), "i_channel");
 	if (i_chan == NULL || i_chan->fr == NULL) {
 		error_message_sb2(window, "No frame loaded");
 		return;
 	}
 */
-	wcs = gtk_object_get_data(GTK_OBJECT(window), "wcs_of_window");
+	wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
 	if (wcs == NULL) {
 		wcs = wcs_new();
-		gtk_object_set_data_full(GTK_OBJECT(window), "wcs_of_window", 
-					 wcs, (GtkDestroyNotify)wcs_release);
+		g_object_set_data_full(G_OBJECT(window), "wcs_of_window",
+					 wcs, (GDestroyNotify)wcs_release);
 	}
 
-	dialog = gtk_object_get_data(GTK_OBJECT(window), "wcs_dialog");
+	dialog = g_object_get_data(G_OBJECT(window), "wcs_dialog");
 	if (dialog == NULL) {
 		dialog = create_wcs_edit();
-		gtk_object_set_data(GTK_OBJECT(dialog), "im_window",
+		g_object_set_data(G_OBJECT(dialog), "im_window",
 					 window);
-		gtk_object_set_data_full(GTK_OBJECT(window), "wcs_dialog",
-					 dialog, (GtkDestroyNotify)(gtk_widget_destroy));
-		gtk_signal_connect (GTK_OBJECT (dialog), "destroy",
-				    GTK_SIGNAL_FUNC (close_wcsedit), window);
-		set_named_callback (GTK_OBJECT (dialog), "wcs_close_button", "clicked",
-				    GTK_SIGNAL_FUNC (close_wcs_dialog));
-		set_named_callback (GTK_OBJECT (dialog), "wcs_ok_button", "clicked",
-				    GTK_SIGNAL_FUNC (wcs_ok_cb));
-/* Pertti's code begin */		
-		set_named_callback (GTK_OBJECT (dialog), "wcs_north_button", "clicked", GTK_SIGNAL_FUNC (wcs_north_cb));
-		set_named_callback (GTK_OBJECT (dialog), "wcs_south_button", "clicked", GTK_SIGNAL_FUNC (wcs_south_cb));
-		set_named_callback (GTK_OBJECT (dialog), "wcs_east_button", "clicked", GTK_SIGNAL_FUNC (wcs_east_cb));
-		set_named_callback (GTK_OBJECT (dialog), "wcs_west_button", "clicked", GTK_SIGNAL_FUNC (wcs_west_cb));
-		set_named_callback (GTK_OBJECT (dialog), "wcs_rot_inc_button", "clicked", GTK_SIGNAL_FUNC (wcs_rot_inc_cb));
-		set_named_callback (GTK_OBJECT (dialog), "wcs_rot_dec_button", "clicked", GTK_SIGNAL_FUNC (wcs_rot_dec_cb));
-		set_named_callback (GTK_OBJECT (dialog), "wcs_step_button", "clicked", GTK_SIGNAL_FUNC (wcs_step_cb));
+		g_object_set_data_full(G_OBJECT(window), "wcs_dialog",
+					 dialog, (GDestroyNotify)(gtk_widget_destroy));
+		g_signal_connect (G_OBJECT (dialog), "destroy",
+				    G_CALLBACK (close_wcsedit), window);
+		set_named_callback (G_OBJECT (dialog), "wcs_close_button", "clicked",
+				    G_CALLBACK (close_wcs_dialog));
+		set_named_callback (G_OBJECT (dialog), "wcs_ok_button", "clicked",
+				    G_CALLBACK (wcs_ok_cb));
+/* Pertti's code begin */
+		set_named_callback (G_OBJECT (dialog), "wcs_north_button", "clicked", G_CALLBACK (wcs_north_cb));
+		set_named_callback (G_OBJECT (dialog), "wcs_south_button", "clicked", G_CALLBACK (wcs_south_cb));
+		set_named_callback (G_OBJECT (dialog), "wcs_east_button", "clicked", G_CALLBACK (wcs_east_cb));
+		set_named_callback (G_OBJECT (dialog), "wcs_west_button", "clicked", G_CALLBACK (wcs_west_cb));
+		set_named_callback (G_OBJECT (dialog), "wcs_rot_inc_button", "clicked", G_CALLBACK (wcs_rot_inc_cb));
+		set_named_callback (G_OBJECT (dialog), "wcs_rot_dec_button", "clicked", G_CALLBACK (wcs_rot_dec_cb));
+		set_named_callback (G_OBJECT (dialog), "wcs_step_button", "clicked", G_CALLBACK (wcs_step_cb));
 /* Pertti's code end */
 
 		set_named_callback(dialog, "wcs_ra_entry", "activate", wcsentry_cb);
@@ -144,11 +144,11 @@ void wcsedit_refresh(gpointer window)
 	GtkWidget *dialog;
 	struct wcs *wcs;
 
-	dialog = gtk_object_get_data(GTK_OBJECT(window), "wcs_dialog");
+	dialog = g_object_get_data(G_OBJECT(window), "wcs_dialog");
 	if (dialog == NULL) {
 		return;
 	}
-	wcs = gtk_object_get_data(GTK_OBJECT(window), "wcs_of_window");
+	wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
 	if (wcs == NULL) {
 		return;
 	}
@@ -164,16 +164,16 @@ static void update_wcs_dialog(GtkWidget *dialog, struct wcs *wcs)
 	case WCS_INVALID:
 		set_named_checkb_val(dialog, "wcs_unset_rb", 1);
 /* also clear the fields here */
-		return;		
+		return;
 	case WCS_INITIAL:
 		set_named_checkb_val(dialog, "wcs_initial_rb", 1);
-		break;		
+		break;
 	case WCS_FITTED:
 		set_named_checkb_val(dialog, "wcs_fitted_rb", 1);
-		break;		
+		break;
 	case WCS_VALID:
 		set_named_checkb_val(dialog, "wcs_valid_rb", 1);
-		break;		
+		break;
 	}
 	degrees_to_dms_pr(buf, wcs->xref / 15.0, 2);
 	named_entry_set(dialog, "wcs_ra_entry", buf);
@@ -192,24 +192,24 @@ static void update_wcs_dialog(GtkWidget *dialog, struct wcs *wcs)
 /* push values from the dialog back into the wcs
  * if some values are missing, we try to guess them
  * return 0 if we could set the wcs from values, 1 if some
- * values were defaulted, 2 if there were changes, 
+ * values were defaulted, 2 if there were changes,
  * -1 if we didn;t have enough data*/
 static int wcs_dialog_to_wcs(GtkWidget *dialog, struct wcs *wcs)
 {
 	char *text = NULL, *end;
-	double ra = INV_DBL, dec = INV_DBL, equ = INV_DBL, 
+	double ra = INV_DBL, dec = INV_DBL, equ = INV_DBL,
 		xs = INV_DBL, ys = INV_DBL, rot = INV_DBL, d;
 	int ret = 0, chg = 0;
 
 /* parse the fields */
 	text = named_entry_text(dialog, "wcs_ra_entry");
 //	d3_printf("ra text is |%s|\n", text);
-	if (!dms_to_degrees(text, &d)) 
+	if (!dms_to_degrees(text, &d))
 		ra = d * 15.0;
 //	d3_printf("got %.4f for ra\n", ra);
 	g_free(text);
 	text = named_entry_text(dialog, "wcs_dec_entry");
-	if (!dms_to_degrees(text, &d)) 
+	if (!dms_to_degrees(text, &d))
 		dec = d ;
 //	d3_printf("got %.4f for dec\n", dec);
 	g_free(text);
@@ -247,14 +247,14 @@ static int wcs_dialog_to_wcs(GtkWidget *dialog, struct wcs *wcs)
 		ret = 1;
 	}
 	if (xs == INV_DBL) {
-		if (ys == INV_DBL) 
+		if (ys == INV_DBL)
 			xs = -P_DBL(WCS_SEC_PER_PIX);
 		else
 			xs = ys;
 		ret = 1;
 	}
 	if (ys == INV_DBL) {
-		if (xs == INV_DBL) 
+		if (xs == INV_DBL)
 			ys = -P_DBL(WCS_SEC_PER_PIX);
 		else
 			ys = xs;
@@ -320,9 +320,9 @@ static int wcsentry_cb(GtkWidget *widget, gpointer dialog)
 	struct wcs *wcs;
 	struct gui_star_list *gsl;
 
-	window = gtk_object_get_data(GTK_OBJECT(dialog), "im_window");
+	window = g_object_get_data(G_OBJECT(dialog), "im_window");
 	g_return_val_if_fail(window != NULL, 0);
-	wcs = gtk_object_get_data(GTK_OBJECT(window), "wcs_of_window");
+	wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
 	g_return_val_if_fail(wcs != NULL, 0);
 
 	ret = wcs_dialog_to_wcs(dialog, wcs);
@@ -330,10 +330,10 @@ static int wcsentry_cb(GtkWidget *widget, gpointer dialog)
 	if (ret > 0) {
 		update_wcs_dialog(dialog, wcs);
 		warning_beep();
-		gsl = gtk_object_get_data(GTK_OBJECT(window), "gui_star_list");
+		gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 		if (gsl != NULL) {
 			cat_change_wcs(gsl->sl, wcs);
-		} 
+		}
 		gtk_widget_queue_draw(window);
 	} else if (ret < 0) {
 		error_beep();
@@ -370,8 +370,8 @@ void wcs_cb(gpointer data, guint action, GtkWidget *menu_item)
 		break;
 	case WCS_QUIET_AUTO:
 /* we just do the "sgpw<shift>f<shift>s" here */
-		wcs = gtk_object_get_data(GTK_OBJECT(data), "wcs_of_window");
-//		if (wcs != NULL && wcs->wcsset == WCS_VALID) 
+		wcs = g_object_get_data(G_OBJECT(data), "wcs_of_window");
+//		if (wcs != NULL && wcs->wcsset == WCS_VALID)
 //			break;
 		find_stars_cb(data, ADD_STARS_DETECT, NULL);
 		find_stars_cb(data, ADD_STARS_GSC, NULL);
@@ -383,25 +383,25 @@ void wcs_cb(gpointer data, guint action, GtkWidget *menu_item)
 		star_rm_cb(data, STAR_RM_FR, NULL);
 		break;
 	case WCS_RELOAD:
-		wcs = gtk_object_get_data(GTK_OBJECT(window), "wcs_of_window");
-		i_chan = gtk_object_get_data(GTK_OBJECT(window), "i_channel");
+		wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
+		i_chan = g_object_get_data(G_OBJECT(window), "i_channel");
 		if (wcs == NULL || i_chan == NULL || i_chan->fr == NULL)
 			break;
 		wcs_from_frame(i_chan->fr, wcs);
-		gsl = gtk_object_get_data(GTK_OBJECT(window), "gui_star_list");
+		gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 		if (gsl != NULL) {
 			cat_change_wcs(gsl->sl, wcs);
-		} 
+		}
 		gtk_widget_queue_draw(window);
 		break;
 	case WCS_FORCE_VALID:
-		wcs = gtk_object_get_data(GTK_OBJECT(window), "wcs_of_window");
+		wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
 		if (wcs != NULL) {
 			wcs->wcsset = WCS_VALID;
 		}
 		break;
 	case WCS_RESET:
-		wcs = gtk_object_get_data(GTK_OBJECT(window), "wcs_of_window");
+		wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
 		if (wcs != NULL) {
 			wcs->wcsset = WCS_INVALID;
 		}
@@ -418,7 +418,7 @@ int match_field_in_window(void * image_window)
 {
 	struct wcs *wcs;
 	wcs_cb(image_window, WCS_AUTO, NULL);
-	wcs = gtk_object_get_data(GTK_OBJECT(image_window), "wcs_of_window");
+	wcs = g_object_get_data(G_OBJECT(image_window), "wcs_of_window");
 	if (wcs == NULL) {
 		err_printf("No WCS found\n");
 		return -1;
@@ -436,7 +436,7 @@ int match_field_in_window_quiet(void * image_window)
 {
 	struct wcs *wcs;
 	wcs_cb(image_window, WCS_QUIET_AUTO, NULL);
-	wcs = gtk_object_get_data(GTK_OBJECT(image_window), "wcs_of_window");
+	wcs = g_object_get_data(G_OBJECT(image_window), "wcs_of_window");
 	if (wcs == NULL) {
 		err_printf("No WCS found\n");
 		return -1;
@@ -482,18 +482,18 @@ static void wcs_NS_cb(int dir, GtkWidget *wid, gpointer dialog)
 	double d, dec = INV_DBL, step = INV_DBL;
 	int btnstate;
 
-	if (gtk_object_get_data(GTK_OBJECT(dialog), "im_window") == NULL) {
+	if (g_object_get_data(G_OBJECT(dialog), "im_window") == NULL) {
 		return;
 	}
-	button = gtk_object_get_data(GTK_OBJECT(dialog), "wcs_step_button");
+	button = g_object_get_data(G_OBJECT(dialog), "wcs_step_button");
 	btnstate = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
-	
+
 	text = named_entry_text(dialog, "wcs_dec_entry");
-	if (!dms_to_degrees(text, &d)) 
+	if (!dms_to_degrees(text, &d))
 		dec = d;
 	g_free(text);
 	text = named_entry_text(dialog, "wcs_v_scale_entry");
-	if (!dms_to_degrees(text, &d)) 
+	if (!dms_to_degrees(text, &d))
 		step = d * (double)dir * ( 1 + 9.0 * (btnstate > 0) ) / 3600.;
 	g_free(text);
 	if ( (dec != INV_DBL) && (step != INV_DBL) )
@@ -513,22 +513,22 @@ static void wcs_EW_cb(int dir, GtkWidget *wid, gpointer dialog)
 	double d, ra = INV_DBL, step = INV_DBL, dec = INV_DBL, cosdec;
 	int btnstate;
 
-	if (gtk_object_get_data(GTK_OBJECT(dialog), "im_window") == NULL) {
+	if (g_object_get_data(G_OBJECT(dialog), "im_window") == NULL) {
 		return;
 	}
-	button = gtk_object_get_data(GTK_OBJECT(dialog), "wcs_step_button");
+	button = g_object_get_data(G_OBJECT(dialog), "wcs_step_button");
 	btnstate = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
-	
+
 	text = named_entry_text(dialog, "wcs_ra_entry");
-	if (!dms_to_degrees(text, &d)) 
+	if (!dms_to_degrees(text, &d))
 		ra = d * 15.;
 	g_free(text);
 	text = named_entry_text(dialog, "wcs_dec_entry");
-	if (!dms_to_degrees(text, &d)) 
+	if (!dms_to_degrees(text, &d))
 		dec = d;
 	g_free(text);
 	text = named_entry_text(dialog, "wcs_h_scale_entry");
-	if (!dms_to_degrees(text, &d)) 
+	if (!dms_to_degrees(text, &d))
 		step = d * (double)dir * ( 1 + 9.0 * (btnstate > 0) ) / 3600.;
 	g_free(text);
 
@@ -536,9 +536,9 @@ static void wcs_EW_cb(int dir, GtkWidget *wid, gpointer dialog)
 	{
 		cosdec = cos(degrad(dec));
 		if (cosdec < 1.85185185183088e-05)
-			cosdec = 1.85185185183088e-05; 
+			cosdec = 1.85185185183088e-05;
 		ra += step / cosdec;
-		if ( ra < 0 ) 
+		if ( ra < 0 )
 			ra += 360.;
 		if ( ra >= 360 )
 			ra -= 360.;
@@ -568,12 +568,12 @@ static void wcs_rot_cb(int dir, GtkWidget *wid, gpointer dialog)
 	double d, rot = INV_DBL;
 	int btnstate;
 
-	if (gtk_object_get_data(GTK_OBJECT(dialog), "im_window") == NULL) {
+	if (g_object_get_data(G_OBJECT(dialog), "im_window") == NULL) {
 		return;
 	}
-	button = gtk_object_get_data(GTK_OBJECT(dialog), "wcs_step_button");
+	button = g_object_get_data(G_OBJECT(dialog), "wcs_step_button");
 	btnstate = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
-	
+
 	text = named_entry_text(dialog, "wcs_rot_entry");
 	d = strtod(text, &end);
 	if (text != end)
@@ -597,7 +597,7 @@ static void wcs_step_cb(GtkWidget *wid, gpointer dialog)
 	GtkWidget *button;
 	int btnstate;
 
-	button = gtk_object_get_data(GTK_OBJECT(dialog), "wcs_step_button");
+	button = g_object_get_data(G_OBJECT(dialog), "wcs_step_button");
 	/* label = gtk_label_get_text(GTK_LABEL(GTK_BIN(button)->child)); */
 	btnstate = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
 	if (btnstate > 0)

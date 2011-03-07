@@ -171,10 +171,10 @@ static void par_item_update_status(GtkTreeView *tree, GcxPar p)
 	GtkWidget *statlabel;
 	GtkWidget *parwin;
 
-	parwin = gtk_object_get_data(GTK_OBJECT(tree), "par_win");
+	parwin = g_object_get_data(G_OBJECT(tree), "par_win");
 	g_return_if_fail(parwin != NULL);
 
-	statlabel = gtk_object_get_data(GTK_OBJECT(parwin), "par_status_label");
+	statlabel = g_object_get_data(G_OBJECT(parwin), "par_status_label");
 	g_return_if_fail(statlabel != NULL);
 
 	gtk_label_set_text(GTK_LABEL(statlabel), status_string(p));
@@ -289,9 +289,9 @@ static void restore_defaults_one_par(GtkTreeModel *model, GtkTreePath *path, Gtk
 {
 	GtkTreeView *tree = GTK_TREE_VIEW(data);
 	GcxPar p;
-	
+
 	gtk_tree_model_get (model, iter, 1, &p, -1);
-	
+
 	par_item_restore_default_gui(tree, p);
 	update_ancestors_state_gui(tree, p);
 }
@@ -301,7 +301,7 @@ static void restore_defaults_cb(GtkWidget *widget, gpointer parwin )
 	GtkTreeView *tree;
 	GtkTreeSelection *selection;
 
-	tree = GTK_TREE_VIEW(gtk_object_get_data(GTK_OBJECT(parwin), "par_tree"));
+	tree = GTK_TREE_VIEW(g_object_get_data(G_OBJECT(parwin), "par_tree"));
 	g_return_if_fail(tree != NULL);
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree));
@@ -323,7 +323,7 @@ static void setup_par_combo(gpointer parwin, GtkWidget *combo, GcxPar p)
 
 	d4_printf("setup_par_combo\n");
 	entry = GTK_COMBO(combo)->entry;
-	g_signal_handlers_block_by_func(GTK_OBJECT(entry), par_edit_changed, parwin);
+	g_signal_handlers_block_by_func(G_OBJECT(entry), par_edit_changed, parwin);
 
 	if (PAR_FORMAT(p) == FMT_OPTION
 	    && PAR(p)->choices != NULL) {
@@ -351,7 +351,7 @@ static void setup_par_combo(gpointer parwin, GtkWidget *combo, GcxPar p)
 	make_value_string(p, val, 255);
 	gtk_entry_set_text (GTK_ENTRY (entry), (val));
 
-	g_signal_handlers_unblock_by_func(GTK_OBJECT(entry), par_edit_changed, parwin);
+	g_signal_handlers_unblock_by_func(G_OBJECT(entry), par_edit_changed, parwin);
 
 	d4_printf("setting val to %s\n", val);
 }
@@ -362,23 +362,23 @@ static void update_par_labels(GcxPar p, gpointer parwin)
 	GtkWidget *label;
 	char buf[256] = "Config file: ";
 
-	label = gtk_object_get_data(GTK_OBJECT(parwin), "par_title_label");
+	label = g_object_get_data(G_OBJECT(parwin), "par_title_label");
 	g_return_if_fail(label != NULL);
 	gtk_label_set_text(GTK_LABEL(label), PAR(p)->comment);
 
-	label = gtk_object_get_data(GTK_OBJECT(parwin), "par_fname_label");
+	label = g_object_get_data(G_OBJECT(parwin), "par_fname_label");
 	g_return_if_fail(label != NULL);
 	par_pathname(p, buf+13, 255-13);
 	gtk_label_set_text(GTK_LABEL(label), buf);
 
-	label = gtk_object_get_data(GTK_OBJECT(parwin), "par_descr_label");
+	label = g_object_get_data(G_OBJECT(parwin), "par_descr_label");
 	g_return_if_fail(label != NULL);
 	if (PAR(p)->description)
 		gtk_label_set_text(GTK_LABEL(label), PAR(p)->description);
 	else
 		gtk_label_set_text(GTK_LABEL(label), "");
 
-	label = gtk_object_get_data(GTK_OBJECT(parwin), "par_type_label");
+	label = g_object_get_data(G_OBJECT(parwin), "par_type_label");
 	g_return_if_fail(label != NULL);
 	switch(PAR_TYPE(p)) {
 	case PAR_INTEGER:
@@ -401,7 +401,7 @@ static void update_par_labels(GcxPar p, gpointer parwin)
 		break;
 	}
 
-	label = gtk_object_get_data(GTK_OBJECT(parwin), "par_status_label");
+	label = g_object_get_data(G_OBJECT(parwin), "par_status_label");
 	g_return_if_fail(label != NULL);
 	if ((PAR_TYPE(p) == PAR_TREE) || (p == PAR_NULL)) {
 		gtk_label_set_text(GTK_LABEL(label), "");
@@ -417,8 +417,8 @@ static void par_edit_activate(GtkEditable *editable, gpointer parwin)
 	GtkTreeView *tree;
 	GcxPar p;
 
-	p = GPOINTER_TO_INT(gtk_object_get_data(GTK_OBJECT(parwin), "selpar"));
-	tree = gtk_object_get_data(GTK_OBJECT(parwin), "par_tree");
+	p = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(parwin), "selpar"));
+	tree = g_object_get_data(G_OBJECT(parwin), "par_tree");
 
 	param_edited(tree, p, editable);
 	update_par_labels(p, parwin);
@@ -430,8 +430,8 @@ static void par_edit_changed(GtkEditable *editable, gpointer parwin)
 	GcxPar p;
 
 	d4_printf("changed\n");
-	p = GPOINTER_TO_INT(gtk_object_get_data(GTK_OBJECT(parwin), "selpar"));
-	tree = gtk_object_get_data(GTK_OBJECT(parwin), "par_tree");
+	p = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(parwin), "selpar"));
+	tree = g_object_get_data(G_OBJECT(parwin), "par_tree");
 
 	param_edited(tree, p, editable);
 	update_par_labels(p, parwin);
@@ -452,11 +452,11 @@ static void par_selected_cb(GtkTreeView *tree, gpointer parwin)
 
 		d4_printf("selected par: %d\n", p);
 
-		gtk_object_set_data(GTK_OBJECT(parwin), "selpar", (gpointer) p);
+		g_object_set_data(G_OBJECT(parwin), "selpar", (gpointer) p);
 
 		update_par_labels(p, parwin);
 
-		combo = gtk_object_get_data(GTK_OBJECT(parwin), "par_combo");
+		combo = g_object_get_data(G_OBJECT(parwin), "par_combo");
 		g_return_if_fail(combo != NULL);
 
 		if ((PAR_TYPE(p) == PAR_TREE) || (p == PAR_NULL)) {
@@ -474,8 +474,8 @@ static void par_update_current(gpointer parwin)
 	GtkWidget *combo;
 	GcxPar p;
 	d4_printf("update current\n");
-	p = GPOINTER_TO_INT(gtk_object_get_data(GTK_OBJECT(parwin), "selpar"));
-	combo = gtk_object_get_data(GTK_OBJECT(parwin), "par_combo");
+	p = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(parwin), "selpar"));
+	combo = g_object_get_data(G_OBJECT(parwin), "par_combo");
 	g_return_if_fail(combo != NULL);
 	if (p != PAR_NULL) {
 		setup_par_combo(parwin, combo, p);
@@ -510,7 +510,7 @@ static void par_load_cb( GtkWidget *widget, gpointer parwin )
 {
 	GtkTreeView *tree;
 
-	tree = GTK_TREE_VIEW(gtk_object_get_data(GTK_OBJECT(parwin), "par_tree"));
+	tree = GTK_TREE_VIEW(g_object_get_data(G_OBJECT(parwin), "par_tree"));
 	g_return_if_fail(tree != NULL);
 
 	if (!load_params_rc())
@@ -522,13 +522,13 @@ static void par_load_cb( GtkWidget *widget, gpointer parwin )
 static void close_par_dialog(GtkWidget *widget, gpointer parwin)
 {
 	gpointer window;
-	window = gtk_object_get_data(GTK_OBJECT(parwin), "im_window");
-	gtk_object_set_data(GTK_OBJECT(window), "params_window", NULL);
+	window = g_object_get_data(G_OBJECT(parwin), "im_window");
+	g_object_set_data(G_OBJECT(window), "params_window", NULL);
 }
 
 static void close_parwin(GtkWidget *widget, GdkEvent *event, gpointer window )
 {
-	gtk_object_set_data(GTK_OBJECT(window), "params_window", NULL);
+	g_object_set_data(G_OBJECT(window), "params_window", NULL);
 }
 
 void edit_options_cb(gpointer data, guint action, GtkWidget *menu_item)
@@ -539,15 +539,15 @@ void edit_options_cb(gpointer data, guint action, GtkWidget *menu_item)
 	GtkWidget *viewport;
 	GtkCellRenderer *renderer;
 
-	parwin = gtk_object_get_data(GTK_OBJECT(window), "params_window");
+	parwin = g_object_get_data(G_OBJECT(window), "params_window");
 	if (parwin == NULL) {
 		parwin = create_par_edit();
-		viewport = gtk_object_get_data(GTK_OBJECT(parwin), "viewport4");
+		viewport = g_object_get_data(G_OBJECT(parwin), "viewport4");
 
 
 		tree1 = gtk_tree_view_new();
-		gtk_object_set_data(GTK_OBJECT(parwin), "par_tree", tree1);
-		gtk_object_set_data(GTK_OBJECT(tree1),  "par_win", parwin);
+		g_object_set_data(G_OBJECT(parwin), "par_tree", tree1);
+		g_object_set_data(G_OBJECT(tree1),  "par_win", parwin);
 
 		renderer = gtk_cell_renderer_text_new();
 
@@ -570,33 +570,33 @@ void edit_options_cb(gpointer data, guint action, GtkWidget *menu_item)
 
 		gtk_container_add (GTK_CONTAINER (viewport), tree1);
 
-		gtk_object_set_data(GTK_OBJECT(parwin), "im_window", window);
-		gtk_object_set_data_full(GTK_OBJECT(window), "params_window",
-					 parwin, (GtkDestroyNotify)(gtk_widget_destroy));
+		g_object_set_data(G_OBJECT(parwin), "im_window", window);
+		g_object_set_data_full(G_OBJECT(window), "params_window",
+					 parwin, (GDestroyNotify)(gtk_widget_destroy));
 
-		gtk_signal_connect (GTK_OBJECT (parwin), "delete-event",
-				    GTK_SIGNAL_FUNC (close_parwin), window);
+		g_signal_connect (G_OBJECT (parwin), "delete-event",
+				  G_CALLBACK (close_parwin), window);
 
-		gtk_signal_connect (GTK_OBJECT (tree1), "cursor-changed",
-				    GTK_SIGNAL_FUNC (par_selected_cb), parwin);
+		g_signal_connect (G_OBJECT (tree1), "cursor-changed",
+				  G_CALLBACK (par_selected_cb), parwin);
 
 		set_named_callback (parwin, "par_close", "clicked",
-				    GTK_SIGNAL_FUNC (close_par_dialog));
+				    G_CALLBACK (close_par_dialog));
 
 		set_named_callback (parwin, "par_combo_entry", "activate",
-				    GTK_SIGNAL_FUNC (par_edit_activate));
+				    G_CALLBACK (par_edit_activate));
 
 		set_named_callback (parwin, "par_combo_entry", "changed",
-				    GTK_SIGNAL_FUNC (par_edit_changed));
+				    G_CALLBACK (par_edit_changed));
 
 		set_named_callback (parwin, "par_save", "clicked",
-				    GTK_SIGNAL_FUNC (par_save_cb));
+				    G_CALLBACK (par_save_cb));
 
 		set_named_callback (parwin, "par_default", "clicked",
-				    GTK_SIGNAL_FUNC (restore_defaults_cb));
+				    G_CALLBACK (restore_defaults_cb));
 
 		set_named_callback (parwin, "par_load", "clicked",
-				    GTK_SIGNAL_FUNC (par_load_cb));
+				    G_CALLBACK (par_load_cb));
 
 		gtk_widget_show(parwin);
 	} else {

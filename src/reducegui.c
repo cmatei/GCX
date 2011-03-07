@@ -80,7 +80,7 @@ static void mframe_cb(gpointer dialog, guint action, GtkWidget *menu_item);
 static gboolean close_processing_window( GtkWidget *widget, gpointer data )
 {
 	g_return_val_if_fail(data != NULL, TRUE);
-//	gtk_object_set_data(GTK_OBJECT(data), "processing", NULL);
+//	g_object_set_data(G_OBJECT(data), "processing", NULL);
 	gtk_widget_hide(widget);
 	return TRUE;
 }
@@ -89,7 +89,7 @@ static void mframe_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 {
 	gpointer im_window;
 
-	im_window = gtk_object_get_data(GTK_OBJECT(dialog), "im_window");
+	im_window = g_object_get_data(G_OBJECT(dialog), "im_window");
 	g_return_if_fail(im_window != NULL);
 
 	mband_open_cb(im_window, 1, NULL);
@@ -139,8 +139,8 @@ static GtkWidget *get_main_menu_bar(GtkWidget *window)
 
 	item_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR,
 					     "<main_menu>", accel_group);
-	gtk_object_set_data_full(GTK_OBJECT(window), "main_menu_if", item_factory,
-				 (GtkDestroyNotify) gtk_object_unref);
+	g_object_set_data_full(G_OBJECT(window), "main_menu_if", item_factory,
+				 (GDestroyNotify) g_object_unref);
 	gtk_item_factory_create_items (item_factory, nmenu_items,
 				       reduce_menu_items, window);
 
@@ -164,44 +164,44 @@ static GtkWidget *make_image_processing(gpointer window)
 	GtkWidget *menubar, *top_hb;
 
 	dialog = create_image_processing();
-	gtk_object_set_data(GTK_OBJECT(dialog), "im_window", window);
-	gtk_object_set_data_full(GTK_OBJECT(window), "processing",
-				 dialog, (GtkDestroyNotify)(gtk_widget_destroy));
-	gtk_signal_connect (GTK_OBJECT (dialog), "delete_event",
-			    GTK_SIGNAL_FUNC (close_processing_window), window);
+	g_object_set_data(G_OBJECT(dialog), "im_window", window);
+	g_object_set_data_full(G_OBJECT(window), "processing",
+				 dialog, (GDestroyNotify)(gtk_widget_destroy));
+	g_signal_connect (G_OBJECT (dialog), "delete_event",
+			    G_CALLBACK (close_processing_window), window);
 
-	set_named_callback (GTK_OBJECT (dialog), "bias_browse", "clicked",
-			    GTK_SIGNAL_FUNC (imf_red_browse_cb));
-	set_named_callback (GTK_OBJECT (dialog), "dark_browse", "clicked",
-			    GTK_SIGNAL_FUNC (imf_red_browse_cb));
-	set_named_callback (GTK_OBJECT (dialog), "flat_browse", "clicked",
-			    GTK_SIGNAL_FUNC (imf_red_browse_cb));
-	set_named_callback (GTK_OBJECT (dialog), "badpix_browse", "clicked",
-			    GTK_SIGNAL_FUNC (imf_red_browse_cb));
-	set_named_callback (GTK_OBJECT (dialog), "align_browse", "clicked",
-			    GTK_SIGNAL_FUNC (imf_red_browse_cb));
-	set_named_callback (GTK_OBJECT (dialog), "output_file_browse", "clicked",
-			    GTK_SIGNAL_FUNC (imf_red_browse_cb));
-	set_named_callback (GTK_OBJECT (dialog), "recipe_browse", "clicked",
-			    GTK_SIGNAL_FUNC (imf_red_browse_cb));
-	set_named_callback (GTK_OBJECT (dialog), "bias_entry", "activate",
-			    GTK_SIGNAL_FUNC (imf_red_activate_cb));
-	set_named_callback (GTK_OBJECT (dialog), "dark_entry", "activate",
-			    GTK_SIGNAL_FUNC (imf_red_activate_cb));
-	set_named_callback (GTK_OBJECT (dialog), "flat_entry", "activate",
-			    GTK_SIGNAL_FUNC (imf_red_activate_cb));
-	set_named_callback (GTK_OBJECT (dialog), "badpix_entry", "activate",
-			    GTK_SIGNAL_FUNC (imf_red_activate_cb));
-	set_named_callback (GTK_OBJECT (dialog), "align_entry", "activate",
-			    GTK_SIGNAL_FUNC (imf_red_activate_cb));
-	set_named_callback (GTK_OBJECT (dialog), "recipe_entry", "activate",
-			    GTK_SIGNAL_FUNC (imf_red_activate_cb));
+	set_named_callback (G_OBJECT (dialog), "bias_browse", "clicked",
+			    G_CALLBACK (imf_red_browse_cb));
+	set_named_callback (G_OBJECT (dialog), "dark_browse", "clicked",
+			    G_CALLBACK (imf_red_browse_cb));
+	set_named_callback (G_OBJECT (dialog), "flat_browse", "clicked",
+			    G_CALLBACK (imf_red_browse_cb));
+	set_named_callback (G_OBJECT (dialog), "badpix_browse", "clicked",
+			    G_CALLBACK (imf_red_browse_cb));
+	set_named_callback (G_OBJECT (dialog), "align_browse", "clicked",
+			    G_CALLBACK (imf_red_browse_cb));
+	set_named_callback (G_OBJECT (dialog), "output_file_browse", "clicked",
+			    G_CALLBACK (imf_red_browse_cb));
+	set_named_callback (G_OBJECT (dialog), "recipe_browse", "clicked",
+			    G_CALLBACK (imf_red_browse_cb));
+	set_named_callback (G_OBJECT (dialog), "bias_entry", "activate",
+			    G_CALLBACK (imf_red_activate_cb));
+	set_named_callback (G_OBJECT (dialog), "dark_entry", "activate",
+			    G_CALLBACK (imf_red_activate_cb));
+	set_named_callback (G_OBJECT (dialog), "flat_entry", "activate",
+			    G_CALLBACK (imf_red_activate_cb));
+	set_named_callback (G_OBJECT (dialog), "badpix_entry", "activate",
+			    G_CALLBACK (imf_red_activate_cb));
+	set_named_callback (G_OBJECT (dialog), "align_entry", "activate",
+			    G_CALLBACK (imf_red_activate_cb));
+	set_named_callback (G_OBJECT (dialog), "recipe_entry", "activate",
+			    G_CALLBACK (imf_red_activate_cb));
 
 	menubar = get_main_menu_bar(dialog);
-	gtk_object_set_data(GTK_OBJECT(dialog), "menubar", menubar);
+	g_object_set_data(G_OBJECT(dialog), "menubar", menubar);
 	//gtk_menu_bar_set_shadow_type(GTK_MENU_BAR(menubar), GTK_SHADOW_NONE);
 
-	top_hb = gtk_object_get_data(GTK_OBJECT(dialog), "top_hbox");
+	top_hb = g_object_get_data(G_OBJECT(dialog), "top_hbox");
 	gtk_box_pack_start(GTK_BOX(top_hb), menubar, TRUE, TRUE, 0);
 	gtk_box_reorder_child(GTK_BOX(top_hb), menubar, 0);
 	d3_printf("menubar: %p\n", menubar);
@@ -233,7 +233,7 @@ static void set_processing_dialog_ccdr(GtkWidget *dialog, struct ccd_reduce *ccd
 	char **c;
 	long i;
 
-	omenu = gtk_object_get_data(GTK_OBJECT(dialog), "stack_method_optmenu");
+	omenu = g_object_get_data(G_OBJECT(dialog), "stack_method_optmenu");
 	g_return_if_fail(omenu != NULL);
 	menu = gtk_menu_new();
 	g_return_if_fail(menu != NULL);
@@ -244,8 +244,8 @@ static void set_processing_dialog_ccdr(GtkWidget *dialog, struct ccd_reduce *ccd
 		menuitem = gtk_menu_item_new_with_label (*c);
 		gtk_widget_show (menuitem);
 		gtk_menu_append (GTK_MENU (menu), menuitem);
-		gtk_signal_connect (GTK_OBJECT (menuitem), "activate",
-			    GTK_SIGNAL_FUNC (stack_method_activate), (gpointer)i);
+		g_signal_connect (G_OBJECT (menuitem), "activate",
+			    G_CALLBACK (stack_method_activate), (gpointer)i);
 		d3_printf("add %s to stack method menu\n", *c);
 		c++;
 		i++;
@@ -259,7 +259,7 @@ static void set_processing_dialog_ccdr(GtkWidget *dialog, struct ccd_reduce *ccd
 	named_spin_set(dialog, "stack_sigmas_spin", P_DBL(CCDRED_SIGMAS));
 	named_spin_set(dialog, "stack_iter_spin", 1.0 * P_INT(CCDRED_ITER));
 
-	omenu = gtk_object_get_data(GTK_OBJECT(dialog), "demosaic_method_optmenu");
+	omenu = g_object_get_data(G_OBJECT(dialog), "demosaic_method_optmenu");
 	g_return_if_fail(omenu != NULL);
 	menu = gtk_menu_new();
 	g_return_if_fail(menu != NULL);
@@ -270,8 +270,8 @@ static void set_processing_dialog_ccdr(GtkWidget *dialog, struct ccd_reduce *ccd
 		menuitem = gtk_menu_item_new_with_label (*c);
 		gtk_widget_show (menuitem);
 		gtk_menu_append (GTK_MENU (menu), menuitem);
-		gtk_signal_connect (GTK_OBJECT (menuitem), "activate",
-			    GTK_SIGNAL_FUNC (demosaic_method_activate), (gpointer)i);
+		g_signal_connect (G_OBJECT (menuitem), "activate",
+				  G_CALLBACK (demosaic_method_activate), (gpointer)i);
 		d3_printf("add %s to demosaic method menu\n", *c);
 		c++;
 		i++;
@@ -341,7 +341,7 @@ static void set_processing_dialog_imfl(GtkWidget *dialog, struct image_file_list
 	GList *gl;
 	struct image_file *imf;
 
-	list = gtk_object_get_data(GTK_OBJECT(dialog), "image_file_list");
+	list = g_object_get_data(G_OBJECT(dialog), "image_file_list");
 	g_return_if_fail(list != NULL);
 
 	gtk_list_store_clear (list);
@@ -368,7 +368,7 @@ void set_imfl_ccdr(gpointer window, struct ccd_reduce *ccdr,
 		   struct image_file_list *imfl)
 {
 	GtkWidget *dialog;
-	dialog = gtk_object_get_data(GTK_OBJECT(window), "processing");
+	dialog = g_object_get_data(G_OBJECT(window), "processing");
 	if (dialog == NULL) {
 		dialog = make_image_processing(window);
 	}
@@ -376,14 +376,14 @@ void set_imfl_ccdr(gpointer window, struct ccd_reduce *ccdr,
 
 	if (imfl) {
 		image_file_list_ref(imfl);
-		gtk_object_set_data_full(GTK_OBJECT(dialog), "imfl",
-					 imfl, (GtkDestroyNotify)(image_file_list_release));
+		g_object_set_data_full(G_OBJECT(dialog), "imfl",
+					 imfl, (GDestroyNotify)(image_file_list_release));
 		set_processing_dialog_imfl(dialog, imfl);
 	}
 	if (ccdr) {
 		ccd_reduce_ref(ccdr);
-		gtk_object_set_data_full(GTK_OBJECT(dialog), "ccdred",
-					 ccdr, (GtkDestroyNotify)(ccd_reduce_release));
+		g_object_set_data_full(G_OBJECT(dialog), "ccdred",
+					 ccdr, (GDestroyNotify)(ccd_reduce_release));
 		set_processing_dialog_ccdr(dialog, ccdr);
 	}
 }
@@ -398,10 +398,10 @@ static void imf_skip_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 	GList *sel, *tmp;
 	struct image_file *imf;
 
-	list = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_list");
+	list = g_object_get_data (G_OBJECT(dialog), "image_file_list");
 	g_return_if_fail (list != NULL);
 
-	view = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_view");
+	view = g_object_get_data (G_OBJECT(dialog), "image_file_view");
 	g_return_if_fail (view != NULL);
 
 	selection = gtk_tree_view_get_selection (view);
@@ -430,10 +430,10 @@ static void imf_unskip_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 	GList *sel, *tmp;
 	struct image_file *imf;
 
-	list = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_list");
+	list = g_object_get_data (G_OBJECT(dialog), "image_file_list");
 	g_return_if_fail (list != NULL);
 
-	view = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_view");
+	view = g_object_get_data (G_OBJECT(dialog), "image_file_view");
 	g_return_if_fail (view != NULL);
 
 	selection = gtk_tree_view_get_selection (view);
@@ -464,13 +464,13 @@ static void imf_rm_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 	struct image_file *imf;
 	struct image_file_list *imfl;
 
-	list = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_list");
+	list = g_object_get_data (G_OBJECT(dialog), "image_file_list");
 	g_return_if_fail (list != NULL);
 
-	view = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_view");
+	view = g_object_get_data (G_OBJECT(dialog), "image_file_view");
 	g_return_if_fail (view != NULL);
 
-	imfl = gtk_object_get_data (GTK_OBJECT(dialog), "imfl");
+	imfl = g_object_get_data (G_OBJECT(dialog), "imfl");
 	g_return_if_fail (imfl != NULL);
 
 	selection = gtk_tree_view_get_selection (view);
@@ -521,10 +521,10 @@ static void imf_next_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 	GtkAdjustment *vadj;
 	double nv;
 
-	list = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_list");
+	list = g_object_get_data (G_OBJECT(dialog), "image_file_list");
 	g_return_if_fail (list != NULL);
 
-	view = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_view");
+	view = g_object_get_data (G_OBJECT(dialog), "image_file_view");
 	g_return_if_fail (view != NULL);
 
 	selection = gtk_tree_view_get_selection (view);
@@ -569,7 +569,7 @@ static void imf_next_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 
 	d3_printf("initial position is %d\n", index);
 
-	scw = gtk_object_get_data(GTK_OBJECT(dialog), "scrolledwindow");
+	scw = g_object_get_data(G_OBJECT(dialog), "scrolledwindow");
 	g_return_if_fail(scw != NULL);
 
 	vadj =  gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW(scw));
@@ -601,10 +601,10 @@ static void imf_prev_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 	GtkAdjustment *vadj;
 	double nv;
 
-	list = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_list");
+	list = g_object_get_data (G_OBJECT(dialog), "image_file_list");
 	g_return_if_fail (list != NULL);
 
-	view = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_view");
+	view = g_object_get_data (G_OBJECT(dialog), "image_file_view");
 	g_return_if_fail (view != NULL);
 
 	selection = gtk_tree_view_get_selection (view);
@@ -645,7 +645,7 @@ static void imf_prev_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 
 	d3_printf("initial position is %d\n", index);
 
-	scw = gtk_object_get_data(GTK_OBJECT(dialog), "scrolledwindow");
+	scw = g_object_get_data(G_OBJECT(dialog), "scrolledwindow");
 	g_return_if_fail(scw != NULL);
 
 	vadj =  gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW(scw));
@@ -675,13 +675,13 @@ static void imf_display_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 
 	d3_printf("display\n");
 
-	im_window = gtk_object_get_data(GTK_OBJECT(dialog), "im_window");
+	im_window = g_object_get_data(G_OBJECT(dialog), "im_window");
 	g_return_if_fail (im_window != NULL);
 
-	list = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_list");
+	list = g_object_get_data (G_OBJECT(dialog), "image_file_list");
 	g_return_if_fail (list != NULL);
 
-	view = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_view");
+	view = g_object_get_data (G_OBJECT(dialog), "image_file_view");
 	g_return_if_fail (view != NULL);
 
 	selection = gtk_tree_view_get_selection (view);
@@ -706,7 +706,7 @@ static void imf_display_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 	}
 
 	if (P_INT(FILE_SAVE_MEM)) {
-		imfl = gtk_object_get_data(GTK_OBJECT(dialog), "imfl");
+		imfl = g_object_get_data(G_OBJECT(dialog), "imfl");
 		if (imfl)
 			unload_clean_frames(imfl);
 	}
@@ -726,7 +726,7 @@ static void imf_selall_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 	GtkTreeView *view;
 	GtkTreeSelection *selection;
 
-	view = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_view");
+	view = g_object_get_data (G_OBJECT(dialog), "image_file_view");
 	g_return_if_fail (view != NULL);
 
 	selection = gtk_tree_view_get_selection (view);
@@ -741,14 +741,14 @@ static void imf_add_files(GSList *files, gpointer dialog)
 	struct image_file_list *imfl;
 	char *text;
 
-	list = gtk_object_get_data(GTK_OBJECT(dialog), "image_file_list");
+	list = g_object_get_data(G_OBJECT(dialog), "image_file_list");
 	g_return_if_fail(list != NULL);
 
-	imfl = gtk_object_get_data(GTK_OBJECT(dialog), "imfl");
+	imfl = g_object_get_data(G_OBJECT(dialog), "imfl");
 	if (imfl == NULL) {
 		imfl = image_file_list_new();
-		gtk_object_set_data_full (GTK_OBJECT(dialog), "imfl", imfl,
-					  (GtkDestroyNotify) (image_file_list_release));
+		g_object_set_data_full (G_OBJECT(dialog), "imfl", imfl,
+					  (GDestroyNotify) (image_file_list_release));
 	}
 
 	while (files != NULL) {
@@ -790,10 +790,10 @@ static void imf_reload_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 	GList *sel, *tmp;
 	struct image_file *imf;
 
-	list = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_list");
+	list = g_object_get_data (G_OBJECT(dialog), "image_file_list");
 	g_return_if_fail (list != NULL);
 
-	view = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_view");
+	view = g_object_get_data (G_OBJECT(dialog), "image_file_view");
 	g_return_if_fail (view != NULL);
 
 	selection = gtk_tree_view_get_selection (view);
@@ -822,7 +822,7 @@ static void imf_reload_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 void switch_frame_cb(gpointer window, guint action, GtkWidget *menu_item)
 {
 	GtkWidget *dialog;
-	dialog = gtk_object_get_data(GTK_OBJECT(window), "processing");
+	dialog = g_object_get_data(G_OBJECT(window), "processing");
 	if (dialog == NULL) {
 		dialog = make_image_processing(window);
 	}
@@ -904,10 +904,10 @@ static void update_selected_status_label(gpointer dialog)
 	GtkTreeIter iter;
 	GList *sel, *tmp;
 
-	list = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_list");
+	list = g_object_get_data (G_OBJECT(dialog), "image_file_list");
 	g_return_if_fail (list != NULL);
 
-	view = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_view");
+	view = g_object_get_data (G_OBJECT(dialog), "image_file_view");
 	g_return_if_fail (view != NULL);
 
 	selection = gtk_tree_view_get_selection (view);
@@ -928,7 +928,7 @@ static void update_status_labels(gpointer dialog)
 	GtkTreeIter iter;
 	gboolean valid;
 
-	list = gtk_object_get_data(GTK_OBJECT(dialog), "image_file_list");
+	list = g_object_get_data(G_OBJECT(dialog), "image_file_list");
 	g_return_if_fail(list != NULL);
 
 	valid = gtk_tree_model_get_iter_first (list, &iter);
@@ -954,38 +954,38 @@ static void list_button_cb(GtkWidget *wid, GdkEventButton *event, gpointer dialo
 static void imf_red_browse_cb(GtkWidget *wid, gpointer dialog)
 {
 	GtkWidget *entry;
-	if (wid == gtk_object_get_data(GTK_OBJECT(dialog), "bias_browse")) {
-		entry = gtk_object_get_data(GTK_OBJECT(dialog), "bias_entry");
+	if (wid == g_object_get_data(G_OBJECT(dialog), "bias_browse")) {
+		entry = g_object_get_data(G_OBJECT(dialog), "bias_entry");
 		g_return_if_fail(entry != NULL);
 		file_select_to_entry(dialog, entry, "Select bias frame", "*", 1);
 	}
-	if (wid == gtk_object_get_data(GTK_OBJECT(dialog), "dark_browse")) {
-		entry = gtk_object_get_data(GTK_OBJECT(dialog), "dark_entry");
+	if (wid == g_object_get_data(G_OBJECT(dialog), "dark_browse")) {
+		entry = g_object_get_data(G_OBJECT(dialog), "dark_entry");
 		g_return_if_fail(entry != NULL);
 		file_select_to_entry(dialog, entry, "Select dark frame", "*", 1);
 	}
-	if (wid == gtk_object_get_data(GTK_OBJECT(dialog), "flat_browse")) {
-		entry = gtk_object_get_data(GTK_OBJECT(dialog), "flat_entry");
+	if (wid == g_object_get_data(G_OBJECT(dialog), "flat_browse")) {
+		entry = g_object_get_data(G_OBJECT(dialog), "flat_entry");
 		g_return_if_fail(entry != NULL);
 		file_select_to_entry(dialog, entry, "Select flat frame", "*", 1);
 	}
-	if (wid == gtk_object_get_data(GTK_OBJECT(dialog), "badpix_browse")) {
-		entry = gtk_object_get_data(GTK_OBJECT(dialog), "badpix_entry");
+	if (wid == g_object_get_data(G_OBJECT(dialog), "badpix_browse")) {
+		entry = g_object_get_data(G_OBJECT(dialog), "badpix_entry");
 		g_return_if_fail(entry != NULL);
 		file_select_to_entry(dialog, entry, "Select bad pixel file", "*", 1);
 	}
-	if (wid == gtk_object_get_data(GTK_OBJECT(dialog), "align_browse")) {
-		entry = gtk_object_get_data(GTK_OBJECT(dialog), "align_entry");
+	if (wid == g_object_get_data(G_OBJECT(dialog), "align_browse")) {
+		entry = g_object_get_data(G_OBJECT(dialog), "align_entry");
 		g_return_if_fail(entry != NULL);
 		file_select_to_entry(dialog, entry, "Select alignment reference frame", "*", 1);
 	}
-	if (wid == gtk_object_get_data(GTK_OBJECT(dialog), "recipe_browse")) {
-		entry = gtk_object_get_data(GTK_OBJECT(dialog), "recipe_entry");
+	if (wid == g_object_get_data(G_OBJECT(dialog), "recipe_browse")) {
+		entry = g_object_get_data(G_OBJECT(dialog), "recipe_entry");
 		g_return_if_fail(entry != NULL);
 		file_select_to_entry(dialog, entry, "Select recipe file", "*", 1);
 	}
-	if (wid == gtk_object_get_data(GTK_OBJECT(dialog), "output_file_browse")) {
-		entry = gtk_object_get_data(GTK_OBJECT(dialog), "output_file_entry");
+	if (wid == g_object_get_data(G_OBJECT(dialog), "output_file_browse")) {
+		entry = g_object_get_data(G_OBJECT(dialog), "output_file_entry");
 		g_return_if_fail(entry != NULL);
 		file_select_to_entry(dialog, entry, "Select output file/dir", "*", 1);
 	}
@@ -995,7 +995,7 @@ static int log_msg(char *msg, void *dialog)
 {
 	GtkWidget *text;
 
-	text = gtk_object_get_data(GTK_OBJECT(dialog), "processing_log_text");
+	text = g_object_get_data(G_OBJECT(dialog), "processing_log_text");
 	g_return_val_if_fail(text != NULL, 0);
 
 	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(text), GTK_WRAP_CHAR);
@@ -1149,7 +1149,7 @@ static void dialog_to_ccdr(GtkWidget *dialog, struct ccd_reduce *ccdr)
 	if (get_named_checkb_val(dialog, "phot_en_checkb")) {
 		gpointer window;
 		int i;
-		window = gtk_object_get_data(GTK_OBJECT(dialog), "im_window");
+		window = g_object_get_data(G_OBJECT(dialog), "im_window");
 		g_return_if_fail(window != NULL);
 		ccdr->window = window;
 		if (ccdr->wcs) {
@@ -1167,7 +1167,7 @@ static void dialog_to_ccdr(GtkWidget *dialog, struct ccd_reduce *ccdr)
 		free(text);
 		if (get_named_checkb_val(dialog, "phot_reuse_wcs_checkb")) {
 			struct wcs *wcs;
-			wcs = gtk_object_get_data(GTK_OBJECT(window), "wcs_of_window");
+			wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
 			if ((wcs == NULL) || ((wcs->wcsset & WCS_VALID) == 0)) {
 				err_printf("invalid wcs inherited\n");
 			} else {
@@ -1226,13 +1226,13 @@ static void ccdred_run_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 	GtkWidget *menubar;
 
 
-	imfl = gtk_object_get_data(GTK_OBJECT(dialog), "imfl");
+	imfl = g_object_get_data(G_OBJECT(dialog), "imfl");
 	g_return_if_fail (imfl != NULL);
-	ccdr = gtk_object_get_data(GTK_OBJECT(dialog), "ccdred");
+	ccdr = g_object_get_data(G_OBJECT(dialog), "ccdred");
 	if (ccdr == NULL) {
 		ccdr = ccd_reduce_new();
-		gtk_object_set_data_full(GTK_OBJECT(dialog), "ccdred",
-					 ccdr, (GtkDestroyNotify)(ccd_reduce_release));
+		g_object_set_data_full(G_OBJECT(dialog), "ccdred",
+					 ccdr, (GDestroyNotify)(ccd_reduce_release));
 	}
 	g_return_if_fail (ccdr != NULL);
 	ccdr->ops &= ~CCDR_BG_VAL_SET;
@@ -1241,22 +1241,22 @@ static void ccdred_run_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 	outf = named_entry_text(dialog, "output_file_entry");
 	d3_printf("outf is |%s|\n", outf);
 
-	menubar = gtk_object_get_data(GTK_OBJECT(dialog), "menubar");
+	menubar = g_object_get_data(G_OBJECT(dialog), "menubar");
 	gtk_widget_set_sensitive(menubar, 0);
 
 	if (ccdr->ops & IMG_OP_PHOT) {
 		if (ccdr->multiband == NULL) {
 			gpointer mbd;
-			im_window = gtk_object_get_data(GTK_OBJECT(dialog), "im_window");
-			mbd = gtk_object_get_data(GTK_OBJECT(im_window), "mband_window");
+			im_window = g_object_get_data(G_OBJECT(dialog), "im_window");
+			mbd = g_object_get_data(G_OBJECT(im_window), "mband_window");
 			if (mbd == NULL) {
 				mband_open_cb(im_window, 0, NULL);
-				mbd = gtk_object_get_data(GTK_OBJECT(im_window), "mband_window");
+				mbd = g_object_get_data(G_OBJECT(im_window), "mband_window");
 			}
-			gtk_widget_ref(GTK_WIDGET(mbd));
+			g_object_ref(GTK_WIDGET(mbd));
 			ccdr->multiband = mbd;
-			gtk_object_set_data_full(GTK_OBJECT(dialog), "mband_window",
-						 mbd, (GtkDestroyNotify)(gtk_widget_unref));
+			g_object_set_data_full(G_OBJECT(dialog), "mband_window",
+						 mbd, (GDestroyNotify)(g_object_unref));
 		}
 	}
 
@@ -1315,7 +1315,7 @@ static void ccdred_run_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 				progress_pr, dialog);
 		image_file_release(imf);
 	}
-	im_window = gtk_object_get_data(GTK_OBJECT(dialog), "im_window");
+	im_window = g_object_get_data(G_OBJECT(dialog), "im_window");
 	g_return_if_fail(im_window != NULL);
 	frame_to_channel(fr, im_window, "i_channel");
 	release_frame(fr);
@@ -1337,10 +1337,10 @@ static struct image_file * current_imf(gpointer dialog)
 	GList *sel;
 	struct image_file *imf = NULL;
 
-	list = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_list");
+	list = g_object_get_data (G_OBJECT(dialog), "image_file_list");
 	g_return_val_if_fail (list != NULL, NULL);
 
-	view = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_view");
+	view = g_object_get_data (G_OBJECT(dialog), "image_file_view");
 	g_return_val_if_fail (view != NULL, NULL);
 
 	selection = gtk_tree_view_get_selection (view);
@@ -1384,10 +1384,10 @@ static void select_next_imf(gpointer dialog)
 	GtkAdjustment *vadj;
 	double nv;
 
-	list = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_list");
+	list = g_object_get_data (G_OBJECT(dialog), "image_file_list");
 	g_return_if_fail (list != NULL);
 
-	view = gtk_object_get_data (GTK_OBJECT(dialog), "image_file_view");
+	view = g_object_get_data (G_OBJECT(dialog), "image_file_view");
 	g_return_if_fail (view != NULL);
 
 	selection = gtk_tree_view_get_selection (view);
@@ -1430,7 +1430,7 @@ static void select_next_imf(gpointer dialog)
 
 	d3_printf("initial position is %d\n", index);
 
-	scw = gtk_object_get_data(GTK_OBJECT(dialog), "scrolledwindow");
+	scw = g_object_get_data(G_OBJECT(dialog), "scrolledwindow");
 	g_return_if_fail(scw != NULL);
 
 	vadj =  gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW(scw));
@@ -1464,13 +1464,13 @@ static void ccdred_one_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 		return;
 	}
 
-	imfl = gtk_object_get_data(GTK_OBJECT(dialog), "imfl");
+	imfl = g_object_get_data(G_OBJECT(dialog), "imfl");
 	g_return_if_fail (imfl != NULL);
-	ccdr = gtk_object_get_data(GTK_OBJECT(dialog), "ccdred");
+	ccdr = g_object_get_data(G_OBJECT(dialog), "ccdred");
 	if (ccdr == NULL) {
 		ccdr = ccd_reduce_new();
-		gtk_object_set_data_full(GTK_OBJECT(dialog), "ccdred",
-					 ccdr, (GtkDestroyNotify)(ccd_reduce_release));
+		g_object_set_data_full(G_OBJECT(dialog), "ccdred",
+					 ccdr, (GDestroyNotify)(ccd_reduce_release));
 	}
 	g_return_if_fail (ccdr != NULL);
 	ccdr->ops &= ~CCDR_BG_VAL_SET;
@@ -1479,22 +1479,22 @@ static void ccdred_one_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 	outf = named_entry_text(dialog, "output_file_entry");
 	d3_printf("outf is |%s|\n", outf);
 
-	menubar = gtk_object_get_data(GTK_OBJECT(dialog), "menubar");
+	menubar = g_object_get_data(G_OBJECT(dialog), "menubar");
 	gtk_widget_set_sensitive(menubar, 0);
 
 	if (ccdr->ops & IMG_OP_PHOT) {
 		if (ccdr->multiband == NULL) {
 			gpointer mbd;
-			im_window = gtk_object_get_data(GTK_OBJECT(dialog), "im_window");
-			mbd = gtk_object_get_data(GTK_OBJECT(im_window), "mband_window");
+			im_window = g_object_get_data(G_OBJECT(dialog), "im_window");
+			mbd = g_object_get_data(G_OBJECT(im_window), "mband_window");
 			if (mbd == NULL) {
 				mband_open_cb(im_window, 0, NULL);
-				mbd = gtk_object_get_data(GTK_OBJECT(im_window), "mband_window");
+				mbd = g_object_get_data(G_OBJECT(im_window), "mband_window");
 			}
-			gtk_widget_ref(GTK_WIDGET(mbd));
+			g_object_ref(GTK_WIDGET(mbd));
 			ccdr->multiband = mbd;
-			gtk_object_set_data_full(GTK_OBJECT(dialog), "mband_window",
-						 mbd, (GtkDestroyNotify)(gtk_widget_unref));
+			g_object_set_data_full(G_OBJECT(dialog), "mband_window",
+						 mbd, (GDestroyNotify)(g_object_unref));
 		}
 	}
 
@@ -1545,13 +1545,13 @@ static void ccdred_qphotone_cb(gpointer dialog, guint action, GtkWidget *menu_it
 		return;
 	}
 
-	imfl = gtk_object_get_data(GTK_OBJECT(dialog), "imfl");
+	imfl = g_object_get_data(G_OBJECT(dialog), "imfl");
 	g_return_if_fail (imfl != NULL);
-	ccdr = gtk_object_get_data(GTK_OBJECT(dialog), "ccdred");
+	ccdr = g_object_get_data(G_OBJECT(dialog), "ccdred");
 	if (ccdr == NULL) {
 		ccdr = ccd_reduce_new();
-		gtk_object_set_data_full(GTK_OBJECT(dialog), "ccdred",
-					 ccdr, (GtkDestroyNotify)(ccd_reduce_release));
+		g_object_set_data_full(G_OBJECT(dialog), "ccdred",
+					 ccdr, (GDestroyNotify)(ccd_reduce_release));
 	}
 	g_return_if_fail (ccdr != NULL);
 	ccdr->ops &= ~CCDR_BG_VAL_SET;
@@ -1564,7 +1564,7 @@ static void ccdred_qphotone_cb(gpointer dialog, guint action, GtkWidget *menu_it
 	outf = named_entry_text(dialog, "output_file_entry");
 	d3_printf("outf is |%s|\n", outf);
 
-	menubar = gtk_object_get_data(GTK_OBJECT(dialog), "menubar");
+	menubar = g_object_get_data(G_OBJECT(dialog), "menubar");
 	gtk_widget_set_sensitive(menubar, 0);
 
 	ccdr->ops |= IMG_QUICKPHOT;
@@ -1584,16 +1584,16 @@ static void show_align_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 	struct ccd_reduce *ccdr;
 	GtkWidget *im_window;
 
-	ccdr = gtk_object_get_data(GTK_OBJECT(dialog), "ccdred");
+	ccdr = g_object_get_data(G_OBJECT(dialog), "ccdred");
 	if (ccdr == NULL) {
 		ccdr = ccd_reduce_new();
-		gtk_object_set_data_full(GTK_OBJECT(dialog), "ccdred",
-					 ccdr, (GtkDestroyNotify)(ccd_reduce_release));
+		g_object_set_data_full(G_OBJECT(dialog), "ccdred",
+					 ccdr, (GDestroyNotify)(ccd_reduce_release));
 	}
 	g_return_if_fail (ccdr != NULL);
 	dialog_to_ccdr(dialog, ccdr);
 
-	im_window = gtk_object_get_data(GTK_OBJECT(dialog), "im_window");
+	im_window = g_object_get_data(G_OBJECT(dialog), "im_window");
 	g_return_if_fail(im_window != NULL);
 
 	d3_printf("ops: %08x, align_stars: %08p\n", ccdr->ops, ccdr->align_stars);
@@ -1615,22 +1615,22 @@ static void show_align_cb(gpointer dialog, guint action, GtkWidget *menu_item)
 /* set the enable check buttons when the user activates a file entry */
 static void imf_red_activate_cb(GtkWidget *wid, gpointer dialog)
 {
-	if (wid == gtk_object_get_data(GTK_OBJECT(dialog), "dark_entry")) {
+	if (wid == g_object_get_data(G_OBJECT(dialog), "dark_entry")) {
 		set_named_checkb_val(dialog, "dark_checkb", 1);
 	}
-	if (wid == gtk_object_get_data(GTK_OBJECT(dialog), "flat_entry")) {
+	if (wid == g_object_get_data(G_OBJECT(dialog), "flat_entry")) {
 		set_named_checkb_val(dialog, "flat_checkb", 1);
 	}
-	if (wid == gtk_object_get_data(GTK_OBJECT(dialog), "bias_entry")) {
+	if (wid == g_object_get_data(G_OBJECT(dialog), "bias_entry")) {
 		set_named_checkb_val(dialog, "bias_checkb", 1);
 	}
-	if (wid == gtk_object_get_data(GTK_OBJECT(dialog), "badpix_entry")) {
+	if (wid == g_object_get_data(G_OBJECT(dialog), "badpix_entry")) {
 		set_named_checkb_val(dialog, "badpix_checkb", 1);
 	}
-	if (wid == gtk_object_get_data(GTK_OBJECT(dialog), "align_entry")) {
+	if (wid == g_object_get_data(G_OBJECT(dialog), "align_entry")) {
 		set_named_checkb_val(dialog, "align_checkb", 1);
 	}
-	if (wid == gtk_object_get_data(GTK_OBJECT(dialog), "recipe_entry")) {
+	if (wid == g_object_get_data(G_OBJECT(dialog), "recipe_entry")) {
 		set_named_checkb_val(dialog, "phot_en_checkb", 1);
 	}
 
@@ -1643,7 +1643,7 @@ void processing_cb(gpointer window, guint action, GtkWidget *menu_item)
 {
 	GtkWidget *dialog;
 
-	dialog = gtk_object_get_data(GTK_OBJECT(window), "processing");
+	dialog = g_object_get_data(G_OBJECT(window), "processing");
 	if (dialog == NULL) {
 		dialog = make_image_processing(window);
 		gtk_widget_show_all(dialog);

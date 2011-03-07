@@ -1642,7 +1642,7 @@ int aphot_imf(struct image_file *imf, struct ccd_reduce *ccdr,
 
 	frame_to_channel(imf->fr, window, "i_channel");
 
-	i_chan = gtk_object_get_data(GTK_OBJECT(window), "i_channel");
+	i_chan = g_object_get_data(G_OBJECT(window), "i_channel");
 	if (i_chan == NULL || i_chan->fr == NULL) {
 		err_printf("aphot_imf: No frame\n");
 		return -1;
@@ -1657,7 +1657,7 @@ int aphot_imf(struct image_file *imf, struct ccd_reduce *ccdr,
 		wcs = ccdr->wcs;
 	} else {
 		match_field_in_window_quiet(window);
-		wcs = gtk_object_get_data(GTK_OBJECT(window), "wcs_of_window");
+		wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
 	}
 
 	if ((wcs == NULL) || ((wcs->wcsset & WCS_VALID) == 0)) {
@@ -1667,7 +1667,7 @@ int aphot_imf(struct image_file *imf, struct ccd_reduce *ccdr,
 		}
 		return -1;
 	}
-	gsl = gtk_object_get_data(GTK_OBJECT(window), "gui_star_list");
+	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl == NULL) {
 		if (progress) {
 			snprintf(msg, 255, " no phot stars");

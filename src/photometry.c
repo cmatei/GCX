@@ -1,23 +1,23 @@
 /*******************************************************************************
   Copyright(c) 2000 - 2003 Radu Corlan. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: radu@corlan.net
 *******************************************************************************/
 
@@ -80,7 +80,7 @@ void ap_params_from_par(struct ap_params *ap)
 static double stf_scint(struct stf *stf)
 {
 	double t, d, am;
-	
+
 	if (!stf_find_double(stf, &t, 1, SYM_OBSERVATION, SYM_EXPTIME)) {
 		err_printf("cannot calculate scintillation: no exptime\n");
 		return 0.0;
@@ -102,7 +102,7 @@ static int stf_am_pars(struct stf *stf, double *lat, double *lng, double *jd)
 {
 	double mjd;
 	char *la, *ln;
-	
+
 	la = stf_find_string(stf, 1, SYM_OBSERVATION, SYM_LATITUDE);
 	ln = stf_find_string(stf, 1, SYM_OBSERVATION, SYM_LONGITUDE);
 
@@ -123,10 +123,10 @@ static int stf_am_pars(struct stf *stf, double *lat, double *lng, double *jd)
 /* return 1 if star is inside the frame, with a margin of margin pixels */
 static int star_in_frame(struct ccd_frame *fr, double x, double y, int margin)
 {
-	if (x < margin || x > fr->w - margin 
+	if (x < margin || x > fr->w - margin
 	    || y < margin || y > fr->h - margin)
 		return 0;
-	if (sqr(x - fr->w / 2) + sqr(y - fr->h / 2) > 
+	if (sqr(x - fr->w / 2) + sqr(y - fr->h / 2) >
 		sqr(P_DBL(AP_MAX_STD_RADIUS)) * (sqr(fr->w / 2) + sqr(fr->h / 2)))
 		return 0;
 	return 1;
@@ -145,14 +145,14 @@ int center_star(struct ccd_frame *fr, struct star *st, double max_ce)
 	get_star_near(fr, (int)(round(st->x)), (int)(round(st->y)), 0, &sf);
 	d3_printf("found at %.4g %.4g ", sf.x, sf.y) ;
 	if (((distance(st->x, st->y, sf.x, sf.y)) > max_ce)) {
-		st->xerr = BIG_ERR;	
+		st->xerr = BIG_ERR;
 		st->yerr = BIG_ERR;
 		d3_printf(" -- too far, skipped\n");
 		return -1;
 	} else {
-		st->x = sf.x;	
+		st->x = sf.x;
 		st->y = sf.y;
-		st->xerr = sf.xerr;	
+		st->xerr = sf.xerr;
 		st->yerr = sf.yerr;
 		d3_printf(" -- centered\n");
 	}
@@ -160,7 +160,7 @@ int center_star(struct ccd_frame *fr, struct star *st, double max_ce)
 }
 
 /* measure instrumental magnitudes for the stars in the stf. */
-static int stf_aphot(struct stf *stf, struct ccd_frame *fr, 
+static int stf_aphot(struct stf *stf, struct ccd_frame *fr,
 		     struct wcs *wcs, struct ap_params *ap)
 {
 //	struct star *star;
@@ -239,7 +239,7 @@ static int stf_aphot(struct stf *stf, struct ccd_frame *fr,
 		if (ret)
 			continue;
 
-		if ((cats->flags & CPHOT_CENTERED) && 
+		if ((cats->flags & CPHOT_CENTERED) &&
 		    !(cats->flags & CAT_ASTROMET) &&
 		    P_INT(AP_MOVE_TARGETS)) {
 			w_worldpos(wcs, s.x, s.y, &cats->ra, &cats->dec);
@@ -254,7 +254,7 @@ static int stf_aphot(struct stf *stf, struct ccd_frame *fr,
 		cats->pos[POS_XERR] = s.xerr * s.aph.star_err/s.aph.star;
 		cats->pos[POS_YERR] = s.yerr * s.aph.star_err/s.aph.star;
 		cats->flags |= INFO_POS;
-		if (ret < 0) { 
+		if (ret < 0) {
 			cats->flags |= CPHOT_INVALID;
 		} else {
 			if (s.aph.flags & AP_FAINT) {
@@ -288,7 +288,7 @@ static struct stf * create_obs_alist(struct ccd_frame *fr, struct wcs *wcs)
 	double v, jd;
 	char s[80];
 
-	if (P_INT(AP_FORCE_IBAND) || 
+	if (P_INT(AP_FORCE_IBAND) ||
 	    (fits_get_string(fr, P_STR(FN_FILTER), s, 79) <= 0)) {
 		stf = stf_append_string(NULL, SYM_FILTER, P_STR(AP_IBAND_NAME));
 	} else {
@@ -314,16 +314,16 @@ static struct stf * create_obs_alist(struct ccd_frame *fr, struct wcs *wcs)
 		stf_append_string(stf, SYM_TELESCOPE, s);
 	}
 	if (fits_get_double(fr, P_STR(FN_APERTURE), &v) > 0) {
-		d1_printf("using aperture = %.3f from %s\n", 
+		d1_printf("using aperture = %.3f from %s\n",
 			  v, P_STR(FN_APERTURE));
 		stf_append_double(stf, SYM_APERTURE, v);
 	}
 	if (fits_get_double(fr, P_STR(FN_EXPTIME), &v) > 0) {
-		d1_printf("using exptime = %.3f from %s\n", 
+		d1_printf("using exptime = %.3f from %s\n",
 			  v, P_STR(FN_EXPTIME));
 		stf_append_double(stf, SYM_EXPTIME, v);
-		if (jd > 0) 
-			stf_append_double(stf, SYM_MJD, 
+		if (jd > 0)
+			stf_append_double(stf, SYM_MJD,
 					  jd_to_mjd(jd + v / 2/24/3600));
 	} else if (jd > 0) {
 		stf_append_double(stf, SYM_MJD, jd_to_mjd(jd));
@@ -342,10 +342,10 @@ static struct stf * create_obs_alist(struct ccd_frame *fr, struct wcs *wcs)
 		stf_append_double(stf, SYM_ALTITUDE, v);
 	}
 	if (fits_get_double(fr, P_STR(FN_AIRMASS), &v) > 0) {
-		d1_printf("using airmass = %.3f from %s\n", 
+		d1_printf("using airmass = %.3f from %s\n",
 			  v, P_STR(FN_AIRMASS));
 		stf_append_double(stf, SYM_AIRMASS, v);
-	} else if ((wcs->flags & WCS_LOC_VALID) && jd > 0.0) { 
+	} else if ((wcs->flags & WCS_LOC_VALID) && jd > 0.0) {
 		/* attempt to calculate airmass from other fields */
 		v = calculate_airmass(wcs->xref, wcs->yref, jd, wcs->lat, wcs->lng);
 		if (v > 0.0) {
@@ -361,7 +361,7 @@ static struct stf * create_obs_alist(struct ccd_frame *fr, struct wcs *wcs)
 
 
 /* create a stf from the frame and a list of cat stars. The wcs is assumed valid */
-static struct stf * build_stf_from_frame(struct wcs *wcs, GList *sl, 
+static struct stf * build_stf_from_frame(struct wcs *wcs, GList *sl,
 		       struct ccd_frame *fr, struct ap_params *ap)
 {
 	GList *apsl=NULL;
@@ -370,13 +370,13 @@ static struct stf * build_stf_from_frame(struct wcs *wcs, GList *sl,
 
 	for (; sl != NULL; sl = g_list_next(sl)) {
 		cats = CAT_STAR(sl->data);
-		if (CATS_TYPE(cats) == CAT_STAR_TYPE_APSTAR || 
+		if (CATS_TYPE(cats) == CAT_STAR_TYPE_APSTAR ||
 		    CATS_TYPE(cats) == CAT_STAR_TYPE_APSTD) {
 			apsl = g_list_prepend(apsl, cats);
 			cat_star_ref(cats);
 		}
 	}
-	stf = stf_append_list(NULL, SYM_OBSERVATION, 
+	stf = stf_append_list(NULL, SYM_OBSERVATION,
 			      create_obs_alist(fr, wcs));
 	st = stf_append_double(NULL, SYM_READ, fr->exp.rdnoise);
 	stf_append_double(st, SYM_ELADU, fr->exp.scale);
@@ -420,7 +420,7 @@ static void stf_keep_good_phot(struct stf *stf)
 	sl = STF_GLIST(st->next);
 	for (; sl != NULL; sl = sl->next) {
 		cats = CAT_STAR(sl->data);
-		if (CATS_TYPE(cats) != CAT_STAR_TYPE_APSTAR && 
+		if (CATS_TYPE(cats) != CAT_STAR_TYPE_APSTAR &&
 		    CATS_TYPE(cats) != CAT_STAR_TYPE_APSTD) {
 			cat_star_release(cats);
 			continue;
@@ -443,7 +443,7 @@ static void stf_keep_good_phot(struct stf *stf)
 }
 
 /* single-field photometric run. Returns a stf for the observation. */
-struct stf * run_phot(gpointer window, struct wcs *wcs, struct gui_star_list *gsl, 
+struct stf * run_phot(gpointer window, struct wcs *wcs, struct gui_star_list *gsl,
 		       struct ccd_frame *fr)
 {
 	GSList *apsl=NULL, *sl;
@@ -457,9 +457,9 @@ struct stf * run_phot(gpointer window, struct wcs *wcs, struct gui_star_list *gs
 	struct ap_params apdef;
 	struct stf *rcp;
 	char *seq;
-	
 
-	bpmap = gtk_object_get_data(GTK_OBJECT(window), "bad_pix_map");
+
+	bpmap = g_object_get_data(G_OBJECT(window), "bad_pix_map");
 
 	apsl = gui_stars_of_type(gsl, TYPE_MASK_PHOT);
 	all = g_slist_length(apsl);
@@ -468,12 +468,12 @@ struct stf * run_phot(gpointer window, struct wcs *wcs, struct gui_star_list *gs
 		return  NULL;
 	}
 //	scint = frame_scint(fr, wcs);
-	
+
 	sl = apsl;
 	while (sl != NULL) {
 		gs = GUI_STAR(sl->data);
 		sl = g_slist_next(sl);
-		if (gs->s != NULL) 
+		if (gs->s != NULL)
 			cats = CAT_STAR(gs->s);
 		else
 			continue;
@@ -481,14 +481,14 @@ struct stf * run_phot(gpointer window, struct wcs *wcs, struct gui_star_list *gs
 	}
 	g_slist_free(apsl);
 
-	rcp = gtk_object_get_data(GTK_OBJECT(window), "recipe");
+	rcp = g_object_get_data(G_OBJECT(window), "recipe");
 
 	ap_params_from_par(&apdef);
 	stf = build_stf_from_frame(wcs, asl, fr, &apdef);
 
 	if (rcp != NULL) { 	/* get the sequence and maybe object info from rcp */
 		seq = stf_find_string(rcp, 0, SYM_SEQUENCE);
-		if (seq != NULL) 
+		if (seq != NULL)
 			stf_append_string(stf, SYM_SEQUENCE, seq);
 		if (stf_find(stf, 1, SYM_OBSERVATION, SYM_OBJECT) == NULL) {
 			d3_printf("looking for obj in rcp\n");
@@ -532,7 +532,7 @@ static void rep_mbds(char *fn, gpointer data, unsigned action)
 
 	d3_printf("Report action %x fn:%s\n", action, fn);
 
-	mbds = gtk_object_get_data(GTK_OBJECT(data), "temp-mbds");
+	mbds = g_object_get_data(G_OBJECT(data), "temp-mbds");
 
 	g_return_if_fail(mbds != NULL);
 
@@ -551,8 +551,8 @@ static void rep_mbds(char *fn, gpointer data, unsigned action)
 		return;
 	}
 	for (sl = mbds->ofrs; sl != NULL; sl = g_list_next(sl)) {
-		ofr = O_FRAME(sl->data); 
-		if (((action & FMT_MASK) != REP_DATASET) && 
+		ofr = O_FRAME(sl->data);
+		if (((action & FMT_MASK) != REP_DATASET) &&
 		    (ofr == NULL || ZPSTATE(ofr) <= ZP_FIT_ERR)) {
 			continue;
 		}
@@ -614,23 +614,23 @@ void photometry_cb(gpointer window, guint action, GtkWidget *menu_item)
 	int n;
 	FILE *plfp;
 
-	i_chan = gtk_object_get_data(GTK_OBJECT(window), "i_channel");
+	i_chan = g_object_get_data(G_OBJECT(window), "i_channel");
 	if (i_chan == NULL || i_chan->fr == NULL) {
 		err_printf_sb2(window, "No frame\n");
 		return;
 	} else {
 		fr = i_chan->fr;
 	}
-	gsl = gtk_object_get_data(GTK_OBJECT(window), "gui_star_list");
+	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl == NULL) {
 		err_printf_sb2(window, "No stars\n");
 		return;
-	} 
-	wcs = gtk_object_get_data(GTK_OBJECT(window), "wcs_of_window");
+	}
+	wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
 	if ((wcs == NULL) || ((wcs->wcsset & WCS_VALID) == 0)) {
 		err_printf_sb2(window, "Invalid wcs\n");
 		return;
-	} 
+	}
 
 //	d3_printf("airmass %f\n", frame_airmass(fr, wcs->xref, wcs->yref));
 
@@ -655,10 +655,10 @@ void photometry_cb(gpointer window, guint action, GtkWidget *menu_item)
 		if (stf == NULL) {
 			err_printf_sb2(window, "Phot: %s\n", last_err());
 			return;
-		} 
+		}
 		plfp = popen(P_STR(FILE_GNUPLOT), "w");
 		if (plfp == NULL) {
-			err_printf_sb2(window, "Error running gnuplot (with %s)\n", 
+			err_printf_sb2(window, "Error running gnuplot (with %s)\n",
 				    P_STR(FILE_GNUPLOT));
 			return ;
 		} else {
@@ -676,10 +676,10 @@ void photometry_cb(gpointer window, guint action, GtkWidget *menu_item)
 		}
 		if ((action & PHOT_OUTPUT_MASK) == PHOT_TO_MBDS) {
 			gpointer mbd;
-			mbd = gtk_object_get_data(GTK_OBJECT(window), "mband_window");
+			mbd = g_object_get_data(G_OBJECT(window), "mband_window");
 			if (mbd == NULL) {
 				mband_open_cb(window, 0, NULL);
-				mbd = gtk_object_get_data(GTK_OBJECT(window), "mband_window");
+				mbd = g_object_get_data(G_OBJECT(window), "mband_window");
 			}
 			stf_to_mband(mbd, stf);
 			return;
@@ -691,7 +691,7 @@ void photometry_cb(gpointer window, guint action, GtkWidget *menu_item)
 		d3_printf("mbds has %d frames\n", g_list_length(mbds->ofrs));
 		ofr_fit_zpoint(O_FRAME(mbds->ofrs->data), P_DBL(AP_ALPHA), P_DBL(AP_BETA), 1);
 		ofr_transform_stars(O_FRAME(mbds->ofrs->data), mbds, 0, 0);
-		if (3 * O_FRAME(mbds->ofrs->data)->outliers > 
+		if (3 * O_FRAME(mbds->ofrs->data)->outliers >
 		    O_FRAME(mbds->ofrs->data)->vstars) {
 			info_printf(
 				"\nWarning: Frame has a large number of outliers (more than 1/3\n"
@@ -721,15 +721,15 @@ void photometry_cb(gpointer window, guint action, GtkWidget *menu_item)
 			break;
 		case PHOT_TO_FILE:
 			/* bad hack passing the mbds like that. It will cause a leak.*/
-			gtk_object_set_data_full(GTK_OBJECT(window), "temp-mbds", mbds,
-				 (GtkDestroyNotify)mband_dataset_release);
-//			gtk_object_set_data(GTK_OBJECT(window), "temp-mbds", mbds);
+			g_object_set_data_full(G_OBJECT(window), "temp-mbds", mbds,
+					       (GDestroyNotify) mband_dataset_release);
+//			gtk_object_set_data(G_OBJECT(window), "temp-mbds", mbds);
 			file_select(window, "Report File", "", rep_mbds, REP_ALL|REP_DATASET);
 			break;
 		case PHOT_TO_FILE_AA:
-			gtk_object_set_data_full(GTK_OBJECT(window), "temp-mbds", mbds,
-				 (GtkDestroyNotify)mband_dataset_release);
-//			gtk_object_set_data(GTK_OBJECT(window), "temp-mbds", mbds);
+			g_object_set_data_full(G_OBJECT(window), "temp-mbds", mbds,
+					       (GDestroyNotify) mband_dataset_release);
+//			gtk_object_set_data(G_OBJECT(window), "temp-mbds", mbds);
 			file_select(window, "Report File", "", rep_mbds, REP_TGT|REP_AAVSO);
 			break;
 		}
@@ -739,7 +739,7 @@ void photometry_cb(gpointer window, guint action, GtkWidget *menu_item)
 	}
 }
 
-/* run photometry on the stars in window, writing report to fd 
+/* run photometry on the stars in window, writing report to fd
  * a 'short' result (malloced string) is returned (NULL for an error) */
 char * phot_to_fd(gpointer window, FILE *fd, int format)
 {
@@ -751,26 +751,26 @@ char * phot_to_fd(gpointer window, FILE *fd, int format)
 	char *ret = NULL;
 	struct stf *stf;
 
-	i_chan = gtk_object_get_data(GTK_OBJECT(window), "i_channel");
+	i_chan = g_object_get_data(G_OBJECT(window), "i_channel");
 	if (i_chan == NULL || i_chan->fr == NULL) {
 		err_printf("No frame\n");
 		return NULL;
 	} else {
 		fr = i_chan->fr;
 	}
-	gsl = gtk_object_get_data(GTK_OBJECT(window), "gui_star_list");
+	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl == NULL) {
 		err_printf("No phot stars\n");
 		return NULL;
-	} 
-	wcs = gtk_object_get_data(GTK_OBJECT(window), "wcs_of_window");
+	}
+	wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
 	if ((wcs == NULL) || ((wcs->wcsset & WCS_VALID) == 0)) {
 		err_printf("Invalid wcs\n");
 		return NULL;
-	} 
+	}
 
 	stf = run_phot(window, wcs, gsl, fr);
-	if (stf == NULL) 
+	if (stf == NULL)
 		return NULL;
 	mbds = mband_dataset_new();
 	d3_printf("mbds: %p\n", mbds);
@@ -784,7 +784,7 @@ char * phot_to_fd(gpointer window, FILE *fd, int format)
 	ofr_transform_stars(O_FRAME(mbds->ofrs->data), mbds, 0, 0);
 	d3_printf("mbds has %d frames\n", g_list_length(mbds->ofrs));
 	mbds_report_from_ofrs(mbds, fd, mbds->ofrs, format);
-	if (3 * O_FRAME(mbds->ofrs->data)->outliers > 
+	if (3 * O_FRAME(mbds->ofrs->data)->outliers >
 	    O_FRAME(mbds->ofrs->data)->vstars) {
 		info_printf(
 			"\nWarning: Frame has a large number of outliers (more than 1/3\n"

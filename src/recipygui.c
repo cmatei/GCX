@@ -1,23 +1,23 @@
 /*******************************************************************************
   Copyright(c) 2000 - 2003 Radu Corlan. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: radu@corlan.net
 *******************************************************************************/
 
@@ -58,15 +58,15 @@ static void browse_cb( GtkWidget *widget, gpointer data );
 static void close_mkrcp( GtkWidget *widget, gpointer data )
 {
 	g_return_if_fail(data != NULL);
-	gtk_object_set_data(GTK_OBJECT(data), "mkrcp_dialog", NULL);
+	g_object_set_data(G_OBJECT(data), "mkrcp_dialog", NULL);
 }
 
 static void close_mkrcp_dialog( GtkWidget *widget, gpointer data )
 {
 //	GtkWidget *im_window;
-//	im_window = gtk_object_get_data(GTK_OBJECT(data), "im_window");
+//	im_window = g_object_get_data(G_OBJECT(data), "im_window");
 //	g_return_if_fail(im_window != NULL);
-//	gtk_object_set_data(GTK_OBJECT(im_window), "mkrcp_dialog", NULL);
+//	g_object_set_data(G_OBJECT(im_window), "mkrcp_dialog", NULL);
 	gtk_widget_hide(GTK_WIDGET(data));
 }
 
@@ -75,7 +75,7 @@ static void update_rcp_dialog(gpointer window, GtkWidget *dialog)
 	struct stf *rcp;
 	char *text;
 
-	rcp = gtk_object_get_data(GTK_OBJECT(window), "recipe");
+	rcp = g_object_get_data(G_OBJECT(window), "recipe");
 	if (rcp == NULL)
 		return;
 
@@ -95,23 +95,23 @@ void create_recipe_cb(gpointer window, guint action, GtkWidget *menu_item)
 {
 	GtkWidget *dialog;
 
-	dialog = gtk_object_get_data(GTK_OBJECT(window), "mkrcp_dialog");
+	dialog = g_object_get_data(G_OBJECT(window), "mkrcp_dialog");
 	if (dialog == NULL) {
 		dialog = create_create_recipe();
-		gtk_object_set_data(GTK_OBJECT(dialog), "im_window",
+		g_object_set_data(G_OBJECT(dialog), "im_window",
 					 window);
-		gtk_object_set_data_full(GTK_OBJECT(window), "mkrcp_dialog",
-					 dialog, (GtkDestroyNotify)(gtk_widget_destroy));
-		gtk_signal_connect (GTK_OBJECT (dialog), "destroy",
-				    GTK_SIGNAL_FUNC (close_mkrcp), window);
-		set_named_callback (GTK_OBJECT (dialog), "mkrcp_close_button", "clicked",
-				    GTK_SIGNAL_FUNC (close_mkrcp_dialog));
-		set_named_callback (GTK_OBJECT (dialog), "mkrcp_ok_button", "clicked",
-				    GTK_SIGNAL_FUNC (mkrcp_ok_cb));
-		set_named_callback (GTK_OBJECT (dialog), "browse_file_button", "clicked",
-				    GTK_SIGNAL_FUNC (browse_cb));
-		set_named_callback (GTK_OBJECT (dialog), "recipe_file_entry", "activate",
-				    GTK_SIGNAL_FUNC (mkrcp_ok_cb));
+		g_object_set_data_full(G_OBJECT(window), "mkrcp_dialog",
+					 dialog, (GDestroyNotify)(gtk_widget_destroy));
+		g_signal_connect (G_OBJECT (dialog), "destroy",
+				  G_CALLBACK (close_mkrcp), window);
+		set_named_callback (G_OBJECT (dialog), "mkrcp_close_button", "clicked",
+				    G_CALLBACK (close_mkrcp_dialog));
+		set_named_callback (G_OBJECT (dialog), "mkrcp_ok_button", "clicked",
+				    G_CALLBACK (mkrcp_ok_cb));
+		set_named_callback (G_OBJECT (dialog), "browse_file_button", "clicked",
+				    G_CALLBACK (browse_cb));
+		set_named_callback (G_OBJECT (dialog), "recipe_file_entry", "activate",
+				    G_CALLBACK (mkrcp_ok_cb));
 		update_rcp_dialog(window, dialog);
 		gtk_widget_show(dialog);
 	} else {
@@ -166,21 +166,21 @@ static void mkrcp_ok_cb( GtkWidget *widget, gpointer dialog)
 	GList *stars;
 
 
-	window = gtk_object_get_data(GTK_OBJECT(dialog), "im_window");
+	window = g_object_get_data(G_OBJECT(dialog), "im_window");
 	g_return_if_fail(window != NULL);
-	i_ch = gtk_object_get_data(GTK_OBJECT(window), "i_channel");
+	i_ch = g_object_get_data(G_OBJECT(window), "i_channel");
 	if (i_ch != NULL && i_ch->fr != NULL) {
 		w = i_ch->fr->w;
 		h = i_ch->fr->h;
 	}
 
-	wcs = gtk_object_get_data(GTK_OBJECT(window), "wcs_of_window");
+	wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
 	if (wcs == NULL) {
 		err_printf_sb2(window, "Cannot create a recipe without a wcs");
 		error_beep();
 		return;
 	}
-	gsl = gtk_object_get_data(GTK_OBJECT(window), "gui_star_list");
+	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl == NULL || gsl->sl == NULL) {
 		err_printf_sb2(window, "No stars to put in recipe");
 		error_beep();
@@ -224,11 +224,11 @@ static void mkrcp_ok_cb( GtkWidget *widget, gpointer dialog)
 	if (rcp == NULL) {
 		err_printf_sb2(window, "%s", last_err());
 	} else {
-		gtk_object_set_data_full(GTK_OBJECT(window), "recipe", rcp, 
-					 (GtkDestroyNotify)stf_free_all);
+		g_object_set_data_full(G_OBJECT(window), "recipe", rcp,
+					 (GDestroyNotify)stf_free_all);
 		stf_fprint(rfp, rcp, 0, 0);
 		stars = stf_find_glist(rcp, 0, SYM_STARS);
-		info_printf_sb2(window, "recipe", 10000, 
+		info_printf_sb2(window, "recipe", 10000,
 				"Wrote %d star(s) to %s\n", g_list_length(stars), fn2);
 	}
 	fclose(rfp);
@@ -244,7 +244,7 @@ static void browse_cb( GtkWidget *widget, gpointer dialog)
 {
 	GtkWidget *entry;
 
-	entry = gtk_object_get_data(GTK_OBJECT(dialog), "recipe_file_entry");
+	entry = g_object_get_data(G_OBJECT(dialog), "recipe_file_entry");
 	g_return_if_fail(entry != NULL);
 	file_select_to_entry(dialog, entry, "Select Recipe File Name", "*.rcp", 0);
 }

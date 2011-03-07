@@ -1,4 +1,3 @@
-
 /*******************************************************************************
   Copyright(c) 2000 - 2003 Radu Corlan. All rights reserved.
 
@@ -91,7 +90,7 @@ static int mbds_printf(gpointer window, const char *fmt, ...)
 	ret = vsnprintf(err_string, ERR_SIZE, fmt, ap2);
 	if (ret > 0 && err_string[ret-1] == '\n')
 		err_string[ret-1] = 0;
-	label = gtk_object_get_data(GTK_OBJECT(window), "status_label");
+	label = g_object_get_data(G_OBJECT(window), "status_label");
 	if (label != NULL)
 		gtk_label_set_text(GTK_LABEL(label), err_string);
 	va_end(ap);
@@ -122,10 +121,10 @@ static void rep_file_cb(char *fn, gpointer data, unsigned action)
 
 	d3_printf("Report action %x fn:%s\n", action, fn);
 
-	mbds = gtk_object_get_data(GTK_OBJECT(data), "mbds");
+	mbds = g_object_get_data(G_OBJECT(data), "mbds");
 	g_return_if_fail(mbds != NULL);
 
-	ofr_list = gtk_object_get_data(GTK_OBJECT(data), "ofr_list");
+	ofr_list = g_object_get_data(G_OBJECT(data), "ofr_list");
 	g_return_if_fail(ofr_list != NULL);
 
 	ofr_store = gtk_tree_view_get_model(GTK_TREE_VIEW(ofr_list));
@@ -219,28 +218,28 @@ static void select_cb(gpointer data, guint action, GtkWidget *menu_item)
 
 	switch(action) {
 	case SEL_ALL:
-		list = gtk_object_get_data(GTK_OBJECT(data), "ofr_list");
+		list = g_object_get_data(G_OBJECT(data), "ofr_list");
 		if (list)
 			gtk_tree_selection_select_all(gtk_tree_view_get_selection(GTK_TREE_VIEW(list)));
 
-		list = gtk_object_get_data(GTK_OBJECT(data), "sob_list");
+		list = g_object_get_data(G_OBJECT(data), "sob_list");
 		if (list)
 			gtk_tree_selection_select_all(gtk_tree_view_get_selection(GTK_TREE_VIEW(list)));
 		break;
 
 	case UNSEL_ALL:
-		list = gtk_object_get_data(GTK_OBJECT(data), "ofr_list");
+		list = g_object_get_data(G_OBJECT(data), "ofr_list");
 		if (list)
 			gtk_tree_selection_unselect_all(gtk_tree_view_get_selection(GTK_TREE_VIEW(list)));
 
-		list = gtk_object_get_data(GTK_OBJECT(data), "sob_list");
+		list = g_object_get_data(G_OBJECT(data), "sob_list");
 		if (list)
 			gtk_tree_selection_unselect_all(gtk_tree_view_get_selection(GTK_TREE_VIEW(list)));
 		break;
 
 	case HIDE_SEL:
 		n = 0;
-		list = gtk_object_get_data(GTK_OBJECT(data), "ofr_list");
+		list = g_object_get_data(G_OBJECT(data), "ofr_list");
 		if (list == NULL)
 			return;
 
@@ -270,7 +269,7 @@ static void select_cb(gpointer data, guint action, GtkWidget *menu_item)
 
 	case UNHIDE_ALL:
 		n = 0;
-		mbds = gtk_object_get_data(GTK_OBJECT(data), "mbds");
+		mbds = g_object_get_data(G_OBJECT(data), "mbds");
 		g_return_if_fail(mbds != NULL);
 
 		for (gl = mbds->ofrs; gl != NULL; gl = gl->next) {
@@ -294,30 +293,30 @@ static void mb_close_cb(gpointer data, guint action, GtkWidget *menu_item)
 	struct mband_dataset *mbds;
 	GtkWidget *list;
 
-	mbds = gtk_object_get_data(GTK_OBJECT(data), "mbds");
+	mbds = g_object_get_data(G_OBJECT(data), "mbds");
 
 	if (mbds && !modal_yes_no("Closing the dataset will "
 				  "discard fit information\n"
 				  "Are you sure?", "Close dataset?"))
 		return;
 
-	list = gtk_object_get_data(GTK_OBJECT(data), "ofr_list");
+	list = g_object_get_data(G_OBJECT(data), "ofr_list");
 	if (list) {
 //		gtk_widget_hide(list);
-		gtk_object_set_data(GTK_OBJECT(data), "ofr_list", NULL);
+		g_object_set_data(G_OBJECT(data), "ofr_list", NULL);
 	}
-	list = gtk_object_get_data(GTK_OBJECT(data), "sob_list");
+	list = g_object_get_data(G_OBJECT(data), "sob_list");
 	if (list) {
 //		gtk_widget_hide(list);
-		gtk_object_set_data(GTK_OBJECT(data), "sob_list", NULL);
+		g_object_set_data(G_OBJECT(data), "sob_list", NULL);
 	}
-	list = gtk_object_get_data(GTK_OBJECT(data), "bands_list");
+	list = g_object_get_data(G_OBJECT(data), "bands_list");
 	if (list) {
 //		gtk_widget_hide(list);
-		gtk_object_set_data(GTK_OBJECT(data), "bands_list", NULL);
+		g_object_set_data(G_OBJECT(data), "bands_list", NULL);
 	}
 	if (mbds)
-		gtk_object_set_data(GTK_OBJECT(data), "mbds", NULL);
+		g_object_set_data(G_OBJECT(data), "mbds", NULL);
 }
 
 
@@ -337,12 +336,12 @@ static void plot_cb(gpointer data, guint action, GtkWidget *menu_item)
 	GtkTreeIter iter;
 
 
-	mbds = gtk_object_get_data(GTK_OBJECT(data), "mbds");
+	mbds = g_object_get_data(G_OBJECT(data), "mbds");
 	g_return_if_fail(mbds != NULL);
 
 	if (action == PLOT_STAR) {
 		/* FIXME: variable reuse is not pretty */
-		ofr_list = gtk_object_get_data(GTK_OBJECT(data), "sob_list");
+		ofr_list = g_object_get_data(G_OBJECT(data), "sob_list");
 		if (ofr_list == NULL) {
 			error_beep();
 			mbds_printf(data, "No star selected\n");
@@ -386,7 +385,7 @@ static void plot_cb(gpointer data, guint action, GtkWidget *menu_item)
 	}
 
 
-	ofr_list = gtk_object_get_data(GTK_OBJECT(data), "ofr_list");
+	ofr_list = g_object_get_data(G_OBJECT(data), "ofr_list");
 	g_return_if_fail(ofr_list != NULL);
 	ofr_store = gtk_tree_view_get_model(GTK_TREE_VIEW(ofr_list));
 
@@ -535,14 +534,14 @@ static void fit_cb(gpointer data, guint action, GtkWidget *menu_item)
 	GtkTreeModel *ofr_store;
 	GtkTreeIter iter;
 
-	ofr_list = gtk_object_get_data(GTK_OBJECT(data), "ofr_list");
+	ofr_list = g_object_get_data(G_OBJECT(data), "ofr_list");
 	g_return_if_fail(ofr_list != NULL);
 	ofr_store = gtk_tree_view_get_model(GTK_TREE_VIEW(ofr_list));
 
-	sob_list = gtk_object_get_data(GTK_OBJECT(data), "sob_list");
+	sob_list = g_object_get_data(G_OBJECT(data), "sob_list");
 //	g_return_if_fail(sob_list != NULL);
 
-	mbds = gtk_object_get_data(GTK_OBJECT(data), "mbds");
+	mbds = g_object_get_data(G_OBJECT(data), "mbds");
 	g_return_if_fail(mbds != NULL);
 
 	sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(ofr_list));
@@ -682,7 +681,7 @@ static void mbds_ofr_to_list(GtkWidget *dialog, GtkWidget *list)
 	GtkTreeIter iter;
 	GtkTreeModel *ofr_model;
 
-	mbds = gtk_object_get_data(GTK_OBJECT(dialog), "mbds");
+	mbds = g_object_get_data(G_OBJECT(dialog), "mbds");
 	g_return_if_fail(mbds != NULL);
 
 	ofr_model = gtk_tree_view_get_model(GTK_TREE_VIEW(list));
@@ -736,9 +735,9 @@ static void mb_rebuild_ofr_list(gpointer dialog)
 	int i;
 	GtkTreeViewColumn *column;
 
-	ofr_list = gtk_object_get_data(GTK_OBJECT(dialog), "ofr_list");
+	ofr_list = g_object_get_data(G_OBJECT(dialog), "ofr_list");
 	if (ofr_list == NULL) {
-		scw = gtk_object_get_data(GTK_OBJECT(dialog), "ofr_scw");
+		scw = g_object_get_data(G_OBJECT(dialog), "ofr_scw");
 		g_return_if_fail(scw != NULL);
 
 		ofr_store = gtk_list_store_new(11, G_TYPE_POINTER,
@@ -759,15 +758,15 @@ static void mb_rebuild_ofr_list(gpointer dialog)
 		}
 
 		gtk_scrolled_window_add_with_viewport(scw, ofr_list);
-		gtk_widget_ref(ofr_list);
-		gtk_object_set_data_full(GTK_OBJECT(dialog), "ofr_list",
-					 ofr_list, (GtkDestroyNotify) gtk_widget_destroy);
+		g_object_ref(ofr_list);
+		g_object_set_data_full(G_OBJECT(dialog), "ofr_list",
+					 ofr_list, (GDestroyNotify) gtk_widget_destroy);
 
 		gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(ofr_list)),
 					    GTK_SELECTION_MULTIPLE);
 
-		gtk_signal_connect(GTK_OBJECT(ofr_list), "button-press-event",
-				   GTK_SIGNAL_FUNC(ofr_bpress_cb), dialog);
+		g_signal_connect(G_OBJECT(ofr_list), "button-press-event",
+				 G_CALLBACK(ofr_bpress_cb), dialog);
 
 		gtk_widget_show(ofr_list);
 	} else {
@@ -825,7 +824,7 @@ static void bands_list_update_vals(GtkWidget *dialog, struct mband_dataset *mbds
 	GtkTreeIter iter;
 	int i;
 
-	list = gtk_object_get_data(GTK_OBJECT(dialog), "bands_list");
+	list = g_object_get_data(G_OBJECT(dialog), "bands_list");
 	g_return_if_fail(mbds != NULL);
 	g_return_if_fail(list != NULL);
 
@@ -843,7 +842,7 @@ static void mbds_bands_to_list(GtkWidget *dialog, GtkWidget *list)
 {
 	struct mband_dataset *mbds;
 
-	mbds = gtk_object_get_data(GTK_OBJECT(dialog), "mbds");
+	mbds = g_object_get_data(G_OBJECT(dialog), "mbds");
 	if (mbds == NULL)
 		return;
 
@@ -861,9 +860,9 @@ static void mb_rebuild_bands_list(gpointer dialog)
 			  "Extinction coeff", "Extinction me1", NULL};
 	int i;
 
-	list = gtk_object_get_data(GTK_OBJECT(dialog), "bands_list");
+	list = g_object_get_data(G_OBJECT(dialog), "bands_list");
 	if (list == NULL) {
-		scw = gtk_object_get_data(GTK_OBJECT(dialog), "bands_scw");
+		scw = g_object_get_data(G_OBJECT(dialog), "bands_scw");
 		g_return_if_fail(scw != NULL);
 
 		store = gtk_list_store_new(8, G_TYPE_POINTER,
@@ -882,9 +881,9 @@ static void mb_rebuild_bands_list(gpointer dialog)
 		}
 
 		gtk_scrolled_window_add_with_viewport(scw, list);
-		gtk_widget_ref(list);
-		gtk_object_set_data_full(GTK_OBJECT(dialog), "bands_list",
-					 list, (GtkDestroyNotify) gtk_widget_destroy);
+		g_object_ref(list);
+		g_object_set_data_full(G_OBJECT(dialog), "bands_list",
+					 list, (GDestroyNotify) gtk_widget_destroy);
 		gtk_widget_show(list);
 	} else {
 		store = GTK_LIST_STORE (gtk_tree_view_get_model(GTK_TREE_VIEW(list)));
@@ -1013,9 +1012,9 @@ static void mb_rebuild_sob_list(gpointer dialog, GList *sol)
 	char *titles[] = {"Name", "Type", "Band", "Smag", "Err", "Imag", "Err", "Residual",
 			  "Std Error", "Outlier", "R.A.", "Declination", "Flags", NULL};
 
-	list = gtk_object_get_data(GTK_OBJECT(dialog), "sob_list");
+	list = g_object_get_data(G_OBJECT(dialog), "sob_list");
 	if (list == NULL) {
-		scw = gtk_object_get_data(GTK_OBJECT(dialog), "sob_scw");
+		scw = g_object_get_data(G_OBJECT(dialog), "sob_scw");
 		g_return_if_fail(scw != NULL);
 
 		store = gtk_list_store_new(14, G_TYPE_POINTER,
@@ -1041,9 +1040,9 @@ static void mb_rebuild_sob_list(gpointer dialog, GList *sol)
 
 
 		gtk_scrolled_window_add_with_viewport(scw, list);
-		gtk_widget_ref(list);
-		gtk_object_set_data_full(GTK_OBJECT(dialog), "sob_list",
-					 list, (GtkDestroyNotify) gtk_widget_destroy);
+		g_object_ref(list);
+		g_object_set_data_full(G_OBJECT(dialog), "sob_list",
+					 list, (GDestroyNotify) gtk_widget_destroy);
 
 		gtk_widget_show(list);
 	} else {
@@ -1070,13 +1069,13 @@ void add_to_mband(gpointer dialog, char *fn)
 		return;
 	}
 
-	mbds = gtk_object_get_data(GTK_OBJECT(dialog), "mbds");
+	mbds = g_object_get_data(G_OBJECT(dialog), "mbds");
 	if (mbds == NULL) {
 		mbds = mband_dataset_new();
 		d3_printf("mbds: %p\n", mbds);
 		mband_dataset_set_bands_by_string(mbds, P_STR(AP_BANDS_SETUP));
-		gtk_object_set_data_full(GTK_OBJECT(dialog), "mbds",
-					 mbds, (GtkDestroyNotify)(mband_dataset_release));
+		g_object_set_data_full(G_OBJECT(dialog), "mbds",
+					 mbds, (GDestroyNotify)(mband_dataset_release));
 	}
 	while (	(stf = stf_read_frame(inf)) != NULL ) {
 //		d3_printf("----------------------------------read stf\n");
@@ -1111,13 +1110,13 @@ void stf_to_mband(gpointer dialog, struct stf *stf)
 	int ret;
 
 
-	mbds = gtk_object_get_data(GTK_OBJECT(dialog), "mbds");
+	mbds = g_object_get_data(G_OBJECT(dialog), "mbds");
 	if (mbds == NULL) {
 		mbds = mband_dataset_new();
 		d3_printf("mbds: %p\n", mbds);
 		mband_dataset_set_bands_by_string(mbds, P_STR(AP_BANDS_SETUP));
-		gtk_object_set_data_full(GTK_OBJECT(dialog), "mbds",
-					 mbds, (GtkDestroyNotify)(mband_dataset_release));
+		g_object_set_data_full(G_OBJECT(dialog), "mbds",
+					 mbds, (GDestroyNotify)(mband_dataset_release));
 	}
 	ret = mband_dataset_add_stf(mbds, stf);
 	if (ret == 0) {
@@ -1139,29 +1138,29 @@ void mbds_to_mband(gpointer dialog, struct mband_dataset *nmbds)
 {
 	struct mband_dataset *mbds;
 
-	mbds = gtk_object_get_data(GTK_OBJECT(dialog), "mbds");
+	mbds = g_object_get_data(G_OBJECT(dialog), "mbds");
 	if (mbds != NULL) {
 		GtkWidget *list;
-		list = gtk_object_get_data(GTK_OBJECT(dialog), "ofr_list");
+		list = g_object_get_data(G_OBJECT(dialog), "ofr_list");
 		if (list) {
 //		gtk_widget_hide(list);
-			gtk_object_set_data(GTK_OBJECT(dialog), "ofr_list", NULL);
+			g_object_set_data(G_OBJECT(dialog), "ofr_list", NULL);
 		}
-		list = gtk_object_get_data(GTK_OBJECT(dialog), "sob_list");
+		list = g_object_get_data(G_OBJECT(dialog), "sob_list");
 		if (list) {
 //		gtk_widget_hide(list);
-			gtk_object_set_data(GTK_OBJECT(dialog), "sob_list", NULL);
+			g_object_set_data(G_OBJECT(dialog), "sob_list", NULL);
 		}
-		list = gtk_object_get_data(GTK_OBJECT(dialog), "bands_list");
+		list = g_object_get_data(G_OBJECT(dialog), "bands_list");
 		if (list) {
 //		gtk_widget_hide(list);
-			gtk_object_set_data(GTK_OBJECT(dialog), "bands_list", NULL);
+			g_object_set_data(G_OBJECT(dialog), "bands_list", NULL);
 		}
-		gtk_object_set_data(GTK_OBJECT(dialog), "mbds", NULL);
+		g_object_set_data(G_OBJECT(dialog), "mbds", NULL);
 	}
 	nmbds->ref_count ++;
-	gtk_object_set_data_full(GTK_OBJECT(dialog), "mbds",
-				 nmbds, (GtkDestroyNotify)(mband_dataset_release));
+	g_object_set_data_full(G_OBJECT(dialog), "mbds",
+				 nmbds, (GDestroyNotify)(mband_dataset_release));
 	mbds_printf(dialog, "Dataset has %d observation(s) %d object(s), %d frame(s)\n",
 		    g_list_length(nmbds->sobs), g_list_length(nmbds->ostars),
 		    g_list_length(nmbds->ofrs));
@@ -1175,7 +1174,7 @@ void mbds_to_mband(gpointer dialog, struct mband_dataset *nmbds)
 gboolean mband_window_delete(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
 	gtk_widget_hide(widget);
-//	gtk_object_set_data(GTK_OBJECT(data), "mband_window", NULL);
+//	g_object_set_data(G_OBJECT(data), "mband_window", NULL);
 	return TRUE;
 }
 static void mb_wclose_cb(gpointer data, guint action, GtkWidget *menu_item)
@@ -1243,8 +1242,8 @@ static GtkWidget *get_main_menu_bar(GtkWidget *window)
 
 	item_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR,
 					     "<main_menu>", accel_group);
-	gtk_object_set_data_full(GTK_OBJECT(window), "main_menu_if", item_factory,
-				 (GtkDestroyNotify) gtk_object_unref);
+	g_object_set_data_full(G_OBJECT(window), "main_menu_if", item_factory,
+				 (GDestroyNotify) g_object_unref);
 	gtk_item_factory_create_items (item_factory, nmenu_items,
 				       mband_menu_items, window);
 
@@ -1262,16 +1261,16 @@ void mband_open_cb(gpointer data, guint action, GtkWidget *menu_item)
 	GtkWidget *window = data;
 	GtkWidget *dialog, *vb, *menubar;
 
-	dialog = gtk_object_get_data(GTK_OBJECT(window), "mband_window");
+	dialog = g_object_get_data(G_OBJECT(window), "mband_window");
 	if (dialog == NULL) {
 		dialog = create_mband_dialog();
-		gtk_widget_ref(dialog);
-		gtk_object_set_data_full(GTK_OBJECT(window), "mband_window",
-					 dialog, (GtkDestroyNotify)(gtk_widget_unref));
-		gtk_object_set_data(GTK_OBJECT(dialog), "in_window", window);
-		vb = gtk_object_get_data(GTK_OBJECT(dialog), "mband_vbox");
-		gtk_signal_connect(GTK_OBJECT(dialog), "delete_event",
-				   GTK_SIGNAL_FUNC(mband_window_delete), window);
+		g_object_ref(dialog);
+		g_object_set_data_full(G_OBJECT(window), "mband_window", dialog,
+				       (GDestroyNotify) g_object_unref);
+		g_object_set_data(G_OBJECT(dialog), "in_window", window);
+		vb = g_object_get_data(G_OBJECT(dialog), "mband_vbox");
+		g_signal_connect(G_OBJECT(dialog), "delete_event",
+				 G_CALLBACK(mband_window_delete), window);
 		menubar = get_main_menu_bar(dialog);
 		gtk_box_pack_start(GTK_BOX(vb), menubar, FALSE, TRUE, 0);
 		gtk_box_reorder_child(GTK_BOX(vb), menubar, 0);

@@ -1060,7 +1060,7 @@ int main(int ac, char **av)
 		release_frame(fr);
 		if (to_pnm) {
 			struct image_channel *channel;
-			channel = gtk_object_get_data(GTK_OBJECT(window), "i_channel");
+			channel = g_object_get_data(G_OBJECT(window), "i_channel");
 			if (channel == NULL) {
 				err_printf("oops - no channel\n");
 				if (batch && !interactive)

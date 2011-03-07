@@ -73,9 +73,9 @@ gboolean chooser_response_cb(GtkWidget *widget, gint response, struct file_actio
 		fa->action(GTK_WIDGET(widget), fa);
 	}
 
-	gtk_object_set_data(GTK_OBJECT(fa->window), "file_chooser", NULL);
+	g_object_set_data(G_OBJECT(fa->window), "file_chooser", NULL);
 	gtk_widget_destroy(widget);
-	
+
 	free(fa);
 
 	return TRUE;
@@ -185,25 +185,25 @@ static void set_last_open(gpointer object, char *file_class, char *path)
 	g_object_set_data_full(G_OBJECT(object), file_class, path,
 			       (GDestroyNotify) free);
 
-	op = gtk_object_get_data(GTK_OBJECT(object), "last_open_fits");
+	op = g_object_get_data(G_OBJECT(object), "last_open_fits");
 	if (op == NULL) {
 		g_object_set_data_full(G_OBJECT(object), "last_open_fits", strdup(path),
 				       (GDestroyNotify) free);
 	}
 
-	op = gtk_object_get_data(GTK_OBJECT(object), "last_open_etc");
+	op = g_object_get_data(G_OBJECT(object), "last_open_etc");
 	if (op == NULL) {
 		g_object_set_data_full(G_OBJECT(object), "last_open_etc", strdup(path),
 				       (GDestroyNotify) free);
 	}
 
-	op = gtk_object_get_data(GTK_OBJECT(object), "last_open_rcp");
+	op = g_object_get_data(G_OBJECT(object), "last_open_rcp");
 	if (op == NULL) {
 		g_object_set_data_full(G_OBJECT(object), "last_open_rcp", strdup(path),
 				       (GDestroyNotify) free);
 	}
 
-	op = gtk_object_get_data(GTK_OBJECT(object), "last_open_mband");
+	op = g_object_get_data(G_OBJECT(object), "last_open_mband");
 	if (op == NULL) {
 		g_object_set_data_full(G_OBJECT(object), "last_open_mband", strdup(path),
 				       (GDestroyNotify) free);
@@ -309,10 +309,10 @@ int load_rcp_to_window(gpointer window, char *name, char *object)
 		return -1;
 	d3_printf("read_rcp: looking for '%s'\n", name);
 
-	wcs = gtk_object_get_data(GTK_OBJECT(window), "wcs_of_window");
+	wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
 
 	if (!strcmp(name, "_OBJECT_") || !strcmp(name, "_AUTO_") || !strcmp(name, "_TYCHO_")) {
-		channel = gtk_object_get_data(GTK_OBJECT(window), "i_channel");
+		channel = g_object_get_data(G_OBJECT(window), "i_channel");
 		if (channel == NULL || channel->fr == NULL) {
 			err_printf("no image - cannot load/create dynamic recipe\n");
 			return -1;
@@ -409,8 +409,8 @@ int load_rcp_to_window(gpointer window, char *name, char *object)
 	if (rsl == NULL)
 		return -1;
 
-	gtk_object_set_data_full(GTK_OBJECT(window), "recipe", stf,
-				 (GtkDestroyNotify)stf_free_all);
+	g_object_set_data_full(G_OBJECT(window), "recipe", stf,
+			       (GDestroyNotify)stf_free_all);
 	merge_cat_star_list_to_window(window, rsl);
 	return g_list_length(rsl);
 }
@@ -490,7 +490,7 @@ static void open_mband(GtkWidget *chooser, gpointer user_data)
 
 	add_to_mband(fa->window, fn);
 
-	mwin = gtk_object_get_data(GTK_OBJECT(fa->window), "im_window");
+	mwin = g_object_get_data(G_OBJECT(fa->window), "im_window");
 	if (mwin != NULL)
 		set_last_open(mwin, "last_open_mband", fnd = strdup(fn));
 	else
@@ -533,7 +533,7 @@ static void set_entry(GtkWidget *chooser, gpointer user_data)
 
 	gtk_entry_set_text(GTK_ENTRY(fa->data), fn);
 	if (fa->arg1)
-		gtk_signal_emit_by_name(GTK_OBJECT(fa->data), "activate", fa->data);
+		g_signal_emit_by_name(G_OBJECT(fa->data), "activate", fa->data);
 
 	set_last_open(fa->window, "last_open_fits", fnd = strdup(fn));
 	d3_printf("lastopen_fits set to %s\n", fnd);
@@ -549,7 +549,7 @@ static void get_list(GtkWidget *chooser, gpointer user_data)
 	get_file_list_type cb;
 	char *fn = NULL;
 	GSList *fl, *sl;
-	
+
 
 	fl = gtk_file_chooser_get_filenames(GTK_FILE_CHOOSER(chooser));
 	g_return_if_fail(fl != NULL);
@@ -587,7 +587,7 @@ static void get_file(GtkWidget *chooser, gpointer user_data)
 	if (cb)
 		(* cb)(fn, fa->window, fa->arg1);
 
-	mwin = gtk_object_get_data(GTK_OBJECT(fa->window), "im_window");
+	mwin = g_object_get_data(G_OBJECT(fa->window), "im_window");
 	if (mwin != NULL)
 		set_last_open(mwin, "last_open_etc", fnd = strdup(fn));
 	else
@@ -629,7 +629,7 @@ void file_select_to_entry(gpointer data, GtkWidget *entry, char *title, char *fi
 	strncpy(fa->file_filter, filter, FILE_FILTER_SZ);
 	fa->chooser = chooser;
 
-	lastopen = gtk_object_get_data(GTK_OBJECT(window), "last_open_fits");
+	lastopen = g_object_get_data(G_OBJECT(window), "last_open_fits");
 	if (lastopen)
 		gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(chooser), lastopen);
 }
@@ -663,7 +663,7 @@ void file_select(gpointer data, char *title, char *filter,
 	else
 		fa->file_filter[0] = 0;
 	fa->chooser = chooser;
-	lastopen = gtk_object_get_data(GTK_OBJECT(window), "last_open_etc");
+	lastopen = g_object_get_data(G_OBJECT(window), "last_open_etc");
 	if (lastopen)
 		gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(chooser), lastopen);
 }
@@ -694,7 +694,7 @@ void file_select_list(gpointer data, char *title, char *filter,
 	strncpy(fa->file_filter, filter, FILE_FILTER_SZ);
 	fa->chooser = chooser;
 
-	lastopen = gtk_object_get_data(GTK_OBJECT(window), "last_open_etc");
+	lastopen = g_object_get_data(G_OBJECT(window), "last_open_etc");
 	if (lastopen)
 		gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(chooser), lastopen);
 }
@@ -720,7 +720,7 @@ void file_popup_cb(gpointer data, guint action, GtkWidget *menu_item)
 		fa->chooser = chooser;
 		strncpy(fa->file_filter, "*.fits*", FILE_FILTER_SZ);
 
-		lastopen = gtk_object_get_data(GTK_OBJECT(window), "last_open_fits");
+		lastopen = g_object_get_data(G_OBJECT(window), "last_open_fits");
 		if (lastopen)
 			gtk_file_chooser_set_filename (GTK_FILE_CHOOSER(chooser), lastopen);
 		break;
@@ -731,7 +731,7 @@ void file_popup_cb(gpointer data, guint action, GtkWidget *menu_item)
 		chooser = create_file_chooser("Select fits file to open", F_OPEN, fa);
 		fa->chooser = chooser;
 
-		lastopen = gtk_object_get_data(GTK_OBJECT(window), "last_open_rcp");
+		lastopen = g_object_get_data(G_OBJECT(window), "last_open_rcp");
 		if (lastopen)
 			gtk_file_chooser_set_filename (GTK_FILE_CHOOSER(chooser), lastopen);
 		break;
@@ -742,7 +742,7 @@ void file_popup_cb(gpointer data, guint action, GtkWidget *menu_item)
 		chooser = create_file_chooser("Select report file to open", F_OPEN, fa);
 		fa->chooser = chooser;
 
-		lastopen = gtk_object_get_data(GTK_OBJECT(window), "last_open_mband");
+		lastopen = g_object_get_data(G_OBJECT(window), "last_open_mband");
 		if (lastopen)
 			gtk_file_chooser_set_filename (GTK_FILE_CHOOSER(chooser), lastopen);
 		break;
@@ -753,7 +753,7 @@ void file_popup_cb(gpointer data, guint action, GtkWidget *menu_item)
 		chooser = create_file_chooser("Select GSC-2 data file to open", F_OPEN, fa);
 		fa->chooser = chooser;
 
-		lastopen = gtk_object_get_data(GTK_OBJECT(window), "last_open_etc");
+		lastopen = g_object_get_data(G_OBJECT(window), "last_open_etc");
 		if (lastopen)
 			gtk_file_chooser_set_filename (GTK_FILE_CHOOSER(chooser), lastopen);
 		break;
@@ -761,8 +761,8 @@ void file_popup_cb(gpointer data, guint action, GtkWidget *menu_item)
 	case FILE_EXPORT_PNM8:
 	case FILE_EXPORT_PNM16:
 		fa->action = export_pnm;
-		
-		channel = gtk_object_get_data(GTK_OBJECT(window), "i_channel");
+
+		channel = g_object_get_data(G_OBJECT(window), "i_channel");
 		if (channel == NULL || channel->fr == NULL) {
 			err_printf_sb2(window, "No frame loaded");
 			error_beep();
@@ -782,8 +782,8 @@ void file_popup_cb(gpointer data, guint action, GtkWidget *menu_item)
 
 	case FILE_SAVE_AS:
 		fa->action = save_fits;
-		
-		channel = gtk_object_get_data(GTK_OBJECT(window), "i_channel");
+
+		channel = g_object_get_data(G_OBJECT(window), "i_channel");
 		if (channel == NULL || channel->fr == NULL) {
 			err_printf_sb2(window, "No frame");
 			error_beep();
@@ -791,10 +791,10 @@ void file_popup_cb(gpointer data, guint action, GtkWidget *menu_item)
 			return ;
 		}
 
-		fa->data = channel;		
+		fa->data = channel;
 		wcs_to_fits_header(channel->fr);
 		fn = channel->fr->name;
-		
+
 		chooser = create_file_chooser("Select output file name", F_SAVE, fa);
 		fa->chooser = chooser;
 		gtk_file_chooser_set_filename (GTK_FILE_CHOOSER(chooser), fn);

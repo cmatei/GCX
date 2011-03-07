@@ -58,7 +58,7 @@ void drag_adjust_cuts(GtkWidget *window, int dx, int dy)
 	double base;
 	double span;
 
-	channel = gtk_object_get_data(GTK_OBJECT(window), "i_channel");
+	channel = g_object_get_data(G_OBJECT(window), "i_channel");
 	if (channel == NULL) {
 		err_printf("drag_adjust_cuts: no i_channel\n");
 		return ;
@@ -197,7 +197,7 @@ int set_scrolls(GtkWidget *window, double xc, double yc)
 	GtkScrolledWindow *scw;
 	GtkAdjustment *hadj, *vadj;
 
-	scw = gtk_object_get_data(GTK_OBJECT(window), "scrolled_window");
+	scw = g_object_get_data(G_OBJECT(window), "scrolled_window");
 	if (scw == NULL) {
 		err_printf("set_scroll: no scrolled window\n");
 		return -1;
@@ -232,7 +232,7 @@ int get_scrolls(GtkWidget *window, double *xc, double *yc)
 	GtkScrolledWindow *scw;
 	GtkAdjustment *hadj, *vadj;
 
-	scw = gtk_object_get_data(GTK_OBJECT(window), "scrolled_window");
+	scw = g_object_get_data(G_OBJECT(window), "scrolled_window");
 	if (scw == NULL) {
 		err_printf("set_scroll: no scrolled window\n");
 		return -1;
@@ -255,7 +255,7 @@ void set_darea_size(GtkWidget *window, struct map_geometry *geom, double xc, dou
 	GtkAdjustment *hadj, *vadj;
 	int w, h;
 
-	darea = gtk_object_get_data(GTK_OBJECT(window), "image");
+	darea = g_object_get_data(G_OBJECT(window), "image");
 
 	if (geom->zoom > 1) {
 		zo = 1;
@@ -265,7 +265,7 @@ void set_darea_size(GtkWidget *window, struct map_geometry *geom, double xc, dou
 		zo = floor(1.0 / geom->zoom + 0.5);
 	}
 
-	scw = gtk_object_get_data(GTK_OBJECT(window), "scrolled_window");
+	scw = g_object_get_data(G_OBJECT(window), "scrolled_window");
 	if (scw == NULL) {
 		err_printf("set_darea_size: no scrolled window\n");
 		return;
@@ -273,18 +273,13 @@ void set_darea_size(GtkWidget *window, struct map_geometry *geom, double xc, dou
 
 	if (GTK_WIDGET(scw)->window == NULL)
 		return;
-	gdk_window_get_size(GTK_WIDGET(scw)->window, &w, &h);
+	gdk_drawable_get_size(GTK_WIDGET(scw)->window, &w, &h);
 	d3_printf("scw size id %d %d\n", w, h);
 
 //	gdk_window_freeze_updates(GTK_WIDGET(darea)->window);
 
-#ifndef GTK2
-	gtk_drawing_area_size(GTK_DRAWING_AREA(darea),
-			      geom->width * zi / zo, geom->height * zi / zo);
-#else
 	gtk_widget_set_size_request(GTK_WIDGET(darea), geom->width * zi / zo,
 				    geom->height * zi / zo);
-#endif
 
 /* we need this to make sure the drawing area contracts properly
  * when we go from scrollbars to no scrollbars, we have to be sure
@@ -386,7 +381,7 @@ void pan_cursor(GtkWidget *window)
 	int x, y, w, h;
 	GdkModifierType mask;
 
-	image = gtk_object_get_data(GTK_OBJECT(window), "image");
+	image = g_object_get_data(G_OBJECT(window), "image");
 
 	if (image == NULL) {
 		err_printf("no image\n");
@@ -394,7 +389,7 @@ void pan_cursor(GtkWidget *window)
 	}
 	if (image->window) {
 		gdk_window_get_pointer(image->window, &x, &y, &mask);
-		gdk_window_get_size(image->window, &w, &h);
+		gdk_drawable_get_size(image->window, &w, &h);
 
 		set_scrolls(window, 1.0 * x / w, 1.0 * y / h);
 	}
@@ -413,7 +408,7 @@ void cuts_option_cb(gpointer data, guint action, GtkWidget *menu_item)
 	GtkWidget *window = data;
 	struct image_channel* channel;
 
-	channel = gtk_object_get_data(GTK_OBJECT(window), "i_channel");
+	channel = g_object_get_data(G_OBJECT(window), "i_channel");
 	if (channel == NULL) {
 		err_printf("cuts_option_cb: no i_channel\n");
 		return ;
@@ -438,8 +433,8 @@ void view_option_cb(gpointer window, guint action, GtkWidget *menu_item)
 	struct map_geometry *geom;
 	double xc, yc;
 
-	image = gtk_object_get_data(GTK_OBJECT(window), "image");
-	geom = gtk_object_get_data(GTK_OBJECT(window), "geometry");
+	image = g_object_get_data(G_OBJECT(window), "image");
+	geom = g_object_get_data(G_OBJECT(window), "geometry");
 
 	if (image == NULL || geom == NULL) {
 		err_printf("no image/geom\n");
@@ -447,7 +442,8 @@ void view_option_cb(gpointer window, guint action, GtkWidget *menu_item)
 	}
 
 	gdk_window_get_pointer(image->window, &x, &y, &mask);
-	gdk_window_get_size(image->window, &w, &h);
+	gdk_drawable_get_size(image->window, &w, &h);
+
 	d2_printf("view action %d at x:%d y:%d  (w:%d h:%d) mask: %d\n",
 	       action, x, y, w, h, mask);
 
@@ -500,7 +496,7 @@ void stats_cb(gpointer data, guint action, GtkWidget *menu_item)
 	gpointer ret;
 	struct image_channel *i_channel;
 
-	ret = gtk_object_get_data(GTK_OBJECT(data), "i_channel");
+	ret = g_object_get_data(G_OBJECT(data), "i_channel");
 	if (ret == NULL) /* no channel */
 		return;
 	i_channel = ret;
@@ -529,14 +525,14 @@ void show_region_stats(GtkWidget *window, double x, double y)
 	int xi, yi;
 	float val;
 
-	ret = gtk_object_get_data(GTK_OBJECT(window), "i_channel");
+	ret = g_object_get_data(G_OBJECT(window), "i_channel");
 	if (ret == NULL) /* no channel */
 		return;
 	i_channel = ret;
 	if (i_channel->fr == NULL) /* no frame */
 		return;
 
-	geom = gtk_object_get_data(GTK_OBJECT(window), "geometry");
+	geom = g_object_get_data(G_OBJECT(window), "geometry");
 	if (geom == NULL)
 		return;
 
@@ -584,15 +580,15 @@ void show_zoom_cuts(GtkWidget * window)
 	struct map_geometry *geom;
 	void imadj_dialog_update(GtkWidget *dialog);
 
-	statuslabel = gtk_object_get_data(GTK_OBJECT(window), "statuslabel1");
+	statuslabel = g_object_get_data(G_OBJECT(window), "statuslabel1");
 	if (statuslabel == NULL)
 		return;
-	ret = gtk_object_get_data(GTK_OBJECT(window), "i_channel");
+	ret = g_object_get_data(G_OBJECT(window), "i_channel");
 	if (ret == NULL) /* no channel */
 		return;
 	i_channel = ret;
 
-	geom = gtk_object_get_data(GTK_OBJECT(window), "geometry");
+	geom = g_object_get_data(G_OBJECT(window), "geometry");
 	if (geom == NULL)
 		return;
 
@@ -601,7 +597,7 @@ void show_zoom_cuts(GtkWidget * window)
 
 	gtk_label_set_text(GTK_LABEL(statuslabel), buf);
 /* see if we have a imadjust dialog and update it, too */
-	dialog = gtk_object_get_data(GTK_OBJECT(window), "imadj_dialog");
+	dialog = g_object_get_data(G_OBJECT(window), "imadj_dialog");
 	if (dialog == NULL)
 		return;
 	imadj_dialog_update(dialog);
@@ -746,7 +742,7 @@ void plot_histogram(GtkWidget *darea, GdkRectangle *area,
 	red.red = 65535;
 	red.green = 0;
 	red.blue = 0;
-	gdk_color_alloc(cmap, &red);
+	gdk_colormap_alloc_color(cmap, &red, FALSE, TRUE);
 
 	redgc = gdk_gc_new(darea->window);
 	gdk_gc_set_foreground(redgc, &red);
@@ -770,8 +766,7 @@ void plot_histogram(GtkWidget *darea, GdkRectangle *area,
 	gdk_draw_line(darea->window, redgc, lcx, darea->allocation.height, lcx, 0);
 	gdk_draw_line(darea->window, redgc, hcx, darea->allocation.height, hcx, 0);
 
-	gdk_gc_destroy(redgc);
-
+	g_object_unref (redgc);
 }
 
 /* draw the curve over the histogram area */
@@ -788,7 +783,7 @@ void plot_curve(GtkWidget *darea, GdkRectangle *area, struct image_channel *chan
 	green.red = 10000;
 	green.green = 40000;
 	green.blue = 10000;
-	gdk_color_alloc(cmap, &green);
+	gdk_colormap_alloc_color(cmap, &green, FALSE, TRUE);
 
 	greengc = gdk_gc_new(darea->window);
 	gdk_gc_set_foreground(greengc, &green);
@@ -809,7 +804,8 @@ void plot_curve(GtkWidget *darea, GdkRectangle *area, struct image_channel *chan
 	}
 	gdk_draw_lines(darea->window, greengc, points, span+1);
 	free(points);
-	gdk_gc_destroy(greengc);
+
+	g_object_unref(greengc);
 }
 
 
@@ -852,11 +848,11 @@ gboolean histogram_expose_cb(GtkWidget *darea, GdkEventExpose *event, gpointer d
 	double low, high;
 	int logh = 0;
 
-	channel = gtk_object_get_data(GTK_OBJECT(dialog), "i_channel");
+	channel = g_object_get_data(G_OBJECT(dialog), "i_channel");
 	if (channel == NULL) /* no channel */
 		return 0 ;
 
-	logckb = gtk_object_get_data(GTK_OBJECT(dialog), "log_hist_check");
+	logckb = g_object_get_data(G_OBJECT(dialog), "log_hist_check");
 	if (logckb != NULL) {
 		logh = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(logckb));
 	}
@@ -873,7 +869,7 @@ void update_histogram(GtkWidget *dialog)
 {
 	GtkWidget *darea;
 
-	darea = gtk_object_get_data(GTK_OBJECT(dialog), "hist_area");
+	darea = g_object_get_data(G_OBJECT(dialog), "hist_area");
 	if (darea == NULL)
 		return;
 	gtk_widget_queue_draw(darea);
@@ -884,7 +880,7 @@ void update_histogram(GtkWidget *dialog)
 void spin_set_value(GtkWidget *dialog, char *name, float val)
 {
 	GtkWidget *spin;
-	spin = gtk_object_get_data(GTK_OBJECT(dialog), name);
+	spin = g_object_get_data(G_OBJECT(dialog), name);
 	if (spin == NULL) {
 		g_warning("cannot find spin button named %s\n", name);
 		return;
@@ -893,15 +889,15 @@ void spin_set_value(GtkWidget *dialog, char *name, float val)
 }
 
 /* get the value in a named spinbutton */
-float spin_get_value(GtkWidget *dialog, char *name)
+double spin_get_value(GtkWidget *dialog, char *name)
 {
 	GtkWidget *spin;
-	spin = gtk_object_get_data(GTK_OBJECT(dialog), name);
+	spin = g_object_get_data(G_OBJECT(dialog), name);
 	if (spin == NULL) {
 		g_warning("cannot find spin button named %s\n", name);
 		return 0.0;
 	}
-	return gtk_spin_button_get_value_as_float(GTK_SPIN_BUTTON(spin));
+	return gtk_spin_button_get_value (GTK_SPIN_BUTTON(spin));
 }
 
 void imadj_cuts_updated (GtkWidget *spinbutton, gpointer dialog)
@@ -909,10 +905,10 @@ void imadj_cuts_updated (GtkWidget *spinbutton, gpointer dialog)
 	struct image_channel *channel;
 	GtkWidget *window;
 
-	channel = gtk_object_get_data(GTK_OBJECT(dialog), "i_channel");
+	channel = g_object_get_data(G_OBJECT(dialog), "i_channel");
 	if (channel == NULL) /* no channel */
 		return;
-	window = gtk_object_get_data(GTK_OBJECT(dialog), "image_window");
+	window = g_object_get_data(G_OBJECT(dialog), "image_window");
 
 	channel->lcut = spin_get_value(dialog, "low_cut_spin");
 	channel->hcut = spin_get_value(dialog, "high_cut_spin");
@@ -937,10 +933,10 @@ void imadj_lut_updated (GtkWidget *spinbutton, gpointer dialog)
 	struct image_channel *channel;
 	GtkWidget *window;
 
-	channel = gtk_object_get_data(GTK_OBJECT(dialog), "i_channel");
+	channel = g_object_get_data(G_OBJECT(dialog), "i_channel");
 	if (channel == NULL) /* no channel */
 		return;
-	window = gtk_object_get_data(GTK_OBJECT(dialog), "image_window");
+	window = g_object_get_data(G_OBJECT(dialog), "image_window");
 
 	channel->gamma = spin_get_value(dialog, "gamma_spin");
 	channel->toe = spin_get_value(dialog, "toe_spin");
@@ -985,83 +981,83 @@ void imadj_set_callbacks(GtkWidget *dialog)
 	GtkWidget *spin, *logckb, *button, *window;
 	GtkAdjustment *adj;
 
-	spin = gtk_object_get_data(GTK_OBJECT(dialog), "low_cut_spin");
+	spin = g_object_get_data(G_OBJECT(dialog), "low_cut_spin");
 	if (spin == NULL) return;
 	adj = gtk_spin_button_get_adjustment(GTK_SPIN_BUTTON(spin));
 	gtk_spin_button_set_update_policy(GTK_SPIN_BUTTON(spin), GTK_UPDATE_IF_VALID);
 	gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(spin), TRUE);
-	gtk_signal_connect(GTK_OBJECT(adj), "value_changed",
-			   GTK_SIGNAL_FUNC (imadj_cuts_updated), dialog);
+	g_signal_connect(G_OBJECT(adj), "value_changed",
+			   G_CALLBACK (imadj_cuts_updated), dialog);
 
-	spin = gtk_object_get_data(GTK_OBJECT(dialog), "high_cut_spin");
+	spin = g_object_get_data(G_OBJECT(dialog), "high_cut_spin");
 	if (spin == NULL) return;
 	adj = gtk_spin_button_get_adjustment(GTK_SPIN_BUTTON(spin));
 	gtk_spin_button_set_update_policy(GTK_SPIN_BUTTON(spin), GTK_UPDATE_IF_VALID);
 	gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(spin), TRUE);
-	gtk_signal_connect(GTK_OBJECT(adj), "value_changed",
-			   GTK_SIGNAL_FUNC (imadj_cuts_updated), dialog);
+	g_signal_connect(G_OBJECT(adj), "value_changed",
+			   G_CALLBACK (imadj_cuts_updated), dialog);
 
-	spin = gtk_object_get_data(GTK_OBJECT(dialog), "gamma_spin");
+	spin = g_object_get_data(G_OBJECT(dialog), "gamma_spin");
 	if (spin == NULL) return;
 	adj = gtk_spin_button_get_adjustment(GTK_SPIN_BUTTON(spin));
 	gtk_spin_button_set_update_policy(GTK_SPIN_BUTTON(spin), GTK_UPDATE_IF_VALID);
 	gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(spin), TRUE);
-	gtk_signal_connect(GTK_OBJECT(adj), "value_changed",
-			   GTK_SIGNAL_FUNC (imadj_lut_updated), dialog);
+	g_signal_connect(G_OBJECT(adj), "value_changed",
+			   G_CALLBACK (imadj_lut_updated), dialog);
 
-	spin = gtk_object_get_data(GTK_OBJECT(dialog), "toe_spin");
+	spin = g_object_get_data(G_OBJECT(dialog), "toe_spin");
 	if (spin == NULL) return;
 	adj = gtk_spin_button_get_adjustment(GTK_SPIN_BUTTON(spin));
 	gtk_spin_button_set_update_policy(GTK_SPIN_BUTTON(spin), GTK_UPDATE_IF_VALID);
 	gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(spin), TRUE);
-	gtk_signal_connect(GTK_OBJECT(adj), "value_changed",
-			   GTK_SIGNAL_FUNC (imadj_lut_updated), dialog);
+	g_signal_connect(G_OBJECT(adj), "value_changed",
+			   G_CALLBACK (imadj_lut_updated), dialog);
 
-	spin = gtk_object_get_data(GTK_OBJECT(dialog), "offset_spin");
+	spin = g_object_get_data(G_OBJECT(dialog), "offset_spin");
 	if (spin == NULL) return;
 	adj = gtk_spin_button_get_adjustment(GTK_SPIN_BUTTON(spin));
 	gtk_spin_button_set_update_policy(GTK_SPIN_BUTTON(spin), GTK_UPDATE_IF_VALID);
 	gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(spin), TRUE);
-	gtk_signal_connect(GTK_OBJECT(adj), "value_changed",
-			   GTK_SIGNAL_FUNC (imadj_lut_updated), dialog);
+	g_signal_connect(G_OBJECT(adj), "value_changed",
+			   G_CALLBACK (imadj_lut_updated), dialog);
 
-	logckb = gtk_object_get_data(GTK_OBJECT(dialog), "log_hist_check");
+	logckb = g_object_get_data(G_OBJECT(dialog), "log_hist_check");
 	if (logckb != NULL) {
-		gtk_signal_connect(GTK_OBJECT(logckb), "toggled",
-			   GTK_SIGNAL_FUNC (log_toggled), dialog);
+		g_signal_connect(G_OBJECT(logckb), "toggled",
+			   G_CALLBACK (log_toggled), dialog);
 	}
 
-	window = gtk_object_get_data(GTK_OBJECT(dialog), "image_window");
+	window = g_object_get_data(G_OBJECT(dialog), "image_window");
 
-	button = gtk_object_get_data(GTK_OBJECT(dialog), "cuts_darker");
+	button = g_object_get_data(G_OBJECT(dialog), "cuts_darker");
 	if (button != NULL) {
-		gtk_signal_connect(GTK_OBJECT(button), "clicked",
-			   GTK_SIGNAL_FUNC (cuts_darker_cb), window);
+		g_signal_connect(G_OBJECT(button), "clicked",
+			   G_CALLBACK (cuts_darker_cb), window);
 	}
-	button = gtk_object_get_data(GTK_OBJECT(dialog), "cuts_sharper");
+	button = g_object_get_data(G_OBJECT(dialog), "cuts_sharper");
 	if (button != NULL) {
-		gtk_signal_connect(GTK_OBJECT(button), "clicked",
-			   GTK_SIGNAL_FUNC (cuts_sharper_cb), window);
+		g_signal_connect(G_OBJECT(button), "clicked",
+			   G_CALLBACK (cuts_sharper_cb), window);
 	}
-	button = gtk_object_get_data(GTK_OBJECT(dialog), "cuts_duller");
+	button = g_object_get_data(G_OBJECT(dialog), "cuts_duller");
 	if (button != NULL) {
-		gtk_signal_connect(GTK_OBJECT(button), "clicked",
-			   GTK_SIGNAL_FUNC (cuts_duller_cb), window);
+		g_signal_connect(G_OBJECT(button), "clicked",
+			   G_CALLBACK (cuts_duller_cb), window);
 	}
-	button = gtk_object_get_data(GTK_OBJECT(dialog), "cuts_auto");
+	button = g_object_get_data(G_OBJECT(dialog), "cuts_auto");
 	if (button != NULL) {
-		gtk_signal_connect(GTK_OBJECT(button), "clicked",
-			   GTK_SIGNAL_FUNC (cuts_auto_cb), window);
+		g_signal_connect(G_OBJECT(button), "clicked",
+			   G_CALLBACK (cuts_auto_cb), window);
 	}
-	button = gtk_object_get_data(GTK_OBJECT(dialog), "cuts_min_max");
+	button = g_object_get_data(G_OBJECT(dialog), "cuts_min_max");
 	if (button != NULL) {
-		gtk_signal_connect(GTK_OBJECT(button), "clicked",
-			   GTK_SIGNAL_FUNC (cuts_min_max_cb), window);
+		g_signal_connect(G_OBJECT(button), "clicked",
+			   G_CALLBACK (cuts_min_max_cb), window);
 	}
-	button = gtk_object_get_data(GTK_OBJECT(dialog), "cuts_brighter");
+	button = g_object_get_data(G_OBJECT(dialog), "cuts_brighter");
 	if (button != NULL) {
-		gtk_signal_connect(GTK_OBJECT(button), "clicked",
-			   GTK_SIGNAL_FUNC (cuts_brighter_cb), window);
+		g_signal_connect(G_OBJECT(button), "clicked",
+			   G_CALLBACK (cuts_brighter_cb), window);
 	}
 
 }
@@ -1071,7 +1067,7 @@ void imadj_dialog_update(GtkWidget *dialog)
 	struct image_channel *i_channel;
 	double lcut, hcut, gamma, toe, offset;
 
-	i_channel = gtk_object_get_data(GTK_OBJECT(dialog), "i_channel");
+	i_channel = g_object_get_data(G_OBJECT(dialog), "i_channel");
 	if (i_channel == NULL) /* no channel */
 		return;
 	lcut = i_channel->lcut;
@@ -1094,7 +1090,7 @@ void imadj_dialog_edit(GtkWidget *dialog)
 
 void close_imadj_dialog( GtkWidget *widget, gpointer data )
 {
-	gtk_object_set_data(GTK_OBJECT(data), "imadj_dialog", NULL);
+	g_object_set_data(G_OBJECT(data), "imadj_dialog", NULL);
 }
 
 
@@ -1106,27 +1102,27 @@ void histogram_cb(gpointer data, guint action, GtkWidget *menu_item)
 	GtkWidget* create_imadj_dialog (void);
 	struct image_channel *i_channel;
 
-	ret = gtk_object_get_data(GTK_OBJECT(window), "i_channel");
+	ret = g_object_get_data(G_OBJECT(window), "i_channel");
 	if (ret == NULL) /* no channel */
 		return;
 	i_channel = ret;
 
-	dialog = gtk_object_get_data(GTK_OBJECT(window), "imadj_dialog");
+	dialog = g_object_get_data(G_OBJECT(window), "imadj_dialog");
 	if (dialog == NULL) {
 		dialog = create_imadj_dialog();
 		gtk_window_set_default_size(GTK_WINDOW(dialog), 500, 400);
-		gtk_widget_ref(dialog);
-		gtk_object_set_data_full(GTK_OBJECT(window), "imadj_dialog", dialog,
-					 (GtkDestroyNotify)gtk_widget_destroy);
-		gtk_object_set_data(GTK_OBJECT(dialog), "image_window", window);
-		close = gtk_object_get_data(GTK_OBJECT(dialog), "hist_close");
-		gtk_signal_connect (GTK_OBJECT (dialog), "destroy",
-				    GTK_SIGNAL_FUNC (close_imadj_dialog), window);
-		gtk_signal_connect (GTK_OBJECT (close), "clicked",
-				    GTK_SIGNAL_FUNC (close_imadj_dialog), window);
-		darea = gtk_object_get_data(GTK_OBJECT(dialog), "hist_area");
-		gtk_signal_connect (GTK_OBJECT (darea), "expose-event",
-				    GTK_SIGNAL_FUNC (histogram_expose_cb), dialog);
+		g_object_ref(dialog);
+		g_object_set_data_full(G_OBJECT(window), "imadj_dialog", dialog,
+					 (GDestroyNotify)gtk_widget_destroy);
+		g_object_set_data(G_OBJECT(dialog), "image_window", window);
+		close = g_object_get_data(G_OBJECT(dialog), "hist_close");
+		g_signal_connect (G_OBJECT (dialog), "destroy",
+				    G_CALLBACK (close_imadj_dialog), window);
+		g_signal_connect (G_OBJECT (close), "clicked",
+				    G_CALLBACK (close_imadj_dialog), window);
+		darea = g_object_get_data(G_OBJECT(dialog), "hist_area");
+		g_signal_connect (G_OBJECT (darea), "expose-event",
+				    G_CALLBACK (histogram_expose_cb), dialog);
 
 		imadj_set_callbacks(dialog);
 		gtk_widget_show(dialog);
@@ -1134,8 +1130,8 @@ void histogram_cb(gpointer data, guint action, GtkWidget *menu_item)
 		gdk_window_raise(dialog->window);
 	}
 	ref_image_channel(i_channel);
-	gtk_object_set_data_full(GTK_OBJECT(dialog), "i_channel", i_channel,
-				 (GtkDestroyNotify)release_image_channel);
+	g_object_set_data_full(G_OBJECT(dialog), "i_channel", i_channel,
+				 (GDestroyNotify)release_image_channel);
 	imadj_dialog_update(dialog);
 	imadj_dialog_edit(dialog);
 }
@@ -1189,25 +1185,25 @@ GtkWidget* create_imadj_dialog (void)
   GtkWidget *hist_redraw;
 
   imadj_dialog = gtk_dialog_new ();
-  gtk_object_set_data (GTK_OBJECT (imadj_dialog), "imadj_dialog", imadj_dialog);
+  g_object_set_data (G_OBJECT (imadj_dialog), "imadj_dialog", imadj_dialog);
   gtk_window_set_title (GTK_WINDOW (imadj_dialog), ("Curves / Histogram"));
 //  GTK_WINDOW (imadj_dialog)->type = GTK_WINDOW_DIALOG;
 
   dialog_vbox1 = GTK_DIALOG (imadj_dialog)->vbox;
-  gtk_object_set_data (GTK_OBJECT (imadj_dialog), "dialog_vbox1", dialog_vbox1);
+  g_object_set_data (G_OBJECT (imadj_dialog), "dialog_vbox1", dialog_vbox1);
   gtk_widget_show (dialog_vbox1);
 
   vbox1 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_ref (vbox1);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "vbox1", vbox1,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (vbox1);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "vbox1", vbox1,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (vbox1);
   gtk_box_pack_start (GTK_BOX (dialog_vbox1), vbox1, TRUE, TRUE, 0);
 
   hist_scrolled_win = gtk_scrolled_window_new (NULL, NULL);
-  gtk_widget_ref (hist_scrolled_win);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "hist_scrolled_win", hist_scrolled_win,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (hist_scrolled_win);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "hist_scrolled_win", hist_scrolled_win,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (hist_scrolled_win);
   gtk_box_pack_start (GTK_BOX (vbox1), hist_scrolled_win, TRUE, TRUE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hist_scrolled_win), 2);
@@ -1215,44 +1211,44 @@ GtkWidget* create_imadj_dialog (void)
   gtk_range_set_update_policy (GTK_RANGE (GTK_SCROLLED_WINDOW (hist_scrolled_win)->hscrollbar), GTK_POLICY_NEVER);
 
   viewport1 = gtk_viewport_new (NULL, NULL);
-  gtk_widget_ref (viewport1);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "viewport1", viewport1,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (viewport1);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "viewport1", viewport1,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (viewport1);
   gtk_container_add (GTK_CONTAINER (hist_scrolled_win), viewport1);
 
   hist_area = gtk_drawing_area_new ();
-  gtk_widget_ref (hist_area);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "hist_area", hist_area,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (hist_area);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "hist_area", hist_area,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (hist_area);
   gtk_container_add (GTK_CONTAINER (viewport1), hist_area);
 
   vbox2 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_ref (vbox2);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "vbox2", vbox2,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (vbox2);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "vbox2", vbox2,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (vbox2);
   gtk_box_pack_start (GTK_BOX (vbox1), vbox2, FALSE, TRUE, 0);
 
   frame3 = gtk_frame_new (("Curve/Histogram"));
-  gtk_widget_ref (frame3);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "frame3", frame3,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (frame3);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "frame3", frame3,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (frame3);
   gtk_box_pack_start (GTK_BOX (vbox2), frame3, TRUE, TRUE, 0);
 
   hbox2 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_ref (hbox2);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "hbox2", hbox2,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (hbox2);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "hbox2", hbox2,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (hbox2);
   gtk_container_add (GTK_CONTAINER (frame3), hbox2);
 
   optionmenu1 = gtk_option_menu_new ();
-  gtk_widget_ref (optionmenu1);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "optionmenu1", optionmenu1,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (optionmenu1);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "optionmenu1", optionmenu1,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (optionmenu1);
   gtk_box_pack_start (GTK_BOX (hbox2), optionmenu1, FALSE, FALSE, 0);
   optionmenu1_menu = gtk_menu_new ();
@@ -1262,9 +1258,9 @@ GtkWidget* create_imadj_dialog (void)
   gtk_option_menu_set_menu (GTK_OPTION_MENU (optionmenu1), optionmenu1_menu);
 
   label3 = gtk_label_new (("Gamma"));
-  gtk_widget_ref (label3);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "label3", label3,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (label3);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "label3", label3,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (label3);
   gtk_box_pack_start (GTK_BOX (hbox2), label3, FALSE, FALSE, 0);
   gtk_misc_set_alignment (GTK_MISC (label3), 1, 0.5);
@@ -1272,17 +1268,17 @@ GtkWidget* create_imadj_dialog (void)
 
   gamma_spin_adj = gtk_adjustment_new (1, 0.1, 10, 0.1, 1, 0.0);
   gamma_spin = gtk_spin_button_new (GTK_ADJUSTMENT (gamma_spin_adj), 1, 1);
-  gtk_widget_ref (gamma_spin);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "gamma_spin", gamma_spin,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_set_usize(GTK_WIDGET(&(GTK_SPIN_BUTTON(gamma_spin)->entry)), 60, 0);
+  g_object_ref (gamma_spin);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "gamma_spin", gamma_spin,
+                            (GDestroyNotify) g_object_unref);
+  gtk_widget_set_size_request (GTK_WIDGET(&(GTK_SPIN_BUTTON(gamma_spin)->entry)), 60, 0);
   gtk_widget_show (gamma_spin);
   gtk_box_pack_start (GTK_BOX (hbox2), gamma_spin, FALSE, TRUE, 0);
 
   label4 = gtk_label_new (("Toe"));
-  gtk_widget_ref (label4);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "label4", label4,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (label4);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "label4", label4,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (label4);
   gtk_box_pack_start (GTK_BOX (hbox2), label4, FALSE, FALSE, 0);
   gtk_misc_set_alignment (GTK_MISC (label4), 1, 0.5);
@@ -1290,17 +1286,17 @@ GtkWidget* create_imadj_dialog (void)
 
   toe_spin_adj = gtk_adjustment_new (0, 0, 0.4, 0.002, 0.1, 0);
   toe_spin = gtk_spin_button_new (GTK_ADJUSTMENT (toe_spin_adj), 0.002, 3);
-  gtk_widget_ref (toe_spin);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "toe_spin", toe_spin,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_set_usize(GTK_WIDGET(&(GTK_SPIN_BUTTON(toe_spin)->entry)), 60, 0);
+  g_object_ref (toe_spin);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "toe_spin", toe_spin,
+                            (GDestroyNotify) g_object_unref);
+  gtk_widget_set_size_request(GTK_WIDGET(&(GTK_SPIN_BUTTON(toe_spin)->entry)), 60, 0);
   gtk_widget_show (toe_spin);
   gtk_box_pack_start (GTK_BOX (hbox2), toe_spin, FALSE, FALSE, 0);
 
   label5 = gtk_label_new (("Offset"));
-  gtk_widget_ref (label5);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "label5", label5,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (label5);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "label5", label5,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (label5);
   gtk_box_pack_start (GTK_BOX (hbox2), label5, FALSE, FALSE, 0);
   gtk_misc_set_alignment (GTK_MISC (label5), 1, 0.5);
@@ -1308,38 +1304,38 @@ GtkWidget* create_imadj_dialog (void)
 
   offset_spin_adj = gtk_adjustment_new (0, 0, 1, 0.01, 1, 0.0);
   offset_spin = gtk_spin_button_new (GTK_ADJUSTMENT (offset_spin_adj), 0.01, 2);
-  gtk_widget_ref (offset_spin);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "offset_spin", offset_spin,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_set_usize(GTK_WIDGET(&(GTK_SPIN_BUTTON(offset_spin)->entry)), 60, 0);
+  g_object_ref (offset_spin);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "offset_spin", offset_spin,
+                            (GDestroyNotify) g_object_unref);
+  gtk_widget_set_size_request(GTK_WIDGET(&(GTK_SPIN_BUTTON(offset_spin)->entry)), 60, 0);
   gtk_widget_show (offset_spin);
   gtk_box_pack_start (GTK_BOX (hbox2), offset_spin, FALSE, TRUE, 0);
 
   log_hist_check = gtk_check_button_new_with_label (("Log"));
-  gtk_widget_ref (log_hist_check);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "log_hist_check", log_hist_check,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (log_hist_check);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "log_hist_check", log_hist_check,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (log_hist_check);
   gtk_box_pack_start (GTK_BOX (hbox2), log_hist_check, FALSE, FALSE, 0);
 
   frame2 = gtk_frame_new (("Cuts"));
-  gtk_widget_ref (frame2);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "frame2", frame2,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (frame2);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "frame2", frame2,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (frame2);
   gtk_box_pack_start (GTK_BOX (vbox2), frame2, TRUE, TRUE, 0);
 
   table1 = gtk_table_new (3, 3, FALSE);
-  gtk_widget_ref (table1);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "table1", table1,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (table1);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "table1", table1,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (table1);
   gtk_container_add (GTK_CONTAINER (frame2), table1);
 
   hseparator1 = gtk_hseparator_new ();
-  gtk_widget_ref (hseparator1);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "hseparator1", hseparator1,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (hseparator1);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "hseparator1", hseparator1,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (hseparator1);
   gtk_table_attach (GTK_TABLE (table1), hseparator1, 0, 3, 0, 1,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
@@ -1347,9 +1343,9 @@ GtkWidget* create_imadj_dialog (void)
 
   low_cut_spin_adj = gtk_adjustment_new (1, -65535, 65535, 2, 10, 0);
   low_cut_spin = gtk_spin_button_new (GTK_ADJUSTMENT (low_cut_spin_adj), 2, 0);
-  gtk_widget_ref (low_cut_spin);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "low_cut_spin", low_cut_spin,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (low_cut_spin);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "low_cut_spin", low_cut_spin,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (low_cut_spin);
   gtk_table_attach (GTK_TABLE (table1), low_cut_spin, 0, 1, 2, 3,
                     (GtkAttachOptions) (GTK_FILL),
@@ -1357,18 +1353,18 @@ GtkWidget* create_imadj_dialog (void)
 
   high_cut_spin_adj = gtk_adjustment_new (1, -65535, 65535, 10, 10, 0);
   high_cut_spin = gtk_spin_button_new (GTK_ADJUSTMENT (high_cut_spin_adj), 10, 0);
-  gtk_widget_ref (high_cut_spin);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "high_cut_spin", high_cut_spin,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (high_cut_spin);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "high_cut_spin", high_cut_spin,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (high_cut_spin);
   gtk_table_attach (GTK_TABLE (table1), high_cut_spin, 0, 1, 1, 2,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
   label2 = gtk_label_new (("High"));
-  gtk_widget_ref (label2);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "label2", label2,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (label2);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "label2", label2,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (label2);
   gtk_table_attach (GTK_TABLE (table1), label2, 1, 2, 1, 2,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
@@ -1378,9 +1374,9 @@ GtkWidget* create_imadj_dialog (void)
   gtk_misc_set_padding (GTK_MISC (label2), 6, 0);
 
   label1 = gtk_label_new (("Low"));
-  gtk_widget_ref (label1);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "label1", label1,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (label1);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "label1", label1,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (label1);
   gtk_table_attach (GTK_TABLE (table1), label1, 1, 2, 2, 3,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_SHRINK | GTK_FILL),
@@ -1390,9 +1386,9 @@ GtkWidget* create_imadj_dialog (void)
   gtk_misc_set_padding (GTK_MISC (label1), 6, 0);
 
   table2 = gtk_table_new (2, 3, TRUE);
-  gtk_widget_ref (table2);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "table2", table2,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (table2);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "table2", table2,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (table2);
   gtk_table_attach (GTK_TABLE (table1), table2, 2, 3, 1, 3,
                     (GtkAttachOptions) (GTK_FILL),
@@ -1401,96 +1397,97 @@ GtkWidget* create_imadj_dialog (void)
   gtk_table_set_col_spacings (GTK_TABLE (table2), 3);
 
   cuts_darker = gtk_button_new_with_label (("Darker"));
-  gtk_widget_ref (cuts_darker);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "cuts_darker", cuts_darker,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (cuts_darker);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "cuts_darker", cuts_darker,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (cuts_darker);
   gtk_table_attach (GTK_TABLE (table2), cuts_darker, 2, 3, 0, 1,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
   cuts_sharper = gtk_button_new_with_label (("Sharper"));
-  gtk_widget_ref (cuts_sharper);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "cuts_sharper", cuts_sharper,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (cuts_sharper);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "cuts_sharper", cuts_sharper,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (cuts_sharper);
   gtk_table_attach (GTK_TABLE (table2), cuts_sharper, 1, 2, 1, 2,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
   cuts_duller = gtk_button_new_with_label (("Flatter"));
-  gtk_widget_ref (cuts_duller);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "cuts_duller", cuts_duller,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (cuts_duller);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "cuts_duller", cuts_duller,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (cuts_duller);
   gtk_table_attach (GTK_TABLE (table2), cuts_duller, 1, 2, 0, 1,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
   cuts_auto = gtk_button_new_with_label (("Auto Cuts"));
-  gtk_widget_ref (cuts_auto);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "cuts_auto", cuts_auto,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (cuts_auto);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "cuts_auto", cuts_auto,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (cuts_auto);
   gtk_table_attach (GTK_TABLE (table2), cuts_auto, 0, 1, 1, 2,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
   cuts_min_max = gtk_button_new_with_label (("Min-Max"));
-  gtk_widget_ref (cuts_min_max);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "cuts_min_max", cuts_min_max,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (cuts_min_max);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "cuts_min_max", cuts_min_max,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (cuts_min_max);
   gtk_table_attach (GTK_TABLE (table2), cuts_min_max, 0, 1, 0, 1,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
   cuts_brighter = gtk_button_new_with_label (("Brighter"));
-  gtk_widget_ref (cuts_brighter);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "cuts_brighter", cuts_brighter,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (cuts_brighter);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "cuts_brighter", cuts_brighter,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (cuts_brighter);
   gtk_table_attach (GTK_TABLE (table2), cuts_brighter, 2, 3, 1, 2,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (GTK_EXPAND), 0, 0);
 
   dialog_action_area1 = GTK_DIALOG (imadj_dialog)->action_area;
-  gtk_object_set_data (GTK_OBJECT (imadj_dialog), "dialog_action_area1", dialog_action_area1);
+  g_object_set_data (G_OBJECT (imadj_dialog), "dialog_action_area1", dialog_action_area1);
   gtk_widget_show (dialog_action_area1);
   gtk_container_set_border_width (GTK_CONTAINER (dialog_action_area1), 3);
 
   hbuttonbox1 = gtk_hbutton_box_new ();
-  gtk_widget_ref (hbuttonbox1);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "hbuttonbox1", hbuttonbox1,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (hbuttonbox1);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "hbuttonbox1", hbuttonbox1,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (hbuttonbox1);
   gtk_box_pack_start (GTK_BOX (dialog_action_area1), hbuttonbox1, TRUE, TRUE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hbuttonbox1), 3);
   gtk_button_box_set_layout (GTK_BUTTON_BOX (hbuttonbox1), GTK_BUTTONBOX_EDGE);
-  gtk_button_box_set_spacing (GTK_BUTTON_BOX (hbuttonbox1), 4);
-  gtk_button_box_set_child_size (GTK_BUTTON_BOX (hbuttonbox1), 0, 0);
-  gtk_button_box_set_child_ipadding (GTK_BUTTON_BOX (hbuttonbox1), 15, -1);
+  gtk_box_set_spacing (GTK_BOX (hbuttonbox1), 4);
+
+  //gtk_button_box_set_child_size (GTK_BUTTON_BOX (hbuttonbox1), 0, 0);
+  //gtk_button_box_set_child_ipadding (GTK_BUTTON_BOX (hbuttonbox1), 15, -1);
 
   hist_close = gtk_button_new_with_label (("Close"));
-  gtk_widget_ref (hist_close);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "hist_close", hist_close,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (hist_close);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "hist_close", hist_close,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (hist_close);
   gtk_container_add (GTK_CONTAINER (hbuttonbox1), hist_close);
   GTK_WIDGET_SET_FLAGS (hist_close, GTK_CAN_DEFAULT);
 
   hist_apply = gtk_button_new_with_label (("Apply"));
-  gtk_widget_ref (hist_apply);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "hist_apply", hist_apply,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (hist_apply);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "hist_apply", hist_apply,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (hist_apply);
   gtk_container_add (GTK_CONTAINER (hbuttonbox1), hist_apply);
   GTK_WIDGET_SET_FLAGS (hist_apply, GTK_CAN_DEFAULT);
 
   hist_redraw = gtk_button_new_with_label (("Redraw"));
-  gtk_widget_ref (hist_redraw);
-  gtk_object_set_data_full (GTK_OBJECT (imadj_dialog), "hist_redraw", hist_redraw,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (hist_redraw);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "hist_redraw", hist_redraw,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (hist_redraw);
   gtk_container_add (GTK_CONTAINER (hbuttonbox1), hist_redraw);
   GTK_WIDGET_SET_FLAGS (hist_redraw, GTK_CAN_DEFAULT);

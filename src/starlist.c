@@ -1,30 +1,30 @@
 /*******************************************************************************
   Copyright(c) 2000 - 2003 Radu Corlan. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: radu@corlan.net
 *******************************************************************************/
 
 /* functions that manage 'gui_stars', star and object markers
  * that are overlaid on the images
  *
- * all the sources are linked in the list attached to the window as 
+ * all the sources are linked in the list attached to the window as
  * "gui_star_list"
  */
 
@@ -55,7 +55,7 @@ void remove_star(struct gui_star_list *gsl, struct gui_star *gs)
 }
 
 /* remove all stars with type matching type_mask from the star list
- * all bits that are '1' in flag_mask must be set in flags for a star 
+ * all bits that are '1' in flag_mask must be set in flags for a star
  * to be removed
  */
 void remove_stars_of_type(struct gui_star_list *gsl, int type_mask, int flag_mask)
@@ -97,8 +97,8 @@ void remove_stars_of_type_window(GtkWidget *window, int type_mask, int flag_mask
 {
 	struct gui_star_list *gsl;
 
-	gsl = gtk_object_get_data(GTK_OBJECT(window), "gui_star_list");
-	if (gsl == NULL) 
+	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
+	if (gsl == NULL)
 		return;
 	remove_stars_of_type(gsl, type_mask, flag_mask);
 }
@@ -108,8 +108,8 @@ struct gui_star * find_window_gs_by_cats_name(GtkWidget *window, char *name)
 {
 	struct gui_star_list *gsl;
 
-	gsl = gtk_object_get_data(GTK_OBJECT(window), "gui_star_list");
-	if (gsl == NULL) 
+	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
+	if (gsl == NULL)
 		return NULL;
 	return find_gs_by_cats_name(gsl, name);
 }
@@ -125,7 +125,7 @@ void gui_star_label_from_cats (struct gui_star *gs)
 	cats = CAT_STAR(gs->s);
 	if (gs->s == NULL)
 		return;
-	
+
 	if (gs->label.label != NULL) {
 		free(gs->label.label);
 		gs->label.label = NULL;
@@ -136,8 +136,8 @@ void gui_star_label_from_cats (struct gui_star *gs)
 		ret = asprintf(&gs->label.label, "%s", cats->name);
 	} else if (CATS_TYPE(cats) == CAT_STAR_TYPE_APSTD &&
 		   P_INT(LABEL_APSTAR)) {
-		if (cats->smags 
-		    && !get_band_by_name(cats->smags, 
+		if (cats->smags
+		    && !get_band_by_name(cats->smags,
 					 P_STR(LABEL_APSTD_BAND), &mag, NULL)) {
 			ret = asprintf(&gs->label.label, "%.0f", mag * 10);
 		} else {
@@ -156,11 +156,11 @@ void gui_star_label_from_cats (struct gui_star *gs)
 /*
  * add the n cat_stars supplied to the gsl
  * return the number of objects added
- * retains a reference to the cats, but does not 
- * ref it - the caller should no longer hold 
+ * retains a reference to the cats, but does not
+ * ref it - the caller should no longer hold
  * it's reference.
  */
-int add_cat_stars(struct cat_star **catsl, int n, 
+int add_cat_stars(struct cat_star **catsl, int n,
 		  struct gui_star_list *gsl, struct wcs *wcs)
 {
 	int i;
@@ -194,7 +194,7 @@ struct gui_star *find_gs_by_cats_name(struct gui_star_list *gsl, char *name)
 	struct gui_star *gs;
 	for (sl = gsl->sl; sl != NULL; sl = sl->next) {
 		gs = GUI_STAR(sl->data);
-		if ((TYPE_MASK_GSTAR(gs) & TYPE_MASK_CATREF) == 0) 
+		if ((TYPE_MASK_GSTAR(gs) & TYPE_MASK_CATREF) == 0)
 			continue;
 		if (gs->s == NULL)
 			continue;
@@ -207,12 +207,12 @@ struct gui_star *find_gs_by_cats_name(struct gui_star_list *gsl, char *name)
 /*
  * merge the n cat_stars supplied into the gsl
  * return the number of objects merged
- * retains a reference to the cats, but does not 
- * ref it - the caller should no longer hold 
+ * retains a reference to the cats, but does not
+ * ref it - the caller should no longer hold
  * it's reference. It will free the stars that aren't yet in.
  * merging is done by name.
  */
-int merge_cat_stars(struct cat_star **catsl, int n, 
+int merge_cat_stars(struct cat_star **catsl, int n,
 		    struct gui_star_list *gsl, struct wcs *wcs)
 {
 	int i;
@@ -270,12 +270,12 @@ int merge_cat_stars(struct cat_star **catsl, int n,
 /*
  * merge the cat_stars supplied into the gsl
  * return the number of objects merged
- * retains a reference to the cats, but does not 
- * ref it - the caller should no longer hold 
+ * retains a reference to the cats, but does not
+ * ref it - the caller should no longer hold
  * it's reference. It will free the stars that aren't yet in.
  * merging is done by name.
  */
-int merge_cat_star_list(GList *addsl, 
+int merge_cat_star_list(GList *addsl,
 		    struct gui_star_list *gsl, struct wcs *wcs)
 {
 	GList *al;
@@ -340,12 +340,12 @@ int merge_cat_star_list_to_window(gpointer window, GList *addsl)
 	struct wcs *wcs;
 	struct gui_star_list *gsl;
 
-	wcs = gtk_object_get_data(GTK_OBJECT(window), "wcs_of_window");
+	wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
 	if (wcs == NULL || wcs->wcsset == WCS_INVALID) {
 		err_printf("merge_cat_star_list_to_window: invalid wcs\n");
 		return -1;
 	}
-	gsl = gtk_object_get_data(GTK_OBJECT(window), "gui_star_list");
+	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl == NULL) {
 		gsl = gui_star_list_new();
 		attach_star_list(gsl, window);
@@ -360,7 +360,7 @@ int merge_cat_star_list_to_window(gpointer window, GList *addsl)
  * add the object from the frame header to the gsl
  * return the number of objects added
  */
-int add_star_from_frame_header(struct ccd_frame *fr, 
+int add_star_from_frame_header(struct ccd_frame *fr,
 			       struct gui_star_list *gsl, struct wcs *wcs)
 {
 	char name[129];
@@ -420,7 +420,7 @@ int add_cat_stars_to_window(gpointer window, struct cat_star **catsl, int n)
 	struct gui_star_list *gsl;
 	int i;
 
-	wcs = gtk_object_get_data(GTK_OBJECT(window), "wcs_of_window");
+	wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
 	if (wcs == NULL || wcs->wcsset == WCS_INVALID) {
 /* we unref the cat stars, so the caller shouldn't */
 		d3_printf("add_cat_stars_to_window: invalid wcs, deleting stars\n");
@@ -428,7 +428,7 @@ int add_cat_stars_to_window(gpointer window, struct cat_star **catsl, int n)
 			cat_star_release(catsl[i]);
 		return -1;
 	}
-	gsl = gtk_object_get_data(GTK_OBJECT(window), "gui_star_list");
+	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl == NULL) {
 		gsl = gui_star_list_new();
 		attach_star_list(gsl, window);
@@ -448,7 +448,7 @@ int add_gui_stars_to_window(gpointer window, GSList *sl)
 {
 	struct gui_star_list *gsl;
 
-	gsl = gtk_object_get_data(GTK_OBJECT(window), "gui_star_list");
+	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl == NULL) {
 		gsl = gui_star_list_new();
 		attach_star_list(gsl, window);
@@ -494,12 +494,12 @@ int add_stars_from_gsc(struct gui_star_list *gsl, struct wcs *wcs,
 //	d3_printf("before call, cat_search = %08x\n", (unsigned)cat->cat_search);
 	n_gsc = (* cat->cat_search)(cats, cat, wcs->xref, wcs->yref, radius, n);
 
-	d3_printf ("got %d from cat_search\n", n_gsc); 
+	d3_printf ("got %d from cat_search\n", n_gsc);
 
 	if (n_gsc == 0) {
 		free(cats);
 		return n_gsc;
-	} 
+	}
 	ret = merge_cat_stars(cats, n_gsc, gsl, wcs);
 
 	free(cats);
@@ -519,10 +519,10 @@ int update_gs_from_cats(GtkWidget *window, struct cat_star *cats)
 	int found = 0;
 
 	g_return_val_if_fail(cats != NULL, -2);
-	gsl = gtk_object_get_data(GTK_OBJECT(window), "gui_star_list");
+	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	g_return_val_if_fail(gsl != NULL, -2);
 
-	wcs = gtk_object_get_data(GTK_OBJECT(window), "wcs_of_window");
+	wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
 	g_return_val_if_fail(wcs != NULL, -2);
 
 	sl = gsl->sl;
@@ -562,7 +562,7 @@ int update_gs_from_cats(GtkWidget *window, struct cat_star *cats)
 }
 
 
-/* update the cat sizes according to the current limiting magnitude 
+/* update the cat sizes according to the current limiting magnitude
  * and mark some as hidden if appropiate */
 
 void star_list_update_size(GtkWidget *window)
@@ -571,7 +571,7 @@ void star_list_update_size(GtkWidget *window)
 	GSList *sl = NULL;
 	struct gui_star_list *gsl;
 
-	gsl = gtk_object_get_data(GTK_OBJECT(window), "gui_star_list");
+	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl == NULL)
 		return;
 	sl = gsl->sl;
@@ -581,7 +581,7 @@ void star_list_update_size(GtkWidget *window)
 		if (gs->s) {
 			gs->size = cat_star_size(CAT_STAR(gs->s));
 			gs->flags &= ~STAR_HIDDEN;
-			if ((!P_INT(DO_DLIM_FAINTER)) && (gs->size <= P_INT(DO_MIN_STAR_SZ)) 
+			if ((!P_INT(DO_DLIM_FAINTER)) && (gs->size <= P_INT(DO_MIN_STAR_SZ))
 			    && (TYPE_MASK_GSTAR(gs) == TYPE_MASK(STAR_TYPE_SREF)))
 			    gs->flags |= STAR_HIDDEN;
 		}
@@ -597,7 +597,7 @@ void star_list_update_labels(GtkWidget *window)
 	GSList *sl = NULL;
 	struct gui_star_list *gsl;
 
-	gsl = gtk_object_get_data(GTK_OBJECT(window), "gui_star_list");
+	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl == NULL)
 		return;
 	sl = gsl->sl;
@@ -617,13 +617,13 @@ void remove_stars(GtkWidget *window, int type_mask, int flag_mask)
 {
 	struct gui_star_list *gsl;
 
-	gsl = gtk_object_get_data(GTK_OBJECT(window), "gui_star_list");
+	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl == NULL) {
 		return;
 	}
 	remove_stars_of_type(gsl, type_mask, flag_mask);
 	gtk_widget_queue_draw(window);
-} 
+}
 
 /*
  * remove all pairs for which at least one of the two stars matches the
@@ -635,7 +635,7 @@ void remove_pairs(GtkWidget *window, int flag_mask)
 	struct gui_star *gs;
 	GSList *sl;
 
-	gsl = gtk_object_get_data(GTK_OBJECT(window), "gui_star_list");
+	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl == NULL) {
 		return;
 	}
@@ -645,7 +645,7 @@ void remove_pairs(GtkWidget *window, int flag_mask)
 		sl = g_slist_next(sl);
 		if ((gs->flags & (STAR_HAS_PAIR)) != (STAR_HAS_PAIR))
 			continue;
-		if (gs->pair != NULL 
+		if (gs->pair != NULL
 		    && ((gs->flags | gs->pair->flags) & flag_mask) == flag_mask) {
 			remove_pair_from(gs);
 		}
@@ -663,11 +663,11 @@ int remove_off_frame_stars(gpointer window)
 	struct gui_star *gs;
 	GSList *sl=NULL, *osl=NULL, *head;
 
-	gsl = gtk_object_get_data(GTK_OBJECT(window), "gui_star_list");
+	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl == NULL) {
 		return 0;
 	}
-	i_ch = gtk_object_get_data(GTK_OBJECT(window), "i_channel");
+	i_ch = g_object_get_data(G_OBJECT(window), "i_channel");
 	if (i_ch == NULL || i_ch->fr == NULL) {
 		err_printf("No image frame\n");
 		return 0;
@@ -735,7 +735,7 @@ void remove_pair_from(struct gui_star *gs)
 	if (gs->pair == NULL)
 		return;
 	gs->pair->flags &= ~STAR_HAS_PAIR;
-//	d3_printf("remove_pair_from: gs refc is %d, pair refc is %d\n", 
+//	d3_printf("remove_pair_from: gs refc is %d, pair refc is %d\n",
 //		  gs->ref_count, GUI_STAR(gs->pair)->ref_count);
 	gui_star_release(gs->pair);
 	gs->pair = NULL;
@@ -775,7 +775,7 @@ void gui_star_release(struct gui_star *gs)
 	if (gs->ref_count == 1) {
 		if(gs->label.label != NULL)
 			free(gs->label.label);
-		if (gs->pair) 
+		if (gs->pair)
 			remove_pair_from(gs);
 		if (gs->s != NULL) {
 			switch(gs->flags & STAR_TYPE_M) {
@@ -806,7 +806,7 @@ struct gui_star_list *gui_star_list_new(void)
 	gsl = calloc(1, sizeof(struct gui_star_list));
 	gsl->ref_count = 1;
 	gui_star_list_update_colors(gsl);
-	gsl->max_size = DEFAULT_MAX_SIZE; 
+	gsl->max_size = DEFAULT_MAX_SIZE;
 	return gsl;
 }
 
@@ -832,7 +832,7 @@ void gui_star_list_release(struct gui_star_list *gsl)
 //		d3_printf("releasing gsl stars\n");
 		g_slist_foreach(gsl->sl, release_gui_star_from_list, NULL);
 //		d3_printf("releasing gsl list\n");
-		g_slist_free(gsl->sl); 
+		g_slist_free(gsl->sl);
 //		d3_printf("releasing gsl struct\n");
 		g_free(gsl);
 //		d3_printf("done\n");

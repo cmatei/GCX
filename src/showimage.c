@@ -1,23 +1,23 @@
 /*******************************************************************************
   Copyright(c) 2000 - 2003 Radu Corlan. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: radu@corlan.net
 *******************************************************************************/
 
@@ -25,9 +25,9 @@
 
 
 /* General strategy for displaying image frames
- * 
+ *
  * Frames to be displayed in a certain drawing area are
- * attached to the respective drawing area using gtk_object_set_data_full
+ * attached to the respective drawing area using g_object_set_data_full
  *
  * Several frames can be attached to the same drawing area; they represent
  * the different channels of the image. Various possible channels are:
@@ -37,7 +37,7 @@
  * "b_channel" - the 'b' channel (from rgb)
  * "cr_channel" - Cr chrominance channel
  * "cb_channel" - Cb chrominance channel
- * 
+ *
  * Depending on which channels are present, when the drawing area is exposed
  * a grayscale or rgb image is produced. The following channel combinations are tried
  * in order: IRGB, ICrCb, RGB, I
@@ -47,13 +47,13 @@
  *
  * Apart from the frames to be displayed, the follwing data items are used to
  * determine how to display the data:
- * 
+ *
  * "geometry"    : a pointer to a geometry structure defining the current zoom/pan
  * "markers"     : a g_list of markers that should be drawn on the frame;
  * "sources"     : a g_list of sources (stars) that should be drawn on the frame;
- * 
+ *
  * channel, markers and sources structures are defined in showimage.h
- * 
+ *
  * channels are grouped into layers : but more about that later
  */
 
@@ -88,7 +88,7 @@ alloc_err:
 	return NULL;
 }
 
-/* 
+/*
  * increase the reference count to a map geometry
  */
 void ref_map_geometry(struct map_geometry *geometry)
@@ -99,7 +99,7 @@ void ref_map_geometry(struct map_geometry *geometry)
 	geometry->ref_count ++;
 }
 
-/* 
+/*
  * decrement the ref_count of a map geometry and free if necessary
  */
 void release_map_geometry(struct map_geometry *geometry)
@@ -131,13 +131,13 @@ struct map_cache *new_map_cache(int size, int type)
 		dat = malloc(3 * size);
 		if (dat == NULL)
 			goto alloc_err;
-		cache->dat = dat; 
+		cache->dat = dat;
 		cache->size = 3 * size;
 	} else {
 		dat = malloc(size);
 		if (dat == NULL)
 			goto alloc_err;
-		cache->dat = dat; 
+		cache->dat = dat;
 		cache->size = size;
 	}
 	cache->ref_count = 1;
@@ -149,7 +149,7 @@ alloc_err2:
 	return NULL;
 }
 
-/* 
+/*
  * increase the reference count to a map cache
  */
 void ref_map_cache(struct map_cache *cache)
@@ -160,7 +160,7 @@ void ref_map_cache(struct map_cache *cache)
 	cache->ref_count ++;
 }
 
-/* 
+/*
  * decrement the ref_count of a map cache and free if necessary
  */
 void release_map_cache(struct map_cache *cache)
@@ -211,7 +211,7 @@ alloc_err:
 	return NULL;
 }
 
-/* 
+/*
  * increase the reference count to a channel cache
  */
 void ref_image_channel(struct image_channel *channel)
@@ -222,7 +222,7 @@ void ref_image_channel(struct image_channel *channel)
 	channel->ref_count ++;
 }
 
-/* 
+/*
  * decrement the ref_count of a map cache and free if necessary
  */
 void release_image_channel(struct image_channel *channel)
@@ -239,7 +239,7 @@ void release_image_channel(struct image_channel *channel)
 	channel->ref_count--;
 }
 
-/* 
+/*
  * return 1 if the requested area is inside the cache
  */
 static int area_in_cache(GdkRectangle *area, struct map_cache *cache)
@@ -256,7 +256,7 @@ static int area_in_cache(GdkRectangle *area, struct map_cache *cache)
 }
 
 /* render a float frame to the cache at zoom >= 1*/
-static void cache_render_rgb_float_zi(struct map_cache *cache, struct image_channel *channel, 
+static void cache_render_rgb_float_zi(struct map_cache *cache, struct image_channel *channel,
 			  int zoom, int fx, int fy, int fw, int fh)
 {
 	struct ccd_frame *fr = channel->fr;
@@ -376,7 +376,7 @@ static void cache_render_rgb_float_zi(struct map_cache *cache, struct image_chan
 //	d3_printf("end of render\n");
 }
 
-static void cache_render_rgb_float_zo(struct map_cache *cache, struct image_channel *channel, 
+static void cache_render_rgb_float_zo(struct map_cache *cache, struct image_channel *channel,
 			  int zoom, int fx, int fy, int fw, int fh)
 {
 	struct ccd_frame *fr = channel->fr;
@@ -421,7 +421,7 @@ static void cache_render_rgb_float_zo(struct map_cache *cache, struct image_chan
 				fd0_r = fdat_r;
 				fd0_g = fdat_g;
 				fd0_b = fdat_b;
-				
+
 				for (yy = 0; yy < zoom; yy++) {
 					for (xx = 0; xx < zoom; xx++) {
 						pixf_r += *fdat_r++;
@@ -433,11 +433,11 @@ static void cache_render_rgb_float_zo(struct map_cache *cache, struct image_chan
 					fdat_g += fj2;
 					fdat_b += fj2;
 				}
-				
+
 				fdat_r = fd0_r + zoom;
 				fdat_g = fd0_g + zoom;
 				fdat_b = fd0_b + zoom;
-				
+
 				lndx = floor(pixf_r * avgf);
 				clamp_int(&lndx, 0, LUT_SIZE - 1);
 				pix = channel->lut[lndx] >> 8;
@@ -453,10 +453,10 @@ static void cache_render_rgb_float_zo(struct map_cache *cache, struct image_chan
 				pix = channel->lut[lndx] >> 8;
 				*cdat++ = pix;
 			}
-			
+
 			fdat_r += fjump;
 			fdat_g += fjump;
-			fdat_b += fjump;			
+			fdat_b += fjump;
 		}
 	} else {
 		for (y = 0; y < cache->h; y++) {
@@ -466,7 +466,7 @@ static void cache_render_rgb_float_zo(struct map_cache *cache, struct image_chan
 				fd0_r = fdat_r;
 				fd0_g = fdat_g;
 				fd0_b = fdat_b;
-				
+
 				for (yy = 0; yy < zoom; yy++) {
 					for (xx = 0; xx < zoom; xx++) {
 						pixf_r += *fdat_r++;
@@ -478,7 +478,7 @@ static void cache_render_rgb_float_zo(struct map_cache *cache, struct image_chan
 					fdat_g += fj2;
 					fdat_b += fj2;
 				}
-				
+
 				fdat_r = fd0_r + zoom;
 				fdat_g = fd0_g + zoom;
 				fdat_b = fd0_b + zoom;
@@ -497,18 +497,18 @@ static void cache_render_rgb_float_zo(struct map_cache *cache, struct image_chan
 				clamp_int(&lndx, 0, LUT_SIZE - 1);
 				pix = channel->lut[lndx] >> 8;
 				*cdat++ = pix;
-				
+
 			}
 			fdat_r += fjump;
 			fdat_g += fjump;
-			fdat_b += fjump;			
+			fdat_b += fjump;
 		}
 	}
 	cache->cache_valid = 1;
-}			
+}
 
 /* render a float frame to the cache at zoom >= 1*/
-static void cache_render_float_zi(struct map_cache *cache, struct image_channel *channel, 
+static void cache_render_float_zi(struct map_cache *cache, struct image_channel *channel,
 			  int zoom, int fx, int fy, int fw, int fh)
 {
 	struct ccd_frame *fr = channel->fr;
@@ -583,7 +583,7 @@ static void cache_render_float_zi(struct map_cache *cache, struct image_channel 
 //	d3_printf("end of render\n");
 }
 
-static void cache_render_float_zo(struct map_cache *cache, struct image_channel *channel, 
+static void cache_render_float_zo(struct map_cache *cache, struct image_channel *channel,
 			  int zoom, int fx, int fy, int fw, int fh)
 {
 	struct ccd_frame *fr = channel->fr;
@@ -598,7 +598,7 @@ static void cache_render_float_zo(struct map_cache *cache, struct image_channel 
 		cache_render_rgb_float_zo(cache, channel, zoom, fx, fy, fw, fh);
 		return;
 	}
-	
+
 	unsigned char *cdat = cache->dat;
 	unsigned char pix;
 
@@ -666,10 +666,10 @@ static void cache_render_float_zo(struct map_cache *cache, struct image_channel 
 		}
 	}
 	cache->cache_valid = 1;
-}			
+}
 
 /* render a byte frame to the cache at zoom >= 1*/
-static void cache_render_byte_zi(struct map_cache *cache, struct image_channel *channel, 
+static void cache_render_byte_zi(struct map_cache *cache, struct image_channel *channel,
 			  int zoom, int fx, int fy, int fw, int fh)
 {
 	struct ccd_frame *fr = channel->fr;
@@ -693,7 +693,7 @@ static void cache_render_byte_zi(struct map_cache *cache, struct image_channel *
 	cjump = cache->w - fw*zoom;
 
 	fdat = (unsigned char *)fr->dat + fx + fy * fr->w;
-	
+
 	if (channel->lut_mode == LUT_MODE_DIRECT) {
 		for (y = 0; y < fh; y++) {
 			for (x = 0; x < fw; x++) {
@@ -733,11 +733,11 @@ static void cache_render_byte_zi(struct map_cache *cache, struct image_channel *
 	cache->cache_valid = 1;
 }
 
-static void cache_render_byte_zo(struct map_cache *cache, struct image_channel *channel, 
+static void cache_render_byte_zo(struct map_cache *cache, struct image_channel *channel,
 			  int zoom, int fx, int fy, int fw, int fh)
 {
 	err_printf("byte zo:not yet\n");
-}			
+}
 
 /*
  * compute the size a cache needs to be so that the give area can fit
@@ -754,7 +754,7 @@ static unsigned cached_area_size(GdkRectangle *area, struct map_cache *cache)
 /*
  * update the cache so that it contains a representation of the given area
  */
-static void update_cache(struct map_cache *cache, 
+static void update_cache(struct map_cache *cache,
 		       struct map_geometry *geom, struct image_channel *channel,
 		       GdkRectangle *area)
 {
@@ -798,13 +798,13 @@ static void update_cache(struct map_cache *cache,
 	fy = area->y * zoom_out / zoom_in;
 	fw = area->width * zoom_out / zoom_in + (zoom_in > 1 ? 2 : 0);
 	fh = area->height * zoom_out / zoom_in + (zoom_in > 1 ? 2 : 0);
-	if (fx > fr->w - 1) 
+	if (fx > fr->w - 1)
 		fx = fr->w - 1;
-	if (fx + fw > fr->w - 1) 
+	if (fx + fw > fr->w - 1)
 		fw = fr->w - fx;
-	if (fy > fr->h - 1) 
+	if (fy > fr->h - 1)
 		fy = fr->h - 1;
-	if (fy + fh > fr->h - 1) 
+	if (fy + fh > fr->h - 1)
 		fh = fr->h - fy;
 //	d3_printf("frame region: %d by %d at %d, %d\n", fw, fh, fx, fy);
 /* and now to the actual cache rendering. We call different
@@ -848,13 +848,13 @@ void paint_from_gray_cache(GtkWidget *widget, struct map_cache *cache, GdkRectan
 	unsigned char *dat;
 	if (!area_in_cache(area, cache)) {
 		err_printf("paint_from_cache: oops - area not in cache\n");
-		d3_printf("area is %d by %d starting at %d,%d\n", 
+		d3_printf("area is %d by %d starting at %d,%d\n",
 			  area->width, area->height, area->x, area->y);
-		d3_printf("cache is %d by %d starting at %d,%d\n", 
+		d3_printf("cache is %d by %d starting at %d,%d\n",
 			  cache->w, cache->h, cache->x, cache->y);
 //		return;
 	}
-	dat = cache->dat + area->x - cache->x 
+	dat = cache->dat + area->x - cache->x
 		+ (area->y - cache->y) * cache->w;
 	gdk_draw_gray_image (widget->window, widget->style->fg_gc[GTK_STATE_NORMAL],
 			     area->x, area->y, area->width, area->height,
@@ -866,13 +866,13 @@ void paint_from_rgb_cache(GtkWidget *widget, struct map_cache *cache, GdkRectang
 	unsigned char *dat;
 	if (!area_in_cache(area, cache)) {
 		err_printf("paint_from_cache: oops - area not in cache\n");
-		d3_printf("area is %d by %d starting at %d,%d\n", 
+		d3_printf("area is %d by %d starting at %d,%d\n",
 			  area->width, area->height, area->x, area->y);
-		d3_printf("cache is %d by %d starting at %d,%d\n", 
+		d3_printf("cache is %d by %d starting at %d,%d\n",
 			  cache->w, cache->h, cache->x, cache->y);
 //		return;
 	}
-	dat = cache->dat + (area->x - cache->x 
+	dat = cache->dat + (area->x - cache->x
 		+ (area->y - cache->y) * cache->w) * 3;
 	gdk_draw_rgb_image (widget->window, widget->style->fg_gc[GTK_STATE_NORMAL],
 			     area->x, area->y, area->width, area->height,
@@ -881,7 +881,7 @@ void paint_from_rgb_cache(GtkWidget *widget, struct map_cache *cache, GdkRectang
 
 
 /*
- * an expose event to our image window 
+ * an expose event to our image window
  * we only handle the i channel for now
  */
 gboolean image_expose_cb(GtkWidget *widget, GdkEventExpose *event, gpointer window)
@@ -891,23 +891,23 @@ gboolean image_expose_cb(GtkWidget *widget, GdkEventExpose *event, gpointer wind
 	struct map_geometry *geom;
 	void *ret;
 
-	extern void draw_sources_hook(GtkWidget *darea, 
+	extern void draw_sources_hook(GtkWidget *darea,
 				      GtkWidget *window, GdkRectangle *area);
 
 
-	ret = gtk_object_get_data(GTK_OBJECT(window), "map_cache");
+	ret = g_object_get_data(G_OBJECT(window), "map_cache");
 	if (ret == NULL) /* no map cache, we don;t have a frame to display */
 		return TRUE;
 	cache = ret;
 
-	ret = gtk_object_get_data(GTK_OBJECT(window), "i_channel");
+	ret = g_object_get_data(G_OBJECT(window), "i_channel");
 	if (ret == NULL) /* no channel */
 		return TRUE;
 	i_channel = ret;
 	if (i_channel->fr == NULL) /* no frame */
 		return TRUE;
 
-	ret = gtk_object_get_data(GTK_OBJECT(window), "geometry");
+	ret = g_object_get_data(G_OBJECT(window), "geometry");
 	if (ret == NULL) /* no geometry */
 		return TRUE;
 	geom = ret;
@@ -928,7 +928,7 @@ gboolean image_expose_cb(GtkWidget *widget, GdkEventExpose *event, gpointer wind
 	} else if (!area_in_cache(&(event->area), cache)) {
 //		d3_printf("expose: other area\n");
 		cache->cache_valid = 0;
-	} 
+	}
 	if (!cache->cache_valid) {
 		update_cache(cache, geom, i_channel, &(event->area));
 	}
@@ -938,7 +938,7 @@ gboolean image_expose_cb(GtkWidget *widget, GdkEventExpose *event, gpointer wind
 //		d3_printf("expose: from cache\n");
 		if (cache->type == MAP_CACHE_GRAY)
 			paint_from_gray_cache(widget, cache, &(event->area));
-		else 
+		else
 			paint_from_rgb_cache(widget, cache, &(event->area));
 	}
 	draw_sources_hook(widget, window, &(event->area));
@@ -948,7 +948,7 @@ gboolean image_expose_cb(GtkWidget *widget, GdkEventExpose *event, gpointer wind
 /* paint the given area of a frame to the given image cache
  */
 
-void image_box_to_cache(struct map_cache *cache, struct image_channel *channel, 
+void image_box_to_cache(struct map_cache *cache, struct image_channel *channel,
 		       double zoom, int x, int y, int w, int h)
 {
 	struct map_geometry geom;
@@ -974,10 +974,10 @@ void image_box_to_cache(struct map_cache *cache, struct image_channel *channel,
 }
 
 
-/* attach a frame to the given window/channel for display 
+/* attach a frame to the given window/channel for display
  * if the requested channel does not exist, it is created;
- * it ref's the frame, so the frame should be released after 
- * frame_to_channel is called 
+ * it ref's the frame, so the frame should be released after
+ * frame_to_channel is called
  */
 int frame_to_channel(struct ccd_frame *fr, GtkWidget *window, char *chname)
 {
@@ -987,13 +987,13 @@ int frame_to_channel(struct ccd_frame *fr, GtkWidget *window, char *chname)
 	struct wcs *wcs;
 	GtkDrawingArea *darea;
 
-/* get the old stuff from the window */
-	cache = gtk_object_get_data(GTK_OBJECT(window), "map_cache");
-	channel = gtk_object_get_data(GTK_OBJECT(window), chname);
-	geom = gtk_object_get_data(GTK_OBJECT(window), "geometry");
-	darea = gtk_object_get_data(GTK_OBJECT(window), "image");
-	wcs = gtk_object_get_data(GTK_OBJECT(window), "wcs_of_window");
-/* now update them and create if necessary */
+        /* get the old stuff from the window */
+	cache = g_object_get_data(G_OBJECT(window), "map_cache");
+	channel = g_object_get_data(G_OBJECT(window), chname);
+	geom = g_object_get_data(G_OBJECT(window), "geometry");
+	darea = g_object_get_data(G_OBJECT(window), "image");
+	wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
+        /* now update them and create if necessary */
 
 	if ((fr->magic & FRAME_VALID_RGB) == 0)
 		bayer_interpolate(fr);
@@ -1004,26 +1004,26 @@ int frame_to_channel(struct ccd_frame *fr, GtkWidget *window, char *chname)
 			gdk_window_get_geometry(window->window, &x, &y, &w, &h, &d);
 
 		if (fr->magic & FRAME_VALID_RGB)
-			cache = new_map_cache((w + MAX_ZOOM) * (h + MAX_ZOOM), 
+			cache = new_map_cache((w + MAX_ZOOM) * (h + MAX_ZOOM),
 					      MAP_CACHE_RGB);
-		else 
-			cache = new_map_cache((w + MAX_ZOOM) * (h + MAX_ZOOM), 
+		else
+			cache = new_map_cache((w + MAX_ZOOM) * (h + MAX_ZOOM),
 					      MAP_CACHE_GRAY);
-		gtk_object_set_data_full(GTK_OBJECT(window), "map_cache", 
-					 cache, (GtkDestroyNotify)release_map_cache);
+		g_object_set_data_full(G_OBJECT(window), "map_cache",
+					 cache, (GDestroyNotify)release_map_cache);
 	}
 	cache->cache_valid = 0;
 
 	if (geom == NULL) {
 		geom = new_map_geometry();
-		gtk_object_set_data_full(GTK_OBJECT(window), "geometry", 
-					 geom, (GtkDestroyNotify)release_map_geometry);
+		g_object_set_data_full(G_OBJECT(window), "geometry",
+					 geom, (GDestroyNotify)release_map_geometry);
 	}
 
 	if (channel == NULL) {
 		channel = new_image_channel();
-		gtk_object_set_data_full(GTK_OBJECT(window), chname, 
-					 channel, (GtkDestroyNotify)release_image_channel);
+		g_object_set_data_full(G_OBJECT(window), chname,
+					 channel, (GDestroyNotify)release_image_channel);
 		get_frame(fr);
 		channel->fr = fr;
 		if (fr->magic & FRAME_VALID_RGB)
@@ -1049,8 +1049,8 @@ int frame_to_channel(struct ccd_frame *fr, GtkWidget *window, char *chname)
 	}
 	if (wcs == NULL) {
 		wcs = wcs_new();
-		gtk_object_set_data_full(GTK_OBJECT(window), "wcs_of_window", 
-					 wcs, (GtkDestroyNotify)wcs_release);
+		g_object_set_data_full(G_OBJECT(window), "wcs_of_window",
+					 wcs, (GDestroyNotify)wcs_release);
 		wcs_from_frame(fr, wcs);
 	} else {
 		struct wcs *nwcs;
@@ -1181,8 +1181,8 @@ static void byte_chan_to_pnm(struct image_channel *channel, FILE *pnmf, int is_1
 
 
 /* save a channel's image to a 8-bit pnm file. The image is curved to the
- * current cuts/lut 
- * window is only used to print status messages, it can be NULL 
+ * current cuts/lut
+ * window is only used to print status messages, it can be NULL
  * if fname is null, the file is output on stdout
  * return 0 for success */
 
@@ -1228,14 +1228,14 @@ int channel_to_pnm_file(struct image_channel *channel, GtkWidget *window, char *
 	case PIX_16BE :
 #endif
 	default:
-		err_printf("channel_to_pnm_file: unsupported frame format %d\n", 
+		err_printf("channel_to_pnm_file: unsupported frame format %d\n",
 			   channel->fr->pix_format);
 		ret = 1;
 	}
 	if (pnmf != stdout)
 		fclose(pnmf);
 
-	if (window != NULL) 
+	if (window != NULL)
 		info_printf_sb2(window, "Pnm file created");
 	return ret;
 }
