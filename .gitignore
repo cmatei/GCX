@@ -16,3 +16,6 @@ install-sh
 makedeb
 missing
 src/stamp-h1
+TAGS
+*.CR2
+*.fits
