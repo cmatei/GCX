@@ -270,6 +270,8 @@ static void set_filter_list(GtkWidget *dialog, struct fwheel_t *fw)
 {
 
 	printf("set_filter_list is not yet implemented\n");
+
+	/* please don't use GtkCombo */
 #if 0
 	GtkWidget *combo;
 	GList *filter_list = NULL;
@@ -299,6 +301,7 @@ static void filter_list_select_cb(gpointer list, GtkWidget *widget,
 				  gpointer dialog)
 {
 	printf("filter_list_select_cb is not yet implemented\n");
+	/* please don't use GtkCombo */
 #if 0
 	int pos, ret;
 	struct fwheel *fw;
