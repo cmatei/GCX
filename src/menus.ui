@@ -1,0 +1,65 @@
+<ui>
+<menubar name="reduce-menubar">
+  <menu name="reduce-file" action="reduce-file">
+    <menuitem name="Add Files" action="reduce-add-files"/>
+    <menuitem name="Remove Selected Files" action="reduce-remove-selected"/>
+    <menuitem name="Reload Selected Files" action="reduce-reload-selected"/>
+    <separator name="separator1"/>
+    <menuitem name="Display Frame" action="reduce-display-frame"/>
+    <menuitem name="Next Frame" action="reduce-next-frame"/>
+    <menuitem name="Previous Frame" action="reduce-prev-frame"/>
+    <separator name="separator2"/>
+    <menuitem name="Skip Selected Frames" action="reduce-skip-selected"/>
+    <menuitem name="Unskip Selected Frames" action="reduce-unskip-selected"/>
+  </menu>
+  <menu name="reduce-edit" action="reduce-edit">
+    <menuitem name="Select All" action="reduce-select-all"/>
+  </menu>
+  <menu name="Reduce" action="reduce-reduce">
+    <menuitem name="Reduce All" action="reduce-reduce-all"/>
+    <menuitem name="Reduce One Frame" action="reduce-reduce-one"/>
+    <menuitem name="Qphot One Frame" action="reduce-qphot-one"/>
+    <separator name="separator1"/>
+    <menuitem name="Show Alignment Stars" action="reduce-show-alignment-stars"/>
+    <separator name="separator2"/>
+    <menuitem name="Multi-frame Photometry..." action="reduce-multi-frame"/>
+  </menu>
+</menubar>
+
+<popup name="star-popup">
+  <menu name="starp" action="starp-popup">
+    <menuitem name="Edit Star"     action="starp-edit-star"/>
+    <menuitem name="Remove Star"   action="starp-remove-star"/>
+    <menuitem name="Create Pair"   action="starp-pair"/>
+    <menuitem name="Remove Pair"   action="starp-pair-rm"/>
+    <menuitem name="Move Star"     action="starp-move"/>
+    <menuitem name="Plot Profile"  action="starp-profile"/>
+    <menuitem name="Measure"       action="starp-measure"/>
+    <menuitem name="Sky Histogram" action="starp-skyhist"/>
+    <menuitem name="Fit PSF"       action="starp-fit-psf"/>
+  </menu>
+</popup>
+
+<popup name="image-popup">
+  <menu name="file" action="image-file">
+    <menuitem name="New Frame"  action="image-new"/>
+    <menuitem name="Open Image" action="image-open"/>
+    <menuitem name="Save Image" action="image-save"/>
+    <menu name="export" action="image-export">
+      <menuitem name="8-bit pnm"  action="image-export-pnm8"/>
+      <menuitem name="16-bit pnm" action="image-export-pnm16"/>
+    </menu>
+    <separator name="separator1"/>
+    <menuitem name="Load Recipe"   action="recipe-open"/>
+    <menuitem name="Create Recipe" action="recipe-create"/>
+    <separator name="separator2"/>
+    <menuitem name="Show FITS Header" action="image-show-header"/>
+    <menuitem name="Edit Options" action="options-edit"/>
+    <menuitem name="Camera/Scope" action="camera-scope-control"/>
+    <menuitem name="Guiding"      action="guide-control"/>
+    <separator name="separator3"/>
+    <menuitem name="Quit"         action="user-quit"/>
+  </menu>
+</popup>
+
+</ui>

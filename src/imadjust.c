@@ -1271,7 +1271,7 @@ GtkWidget* create_imadj_dialog (void)
   g_object_ref (gamma_spin);
   g_object_set_data_full (G_OBJECT (imadj_dialog), "gamma_spin", gamma_spin,
                             (GDestroyNotify) g_object_unref);
-  gtk_widget_set_size_request (GTK_WIDGET(&(GTK_SPIN_BUTTON(gamma_spin)->entry)), 60, 0);
+  gtk_widget_set_size_request (GTK_WIDGET(&(GTK_SPIN_BUTTON(gamma_spin)->entry)), 60, -1);
   gtk_widget_show (gamma_spin);
   gtk_box_pack_start (GTK_BOX (hbox2), gamma_spin, FALSE, TRUE, 0);
 
@@ -1289,7 +1289,7 @@ GtkWidget* create_imadj_dialog (void)
   g_object_ref (toe_spin);
   g_object_set_data_full (G_OBJECT (imadj_dialog), "toe_spin", toe_spin,
                             (GDestroyNotify) g_object_unref);
-  gtk_widget_set_size_request(GTK_WIDGET(&(GTK_SPIN_BUTTON(toe_spin)->entry)), 60, 0);
+  gtk_widget_set_size_request(GTK_WIDGET(&(GTK_SPIN_BUTTON(toe_spin)->entry)), 60, -1);
   gtk_widget_show (toe_spin);
   gtk_box_pack_start (GTK_BOX (hbox2), toe_spin, FALSE, FALSE, 0);
 
@@ -1307,7 +1307,7 @@ GtkWidget* create_imadj_dialog (void)
   g_object_ref (offset_spin);
   g_object_set_data_full (G_OBJECT (imadj_dialog), "offset_spin", offset_spin,
                             (GDestroyNotify) g_object_unref);
-  gtk_widget_set_size_request(GTK_WIDGET(&(GTK_SPIN_BUTTON(offset_spin)->entry)), 60, 0);
+  gtk_widget_set_size_request(GTK_WIDGET(&(GTK_SPIN_BUTTON(offset_spin)->entry)), 60, -1);
   gtk_widget_show (offset_spin);
   gtk_box_pack_start (GTK_BOX (hbox2), offset_spin, FALSE, TRUE, 0);
 
