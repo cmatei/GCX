@@ -1748,7 +1748,7 @@ create_wcs_edit (void)
   g_object_set_data_full (G_OBJECT (wcs_edit), "fixed1", fixed1,
                             (GDestroyNotify) g_object_unref);
   gtk_container_add (GTK_CONTAINER (frame16), fixed1);
-  gtk_fixed_set_has_window(GTK_FIXED(fixed1), TRUE);
+  gtk_widget_set_has_window(GTK_WIDGET(fixed1), TRUE);
   gtk_widget_show (fixed1);
 
   wcs_step_button = gtk_toggle_button_new_with_label ("x1");
@@ -1757,7 +1757,6 @@ create_wcs_edit (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (wcs_step_button);
   gtk_fixed_put (GTK_FIXED (fixed1), wcs_step_button, 32, 32);
-  gtk_widget_set_uposition (wcs_step_button, 32, 32);
   gtk_widget_set_size_request (wcs_step_button, 24, 24);
   gtk_widget_set_tooltip_text (wcs_step_button, "Change step size");
 
@@ -1767,7 +1766,6 @@ create_wcs_edit (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (wcs_rot_inc_button);
   gtk_fixed_put (GTK_FIXED (fixed1), wcs_rot_inc_button, 64, 72);
-  gtk_widget_set_uposition (wcs_rot_inc_button, 64, 72);
   gtk_widget_set_size_request (wcs_rot_inc_button, 24, 24);
   gtk_widget_set_tooltip_text (wcs_rot_inc_button, "Increase rotation");
 
@@ -1777,7 +1775,6 @@ create_wcs_edit (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (wcs_rot_dec_button);
   gtk_fixed_put (GTK_FIXED (fixed1), wcs_rot_dec_button, 0, 72);
-  gtk_widget_set_uposition (wcs_rot_dec_button, 0, 72);
   gtk_widget_set_size_request (wcs_rot_dec_button, 24, 24);
   gtk_widget_set_tooltip_text (wcs_rot_dec_button, "Decrease rotation");
 
@@ -1787,7 +1784,6 @@ create_wcs_edit (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (wcs_north_button);
   gtk_fixed_put (GTK_FIXED (fixed1), wcs_north_button, 32, 0);
-  gtk_widget_set_uposition (wcs_north_button, 32, 0);
   gtk_widget_set_size_request (wcs_north_button, 24, 24);
   gtk_widget_set_tooltip_text (wcs_north_button, "Move WCS north by amount of arcsec/pixel down");
 
@@ -1797,7 +1793,6 @@ create_wcs_edit (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (wcs_south_button);
   gtk_fixed_put (GTK_FIXED (fixed1), wcs_south_button, 32, 64);
-  gtk_widget_set_uposition (wcs_south_button, 32, 64);
   gtk_widget_set_size_request (wcs_south_button, 24, 24);
   gtk_widget_set_tooltip_text (wcs_south_button, "Move WCS south by amount of arcsec/pixel down");
 
@@ -1807,7 +1802,6 @@ create_wcs_edit (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (wcs_west_button);
   gtk_fixed_put (GTK_FIXED (fixed1), wcs_west_button, 64, 32);
-  gtk_widget_set_uposition (wcs_west_button, 64, 32);
   gtk_widget_set_size_request (wcs_west_button, 24, 24);
   gtk_widget_set_tooltip_text (wcs_west_button, "Move WCS west by amount of arcsec/pixel right");
 
@@ -1817,7 +1811,6 @@ create_wcs_edit (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (wcs_east_button);
   gtk_fixed_put (GTK_FIXED (fixed1), wcs_east_button, 0, 32);
-  gtk_widget_set_uposition (wcs_east_button, 0, 32);
   gtk_widget_set_size_request (wcs_east_button, 24, 24);
   gtk_widget_set_tooltip_text (wcs_east_button, "Move WCS east by amount of arcsec/pixel right");
 
