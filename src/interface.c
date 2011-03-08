@@ -2345,14 +2345,12 @@ create_image_processing (void)
   GtkWidget *blur_checkb;
   GtkWidget *frame11;
   GtkWidget *hbox23;
-  GtkWidget *demosaic_method_optmenu;
-  GtkWidget *demosaic_method_optmenu_menu;
+  GtkWidget *demosaic_method_combo;
   GtkWidget *demosaic_checkb;
   GtkWidget *frame8;
   GtkWidget *hbox20;
   GtkWidget *table26;
-  GtkWidget *stack_method_optmenu;
-  GtkWidget *stack_method_optmenu_menu;
+  GtkWidget *stack_method_combo;
   GtkObject *stack_sigmas_spin_adj;
   GtkWidget *stack_sigmas_spin;
   GtkObject *stack_iter_spin_adj;
@@ -2393,7 +2391,11 @@ create_image_processing (void)
   gtk_widget_show (notebook3);
   gtk_container_add (GTK_CONTAINER (image_processing), notebook3);
   gtk_notebook_set_tab_pos (GTK_NOTEBOOK (notebook3), GTK_POS_BOTTOM);
-  gtk_notebook_set_tab_hborder (GTK_NOTEBOOK (notebook3), 16);
+
+  /* Looks a bit ugly without, but it's deprecated, of course.
+
+     gtk_notebook_set_tab_hborder (GTK_NOTEBOOK (notebook3), 16);
+  */
 
   vbox19 = gtk_vbox_new (FALSE, 0);
   g_object_ref (vbox19);
@@ -2759,15 +2761,14 @@ create_image_processing (void)
   gtk_widget_show (hbox23);
   gtk_container_add (GTK_CONTAINER (frame11), hbox23);
 
-  demosaic_method_optmenu = gtk_option_menu_new ();
-  g_object_ref (demosaic_method_optmenu);
-  g_object_set_data_full (G_OBJECT (image_processing), "demosaic_method_optmenu", demosaic_method_optmenu,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (demosaic_method_optmenu);
-  gtk_box_pack_start (GTK_BOX (hbox23), demosaic_method_optmenu, TRUE, TRUE, 0);
-  gtk_widget_set_tooltip_text (demosaic_method_optmenu, "Demosaic method (when applying Bayer matrix)");
-  demosaic_method_optmenu_menu = gtk_menu_new ();
-  gtk_option_menu_set_menu (GTK_OPTION_MENU (demosaic_method_optmenu), demosaic_method_optmenu_menu);
+  demosaic_method_combo = gtk_combo_box_entry_new_text ();
+  g_object_ref (demosaic_method_combo);
+  g_object_set_data_full (G_OBJECT (image_processing), "demosaic_method_combo", demosaic_method_combo,
+			  (GDestroyNotify) g_object_unref);
+  g_object_set_data (G_OBJECT(demosaic_method_combo), "demosaic_method_combo_nvals", GINT_TO_POINTER(0));
+  gtk_widget_show (demosaic_method_combo);
+  gtk_box_pack_start (GTK_BOX (hbox23), demosaic_method_combo, TRUE, TRUE, 0);
+  gtk_widget_set_tooltip_text (demosaic_method_combo, "Demosaic method (when applying Bayer matrix)");
 
   demosaic_checkb = gtk_check_button_new_with_label ("Enable");
   g_object_ref (demosaic_checkb);
@@ -2887,17 +2888,17 @@ create_image_processing (void)
   gtk_box_pack_start (GTK_BOX (hbox20), table26, TRUE, TRUE, 3);
   gtk_table_set_col_spacings (GTK_TABLE (table26), 6);
 
-  stack_method_optmenu = gtk_option_menu_new ();
-  g_object_ref (stack_method_optmenu);
-  g_object_set_data_full (G_OBJECT (image_processing), "stack_method_optmenu", stack_method_optmenu,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (stack_method_optmenu);
-  gtk_table_attach (GTK_TABLE (table26), stack_method_optmenu, 0, 1, 0, 1,
+  stack_method_combo = gtk_combo_box_entry_new_text ();
+  g_object_ref (stack_method_combo);
+  g_object_set_data_full (G_OBJECT (image_processing), "stack_method_combo", stack_method_combo,
+			  (GDestroyNotify) g_object_unref);
+
+  g_object_set_data (G_OBJECT(stack_method_combo), "stack_method_combo_nvals", GINT_TO_POINTER(0));
+  gtk_widget_show (stack_method_combo);
+  gtk_table_attach (GTK_TABLE (table26), stack_method_combo, 0, 1, 0, 1,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
-  gtk_widget_set_tooltip_text (stack_method_optmenu, "Stacking method");
-  stack_method_optmenu_menu = gtk_menu_new ();
-  gtk_option_menu_set_menu (GTK_OPTION_MENU (stack_method_optmenu), stack_method_optmenu_menu);
+  gtk_widget_set_tooltip_text (stack_method_combo, "Stacking method");
 
   stack_sigmas_spin_adj = gtk_adjustment_new (10, 0.5, 10, 0.25, 10, 0);
   stack_sigmas_spin = gtk_spin_button_new (GTK_ADJUSTMENT (stack_sigmas_spin_adj), 1, 1);
