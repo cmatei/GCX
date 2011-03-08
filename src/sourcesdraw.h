@@ -20,12 +20,12 @@ struct gui_star {
 	double size;	/* half-size of marker in pixels at zoom=1 */
 	int flags;	/* flags (selection, type, etc) */
 	struct label label;
-	struct gui_star *pair; /* pointer to this star's pair 
+	struct gui_star *pair; /* pointer to this star's pair
 				* pair is unref'd when gui_star is deleted */
-	void * s; 	/* pointer to a star structure. The exact type of this is 
+	void * s; 	/* pointer to a star structure. The exact type of this is
 			 * determined by the flags TYPE field, and could be a
-			 * struct star, struct cat_star, or other yet undefined type 
-			 * a structure pointed here should be dynamically allocated 
+			 * struct star, struct cat_star, or other yet undefined type
+			 * a structure pointed here should be dynamically allocated
 			 * with g_malloc or similar, and ref_counted. When gui_star
 			 * is deleted, star is unref'd */
 };
@@ -48,7 +48,7 @@ struct gui_star {
 #define STAR_TYPE_ALIGN 0x06 /* a star used for frame alignment */
 
 #define DEFAULT_MAX_SIZE 100
-/* structure holding the gui_star list and general parameters for their display */ 
+/* structure holding the gui_star list and general parameters for their display */
 struct gui_star_list {
 	int ref_count;
 	GdkColor selected_color; /* color we paint the selected stars with */
@@ -61,7 +61,7 @@ struct gui_star_list {
 		       * and check closely for selection */
 	GSList *sl;	/* the star list. When gui_star_list is deleted, all elements of
 			 * sl are unref's and the list is freed */
-}; 
+};
 
 #define STAR_SHAPE_CIRCLE 0
 #define STAR_SHAPE_SQUARE 1
@@ -96,7 +96,9 @@ struct gui_star_list {
 /* from sourcesdraw.c */
 void gsl_unselect_all(GtkWidget *window);
 extern void find_stars_cb(gpointer window, guint action, GtkWidget *menu_item);
-extern void draw_sources_hook(GtkWidget *darea, GtkWidget *window, 
+extern void stars_add_detect_action (GtkAction *action, gpointer data);
+
+extern void draw_sources_hook(GtkWidget *darea, GtkWidget *window,
 			      GdkRectangle *area);
 extern void toggle_selection(GtkWidget *window, GSList *stars);
 extern void single_selection(GtkWidget *window, GSList *stars);
@@ -132,16 +134,16 @@ void star_edit_cb(gpointer window, guint action, GtkWidget *menu_item);
 
 /* starlist.c */
 
-int add_cat_stars(struct cat_star **catsl, int n, 
+int add_cat_stars(struct cat_star **catsl, int n,
 		  struct gui_star_list *gsl, struct wcs *wcs);
 void remove_stars_of_type(struct gui_star_list *gsl, int type_mask, int flag_mask);
-int add_star_from_frame_header(struct ccd_frame *fr, 
+int add_star_from_frame_header(struct ccd_frame *fr,
 			       struct gui_star_list *gsl, struct wcs *wcs);
 void remove_pair_from(struct gui_star *gs);
 void remove_star(struct gui_star_list *gsl, struct gui_star *gs);
 int remove_off_frame_stars(gpointer window);
 void remove_stars_of_type_window(GtkWidget *window, int type_mask, int flag_mask);
-int merge_cat_stars(struct cat_star **catsl, int n, 
+int merge_cat_stars(struct cat_star **catsl, int n,
 		    struct gui_star_list *gsl, struct wcs *wcs);
 int merge_cat_star_list_to_window(gpointer window, GList *addsl);
 struct gui_star *find_window_gs_by_cats_name(GtkWidget *window, char *name);

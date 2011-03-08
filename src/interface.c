@@ -3489,7 +3489,7 @@ create_guide_window (void)
   gtk_widget_show (guide_dark);
   gtk_box_pack_start (GTK_BOX (vbox32), guide_dark, FALSE, FALSE, 0);
 
-  guide_find_star = gtk_button_new_with_label ("_Guide Star");
+  guide_find_star = gtk_button_new_with_mnemonic ("_Guide Star");
   guide_find_star_key = gtk_label_get_mnemonic_keyval (GTK_LABEL (GTK_BIN (guide_find_star)->child));
 
   gtk_widget_add_accelerator (guide_find_star, "clicked", accel_group,
@@ -3541,17 +3541,13 @@ create_guide_window (void)
   gtk_combo_box_append_text (GTK_COMBO_BOX (guide_exp_combo), "2");
   gtk_combo_box_append_text (GTK_COMBO_BOX (guide_exp_combo), "4");
 
-  //gtk_combo_box_set_active(GTK_COMBO_BOX (guide_exp_combo), 0);
-
   guide_exp_combo_entry = GTK_WIDGET (GTK_BIN(guide_exp_combo)->child);
   g_object_ref (guide_exp_combo_entry);
   g_object_set_data_full (G_OBJECT (guide_window), "guide_exp_combo_entry", guide_exp_combo_entry,
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (guide_exp_combo_entry);
-  gtk_widget_set_size_request (guide_exp_combo_entry, 64, -2);
+  gtk_widget_set_size_request (guide_exp_combo_entry, 64, -1);
   gtk_entry_set_text (GTK_ENTRY (guide_exp_combo_entry), "2");
-
-
 
   guide_options = gtk_button_new_with_label ("Options");
   g_object_ref (guide_options);

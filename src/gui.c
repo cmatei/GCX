@@ -333,6 +333,26 @@ void star_rm_cb(gpointer data, guint action, GtkWidget *menu_item)
 	}
 }
 
+void stars_rm_all_action (GtkAction *action, gpointer window)
+{
+	star_rm_cb (window, STAR_RM_ALL, NULL);
+}
+
+void stars_rm_selected_action (GtkAction *action, gpointer window)
+{
+	star_rm_cb (window, STAR_RM_SEL, NULL);
+}
+
+void stars_rm_user_action (GtkAction *action, gpointer window)
+{
+	star_rm_cb (window, STAR_RM_USER, NULL);
+}
+
+void stars_rm_detected_action (GtkAction *action, gpointer window)
+{
+	star_rm_cb (window, STAR_RM_FR, NULL);
+}
+
 static GtkItemFactoryEntry star_popup_menu_items[] = {
 	{"/_Edit Star", NULL, star_popup_cb, STARP_EDIT_AP, "<Item>"},
 //	{"/Make _Std Star", NULL, star_popup_cb, STARP_MAKE_STD, "<Item>"},

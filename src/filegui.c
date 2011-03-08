@@ -808,6 +808,21 @@ void file_popup_cb(gpointer data, guint action, GtkWidget *menu_item)
 
 }
 
+void file_open_action(GtkAction *action, gpointer data)
+{
+	file_popup_cb (data, FILE_OPEN, NULL);
+}
+
+void file_save_action(GtkAction *action, gpointer data)
+{
+	file_popup_cb (data, FILE_SAVE_AS, NULL);
+}
+
+void file_export_pnm8_action(GtkAction *action, gpointer data)
+{
+	file_popup_cb (data, FILE_EXPORT_PNM8, NULL);
+}
+
 /* return the first filename matching pattern that is found in path,
    or null if it couldn't be found */
 char *find_file_in_path(char *pattern, char *path)

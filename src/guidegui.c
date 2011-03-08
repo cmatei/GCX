@@ -44,67 +44,48 @@
 
 #define GUIDE_BOX_SIZE 96 	/* size of guide box */
 
-extern GSList *detect_frame_stars(struct ccd_frame *fr);
+/* name, stock id, label, accel, tooltip, callback */
+static GtkActionEntry guide_menu_actions[] = {
+	{ "guide-file",   NULL, "_File"  },
+	{ "guide-image",  NULL, "_Image" },
+	{ "guide-stars",  NULL, "_Stars" },
+	{ "guide-export", NULL, "_Export Image" },
+	{ "guide-set-contrast", NULL, "Set _Contrast" },
 
-static GtkItemFactoryEntry guide_image_menu_items[] = {
-	{ "/_File",		NULL,         	NULL,  		0, "<Branch>" },
-/*  	{ "/File/tear",  	NULL,         	NULL,  		0, "<Tearoff>" }, */
-//	{ "/File/_New Frame",	"<control>n", 	new_frame_cb, 	0, "<Item>" },
-	{ "/File/_Open Fits",	"<control>o", 	file_popup_cb, 	FILE_OPEN, "<Item>" },
-//	{ "/File/_Close",	"<control>c", 	file_popup_cb, 	FILE_CLOSE, "<Item>" },
+	/* File */
+	{ "guide-open", NULL, "_Open Fits", "<control>O", NULL, G_CALLBACK (file_open_action) },
+	{ "guide-save", NULL, "_Save Fits As...", "<control>S", NULL, G_CALLBACK (file_save_action) },
+	{ "guide-export-pnm8", NULL, "_8-bit pnm", NULL, NULL, G_CALLBACK (file_export_pnm8_action) },
 
-	{ "/File/sep",		NULL,         	NULL,  		0, "<Separator>" },
-	{ "/File/_Save Fits As...", "<control>s", file_popup_cb, FILE_SAVE_AS, "<Item>" },
-	{ "/File/_Export Image",	NULL, 	NULL, 	0, "<Branch>" },
-	{ "/File/_Export Image/_8-bit pnm", NULL, file_popup_cb, FILE_EXPORT_PNM8, "<Item>" },
-	{ "/File/sep",		NULL,         	NULL,  		0, "<Separator>" },
-//	{ "/File/_Quit",	"<control>Q", 	user_quit_action, 0, "<Item>" },
+	/* Image */
+	{ "guide-curves", NULL, "Curves&Histogram...", "C", NULL, G_CALLBACK (histogram_action) },
+	{ "guide-zoom-in", NULL, "Zoom _In", "equal", NULL, G_CALLBACK (view_zoom_in_action) },
+	{ "guide-zoom-out", NULL, "Zoom _Out", "minus", NULL, G_CALLBACK (view_zoom_out_action) },
+	{ "guide-zoom-pixels", NULL, "Actual _Pixels", "bracketright", NULL, G_CALLBACK (view_pixels_action) },
+	{ "guide-pan-center", NULL, "Pan _Center", "<control>L", NULL, G_CALLBACK (view_pan_center_action) },
+	{ "guide-pan-cursor", NULL, "_Pan Cursor", "space", NULL, G_CALLBACK (view_pan_cursor_action) },
+	{ "guide-cuts-auto", NULL, "_Auto Cuts", "0", NULL, G_CALLBACK (cuts_auto_action) },
+	{ "guide-cuts-minmax", NULL, "_Min-Max Cuts", "9", NULL, G_CALLBACK (cuts_minmax_action) },
+	{ "guide-cuts-flatter", NULL, "_Flatter", "F", NULL, G_CALLBACK (cuts_flatter_action) },
+	{ "guide-cuts-sharper", NULL, "S_harper", "H", NULL, G_CALLBACK (cuts_sharper_action) },
+	{ "guide-cuts-brighter", NULL, "_Brighter", "B", NULL, G_CALLBACK (cuts_brighter_action) },
+	{ "guide-cuts-darker", NULL, "_Darker", "D", NULL, G_CALLBACK (cuts_darker_action) },
+	{ "guide-cuts-1", NULL, "_4 sigma", "1", NULL, G_CALLBACK (cuts_contrast_1_action) },
+	{ "guide-cuts-2", NULL, "5_.6 sigma", "2", NULL, G_CALLBACK (cuts_contrast_2_action) },
+	{ "guide-cuts-3", NULL, "_8 sigma", "3", NULL, G_CALLBACK (cuts_contrast_3_action) },
+	{ "guide-cuts-4", NULL, "_11 sigma", "4", NULL, G_CALLBACK (cuts_contrast_4_action) },
+	{ "guide-cuts-5", NULL, "1_6 sigma", "5", NULL, G_CALLBACK (cuts_contrast_5_action) },
+	{ "guide-cuts-6", NULL, "22 _sigma", "6", NULL, G_CALLBACK (cuts_contrast_6_action) },
+	{ "guide-cuts-7", NULL, "45 s_igma", "7", NULL, G_CALLBACK (cuts_contrast_7_action) },
+	{ "guide-cuts-8", NULL, "90 si_gma", "8", NULL, G_CALLBACK (cuts_contrast_8_action) },
+	{ "guide-cuts-minmax", NULL, "_Min-Max", NULL, NULL, G_CALLBACK (cuts_minmax_action) },
 
-
-	{ "/_Image",      	NULL,   	NULL, 		0, "<Branch>" },
-	{ "/Image/tear",  	NULL,   	NULL,  		0, "<Tearoff>" },
-//	{ "/Image/_Show Stats",  	"s",    	stats_cb,       1, "<Item>" },
-	{ "/Image/sep",		NULL,   	NULL,  		0, "<Separator>" },
-	{ "/Image/Curves&Histogram...",  "c", 	histogram_cb, 1, "<Item>" },
-	{ "/Image/sep",		NULL,   	NULL,  		0, "<Separator>" },
-	{ "/Image/Zoom _In",  	"equal",    	view_option_cb, VIEW_ZOOM_IN, "<Item>" },
-	{ "/Image/Zoom _Out",  	"minus",	view_option_cb, VIEW_ZOOM_OUT, "<Item>" },
-//	{ "/Image/Zoom A_ll", 	"bracketleft", view_option_cb, VIEW_ZOOM_FIT, "<Item>" },
-	{ "/Image/Actual _Pixels", "bracketright", view_option_cb, VIEW_PIXELS, "<Item>" },
-	{ "/Image/sep1",		NULL,   	NULL,  		0, "<Separator>" },
-	{ "/Image/Pan _Center",	"<control>l",	view_option_cb, VIEW_PAN_CENTER, "<Item>" },
-	{ "/Image/_Pan Cursor",	"space", view_option_cb, VIEW_PAN_CURSOR, "<Item>" },
-	{ "/Image/sep2",		NULL,   	NULL,  		0, "<Separator>" },
-	{ "/Image/_Auto Cuts", 	"0",		cuts_option_cb, CUTS_AUTO, "<Item>" },
-	{ "/Image/_Min-Max Cuts", "9",		cuts_option_cb, CUTS_MINMAX, "<Item>" },
-	{ "/Image/_Flatter", 	"f",		cuts_option_cb, CUTS_FLATTER, "<Item>" },
-	{ "/Image/S_harper", 	"h",		cuts_option_cb, CUTS_SHARPER, "<Item>" },
-	{ "/Image/_Brighter", 	"b",		cuts_option_cb, CUTS_BRIGHTER, "<Item>" },
-	{ "/Image/_Darker", 	"d",		cuts_option_cb, CUTS_DARKER, "<Item>" },
-
-	{ "/Image/Set _Contrast", NULL, 		NULL, 		0, "<Branch>" },
-	{ "/Image/Set Contrast/_4 sigma", "1", 	cuts_option_cb, CUTS_CONTRAST|1, "<Item>" },
-	{ "/Image/Set Contrast/5_.6 sigma", "2", cuts_option_cb, CUTS_CONTRAST|2, "<Item>" },
-	{ "/Image/Set Contrast/_8 sigma", "3", 	cuts_option_cb, CUTS_CONTRAST|3, "<Item>" },
-	{ "/Image/Set Contrast/_11 sigma", "4", cuts_option_cb, CUTS_CONTRAST|4, "<Item>" },
-	{ "/Image/Set Contrast/1_6 sigma", "5", cuts_option_cb, CUTS_CONTRAST|5, "<Item>" },
-	{ "/Image/Set Contrast/22 _sigma", "6", cuts_option_cb, CUTS_CONTRAST|6, "<Item>" },
-	{ "/Image/Set Contrast/45 s_igma", "7", cuts_option_cb, CUTS_CONTRAST|7, "<Item>" },
-	{ "/Image/Set Contrast/90 si_gma", "8", cuts_option_cb, CUTS_CONTRAST|8, "<Item>" },
-	{ "/Image/Set Contrast/_Min-Max", NULL, 	cuts_option_cb, CUTS_MINMAX, "<Item>" },
-
-	{ "/_Stars",      	NULL,   	NULL, 		0, "<Branch>" },
-	{ "/Stars/tear",  	NULL,   	NULL,  		0, "<Tearoff>" },
-	{ "/Stars/_Detect Sources",  "s", find_stars_cb, ADD_STARS_DETECT, "<Item>" },
-//	{ "/Stars/sep",		NULL,         	NULL,  		0, "<Separator>" },
-//	{ "/Stars/_Mark Stars", NULL, selection_mode_cb, SEL_ACTION_MARK_STARS, "<Item>" },
-//	{ "/Stars/Reset Sel Mode", "Escape", selection_mode_cb, SEL_ACTION_NORMAL, "<Item>" },
-//	{ "/Stars/Show _Sources",  NULL,	NULL,  		0, "<CheckItem>" },
-	{ "/Stars/sep",		NULL,         	NULL,  		0, "<Separator>" },
-	{ "/Stars/Remove Selecte_d",  "<control>d", star_rm_cb, STAR_RM_SEL, "<Item>" },
-	{ "/Stars/Remove _Detected Stars", "<shift>s", star_rm_cb, STAR_RM_FR, "<Item>" },
-	{ "/Stars/Remove _User Stars",  "<shift>u", star_rm_cb, STAR_RM_USER, "<Item>" },
-	{ "/Stars/Remove _All", "<shift>a",	star_rm_cb, STAR_RM_ALL, "<Item>" },
+	/* Stars */
+	{ "guide-stars-add-detect",  NULL, "_Detect Sources",        "S",          NULL, G_CALLBACK (stars_add_detect_action)  },
+	{ "guide-stars-rm-selected", NULL, "Remove Selecte_d",       "<control>D", NULL, G_CALLBACK (stars_rm_selected_action) },
+	{ "guide-stars-rm-detected", NULL, "Remove _Detected Stars", "<shift>S",   NULL, G_CALLBACK (stars_rm_detected_action) },
+	{ "guide-stars-rm-user",     NULL, "Remove _User Stars",     "<shift>U",   NULL, G_CALLBACK (stars_rm_user_action)     },
+	{ "guide-stars-rm-all",      NULL, "Remove _All",            "<shift>A",   NULL, G_CALLBACK (stars_rm_detected_action) },
 };
 
 gboolean guide_window_delete(GtkWidget *widget, GdkEvent *event, gpointer data)
@@ -117,24 +98,34 @@ gboolean guide_window_delete(GtkWidget *widget, GdkEvent *event, gpointer data)
 static GtkWidget *get_main_menu_bar(GtkWidget *window)
 {
 	GtkWidget *ret;
-	GtkItemFactory *item_factory;
-	GtkAccelGroup *accel_group;
-	gint nmenu_items = sizeof (guide_image_menu_items) /
-		sizeof (guide_image_menu_items[0]);
-	accel_group = gtk_accel_group_new ();
+	GtkUIManager *ui;
+	GError *error;
+	GtkActionGroup *action_group;
 
-	item_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR,
-					     "<main_menu>", accel_group);
-	g_object_set_data_full(G_OBJECT(window), "main_menu_if", item_factory,
-				 (GDestroyNotify) g_object_unref);
-	gtk_item_factory_create_items (item_factory, nmenu_items,
-				       guide_image_menu_items, window);
+	action_group = gtk_action_group_new ("GuideActions");
+	gtk_action_group_add_actions (action_group, guide_menu_actions,
+				      G_N_ELEMENTS (guide_menu_actions), window);
 
-  /* Attach the new accelerator group to the window. */
-	gtk_window_add_accel_group (GTK_WINDOW (window), accel_group);
+	ui = gtk_ui_manager_new ();
+	gtk_ui_manager_insert_action_group (ui, action_group, 0);
 
-    /* Finally, return the actual menu bar created by the item factory. */
-	ret = gtk_item_factory_get_widget (item_factory, "<main_menu>");
+	error = NULL;
+	gtk_ui_manager_add_ui_from_file (ui, "menus.ui", &error);
+	if (error) {
+		g_message ("building menus failed: %s", error->message);
+		g_error_free (error);
+		return NULL;
+	}
+
+	ret = gtk_ui_manager_get_widget (ui, "/guide-menubar");
+
+        /* Make sure that the accelerators work */
+	gtk_window_add_accel_group (GTK_WINDOW (window),
+				    gtk_ui_manager_get_accel_group (ui));
+
+	g_object_ref (ret);
+	g_object_unref (ui);
+
 	return ret;
 }
 

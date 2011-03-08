@@ -487,6 +487,31 @@ void view_option_cb(gpointer window, guint action, GtkWidget *menu_item)
 	show_zoom_cuts(window);
 }
 
+void view_zoom_in_action (GtkAction *action, gpointer data)
+{
+	view_option_cb (data, VIEW_ZOOM_IN, NULL);
+}
+
+void view_zoom_out_action (GtkAction *action, gpointer data)
+{
+	view_option_cb (data, VIEW_ZOOM_OUT, NULL);
+}
+
+void view_pixels_action (GtkAction *action, gpointer data)
+{
+	view_option_cb (data, VIEW_PIXELS, NULL);
+}
+
+void view_pan_center_action (GtkAction *action, gpointer data)
+{
+	view_option_cb (data, VIEW_PAN_CENTER, NULL);
+}
+
+void view_pan_cursor_action (GtkAction *action, gpointer data)
+{
+	view_option_cb (data, VIEW_PAN_CURSOR, NULL);
+}
+
 /*
  * display image stats in status bar
  * does not use action or menu_item
@@ -951,29 +976,74 @@ void imadj_lut_updated (GtkWidget *spinbutton, gpointer dialog)
 
 }
 
-static void cuts_brighter_cb(GtkWidget *button, gpointer window)
+void cuts_brighter_action(GtkAction *action, gpointer window)
 {
 	cuts_option_cb(window, CUTS_BRIGHTER, NULL);
 }
-static void cuts_auto_cb(GtkWidget *button, gpointer window)
+
+void cuts_auto_action(GtkAction *action, gpointer window)
 {
 	cuts_option_cb(window, CUTS_AUTO, NULL);
 }
-static void cuts_min_max_cb(GtkWidget *button, gpointer window)
+
+void cuts_minmax_action(GtkAction *action, gpointer window)
 {
 	cuts_option_cb(window, CUTS_MINMAX, NULL);
 }
-static void cuts_darker_cb(GtkWidget *button, gpointer window)
+
+void cuts_darker_action(GtkAction *action, gpointer window)
 {
 	cuts_option_cb(window, CUTS_DARKER, NULL);
 }
-static void cuts_duller_cb(GtkWidget *button, gpointer window)
+
+void cuts_flatter_action(GtkAction *action, gpointer window)
 {
 	cuts_option_cb(window, CUTS_FLATTER, NULL);
 }
-static void cuts_sharper_cb(GtkWidget *button, gpointer window)
+
+void cuts_sharper_action(GtkAction *action, gpointer window)
 {
 	cuts_option_cb(window, CUTS_SHARPER, NULL);
+}
+
+void cuts_contrast_1_action (GtkAction *action, gpointer window)
+{
+	cuts_option_cb(window, CUTS_CONTRAST|1, NULL);
+}
+
+void cuts_contrast_2_action (GtkAction *action, gpointer window)
+{
+	cuts_option_cb(window, CUTS_CONTRAST|2, NULL);
+}
+
+void cuts_contrast_3_action (GtkAction *action, gpointer window)
+{
+	cuts_option_cb(window, CUTS_CONTRAST|3, NULL);
+}
+
+void cuts_contrast_4_action (GtkAction *action, gpointer window)
+{
+	cuts_option_cb(window, CUTS_CONTRAST|4, NULL);
+}
+
+void cuts_contrast_5_action (GtkAction *action, gpointer window)
+{
+	cuts_option_cb(window, CUTS_CONTRAST|5, NULL);
+}
+
+void cuts_contrast_6_action (GtkAction *action, gpointer window)
+{
+	cuts_option_cb(window, CUTS_CONTRAST|6, NULL);
+}
+
+void cuts_contrast_7_action (GtkAction *action, gpointer window)
+{
+	cuts_option_cb(window, CUTS_CONTRAST|7, NULL);
+}
+
+void cuts_contrast_8_action (GtkAction *action, gpointer window)
+{
+	cuts_option_cb(window, CUTS_CONTRAST|8, NULL);
 }
 
 void imadj_set_callbacks(GtkWidget *dialog)
@@ -1032,32 +1102,32 @@ void imadj_set_callbacks(GtkWidget *dialog)
 	button = g_object_get_data(G_OBJECT(dialog), "cuts_darker");
 	if (button != NULL) {
 		g_signal_connect(G_OBJECT(button), "clicked",
-			   G_CALLBACK (cuts_darker_cb), window);
+			   G_CALLBACK (cuts_darker_action), window);
 	}
 	button = g_object_get_data(G_OBJECT(dialog), "cuts_sharper");
 	if (button != NULL) {
 		g_signal_connect(G_OBJECT(button), "clicked",
-			   G_CALLBACK (cuts_sharper_cb), window);
+			   G_CALLBACK (cuts_sharper_action), window);
 	}
 	button = g_object_get_data(G_OBJECT(dialog), "cuts_duller");
 	if (button != NULL) {
 		g_signal_connect(G_OBJECT(button), "clicked",
-			   G_CALLBACK (cuts_duller_cb), window);
+			   G_CALLBACK (cuts_flatter_action), window);
 	}
 	button = g_object_get_data(G_OBJECT(dialog), "cuts_auto");
 	if (button != NULL) {
 		g_signal_connect(G_OBJECT(button), "clicked",
-			   G_CALLBACK (cuts_auto_cb), window);
+			   G_CALLBACK (cuts_auto_action), window);
 	}
 	button = g_object_get_data(G_OBJECT(dialog), "cuts_min_max");
 	if (button != NULL) {
 		g_signal_connect(G_OBJECT(button), "clicked",
-			   G_CALLBACK (cuts_min_max_cb), window);
+			   G_CALLBACK (cuts_minmax_action), window);
 	}
 	button = g_object_get_data(G_OBJECT(dialog), "cuts_brighter");
 	if (button != NULL) {
 		g_signal_connect(G_OBJECT(button), "clicked",
-			   G_CALLBACK (cuts_brighter_cb), window);
+			   G_CALLBACK (cuts_brighter_action), window);
 	}
 
 }
@@ -1134,6 +1204,11 @@ void histogram_cb(gpointer data, guint action, GtkWidget *menu_item)
 				 (GDestroyNotify)release_image_channel);
 	imadj_dialog_update(dialog);
 	imadj_dialog_edit(dialog);
+}
+
+void histogram_action(GtkAction *action, gpointer data)
+{
+	histogram_cb (data, 0, NULL);
 }
 
 /* from Glade */

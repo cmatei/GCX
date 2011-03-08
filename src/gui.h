@@ -225,23 +225,53 @@ void warning_beep(void);
 int err_printf_sb2(gpointer window, const char *fmt, ...);
 int info_printf_sb2(gpointer window, const char *fmt, ...);
 void star_pairs_cb(gpointer data, guint action, GtkWidget *menu_item);
-void star_rm_cb(gpointer data, guint action, GtkWidget *menu_item);
 int modal_yes_no(char *text, char *title);
 int modal_entry_prompt(char *text, char *title, char *initial, char **value);
 int window_auto_pairs(gpointer window);
 
+void star_rm_cb(gpointer data, guint action, GtkWidget *menu_item);
+void stars_rm_selected_action(GtkAction *action, gpointer data);
+void stars_rm_detected_action(GtkAction *action, gpointer data);
+void stars_rm_user_action(GtkAction *action, gpointer data);
+void stars_rm_all_action(GtkAction *action, gpointer data);
 
 /* from imadjust.c */
-extern void cuts_option_cb(gpointer data, guint action, GtkWidget *menu_item);
 extern void set_default_channel_cuts(struct image_channel* channel);
-extern void view_option_cb(gpointer data, guint action, GtkWidget *menu_item);
 extern void set_darea_size(GtkWidget *window, struct map_geometry *geom, double xc, double yc);
 extern void drag_adjust_cuts(GtkWidget *window, int dx, int dy);
 extern void pan_cursor(GtkWidget *window);
 extern void stats_cb(gpointer data, guint action, GtkWidget *menu_item);
 extern void show_region_stats(GtkWidget *window, double x, double y);
 extern void show_zoom_cuts(GtkWidget * window);
+
+extern void cuts_option_cb(gpointer data, guint action, GtkWidget *menu_item);
+
+extern void cuts_auto_action (GtkAction *action, gpointer data);
+extern void cuts_minmax_action (GtkAction *action, gpointer data);
+extern void cuts_flatter_action (GtkAction *action, gpointer data);
+extern void cuts_sharper_action (GtkAction *action, gpointer data);
+extern void cuts_brighter_action (GtkAction *action, gpointer data);
+extern void cuts_darker_action (GtkAction *action, gpointer data);
+extern void cuts_contrast_1_action (GtkAction *action, gpointer data);
+extern void cuts_contrast_2_action (GtkAction *action, gpointer data);
+extern void cuts_contrast_3_action (GtkAction *action, gpointer data);
+extern void cuts_contrast_4_action (GtkAction *action, gpointer data);
+extern void cuts_contrast_5_action (GtkAction *action, gpointer data);
+extern void cuts_contrast_6_action (GtkAction *action, gpointer data);
+extern void cuts_contrast_7_action (GtkAction *action, gpointer data);
+extern void cuts_contrast_8_action (GtkAction *action, gpointer data);
+
+extern void view_option_cb(gpointer data, guint action, GtkWidget *menu_item);
+
+extern void view_zoom_in_action (GtkAction *action, gpointer data);
+extern void view_zoom_out_action (GtkAction *action, gpointer data);
+extern void view_pixels_action (GtkAction *action, gpointer data);
+extern void view_pan_center_action (GtkAction *action, gpointer data);
+extern void view_pan_cursor_action (GtkAction *action, gpointer data);
+
+
 void histogram_cb(gpointer data, guint action, GtkWidget *menu_item);
+extern void histogram_action (GtkAction *action, gpointer data);
 
 /* paramsgui.c */
 void edit_options_cb(gpointer data, guint action, GtkWidget *menu_item);

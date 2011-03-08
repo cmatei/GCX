@@ -969,8 +969,6 @@ void image_box_to_cache(struct map_cache *cache, struct image_channel *channel,
 	area.width = w * zoom_in;
 	area.height = h * zoom_in;
 	update_cache(cache, &geom, channel, &area);
-
-
 }
 
 

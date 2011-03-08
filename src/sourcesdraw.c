@@ -610,7 +610,10 @@ void find_stars_cb(gpointer window, guint action, GtkWidget *menu_item)
 	gtk_widget_queue_draw(window);
 }
 
-
+void stars_add_detect_action(GtkAction *action, gpointer window)
+{
+	find_stars_cb (window, ADD_STARS_DETECT, NULL);
+}
 
 /*
  * check that the distance between the star and (bx, by) is less than maxd

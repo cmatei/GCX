@@ -174,6 +174,9 @@ static GtkWidget *get_main_menu_bar(GtkWidget *window)
 	gtk_window_add_accel_group (GTK_WINDOW (window),
 				    gtk_ui_manager_get_accel_group (ui));
 
+	g_object_ref (ret);
+	g_object_unref (ui);
+
 	return ret;
 }
 
