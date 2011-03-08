@@ -1149,9 +1149,7 @@ GtkWidget* create_imadj_dialog (void)
   GtkWidget *vbox2;
   GtkWidget *frame3;
   GtkWidget *hbox2;
-  GtkWidget *optionmenu1;
-  GtkWidget *optionmenu1_menu;
-  GtkWidget *glade_menuitem;
+  GtkWidget *channel_combo;
   GtkWidget *label3;
   GtkObject *gamma_spin_adj;
   GtkWidget *gamma_spin;
@@ -1245,17 +1243,14 @@ GtkWidget* create_imadj_dialog (void)
   gtk_widget_show (hbox2);
   gtk_container_add (GTK_CONTAINER (frame3), hbox2);
 
-  optionmenu1 = gtk_option_menu_new ();
-  g_object_ref (optionmenu1);
-  g_object_set_data_full (G_OBJECT (imadj_dialog), "optionmenu1", optionmenu1,
+  channel_combo = gtk_combo_box_new_text ();
+  g_object_ref (channel_combo);
+  g_object_set_data_full (G_OBJECT (imadj_dialog), "chanel_combo", channel_combo,
                             (GDestroyNotify) g_object_unref);
-  gtk_widget_show (optionmenu1);
-  gtk_box_pack_start (GTK_BOX (hbox2), optionmenu1, FALSE, FALSE, 0);
-  optionmenu1_menu = gtk_menu_new ();
-  glade_menuitem = gtk_menu_item_new_with_label (("Channel"));
-  gtk_widget_show (glade_menuitem);
-  gtk_menu_append (GTK_MENU (optionmenu1_menu), glade_menuitem);
-  gtk_option_menu_set_menu (GTK_OPTION_MENU (optionmenu1), optionmenu1_menu);
+  gtk_combo_box_append_text (GTK_COMBO_BOX(channel_combo), "Channel");
+  gtk_combo_box_set_active (GTK_COMBO_BOX(channel_combo), 0);
+  gtk_widget_show (channel_combo);
+  gtk_box_pack_start (GTK_BOX (hbox2), channel_combo, FALSE, FALSE, 0);
 
   label3 = gtk_label_new (("Gamma"));
   g_object_ref (label3);
