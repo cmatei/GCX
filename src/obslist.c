@@ -75,7 +75,7 @@ struct command {
 };
 
 static int obs_list_load_file(GtkWidget *dialog, char *name);
-static void obs_list_select_cb (GtkList *list, GtkWidget *widget, gpointer user_data);
+static void obs_list_select_cb (GtkTreeSelection *selection, gpointer dialog);
 static int lx_sync_to_obs(gpointer dialog);
 //static void obs_step_cb(GtkWidget *widget, gpointer data);
 
@@ -189,21 +189,33 @@ static int do_command(char *cmdline, GtkWidget *dialog)
 }
 
 
-/* return a copy of the i-th command string (the text in the label in the index'th
- * list child */
-static char *get_cmd_line(GtkList *list, int index)
+/* return a copy of the i-th command string */
+static char *get_cmd_line(GtkTreeModel *list, int index)
 {
-	GList *ilist = NULL, *cmd_el;
-	char *cmd = NULL;
+	GtkTreeIter iter;
+	char *cmd = NULL, *p;
 
-	ilist = gtk_container_children(GTK_CONTAINER(list));
-	cmd_el = g_list_nth(ilist, index);
-	if (cmd_el != NULL) {
-		gtk_label_get(GTK_LABEL(GTK_BIN(cmd_el->data)->child), &cmd);
-		cmd = strdup(cmd);
+	if (gtk_tree_model_iter_nth_child (list, &iter, NULL, index)) {
+		gtk_tree_model_get (list, &iter, 0, &p, -1);
+		cmd = strdup(p);
 	}
-	g_list_free(ilist);
+
 	return cmd;
+}
+
+/* sets selection at the i-th command string */
+static void select_cmd_line(GtkTreeView *view, int index)
+{
+	GtkTreeModel *list;
+	GtkTreeSelection *selection;
+	GtkTreeIter iter;
+
+	list = gtk_tree_view_get_model (view);
+	if (gtk_tree_model_iter_nth_child (list, &iter, NULL, index)) {
+		selection = gtk_tree_view_get_selection (view);
+
+		gtk_tree_selection_select_iter (selection, &iter);
+	}
 }
 
 /* change the state-machine state, and schedule that it be called */
@@ -272,7 +284,7 @@ static int do_filter_cmd (char *args, GtkWidget *dialog)
 	while (*filters != NULL) {
 		if (!strcasecmp(*filters, args)) {
 			combo = g_object_get_data(G_OBJECT(dialog), "obs_filter_combo");
-			gtk_list_select_item(GTK_LIST(GTK_COMBO(combo) -> list), i);
+			gtk_combo_box_set_active (GTK_COMBO_BOX(combo), i);
 			INDI_set_callback(INDI_COMMON (fwheel), FWHEEL_CALLBACK_DONE,
 			                  obs_list_cmd_done, dialog);
 			return OBS_CMD_RUNNING;
@@ -625,7 +637,7 @@ static int lx_sync_to_obs(gpointer dialog)
 }
 
 /* center item at index in window */
-static void center_selected(gpointer user_data, GtkList *list, int index)
+static void center_selected(gpointer user_data, int index)
 {
 	GtkWidget *scw;
 	GtkAdjustment *vadj;
@@ -647,10 +659,7 @@ static void center_selected(gpointer user_data, GtkList *list, int index)
 void obs_list_start_cb(GtkWidget *widget, gpointer data)
 {
 	GtkWidget *dialog = (GtkWidget *)data;
-	GtkWidget *list;
 
-	list = g_object_get_data(G_OBJECT(dialog), "list1");
-	g_return_if_fail(list != NULL);
 	if (get_named_checkb_val(dialog, "obs_list_run_button")) {
 		obs_list_set_state(dialog, OBS_DO_COMMAND);
 	}
@@ -663,21 +672,24 @@ void obs_list_start_cb(GtkWidget *widget, gpointer data)
 void obs_list_sm(GtkWidget *dialog)
 {
 	int index, all;
-	GtkWidget *list;
+	GtkTreeModel *list;
+	GtkTreeView *view;
 	char *cmd, *cmdo, *cmdh, *cmdho;
 	int cl, clo;
 	long state;
 
 	state = (long)g_object_get_data(G_OBJECT (dialog), "obs_list_state");
-	list = g_object_get_data(G_OBJECT(dialog), "list1");
+	list = g_object_get_data(G_OBJECT(dialog), "obs_list_store");
 	g_return_if_fail(list != NULL);
+	view = g_object_get_data(G_OBJECT(dialog), "obs_list_view");
+	g_return_if_fail(view != NULL);
 
 	d4_printf("obs_list_sm state: %d\n", state);
 	switch(state) {
 	case OBS_DO_COMMAND:
 		index = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(dialog), "index"));
 		obslist_background(dialog, OBSLIST_BACKGROUND_RUNNING);
-		cmd = get_cmd_line(GTK_LIST(list), index);
+		cmd = get_cmd_line(list, index);
 		d3_printf("Command: %s\n", cmd);
 //		state = OBS_CMD_WAIT;
 		state = do_command(cmd, dialog);
@@ -706,19 +718,19 @@ void obs_list_sm(GtkWidget *dialog)
 		status_message(dialog, last_err());
 		index = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(dialog), "index"));
 		all = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(dialog), "commands"));
-		cmdo = get_cmd_line(GTK_LIST(list), index);
+		cmdo = get_cmd_line(list, index);
 		clo = cmd_head(cmdo, &cmdho, NULL);
 		index ++;
 		while(index < all) {
-			cmd = get_cmd_line(GTK_LIST(list), index);
+			cmd = get_cmd_line(list, index);
 			cl = cmd_head(cmd, &cmdh, NULL);
 			if (cl == clo && !strncasecmp(cmdh, cmdho, cl)) {
 				obs_list_set_state(dialog, OBS_NEXT_COMMAND);
 				free(cmd);
 				break;
 			}
-			gtk_list_select_item(GTK_LIST(list), index);
-			center_selected(dialog, GTK_LIST(list), index);
+			select_cmd_line (view, index);
+			center_selected(dialog, index);
 			index ++;
 			d3_printf("skipping %s\n", cmd);
 			free(cmd);
@@ -752,8 +764,8 @@ void obs_list_sm(GtkWidget *dialog)
 			}
 			break;
 		}
-		gtk_list_select_item(GTK_LIST(list), index+1);
-		center_selected(dialog, GTK_LIST(list), index+1);
+		select_cmd_line(view, index + 1);
+		center_selected(dialog, index+1);
 		if (get_named_checkb_val(dialog, "obs_list_run_button")) {
 			obs_list_set_state(dialog, OBS_DO_COMMAND);
 		}
@@ -777,10 +789,18 @@ static void browse_cb( GtkWidget *widget, gpointer dialog)
 void obs_list_callbacks(GtkWidget *dialog)
 {
 	GtkWidget *combo;
-	set_named_callback(dialog, "list1", "select-child", obs_list_select_cb);
+
+	//set_named_callback(dialog, "obs_list_commands", "select-child", obs_list_select_cb);
+
+	GtkTreeView *view = g_object_get_data (G_OBJECT(dialog), "obs_list_view");
+	g_signal_connect (G_OBJECT(gtk_tree_view_get_selection(view)), "changed",
+			  G_CALLBACK(obs_list_select_cb), dialog);
+
 	set_named_callback(dialog, "obs_list_file_button", "clicked", browse_cb);
+
 	combo = g_object_get_data(G_OBJECT(dialog), "obs_list_fname_combo");
-	gtk_combo_disable_activate(GTK_COMBO(combo));
+	gtk_combo_box_set_button_sensitivity (GTK_COMBO_BOX(combo), GTK_SENSITIVITY_AUTO);
+
 	set_named_callback(dialog, "obs_list_run_button", "clicked", obs_list_start_cb);
 	set_named_callback(dialog, "obs_list_step_button", "clicked", obs_list_start_cb);
 
@@ -812,16 +832,25 @@ void obs_list_select_file_cb(GtkWidget *widget, gpointer data)
 }
 
 
-static void obs_list_select_cb (GtkList *list, GtkWidget *widget, gpointer user_data)
+static void obs_list_select_cb (GtkTreeSelection *selection, gpointer dialog)
 {
-	char *text;
-	int index, all;
+	GtkTreeModel *model = NULL;
+	GtkTreeIter iter;
+	GtkTreePath *path;
+	int *indices, index, all;
+	char *text = NULL;
 
-	gtk_label_get(GTK_LABEL(GTK_BIN(widget)->child), &text);
-	index = gtk_list_child_position(list, widget);
-	g_object_set_data(G_OBJECT(user_data), "index", GINT_TO_POINTER(index));
-	all = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(user_data), "commands"));
-	d3_printf("obslist cmd[%d/%d]: %s\n", index, all, text);
+	gtk_tree_selection_get_selected (selection, &model, &iter);
+	gtk_tree_model_get (model, &iter, 0, &text, -1);
+	path = gtk_tree_model_get_path (model, &iter);
+	indices = gtk_tree_path_get_indices (path);
+	index = indices[0];
+	gtk_tree_path_free (path);
+
+	g_object_set_data (G_OBJECT(dialog), "index", GINT_TO_POINTER(index));
+	all = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(dialog), "commands"));
+
+	d3_printf("obslist cmd [%d/%d]: %s\n", index, all, text);
 }
 
 /* load a obs list file into the obslist dialog
@@ -829,21 +858,25 @@ static void obs_list_select_cb (GtkList *list, GtkWidget *widget, gpointer user_
 static int obs_list_load_file(GtkWidget *dialog, char *name)
 {
 	FILE *fp;
-	GtkList *list;
-	GtkWidget *list_item;
-	GList *dlist = NULL;
+	GtkListStore *list;
+	GtkTreeIter iter;
 
 	char *line = NULL;
-	size_t len = 0, ret, items = 0;
+	size_t len = 0, items = 0;
+	ssize_t ret;
 
-	d3_printf("obs filename: %s\n", name);
+	d3_printf("obs filename: %s, dialog %p\n", name, dialog);
 
-	list = g_object_get_data(G_OBJECT(dialog), "list1");
+
+	list = g_object_get_data(G_OBJECT(dialog), "obs_list_store");
 	g_return_val_if_fail(list != NULL, -1);
 
+#if 0
+	/* FIXME: widget styles */
 	gtk_widget_restore_default_style(GTK_WIDGET(list));
 	gtk_widget_hide(GTK_WIDGET(list));
 	gtk_widget_show(GTK_WIDGET(list));
+#endif
 
 	fp = fopen(name, "r");
 	if (fp == NULL) {
@@ -851,16 +884,18 @@ static int obs_list_load_file(GtkWidget *dialog, char *name)
 		status_message(dialog, "Cannot open obslist file");
 		return -1;
 	}
-	gtk_list_clear_items(GTK_LIST(list), 0, -1);
+
+	gtk_list_store_clear (list);
+
 	while ((ret = getline(&line, &len, fp)) > 0) {
 		if (line[ret-1] == '\n')
 			line[ret-1] = 0;
-		list_item=gtk_list_item_new_with_label(line);
-		dlist=g_list_append(dlist, list_item);
-		gtk_widget_show(list_item);
+
+		gtk_list_store_append (list, &iter);
+		gtk_list_store_set (list, &iter, 0, line, -1);
+
 		items ++;
 	}
-	gtk_list_append_items(GTK_LIST(list), dlist);
 	g_object_set_data(G_OBJECT(dialog), "commands", (gpointer)items);
 
 	fclose(fp);
@@ -931,15 +966,19 @@ static void obslist_background(gpointer window, int action)
 	GtkWidget *list;
 	GdkColormap *cmap;
 	GdkColor color;
+#if 0
 	GtkRcStyle *rcstyle;
 	int i;
+#endif
 
 	cmap = gdk_colormap_get_system();
 	get_color_action(action, &color, cmap);
 
-	list = g_object_get_data(G_OBJECT(window), "list1");
+	list = g_object_get_data(G_OBJECT(window), "obs_list_store");
 	g_return_if_fail(list != NULL);
 
+/* FIXME: There have been some changes re: widget styles in gtk3 and gtk2 vs this */
+#if 0
 	if (action == OBSLIST_BACKGROUND_RUNNING) {
 		gtk_widget_restore_default_style(list);
 	} else {
@@ -955,5 +994,6 @@ static void obslist_background(gpointer window, int action)
 
 	gtk_widget_hide(GTK_WIDGET(list));
 	gtk_widget_show(GTK_WIDGET(list));
+#endif
 }
 

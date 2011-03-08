@@ -423,7 +423,8 @@ create_camera_control (void)
   GtkWidget *vbox6;
   GtkWidget *obs_list_scrolledwin;
   GtkWidget *viewport1;
-  GtkWidget *list1;
+  GtkWidget    *obs_list_view;
+  GtkListStore *obs_list_store;
   GtkWidget *table4;
   GtkWidget *obs_list_fname_combo;
   GtkWidget *obs_list_fname;
@@ -945,13 +946,29 @@ create_camera_control (void)
   gtk_widget_show (viewport1);
   gtk_container_add (GTK_CONTAINER (obs_list_scrolledwin), viewport1);
 
-  list1 = gtk_list_new ();
-  g_object_ref (list1);
-  g_object_set_data_full (G_OBJECT (camera_control), "list1", list1,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (list1);
-  gtk_container_add (GTK_CONTAINER (viewport1), list1);
-  gtk_list_set_selection_mode (GTK_LIST (list1), GTK_SELECTION_BROWSE);
+
+  obs_list_store = gtk_list_store_new (1, G_TYPE_STRING);
+  obs_list_view = gtk_tree_view_new_with_model (GTK_TREE_MODEL (obs_list_store));
+  g_object_ref (obs_list_view);
+  g_object_set_data_full (G_OBJECT (camera_control), "obs_list_view", obs_list_view,
+			  (GDestroyNotify) g_object_unref);
+  g_object_set_data_full (G_OBJECT (camera_control), "obs_list_store", obs_list_store,
+			  (GDestroyNotify) g_object_unref);
+
+  gtk_tree_view_set_headers_visible (GTK_TREE_VIEW(obs_list_view), FALSE);
+  gtk_tree_view_set_headers_clickable (GTK_TREE_VIEW(obs_list_view), FALSE);
+
+  GtkCellRenderer *render = gtk_cell_renderer_text_new();
+
+  gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(obs_list_view),
+					      -1,
+					      NULL, render, "text", 0, NULL);
+
+  GtkTreeSelection *treesel = gtk_tree_view_get_selection (GTK_TREE_VIEW(obs_list_view));
+  gtk_tree_selection_set_mode (treesel, GTK_SELECTION_BROWSE);
+
+  gtk_widget_show (obs_list_view);
+  gtk_container_add (GTK_CONTAINER (viewport1), obs_list_view);
 
   table4 = gtk_table_new (2, 2, FALSE);
   g_object_ref (table4);
