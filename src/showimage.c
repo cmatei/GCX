@@ -962,7 +962,7 @@ void image_box_to_cache(struct map_cache *cache, struct image_channel *channel,
 		zoom_out = floor(1.0 / zoom + 0.5);
 	}
 
-	memset(&geom, sizeof(struct map_geometry), 0);
+	memset(&geom, 0, sizeof(struct map_geometry));
 	geom.zoom = zoom;
 	area.x = x * zoom_in / zoom_out;
 	area.y = y * zoom_in / zoom_out;
