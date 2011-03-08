@@ -1199,9 +1199,8 @@ create_camera_control (void)
   gtk_table_attach (GTK_TABLE (table6), current_frame_entry, 2, 3, 1, 2,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
-  //gtk_widget_set_size_request (current_frame_entry, 50, -2);
-  gtk_widget_set_size_request (current_frame_entry, 50, -2);
-  gtk_entry_set_editable (GTK_ENTRY (current_frame_entry), FALSE);
+  gtk_widget_set_size_request (current_frame_entry, 50, -1);
+  gtk_editable_set_editable (GTK_EDITABLE (current_frame_entry), FALSE);
 
   label12 = gtk_label_new ("Files");
   g_object_ref (label12);
@@ -1272,7 +1271,7 @@ create_camera_control (void)
   gtk_table_attach (GTK_TABLE (table8), cooler_temp_entry, 0, 1, 1, 2,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
-  gtk_entry_set_editable (GTK_ENTRY (cooler_temp_entry), FALSE);
+  gtk_editable_set_editable (GTK_EDITABLE (cooler_temp_entry), FALSE);
 
   table24 = gtk_table_new (2, 2, FALSE);
   g_object_ref (table24);
@@ -1685,9 +1684,9 @@ create_wcs_edit (void)
   gtk_widget_show (vbox11);
   gtk_container_add (GTK_CONTAINER (frame1), vbox11);
 
-  wcs_unset_rb = gtk_radio_button_new_with_label (_1_group, "");
-  wcs_unset_rb_key = gtk_label_parse_uline (GTK_LABEL (GTK_BIN (wcs_unset_rb)->child),
-                                   "_Unset");
+  wcs_unset_rb = gtk_radio_button_new_with_mnemonic (_1_group, "_Unset");
+  wcs_unset_rb_key = gtk_label_get_mnemonic_keyval (GTK_LABEL(GTK_BIN(wcs_unset_rb)->child));
+
   gtk_widget_add_accelerator (wcs_unset_rb, "clicked", accel_group,
                               wcs_unset_rb_key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
   _1_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (wcs_unset_rb));
@@ -1698,9 +1697,9 @@ create_wcs_edit (void)
   gtk_box_pack_start (GTK_BOX (vbox11), wcs_unset_rb, FALSE, FALSE, 0);
   gtk_widget_set_sensitive (wcs_unset_rb, FALSE);
 
-  wcs_initial_rb = gtk_radio_button_new_with_label (_1_group, "");
-  wcs_initial_rb_key = gtk_label_parse_uline (GTK_LABEL (GTK_BIN (wcs_initial_rb)->child),
-                                   "_Initial");
+  wcs_initial_rb = gtk_radio_button_new_with_mnemonic (_1_group, "_Initial");
+  wcs_initial_rb_key = gtk_label_get_mnemonic_keyval (GTK_LABEL(GTK_BIN(wcs_initial_rb)->child));
+
   gtk_widget_add_accelerator (wcs_initial_rb, "clicked", accel_group,
                               wcs_initial_rb_key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
   _1_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (wcs_initial_rb));
@@ -1711,9 +1710,9 @@ create_wcs_edit (void)
   gtk_box_pack_start (GTK_BOX (vbox11), wcs_initial_rb, FALSE, FALSE, 0);
   gtk_widget_set_sensitive (wcs_initial_rb, FALSE);
 
-  wcs_fitted_rb = gtk_radio_button_new_with_label (_1_group, "");
-  wcs_fitted_rb_key = gtk_label_parse_uline (GTK_LABEL (GTK_BIN (wcs_fitted_rb)->child),
-                                   "_Fitted");
+  wcs_fitted_rb = gtk_radio_button_new_with_mnemonic (_1_group, "_Fitted");
+  wcs_fitted_rb_key = gtk_label_get_mnemonic_keyval (GTK_LABEL(GTK_BIN(wcs_fitted_rb)->child));
+
   gtk_widget_add_accelerator (wcs_fitted_rb, "clicked", accel_group,
                               wcs_fitted_rb_key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
   _1_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (wcs_fitted_rb));
@@ -1724,9 +1723,9 @@ create_wcs_edit (void)
   gtk_box_pack_start (GTK_BOX (vbox11), wcs_fitted_rb, FALSE, FALSE, 0);
   gtk_widget_set_sensitive (wcs_fitted_rb, FALSE);
 
-  wcs_valid_rb = gtk_radio_button_new_with_label (_1_group, "");
-  wcs_valid_rb_key = gtk_label_parse_uline (GTK_LABEL (GTK_BIN (wcs_valid_rb)->child),
-                                   "_Validated");
+  wcs_valid_rb = gtk_radio_button_new_with_mnemonic (_1_group, "_Validated");
+  wcs_valid_rb_key = gtk_label_get_mnemonic_keyval (GTK_LABEL(GTK_BIN(wcs_valid_rb)->child));
+
   gtk_widget_add_accelerator (wcs_valid_rb, "clicked", accel_group,
                               wcs_valid_rb_key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
   _1_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (wcs_valid_rb));
@@ -3474,20 +3473,20 @@ create_guide_window (void)
   gtk_box_pack_start (GTK_BOX (hbox24), vbox32, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox32), 12);
 
-  guide_run = gtk_toggle_button_new_with_label ("");
-  guide_run_key = gtk_label_parse_uline (GTK_LABEL (GTK_BIN (guide_run)->child),
-                                   "_Run");
+  guide_run = gtk_toggle_button_new_with_mnemonic ("_Run");
+  guide_run_key = gtk_label_get_mnemonic_keyval (GTK_LABEL (GTK_BIN (guide_run)->child));
+
   gtk_widget_add_accelerator (guide_run, "clicked", accel_group,
-                              guide_run_key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
+			      guide_run_key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
   g_object_ref (guide_run);
   g_object_set_data_full (G_OBJECT (guide_window), "guide_run", guide_run,
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (guide_run);
   gtk_box_pack_start (GTK_BOX (vbox32), guide_run, FALSE, FALSE, 0);
 
-  guide_dark = gtk_button_new_with_label ("");
-  guide_dark_key = gtk_label_parse_uline (GTK_LABEL (GTK_BIN (guide_dark)->child),
-                                   "_Dark Frame");
+  guide_dark = gtk_button_new_with_mnemonic ("_Dark Frame");
+  guide_dark_key = gtk_label_get_mnemonic_keyval (GTK_LABEL (GTK_BIN (guide_dark)->child));
+
   gtk_widget_add_accelerator (guide_dark, "clicked", accel_group,
                               guide_dark_key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
   g_object_ref (guide_dark);
@@ -3496,9 +3495,9 @@ create_guide_window (void)
   gtk_widget_show (guide_dark);
   gtk_box_pack_start (GTK_BOX (vbox32), guide_dark, FALSE, FALSE, 0);
 
-  guide_find_star = gtk_button_new_with_label ("");
-  guide_find_star_key = gtk_label_parse_uline (GTK_LABEL (GTK_BIN (guide_find_star)->child),
-                                   "_Guide Star");
+  guide_find_star = gtk_button_new_with_label ("_Guide Star");
+  guide_find_star_key = gtk_label_get_mnemonic_keyval (GTK_LABEL (GTK_BIN (guide_find_star)->child));
+
   gtk_widget_add_accelerator (guide_find_star, "clicked", accel_group,
                               guide_find_star_key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
   g_object_ref (guide_find_star);
@@ -3508,9 +3507,9 @@ create_guide_window (void)
   gtk_box_pack_start (GTK_BOX (vbox32), guide_find_star, FALSE, FALSE, 0);
   gtk_widget_set_tooltip_text (guide_find_star, "Set one of the user-selected stars as a guide star; if no user selected stars exist, search for a suitable star");
 
-  guide_calibrate = gtk_toggle_button_new_with_label ("");
-  guide_calibrate_key = gtk_label_parse_uline (GTK_LABEL (GTK_BIN (guide_calibrate)->child),
-                                   "_Calibrate");
+  guide_calibrate = gtk_toggle_button_new_with_mnemonic ("_Calibrate");
+  guide_calibrate_key = gtk_label_get_mnemonic_keyval (GTK_LABEL (GTK_BIN (guide_calibrate)->child));
+
   gtk_widget_add_accelerator (guide_calibrate, "clicked", accel_group,
                               guide_calibrate_key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
   g_object_ref (guide_calibrate);
