@@ -14,8 +14,8 @@
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-  
-  
+
+
   Contact Information: gcx@phracturedblue.com <Geoffrey Hausheer>
 *******************************************************************************/
 
@@ -84,7 +84,7 @@ static void on_cell_toggled (GtkCellRendererToggle *cell,
 		value ^= 1;
 		gtk_tree_store_set(GTK_TREE_STORE (model), &iter, 0, value, -1);
 	}
-  
+
 	/* clean up */
 	gtk_tree_path_free (path);
 }
@@ -176,3 +176,7 @@ void indisave_show_dialog(struct indi_t *indi)
 	gtk_widget_show_all(GTK_WIDGET(dlg));
 }
 
+void indisave_show_dialog_action(GtkAction *action, gpointer data)
+{
+	indisave_show_dialog (data);
+}

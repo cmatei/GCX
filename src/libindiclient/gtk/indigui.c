@@ -1,6 +1,6 @@
 /*******************************************************************************
   Copyright(c) 2009 Geoffrey Hausheer. All rights reserved.
-  
+
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
     License as published by the Free Software Foundation; either
@@ -14,7 +14,7 @@
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-  
+
   Contact Information: gcx@phracturedblue.com <Geoffrey Hausheer>
 *******************************************************************************/
 //gcc -Wall -g -I. -o inditest indi.c indigui.c base64.c lilxml.c `pkg-config --cflags --libs gtk+-2.0 glib-2.0` -lz -DINDIMAIN
@@ -31,11 +31,30 @@
 #include "gtkled.h"
 #include "indisave.h"
 
+static GtkActionEntry menu_actions[] = {
+	{ "indigui-file", NULL, "_File" },
+
+	{ "indigui-file-save", GTK_STOCK_SAVE, "_Save", "<control>S", NULL,
+	  G_CALLBACK(indisave_show_dialog_action) }
+};
+
+static char *menu_ui =
+	"<ui>"
+	"  <menubar name=\"indigui-menubar\">"
+	"    <menu name=\"indigui-file\" action=\"indigui-file\">"
+	"      <menuitem name=\"indigui-file-save\" action=\"indigui-file-save\"/>"
+	"    </menu>"
+	"  </menubar>"
+	"</ui>";
+
+
+#if 0
 static GtkItemFactoryEntry menu_items[] = {
   { "/_File",         NULL,         NULL,           0, "<Branch>" },
   { "/File/_Save",    "<control>S", indisave_show_dialog,    0, "<StockItem>", GTK_STOCK_SAVE },
 };
 static gint nmenu_items = sizeof (menu_items) / sizeof (menu_items[0]);
+#endif
 
 enum {
 	SWITCH_CHECKBOX,
@@ -91,7 +110,7 @@ static int indigui_get_switch_type(struct indi_prop_t *iprop)
 
 	if (iprop->rule == INDI_RULE_ANYOFMANY)
 		return SWITCH_CHECKBOX;
-	
+
 	if (num_props <= 4)
 		return SWITCH_BUTTON;
 
@@ -167,7 +186,7 @@ void indigui_show_message(struct indi_t *indi, const char *message)
 		curtime = time(NULL);
 		localtime_r(&curtime, &time_loc);
 		strftime(timestr, sizeof(timestr), "%b %d %T: ", &time_loc);
-		gtk_text_buffer_insert_at_cursor(textbuffer, timestr, -1); 
+		gtk_text_buffer_insert_at_cursor(textbuffer, timestr, -1);
 		gtk_text_buffer_insert_at_cursor(textbuffer, message, -1);
 		gtk_text_buffer_insert_at_cursor(textbuffer, "\n", -1);
 	}
@@ -196,7 +215,7 @@ static void indigui_send_cb( GtkWidget *widget, struct indi_prop_t *iprop )
 			elem->value.num.value = strtod(valstr, NULL);
 			gtk_entry_set_text(GTK_ENTRY (entry), "");
 			break;
-		}			
+		}
 	}
 	indi_send(iprop, NULL);
 }
@@ -284,7 +303,7 @@ static void indigui_create_text_widget(struct indi_prop_t *iprop, int num_props)
 			3, 4, 0, num_props,
 			(GtkAttachOptions)(GTK_FILL | GTK_EXPAND), GTK_FILL, 0, 0);
 	}
-		
+
 }
 
 static void indigui_create_switch_combobox(struct indi_prop_t *iprop, int num_props)
@@ -422,7 +441,7 @@ static void indigui_build_prop_widget(struct indi_prop_t *iprop)
 
 	state_label = gtk_led_new(0x000000);
 	indigui_set_state(state_label, iprop->state);
-	
+
 	g_object_ref(G_OBJECT (state_label));
 	g_object_set_data(G_OBJECT (iprop->widget), "_state", state_label);
 
@@ -489,31 +508,34 @@ void *indigui_create_window(struct indi_t *indi)
 	GtkWidget *textscroll;
 	GtkTextBuffer *textbuffer;
 
-  GtkItemFactory *item_factory;
-  GtkAccelGroup *accel_group;
+	GtkWidget *menubar;
+	GtkUIManager *ui;
+	GError *error = NULL;
+	GtkActionGroup *action_group;
 
 	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
 	vbox = gtk_vbox_new(FALSE, 10);
 	gtk_container_add(GTK_CONTAINER (window), vbox);
 
-  /* Make an accelerator group (shortcut keys) */
-  accel_group = gtk_accel_group_new ();
+	action_group = gtk_action_group_new("INDIAction");
+	gtk_action_group_add_actions (action_group, menu_actions,
+				      G_N_ELEMENTS (menu_actions), indi);
 
-  /* Make an ItemFactory (that makes a menubar) */
-  item_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR, "<main>",
-                                       accel_group);
+	ui = gtk_ui_manager_new ();
+	gtk_ui_manager_insert_action_group (ui, action_group, 0);
 
-  /* This function generates the menu items. Pass the item factory,
-     the number of items in the array, the array itself, and any
-     callback data for the the menu items. */
-  gtk_item_factory_create_items (item_factory, nmenu_items, menu_items, indi);
+	gtk_ui_manager_add_ui_from_string (ui, menu_ui, strlen(menu_ui), &error);
 
-  /* Attach the new accelerator group to the window. */
-  gtk_window_add_accel_group (GTK_WINDOW (window), accel_group);
+	menubar = gtk_ui_manager_get_widget (ui, "/indigui-menubar");
 
-  /* Finally, return the actual menu bar created by the item factory. */
-  gtk_box_pack_start(GTK_BOX (vbox), gtk_item_factory_get_widget (item_factory, "<main>"), FALSE, TRUE, 0);
+	gtk_window_add_accel_group (GTK_WINDOW (window),
+				    gtk_ui_manager_get_accel_group (ui));
+
+	/* Finally, return the actual menu bar created by the item factory. */
+	gtk_box_pack_start(GTK_BOX (vbox), menubar, FALSE, TRUE, 0);
+
+	g_object_unref (ui);
 
 	notebook = gtk_notebook_new();
 	g_object_ref(G_OBJECT (notebook));
@@ -538,8 +560,6 @@ void *indigui_create_window(struct indi_t *indi)
 
 	gtk_window_set_title (GTK_WINDOW (window), "INDI Options");
 	gtk_window_set_default_size (GTK_WINDOW (window), 640, 400);
-
-
 
 	return window;
 }
