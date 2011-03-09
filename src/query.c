@@ -625,6 +625,7 @@ GList *query_catalog(char *catalog, double ra, double dec, double w, double h,
 		FD_SET(fileno(vq), &fds);
 		tv.tv_sec = 0;
 		tv.tv_usec = 200000;
+		errno = 0;
 		ret = select(FD_SETSIZE, &fds, NULL, NULL, &tv);
 		if (ret == 0 || errno || !FD_ISSET(fileno(vq), &fds)) {
 			if (progress) {
