@@ -313,6 +313,26 @@ void open_guide_cb(gpointer data, guint action, GtkWidget *menu_item);
 void mband_open_cb(gpointer data, guint action, GtkWidget *menu_item);
 void add_to_mband(gpointer dialog, char *fn);
 
+void mband_save_dataset_action(GtkAction *action, gpointer data);
+void mband_close_dataset_action(GtkAction *action, gpointer data);
+void mband_report_action(GtkAction *action, gpointer data);
+void mband_close_action(GtkAction *action, gpointer data);
+void mband_select_all_action (GtkAction *action, gpointer data);
+void mband_unselect_all_action (GtkAction *action, gpointer data);
+void mband_hide_action (GtkAction *action, gpointer data);
+void mband_unhide_action (GtkAction *action, gpointer data);
+void mband_fit_zpoints_action(GtkAction *action, gpointer data);
+void mband_fit_zp_wtrans_action(GtkAction *action, gpointer data);
+void mband_fit_trans_action(GtkAction *action, gpointer data);
+void mband_fit_allsky_action(GtkAction *action, gpointer data);
+void mband_plot_resmag_action(GtkAction *action, gpointer data);
+void mband_plot_rescol_action(GtkAction *action, gpointer data);
+void mband_plot_errmag_action(GtkAction *action, gpointer data);
+void mband_plot_errcol_action(GtkAction *action, gpointer data);
+void mband_plot_zpairmass_action(GtkAction *action, gpointer data);
+void mband_plot_zptime_action(GtkAction *action, gpointer data);
+void mband_plot_magtime_action(GtkAction *action, gpointer data);
+
 /* synth.c */
 void add_synth_stars_cb(gpointer window, guint action, GtkWidget *menu_item);
 

@@ -1,117 +1,157 @@
 <ui>
-<menubar name="reduce-menubar">
-  <menu name="reduce-file" action="reduce-file">
-    <menuitem name="Add Files" action="reduce-add-files"/>
-    <menuitem name="Remove Selected Files" action="reduce-remove-selected"/>
-    <menuitem name="Reload Selected Files" action="reduce-reload-selected"/>
-    <separator name="separator1"/>
-    <menuitem name="Display Frame" action="reduce-display-frame"/>
-    <menuitem name="Next Frame" action="reduce-next-frame"/>
-    <menuitem name="Previous Frame" action="reduce-prev-frame"/>
-    <separator name="separator2"/>
-    <menuitem name="Skip Selected Frames" action="reduce-skip-selected"/>
-    <menuitem name="Unskip Selected Frames" action="reduce-unskip-selected"/>
-  </menu>
-  <menu name="reduce-edit" action="reduce-edit">
-    <menuitem name="Select All" action="reduce-select-all"/>
-  </menu>
-  <menu name="Reduce" action="reduce-reduce">
-    <menuitem name="Reduce All" action="reduce-reduce-all"/>
-    <menuitem name="Reduce One Frame" action="reduce-reduce-one"/>
-    <menuitem name="Qphot One Frame" action="reduce-qphot-one"/>
-    <separator name="separator1"/>
-    <menuitem name="Show Alignment Stars" action="reduce-show-alignment-stars"/>
-    <separator name="separator2"/>
-    <menuitem name="Multi-frame Photometry..." action="reduce-multi-frame"/>
-  </menu>
-</menubar>
-
-<popup name="star-popup">
-  <menu name="starp" action="starp-popup">
-    <menuitem name="Edit Star"     action="starp-edit-star"/>
-    <menuitem name="Remove Star"   action="starp-remove-star"/>
-    <menuitem name="Create Pair"   action="starp-pair"/>
-    <menuitem name="Remove Pair"   action="starp-pair-rm"/>
-    <menuitem name="Move Star"     action="starp-move"/>
-    <menuitem name="Plot Profile"  action="starp-profile"/>
-    <menuitem name="Measure"       action="starp-measure"/>
-    <menuitem name="Sky Histogram" action="starp-skyhist"/>
-    <menuitem name="Fit PSF"       action="starp-fit-psf"/>
-  </menu>
-</popup>
-
-<popup name="image-popup">
-  <menu name="file" action="image-file">
-    <menuitem name="New Frame"  action="image-new"/>
-    <menuitem name="Open Image" action="image-open"/>
-    <menuitem name="Save Image" action="image-save"/>
-    <menu name="export" action="image-export">
-      <menuitem name="8-bit pnm"  action="image-export-pnm8"/>
-      <menuitem name="16-bit pnm" action="image-export-pnm16"/>
+  <menubar name="reduce-menubar">
+    <menu name="reduce-file" action="reduce-file">
+      <menuitem name="Add Files" action="reduce-add-files"/>
+      <menuitem name="Remove Selected Files" action="reduce-remove-selected"/>
+      <menuitem name="Reload Selected Files" action="reduce-reload-selected"/>
+      <separator name="separator1"/>
+      <menuitem name="Display Frame" action="reduce-display-frame"/>
+      <menuitem name="Next Frame" action="reduce-next-frame"/>
+      <menuitem name="Previous Frame" action="reduce-prev-frame"/>
+      <separator name="separator2"/>
+      <menuitem name="Skip Selected Frames" action="reduce-skip-selected"/>
+      <menuitem name="Unskip Selected Frames" action="reduce-unskip-selected"/>
     </menu>
-    <separator name="separator1"/>
-    <menuitem name="Load Recipe"   action="recipe-open"/>
-    <menuitem name="Create Recipe" action="recipe-create"/>
-    <separator name="separator2"/>
-    <menuitem name="Show FITS Header" action="image-show-header"/>
-    <menuitem name="Edit Options" action="options-edit"/>
-    <menuitem name="Camera/Scope" action="camera-scope-control"/>
-    <menuitem name="Guiding"      action="guide-control"/>
-    <separator name="separator3"/>
-    <menuitem name="Quit"         action="user-quit"/>
-  </menu>
-</popup>
+    <menu name="reduce-edit" action="reduce-edit">
+      <menuitem name="Select All" action="reduce-select-all"/>
+    </menu>
+    <menu name="Reduce" action="reduce-reduce">
+      <menuitem name="Reduce All" action="reduce-reduce-all"/>
+      <menuitem name="Reduce One Frame" action="reduce-reduce-one"/>
+      <menuitem name="Qphot One Frame" action="reduce-qphot-one"/>
+      <separator name="separator1"/>
+      <menuitem name="Show Alignment Stars" action="reduce-show-alignment-stars"/>
+      <separator name="separator2"/>
+      <menuitem name="Multi-frame Photometry..." action="reduce-multi-frame"/>
+    </menu>
+  </menubar>
+
+  <popup name="star-popup">
+    <menu name="starp" action="starp-popup">
+      <menuitem name="Edit Star"     action="starp-edit-star"/>
+      <menuitem name="Remove Star"   action="starp-remove-star"/>
+      <menuitem name="Create Pair"   action="starp-pair"/>
+      <menuitem name="Remove Pair"   action="starp-pair-rm"/>
+      <menuitem name="Move Star"     action="starp-move"/>
+      <menuitem name="Plot Profile"  action="starp-profile"/>
+      <menuitem name="Measure"       action="starp-measure"/>
+      <menuitem name="Sky Histogram" action="starp-skyhist"/>
+      <menuitem name="Fit PSF"       action="starp-fit-psf"/>
+    </menu>
+  </popup>
+
+  <popup name="image-popup">
+    <menu name="file" action="image-file">
+      <menuitem name="New Frame"  action="image-new"/>
+      <menuitem name="Open Image" action="image-open"/>
+      <menuitem name="Save Image" action="image-save"/>
+      <menu name="export" action="image-export">
+	<menuitem name="8-bit pnm"  action="image-export-pnm8"/>
+	<menuitem name="16-bit pnm" action="image-export-pnm16"/>
+      </menu>
+      <separator name="separator1"/>
+      <menuitem name="Load Recipe"   action="recipe-open"/>
+      <menuitem name="Create Recipe" action="recipe-create"/>
+      <separator name="separator2"/>
+      <menuitem name="Show FITS Header" action="image-show-header"/>
+      <menuitem name="Edit Options" action="options-edit"/>
+      <menuitem name="Camera/Scope" action="camera-scope-control"/>
+      <menuitem name="Guiding"      action="guide-control"/>
+      <separator name="separator3"/>
+      <menuitem name="Quit"         action="user-quit"/>
+    </menu>
+  </popup>
 
 
-<!-- GUIDING -->
-<menubar name="guide-menubar">
-  <!-- File -->
-  <menu name="guide-file" action="guide-file">
-    <menuitem name="guide-open" action="guide-open"/>
-    <separator name="separator1"/>
-    <menuitem name="guide-save" action="guide-save"/>
-    <menu name="guide-export" action="guide-export">
-      <menuitem name="guide-export-pnm8" action="guide-export-pnm8"/>
+  <!-- GUIDING -->
+  <menubar name="guide-menubar">
+    <!-- File -->
+    <menu name="guide-file" action="guide-file">
+      <menuitem name="guide-open" action="guide-open"/>
+      <separator name="separator1"/>
+      <menuitem name="guide-save" action="guide-save"/>
+      <menu name="guide-export" action="guide-export">
+	<menuitem name="guide-export-pnm8" action="guide-export-pnm8"/>
+      </menu>
     </menu>
-  </menu>
-  <!-- Image -->
-  <menu name="guide-image" action="guide-image">
-    <menuitem name="guide-curves" action="guide-curves"/>
-    <separator name="separator1"/>
-    <menuitem name="guide-zoom-in" action="guide-zoom-in"/>
-    <menuitem name="guide-zoom-out" action="guide-zoom-out"/>
-    <menuitem name="guide-zoom-pixels" action="guide-zoom-pixels"/>
-    <separator name="separator2"/>
-    <menuitem name="guide-pan-center" action="guide-pan-center"/>
-    <menuitem name="guide-pan-cursor" action="guide-pan-cursor"/>
-    <separator name="separator3"/>
-    <menuitem name="guide-cuts-auto" action="guide-cuts-auto"/>
-    <menuitem name="guide-cuts-minmax" action="guide-cuts-minmax"/>
-    <menuitem name="guide-cuts-flatter" action="guide-cuts-flatter"/>
-    <menuitem name="guide-cuts-sharper" action="guide-cuts-sharper"/>
-    <menuitem name="guide-cuts-brighter" action="guide-cuts-brighter"/>
-    <menuitem name="guide-cuts-darker" action="guide-cuts-darker"/>
-    <menu name="guide-set-contrast" action="guide-set-contrast">
-      <menuitem name="guide-cuts-1" action="guide-cuts-1"/>
-      <menuitem name="guide-cuts-2" action="guide-cuts-2"/>
-      <menuitem name="guide-cuts-3" action="guide-cuts-3"/>
-      <menuitem name="guide-cuts-4" action="guide-cuts-4"/>
-      <menuitem name="guide-cuts-5" action="guide-cuts-5"/>
-      <menuitem name="guide-cuts-6" action="guide-cuts-6"/>
-      <menuitem name="guide-cuts-7" action="guide-cuts-7"/>
-      <menuitem name="guide-cuts-8" action="guide-cuts-8"/>
-      <menuitem name="guide-cuts-minmax"    action="guide-cuts-minmax"/>
+    <!-- Image -->
+    <menu name="guide-image" action="guide-image">
+      <menuitem name="guide-curves" action="guide-curves"/>
+      <separator name="separator1"/>
+      <menuitem name="guide-zoom-in" action="guide-zoom-in"/>
+      <menuitem name="guide-zoom-out" action="guide-zoom-out"/>
+      <menuitem name="guide-zoom-pixels" action="guide-zoom-pixels"/>
+      <separator name="separator2"/>
+      <menuitem name="guide-pan-center" action="guide-pan-center"/>
+      <menuitem name="guide-pan-cursor" action="guide-pan-cursor"/>
+      <separator name="separator3"/>
+      <menuitem name="guide-cuts-auto" action="guide-cuts-auto"/>
+      <menuitem name="guide-cuts-minmax" action="guide-cuts-minmax"/>
+      <menuitem name="guide-cuts-flatter" action="guide-cuts-flatter"/>
+      <menuitem name="guide-cuts-sharper" action="guide-cuts-sharper"/>
+      <menuitem name="guide-cuts-brighter" action="guide-cuts-brighter"/>
+      <menuitem name="guide-cuts-darker" action="guide-cuts-darker"/>
+      <menu name="guide-set-contrast" action="guide-set-contrast">
+	<menuitem name="guide-cuts-1" action="guide-cuts-1"/>
+	<menuitem name="guide-cuts-2" action="guide-cuts-2"/>
+	<menuitem name="guide-cuts-3" action="guide-cuts-3"/>
+	<menuitem name="guide-cuts-4" action="guide-cuts-4"/>
+	<menuitem name="guide-cuts-5" action="guide-cuts-5"/>
+	<menuitem name="guide-cuts-6" action="guide-cuts-6"/>
+	<menuitem name="guide-cuts-7" action="guide-cuts-7"/>
+	<menuitem name="guide-cuts-8" action="guide-cuts-8"/>
+	<menuitem name="guide-cuts-minmax"    action="guide-cuts-minmax"/>
+      </menu>
     </menu>
-  </menu>
-  <!-- Stars -->
-  <menu name="guide-stars" action="guide-stars">
-    <menuitem name="guide-stars-add-detect" action="guide-stars-add-detect"/>
-    <separator name="separator1"/>
-    <menuitem name="guide-stars-rm-selected" action="guide-stars-rm-selected"/>
-    <menuitem name="guide-stars-rm-detected" action="guide-stars-rm-detected"/>
-    <menuitem name="guide-stars-rm-user" action="guide-stars-rm-user"/>
-    <menuitem name="guide-stars-rm-all" action="guide-stars-rm-all"/>
-  </menu>
-</menubar>
+    <!-- Stars -->
+    <menu name="guide-stars" action="guide-stars">
+      <menuitem name="guide-stars-add-detect" action="guide-stars-add-detect"/>
+      <separator name="separator1"/>
+      <menuitem name="guide-stars-rm-selected" action="guide-stars-rm-selected"/>
+      <menuitem name="guide-stars-rm-detected" action="guide-stars-rm-detected"/>
+      <menuitem name="guide-stars-rm-user" action="guide-stars-rm-user"/>
+      <menuitem name="guide-stars-rm-all" action="guide-stars-rm-all"/>
+    </menu>
+  </menubar>
+
+  <!-- Multi-band -->
+  <menubar name="mband-menubar">
+    <!-- File -->
+    <menu name="mband-file" action="mband-file">
+      <menuitem name="mband-file-add" action="mband-file-add"/>
+      <menuitem name="mband-file-save" action="mband-file-save"/>
+      <menuitem name="mband-file-close" action="mband-file-close"/>
+      <separator name="separator1"/>
+      <menuitem name="mband-report-aavso" action="mband-report-aavso"/>
+      <separator name="separator2"/>
+      <menuitem name="mband-close" action="mband-close"/>
+    </menu>
+    <!-- Edit -->
+    <menu name="mband-edit" action="mband-edit">
+      <menuitem name="mband-select-all" action="mband-select-all"/>
+      <menuitem name="mband-unselect-all" action="mband-unselect-all"/>
+      <menuitem name="mband-hide-selected" action="mband-hide-selected"/>
+      <menuitem name="mband-unhide-all" action="mband-unhide-all"/>
+    </menu>
+    <!-- Reduce -->
+    <menu name="mband-reduce" action="mband-reduce">
+      <menuitem name="mband-fit-zpoints" action="mband-fit-zpoints"/>
+      <menuitem name="mband-fit-zp-wtrans" action="mband-fit-zp-wtrans"/>
+      <menuitem name="mband-fit-trans" action="mband-fit-trans"/>
+      <menuitem name="mband-fit-allsky" action="mband-fit-allsky"/>
+    </menu>
+    <!-- Plot -->
+    <menu name="mband-plot" action="mband-plot">
+      <menuitem name="mband-plot-residuals-magnitude" action="mband-plot-residuals-magnitude"/>
+      <menuitem name="mband-plot-residuals-color" action="mband-plot-residuals-color"/>
+      <menuitem name="mband-plot-errors-magnitude" action="mband-plot-errors-magnitude"/>
+      <menuitem name="mband-plot-errors-color" action="mband-plot-errors-color"/>
+      <separator name="separator1"/>
+      <menuitem name="mband-plot-zp-airmass" action="mband-plot-zp-airmass"/>
+      <menuitem name="mband-plot-zp-time" action="mband-plot-zp-time"/>
+      <separator name="separator2"/>
+      <menuitem name="mband-plot-magnitude-time" action="mband-plot-magnitude-time"/>
+    </menu>
+  </menubar>
 
 </ui>

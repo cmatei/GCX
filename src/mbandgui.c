@@ -204,6 +204,43 @@ static void rep_cb(gpointer data, guint action, GtkWidget *menu_item)
 	file_select(data, "Report File", "", rep_file_cb, action);
 }
 
+void mband_save_dataset_action(GtkAction *action, gpointer data)
+{
+	rep_cb(data, REP_DATASET | REP_ALL, NULL);
+}
+
+void mband_close_dataset_action(GtkAction *action, gpointer data)
+{
+	struct mband_dataset *mbds;
+	GtkWidget *list;
+
+	mbds = g_object_get_data(G_OBJECT(data), "mbds");
+
+	if (mbds && !modal_yes_no("Closing the dataset will "
+				  "discard fit information\n"
+				  "Are you sure?", "Close dataset?"))
+		return;
+
+	list = g_object_get_data(G_OBJECT(data), "ofr_list");
+	if (list) {
+		g_object_set_data(G_OBJECT(data), "ofr_list", NULL);
+	}
+	list = g_object_get_data(G_OBJECT(data), "sob_list");
+	if (list) {
+		g_object_set_data(G_OBJECT(data), "sob_list", NULL);
+	}
+	list = g_object_get_data(G_OBJECT(data), "bands_list");
+	if (list) {
+		g_object_set_data(G_OBJECT(data), "bands_list", NULL);
+	}
+	if (mbds)
+		g_object_set_data(G_OBJECT(data), "mbds", NULL);
+}
+
+void mband_report_action(GtkAction *action, gpointer data)
+{
+	rep_cb(data, REP_TGT | REP_AAVSO, NULL);
+}
 
 static void select_cb(gpointer data, guint action, GtkWidget *menu_item)
 {
@@ -288,36 +325,26 @@ static void select_cb(gpointer data, guint action, GtkWidget *menu_item)
 	}
 }
 
-static void mb_close_cb(gpointer data, guint action, GtkWidget *menu_item)
+void mband_select_all_action (GtkAction *action, gpointer data)
 {
-	struct mband_dataset *mbds;
-	GtkWidget *list;
-
-	mbds = g_object_get_data(G_OBJECT(data), "mbds");
-
-	if (mbds && !modal_yes_no("Closing the dataset will "
-				  "discard fit information\n"
-				  "Are you sure?", "Close dataset?"))
-		return;
-
-	list = g_object_get_data(G_OBJECT(data), "ofr_list");
-	if (list) {
-//		gtk_widget_hide(list);
-		g_object_set_data(G_OBJECT(data), "ofr_list", NULL);
-	}
-	list = g_object_get_data(G_OBJECT(data), "sob_list");
-	if (list) {
-//		gtk_widget_hide(list);
-		g_object_set_data(G_OBJECT(data), "sob_list", NULL);
-	}
-	list = g_object_get_data(G_OBJECT(data), "bands_list");
-	if (list) {
-//		gtk_widget_hide(list);
-		g_object_set_data(G_OBJECT(data), "bands_list", NULL);
-	}
-	if (mbds)
-		g_object_set_data(G_OBJECT(data), "mbds", NULL);
+	select_cb (data, SEL_ALL, NULL);
 }
+
+void mband_unselect_all_action (GtkAction *action, gpointer data)
+{
+	select_cb (data, UNSEL_ALL, NULL);
+}
+
+void mband_hide_action (GtkAction *action, gpointer data)
+{
+	select_cb (data, HIDE_SEL, NULL);
+}
+
+void mband_unhide_action (GtkAction *action, gpointer data)
+{
+	select_cb (data, UNHIDE_ALL, NULL);
+}
+
 
 
 static void plot_cb(gpointer data, guint action, GtkWidget *menu_item)
@@ -479,6 +506,41 @@ static void plot_cb(gpointer data, guint action, GtkWidget *menu_item)
 	}
 
 	g_list_free(ofrs);
+}
+
+void mband_plot_resmag_action(GtkAction *action, gpointer data)
+{
+	plot_cb (data, PLOT_RES_SM, NULL);
+}
+
+void mband_plot_rescol_action(GtkAction *action, gpointer data)
+{
+	plot_cb (data, PLOT_RES_COL, NULL);
+}
+
+void mband_plot_errmag_action(GtkAction *action, gpointer data)
+{
+	plot_cb (data, PLOT_RES_SM | PLOT_WEIGHTED, NULL);
+}
+
+void mband_plot_errcol_action(GtkAction *action, gpointer data)
+{
+	plot_cb (data, PLOT_RES_COL | PLOT_WEIGHTED, NULL);
+}
+
+void mband_plot_zpairmass_action(GtkAction *action, gpointer data)
+{
+	plot_cb (data, PLOT_ZP_AIRMASS, NULL);
+}
+
+void mband_plot_zptime_action(GtkAction *action, gpointer data)
+{
+	plot_cb (data, PLOT_ZP_TIME, NULL);
+}
+
+void mband_plot_magtime_action(GtkAction *action, gpointer data)
+{
+	plot_cb (data, PLOT_STAR, NULL);
 }
 
 static void ofr_store_set_row_vals(GtkListStore *ofr_store, GtkTreeIter *iter, struct o_frame *ofr)
@@ -654,15 +716,16 @@ static void fit_cb(gpointer data, guint action, GtkWidget *menu_item)
 		g_list_foreach(glh, (GFunc) gtk_tree_path_free, NULL);
 		g_list_free(glh);
 	} else {
-		/* lovely API */
-		if (gtk_tree_model_get_iter_first(ofr_store, &iter)) {
-			do {
-				gtk_tree_model_get(ofr_store, &iter, 0, &ofr, -1);
-				if (ofr == NULL)
-					continue;
+		gboolean valid;
 
+		valid = gtk_tree_model_get_iter_first (ofr_store, &iter);
+		while (valid) {
+			gtk_tree_model_get(ofr_store, &iter, 0, &ofr, -1);
+
+			if (ofr != NULL)
 				ofr_store_set_row_vals(GTK_LIST_STORE(ofr_store), &iter, ofr);
-			} while (gtk_tree_model_iter_next(ofr_store, &iter));
+
+			valid = gtk_tree_model_iter_next (ofr_store, &iter);
 		}
 	}
 
@@ -672,6 +735,25 @@ static void fit_cb(gpointer data, guint action, GtkWidget *menu_item)
 	g_list_free(ofrs);
 }
 
+void mband_fit_zpoints_action(GtkAction *action, gpointer data)
+{
+	fit_cb (data, FIT_ZPOINTS, NULL);
+}
+
+void mband_fit_zp_wtrans_action(GtkAction *action, gpointer data)
+{
+	fit_cb (data, FIT_ZP_WTRANS, NULL);
+}
+
+void mband_fit_trans_action(GtkAction *action, gpointer data)
+{
+	fit_cb (data, FIT_TRANS, NULL);
+}
+
+void mband_fit_allsky_action(GtkAction *action, gpointer data)
+{
+	fit_cb (data, FIT_ALL_SKY, NULL);
+}
 
 static void mbds_ofr_to_list(GtkWidget *dialog, GtkWidget *list)
 {
@@ -1177,81 +1259,80 @@ gboolean mband_window_delete(GtkWidget *widget, GdkEvent *event, gpointer data)
 //	g_object_set_data(G_OBJECT(data), "mband_window", NULL);
 	return TRUE;
 }
-static void mb_wclose_cb(gpointer data, guint action, GtkWidget *menu_item)
+
+void mband_close_action(GtkAction *action, gpointer data)
 {
 	mband_window_delete(data, NULL, NULL);
 }
 
-static GtkItemFactoryEntry mband_menu_items[] = {
-	{ "/_File",		NULL,         	NULL,  		0, "<Branch>" },
-	{ "/File/_Add to Dataset", "<control>o", 	file_popup_cb,
-	  		FILE_ADD_TO_MBAND, "<Item>" },
-	{ "/File/_Save Dataset", "<control>s", rep_cb, REP_DATASET | REP_ALL, "<Item>"},
-	{ "/File/_Close Dataset", "<control>w",	mb_close_cb, 	0, "<Item>" },
-	{ "/File/Sep", NULL, NULL,	0, "<Separator>" },
-	{ "/File/Report _Targets in AAVSO Format", NULL, rep_cb, REP_TGT | REP_AAVSO, "<Item>" },
-	{ "/File/Sep", NULL, NULL,	0, "<Separator>" },
-	{ "/File/Close Window", "<control>q",	mb_wclose_cb, 	0, "<Item>" },
+/* name, stock id, label, accel, tooltip, callback */
+static GtkActionEntry mband_menu_actions[] = {
+	{ "mband-file",   NULL, "_File" },
+	{ "mband-edit",   NULL, "_Edit" },
+	{ "mband-reduce", NULL, "_Reduce" },
+	{ "mband-plot",   NULL, "_Plot" },
 
-	{ "/_Edit", NULL, NULL,	0, "<Branch>" },
-	{ "/_Edit/Select _All", "<control>A", select_cb, SEL_ALL, "<Item>" },
-	{ "/_Edit/_Unselect All", "<control>U", select_cb, UNSEL_ALL, "<Item>" },
-	{ "/_Edit/_Hide Selected", "H", select_cb, HIDE_SEL, "<Item>" },
-	{ "/_Edit/Unhi_de All", "<shift>H", select_cb, UNHIDE_ALL, "<Item>" },
-//	{ "/_Edit/Filter by Bands", NULL, NULL, 0, "<Item>" },
-//	{ "/_Edit/Filter by Frames", NULL, NULL, 0, "<Item>" },
-//	{ "/_Edit/Filter by Stars", NULL, NULL, 0, "<Item>" },
-//	{ "/_Edit/Show Outliers Only", NULL, NULL, 0, "<Item>" },
+        /* File */
+        { "mband-file-add", NULL, "_Add to Dataset", "<control>O", NULL, G_CALLBACK (file_add_mband_action) },
+	{ "mband-file-save", NULL, "_Save Dataset", "<control>S", NULL, G_CALLBACK (mband_save_dataset_action) },
+	{ "mband-file-close", NULL, "_Close Dataset", "<control>W", NULL, G_CALLBACK (mband_close_dataset_action) },
+	{ "mband-report-aavso", NULL, "Report _Targets in AAVSO Format", NULL, NULL, G_CALLBACK(mband_report_action) },
+	{ "mband-close", NULL, "Close Window", "<control>Q", NULL, G_CALLBACK(mband_close_action) },
 
-	{ "/_Reduce", NULL, NULL,	0, "<Branch>" },
-	{ "/_Reduce/Fit _Zero Points with Null Coefficients", NULL, fit_cb, FIT_ZPOINTS, "<Item>" },
-	{ "/_Reduce/Fit Zero Points with _Current Coefficients", NULL, fit_cb, FIT_ZP_WTRANS, "<Item>" },
-	{ "/_Reduce/Fit Zero Points and _Transformation Coefficients", NULL, fit_cb, FIT_TRANS, "<Item>" },
-	{ "/_Reduce/Fit Extinction and All-Sky Zero points", NULL, fit_cb, FIT_ALL_SKY, "<Item>" },
-//	{ "/Fit/Sep", NULL, NULL,	0, "<Separator>" },
-//	{ "/Fit/Bands Setup...", NULL, NULL,	2, "<Item>" },
+	/* Edit */
+	{ "mband-select-all", NULL, "Select _All", "<control>A", NULL, G_CALLBACK(mband_select_all_action) },
+	{ "mband-unselect-all", NULL, "_Unselect All", "<control>U", NULL, G_CALLBACK(mband_unselect_all_action) },
+	{ "mband-hide-selected", NULL, "_Hide Selected", "H", NULL, G_CALLBACK(mband_hide_action) },
+	{ "mband-unhide-all", NULL, "Unhi_de All", "<shift>H", NULL, G_CALLBACK(mband_unhide_action) },
 
-	{ "/_Plot", NULL, NULL,	0, "<Branch>" },
-	{ "/_Plot/_Residuals vs Magnitude", NULL, plot_cb, PLOT_RES_SM, "<Item>" },
-	{ "/_Plot/Residuals vs _Color", NULL, plot_cb, PLOT_RES_COL, "<Item>" },
-	{ "/_Plot/Standard _Errors vs Magnitude", NULL, plot_cb,
-	  PLOT_RES_SM | PLOT_WEIGHTED, "<Item>" },
-	{ "/_Plot/_Standard Errors vs Color", NULL, plot_cb,
-	  PLOT_RES_COL | PLOT_WEIGHTED, "<Item>" },
-	{ "/_Plot/Sep",	NULL, NULL, 0, "<Separator>" },
-	{ "/_Plot/_Zeropoints vs Airmass", NULL, plot_cb, PLOT_ZP_AIRMASS, "<Item>" },
-	{ "/_Plot/Zeropoints vs _Time", NULL, plot_cb, PLOT_ZP_TIME, "<Item>" },
-	{ "/_Plot/Sep",	NULL, NULL, 0, "<Separator>" },
-	{ "/_Plot/Star _Magnitude vs Time", NULL, plot_cb, PLOT_STAR, "<Item>" },
-//	{ "/_Plot/_Options/Plot _Selected Frames", NULL, NULL, 0, "<RadioItem>" },
-//	{ "/_Plot/_Options/Plot _All Frames", NULL, NULL, 0, "/Plot/Options/Plot Selected Frames" },
-//	{ "/_Plot/_Options/Sep", NULL, NULL, 0, "<Separator>" },
-//	{ "/_Plot/_Options/Plot to _Window", NULL, NULL, 0, "<RadioItem>" },
+	/* Reduce */
+	{ "mband-fit-zpoints", NULL, "Fit _Zero Points with Null Coefficients", NULL, NULL, G_CALLBACK(mband_fit_zpoints_action) },
+	{ "mband-fit-zp-wtrans", NULL, "Fit Zero Points with _Current Coefficients", NULL, NULL, G_CALLBACK(mband_fit_zp_wtrans_action) },
+	{ "mband-fit-trans", NULL, "Fit Zero Points and _Transformation Coefficients", NULL, NULL, G_CALLBACK(mband_fit_trans_action) },
+	{ "mband-fit-allsky", NULL, "Fit Extinction and All-Sky Zero Points", NULL, NULL, G_CALLBACK(mband_fit_allsky_action) },
+
+	/* Plot */
+	{ "mband-plot-residuals-magnitude", NULL, "_Residuals vs Magnitude", NULL, NULL, G_CALLBACK(mband_plot_resmag_action) },
+	{ "mband-plot-residuals-color", NULL, "Residuals vs _Color", NULL, NULL, G_CALLBACK(mband_plot_rescol_action) },
+	{ "mband-plot-errors-magnitude", NULL, "Standard _Errors vs Magnitude", NULL, NULL, G_CALLBACK(mband_plot_errmag_action) },
+	{ "mband-plot-errors-color", NULL, "_Standard Errors vs Color", NULL, NULL, G_CALLBACK(mband_plot_errcol_action) },
+	{ "mband-plot-zp-airmass", NULL, "_Zeropoints vs Airmass", NULL, NULL, G_CALLBACK(mband_plot_zpairmass_action) },
+	{ "mband-plot-zp-time", NULL, "Zeropoints vs _Time", NULL, NULL, G_CALLBACK(mband_plot_zptime_action) },
+	{ "mband-plot-magnitude-time", NULL, "Star _Magnitude vs Time", NULL, NULL, G_CALLBACK(mband_plot_magtime_action) },
 };
-
 
 /* create the menu bar */
 static GtkWidget *get_main_menu_bar(GtkWidget *window)
 {
 	GtkWidget *ret;
-	GtkItemFactory *item_factory;
-	GtkAccelGroup *accel_group;
-	gint nmenu_items = sizeof (mband_menu_items) /
-		sizeof (mband_menu_items[0]);
-	accel_group = gtk_accel_group_new ();
+	GtkUIManager *ui;
+	GError *error;
+	GtkActionGroup *action_group;
 
-	item_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR,
-					     "<main_menu>", accel_group);
-	g_object_set_data_full(G_OBJECT(window), "main_menu_if", item_factory,
-				 (GDestroyNotify) g_object_unref);
-	gtk_item_factory_create_items (item_factory, nmenu_items,
-				       mband_menu_items, window);
+	action_group = gtk_action_group_new ("MBActions");
+	gtk_action_group_add_actions (action_group, mband_menu_actions,
+				      G_N_ELEMENTS (mband_menu_actions), window);
 
-	/* Attach the new accelerator group to the window. */
-	gtk_window_add_accel_group (GTK_WINDOW (window), accel_group);
+	ui = gtk_ui_manager_new ();
+	gtk_ui_manager_insert_action_group (ui, action_group, 0);
 
-	/* Finally, return the actual menu bar created by the item factory. */
-	ret = gtk_item_factory_get_widget (item_factory, "<main_menu>");
+	error = NULL;
+	gtk_ui_manager_add_ui_from_file (ui, "menus.ui", &error);
+	if (error) {
+		g_message ("building menus failed: %s", error->message);
+		g_error_free (error);
+		return NULL;
+	}
+
+	ret = gtk_ui_manager_get_widget (ui, "/mband-menubar");
+
+        /* Make sure that the accelerators work */
+	gtk_window_add_accel_group (GTK_WINDOW (window),
+				    gtk_ui_manager_get_accel_group (ui));
+
+	g_object_ref (ret);
+	g_object_unref (ui);
+
 	return ret;
 }
 
