@@ -479,7 +479,7 @@ static struct cat_star * parse_cat_line_usnob(char *line)
 		n = snprintf(buf, 255, "bj=%.3f ", b1);
 	}
 	if (r1 > 0) {
-		n += snprintf(buf+n, 255-n, "rf=%.3f ", b1);
+		n += snprintf(buf+n, 255-n, "rf=%.3f ", r1);
 	}
 	if (in > 0) {
 		n += snprintf(buf+n, 255-n, "n=%.3f ", in);
