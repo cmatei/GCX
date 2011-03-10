@@ -46,59 +46,42 @@
 #include "psf.h"
 #include "filegui.h"
 
-static unsigned int colors[PAR_COLOR_ALL] = {
-	0xff0000,
-	0xff8000,
-	0xffff00,
-	0x00c000,
-	0x00ffff,
-	0x0000ff,
-	0x8080ff,
-	0x808080,
-	0xffffff,
+static struct {
+	double red;
+	double green;
+	double blue;
+} colors[PAR_COLOR_ALL] = {
+	{ 1.0,  0.0, 0.0 },
+	{ 1.0,  0.5, 0.0 },
+	{ 1.0,  1.0, 0.0 },
+	{ 0.0, 0.75, 0.0 },
+	{ 0.0,  1.0, 1.0 },
+	{ 0.0,  0.0, 1.0 },
+	{ 0.5,  0.5, 1.0 },
+	{ 0.5,  0.5, 0.5 },
+	{ 1.0,  1.0, 1.0 }
 };
 
-void get_color_par(int p, GdkColor *color, GdkColormap *cmap)
-{
-	unsigned int crgb;
-	crgb = colors[P_INT(p)];
-	color->red = (crgb >> 8) & 0xff00;
-	color->green = (crgb) & 0xff00;
-	color->blue = (crgb << 8) & 0xff00;
-	if (!gdk_colormap_alloc_color(cmap, color, FALSE, TRUE)) {
-		g_error("couldn't allocate color");
-	}
-}
 
 void gui_star_list_update_colors(struct gui_star_list *gsl)
 {
-	GdkColormap *cmap;
-	GdkColor color;
-	cmap = gdk_colormap_get_system();
+	gsl->selected_color = P_INT(SDISP_SELECTED_COLOR);
 
-	get_color_par(SDISP_SELECTED_COLOR, &color, cmap);
-	memcpy(&(gsl->selected_color), &color, sizeof(GdkColor));
-	get_color_par(SDISP_SIMPLE_COLOR, &color, cmap);
-	memcpy(&(gsl->color[STAR_TYPE_SIMPLE]), &color, sizeof(GdkColor));
-	get_color_par(SDISP_SREF_COLOR, &color, cmap);
-	memcpy(&(gsl->color[STAR_TYPE_SREF]), &color, sizeof(GdkColor));
-	get_color_par(SDISP_APSTD_COLOR, &color, cmap);
-	memcpy(&(gsl->color[STAR_TYPE_APSTD]), &color, sizeof(GdkColor));
-	get_color_par(SDISP_APSTAR_COLOR, &color, cmap);
-	memcpy(&(gsl->color[STAR_TYPE_APSTAR]), &color, sizeof(GdkColor));
-	get_color_par(SDISP_CAT_COLOR, &color, cmap);
-	memcpy(&(gsl->color[STAR_TYPE_CAT]), &color, sizeof(GdkColor));
-	get_color_par(SDISP_USEL_COLOR, &color, cmap);
-	memcpy(&(gsl->color[STAR_TYPE_USEL]), &color, sizeof(GdkColor));
-	get_color_par(SDISP_ALIGN_COLOR, &color, cmap);
-	memcpy(&(gsl->color[STAR_TYPE_ALIGN]), &color, sizeof(GdkColor));
+	gsl->color[STAR_TYPE_SIMPLE] = P_INT(SDISP_SIMPLE_COLOR);
+	gsl->color[STAR_TYPE_SREF]   = P_INT(SDISP_SREF_COLOR);
+	gsl->color[STAR_TYPE_APSTD]  = P_INT(SDISP_APSTD_COLOR);
+	gsl->color[STAR_TYPE_APSTAR] = P_INT(SDISP_APSTAR_COLOR);
+	gsl->color[STAR_TYPE_CAT]    = P_INT(SDISP_CAT_COLOR);
+	gsl->color[STAR_TYPE_USEL]   = P_INT(SDISP_USEL_COLOR);
+	gsl->color[STAR_TYPE_ALIGN]  = P_INT(SDISP_ALIGN_COLOR);
+
 	gsl->shape[STAR_TYPE_SIMPLE] = P_INT(SDISP_SIMPLE_SHAPE);
-	gsl->shape[STAR_TYPE_SREF] = P_INT(SDISP_SREF_SHAPE);
-	gsl->shape[STAR_TYPE_APSTD] = P_INT(SDISP_APSTD_SHAPE);
+	gsl->shape[STAR_TYPE_SREF]   = P_INT(SDISP_SREF_SHAPE);
+	gsl->shape[STAR_TYPE_APSTD]  = P_INT(SDISP_APSTD_SHAPE);
 	gsl->shape[STAR_TYPE_APSTAR] = P_INT(SDISP_APSTAR_SHAPE);
-	gsl->shape[STAR_TYPE_CAT] = P_INT(SDISP_CAT_SHAPE);
-	gsl->shape[STAR_TYPE_USEL] = P_INT(SDISP_USEL_SHAPE);
-	gsl->shape[STAR_TYPE_ALIGN] = P_INT(SDISP_ALIGN_SHAPE);
+	gsl->shape[STAR_TYPE_CAT]    = P_INT(SDISP_CAT_SHAPE);
+	gsl->shape[STAR_TYPE_USEL]   = P_INT(SDISP_USEL_SHAPE);
+	gsl->shape[STAR_TYPE_ALIGN]  = P_INT(SDISP_ALIGN_SHAPE);
 }
 
 void attach_star_list(struct gui_star_list *gsl, GtkWidget *window)
@@ -123,107 +106,112 @@ static int star_near_area(int x, int y, GdkRectangle *area, int margin)
 }
 
 /* draw the star shape on screen */
-static void draw_a_star(GdkWindow *drawable, GdkGC *gc, int x, int y, int size, int shape,
-			char *label, int ox, int oy, GdkFont *font)
+static void draw_a_star(cairo_t *cr, int x, int y, int size, int shape,
+			char *label, int ox, int oy)
 {
-	GdkPoint point[5];
-	GdkSegment seg[5];
+	int xl, yl;
 	int r;
+
+	xl = x;
+	yl = y;
 
 	switch(shape) {
 	case STAR_SHAPE_CIRCLE:
-		gdk_draw_arc(drawable, gc, FALSE, x-size, y-size,
-			     2*size, 2*size, 0, 360*64);
-		if (label != NULL && font != NULL) {
-			gdk_draw_text(drawable, font, gc, x+size+ox+2, y+oy+2,
-				      label, strlen(label));
-		}
+		cairo_arc (cr, x, y, size, 0, 2 * M_PI);
+		cairo_stroke (cr);
+
+		xl = x + size + ox + 2;
+		yl = y + oy + 2;
 		break;
+
 	case STAR_SHAPE_SQUARE:
-		gdk_draw_rectangle(drawable, gc, FALSE, x-size, y-size,
-				   2*size, 2*size);
-		if (label != NULL && font != NULL) {
-			gdk_draw_text(drawable, font, gc, x+size+ox+2, y+oy+2,
-				      label, strlen(label));
-		}
+		cairo_rectangle (cr, x - size, y - size, 2 * size, 2 * size);
+		cairo_stroke (cr);
+
+		xl = x + size + ox + 2;
+		yl = y + oy + 2;
 		break;
+
 	case STAR_SHAPE_DIAMOND:
 		size *= 2;
-		point[0].x = x;
-		point[0].y = y + size;
-		point[1].x = x - size;
-		point[1].y = y;
-		point[2].x = x;
-		point[2].y = y - size;
-		point[3].x = x + size;
-		point[3].y = y;
-		point[4].x = x;
-		point[4].y = y + size;
-		gdk_draw_lines(drawable, gc, point, 5);
-		if (label != NULL && font != NULL) {
-			gdk_draw_text(drawable, font, gc, x+size+ox+2, y+oy+2,
-				      label, strlen(label));
-		}
+
+		cairo_move_to (cr, x, y + size);
+		cairo_line_to (cr, x - size, y);
+		cairo_line_to (cr, x, y - size);
+		cairo_line_to (cr, x + size, y);
+		cairo_line_to (cr, x, y + size);
+		cairo_stroke (cr);
+
+		xl = x + size + ox + 2;
+		yl = y + oy + 2;
 		break;
+
 	case STAR_SHAPE_BLOB:
 //		if (size > 1)
 //			size --;
-		gdk_draw_arc(drawable, gc, TRUE, x-size, y-size,
-			     2*size, 2*size, 0, 360*64);
-		if (label != NULL && font != NULL) {
-			gdk_draw_text(drawable, font, gc, x+size+ox+2, y+oy+2,
-				      label, strlen(label));
-		}
+
+		cairo_arc (cr, x, y, 2 * size, 0, 2 * M_PI);
+		cairo_close_path (cr);
+		cairo_fill (cr);
+
+		xl = x + size + ox + 2;
+		yl = y + oy + 2;
 		break;
+
 	case STAR_SHAPE_APHOT:
-/* size is the zoom here. for x1, size = 2
-   (so we never make the rings too small */
+		/* size is the zoom here. for x1, size = 2
+		   (so we never make the rings too small */
 		r = P_DBL(AP_R1) * size / 2;
-		gdk_draw_arc(drawable, gc, FALSE, x-r, y-r,
-			     2*r, 2*r, 0, 360*64);
+		cairo_arc (cr, x, y, r, 0, 2 * M_PI);
+		cairo_stroke (cr);
+
 		r = P_DBL(AP_R2) * size / 2;
-		gdk_draw_arc(drawable, gc, FALSE, x-r, y-r,
-			     2*r, 2*r, 0, 360*64);
+		cairo_arc (cr, x, y, r, 0, 2 * M_PI);
+		cairo_stroke (cr);
+
 		r = P_DBL(AP_R3) * size / 2;
-		gdk_draw_arc(drawable, gc, FALSE, x-r, y-r,
-			     2*r, 2*r, 0, 360*64);
-		if (label != NULL && font != NULL) {
-			gdk_draw_text(drawable, font, gc, x+r+ox+2, y+oy+2,
-				      label, strlen(label));
-		}
+		cairo_arc (cr, x, y, r, 0, 2 * M_PI);
+		cairo_stroke (cr);
+
+		xl = x + r + ox + 2;
+		yl = y + oy + 2;
 		break;
+
 	case STAR_SHAPE_CROSS:
-		seg[0].x1 = x+size;
-		seg[0].x2 = x+5*size;
-		seg[0].y1 = y;
-		seg[0].y2 = y;
-		seg[1].x1 = x-size;
-		seg[1].x2 = x-5*size;
-		seg[1].y1 = y;
-		seg[1].y2 = y;
-		seg[2].x1 = x;
-		seg[2].x2 = x;
-		seg[2].y1 = y-size;
-		seg[2].y2 = y-5*size;
-		seg[3].x1 = x;
-		seg[3].x2 = x;
-		seg[3].y1 = y+size;
-		seg[3].y2 = y+5*size;
-		gdk_draw_segments(drawable, gc, seg, 4);
-		if (label != NULL && font != NULL) {
-			gdk_draw_text(drawable, font, gc, x+size+ox+2, y+oy-2,
-				      label, strlen(label));
-		}
+
+		cairo_move_to (cr, x + size, y);
+		cairo_line_to (cr, x + 5 * size, y);
+		cairo_stroke (cr);
+
+		cairo_move_to (cr, x - size, y);
+		cairo_line_to (cr, x - 5 * size, y);
+		cairo_stroke (cr);
+
+		cairo_move_to (cr, x, y - size);
+		cairo_line_to (cr, x, y - 5 * size);
+		cairo_stroke (cr);
+
+		cairo_move_to (cr, x, y + size);
+		cairo_line_to (cr, x, y + 5 * size);
+		cairo_stroke (cr);
+
+		xl = x + size + ox + 2;
+		yl = y + oy - 2;
 		break;
+
 	default:
-		gdk_draw_arc(drawable, gc, FALSE, x-size, y-size,
-			     2*size, 2*size, 0, 360*64);
-		if (label != NULL && font != NULL) {
-			gdk_draw_text(drawable, font, gc, x+size+ox+2, y+oy+2,
-				      label, strlen(label));
-		}
+		cairo_arc (cr, x, y, 2 * size, 0, 2 * M_PI);
+		cairo_stroke (cr);
+
+		xl = x + size + ox + 2;
+		yl = y + oy + 2;
 	}
-/* TODO add label drawing here */
+
+	/* FIXME deal with the fonts/sizes somehow */
+	if (label != NULL) {
+		cairo_move_to (cr, xl, yl);
+		cairo_show_text (cr, label);
+	}
 }
 
 /* get the proper drawing type for the star */
@@ -243,8 +231,12 @@ static int draw_type (struct gui_star *gs)
 }
 */
 
-static void draw_star_helper(struct gui_star *gs, GdkWindow *drawable, struct gui_star_list *gsl,
-			GdkGC *gc, double zoom, GdkFont *font)
+static void set_foreground_color (cairo_t *cr, int color)
+{
+	cairo_set_source_rgb (cr, colors[color].red, colors[color].green, colors[color].blue);
+}
+
+static void draw_star_helper(struct gui_star *gs, cairo_t *cr, struct gui_star_list *gsl, double zoom)
 {
 	int type;
 	int ix, iy, isz;
@@ -253,12 +245,15 @@ static void draw_star_helper(struct gui_star *gs, GdkWindow *drawable, struct gu
 
 	if (type > STAR_TYPES - 1)
 		type = STAR_TYPES - 1;
+
 	if (gs->flags & STAR_SELECTED)
-		gdk_gc_set_foreground(gc, &(gsl->selected_color));
+		set_foreground_color (cr, gsl->selected_color);
 	else
-		gdk_gc_set_foreground(gc, &(gsl->color[type]));
+		set_foreground_color (cr, gsl->color[type]);
+
 	ix = (gs->x + 0.5) * zoom;
 	iy = (gs->y + 0.5) * zoom;
+
 	if (gsl->shape[type] == STAR_SHAPE_APHOT) {
 		if (zoom < 1)
 			isz = 1;
@@ -279,22 +274,33 @@ static void draw_star_helper(struct gui_star *gs, GdkWindow *drawable, struct gu
 	clamp_int(&isz, P_INT(DO_MIN_STAR_SZ), 100);
 	if (gs->flags & STAR_HIDDEN)
 		return;
-	draw_a_star(drawable, gc, ix, iy, isz, gsl->shape[type],
-		    gs->label.label, gs->label.ox, gs->label.oy, font);
+
+	/* FIXME: cairo_set_line_width here, according to zoom */
+	cairo_set_line_width (cr, 1.0);
+
+	draw_a_star(cr, ix, iy, isz, gsl->shape[type],
+		    gs->label.label, gs->label.ox, gs->label.oy);
+
 	if ((gs->pair != NULL) && (gs->pair->flags & STAR_HAS_PAIR)) {
 		int pix, piy;
-		gint8 dash_list[]={1, 1};
-		GdkGC *gc_pline;
-		gc_pline = gdk_gc_new(drawable);
-		gdk_gc_copy(gc_pline, gc);
-		gdk_gc_set_line_attributes (gc_pline, 0, GDK_LINE_ON_OFF_DASH,
-					    GDK_CAP_BUTT, GDK_JOIN_BEVEL);
-		gdk_gc_set_dashes(gc_pline, 0, dash_list, 2);
+		double dash_list[] = { 1.0, 1.0 };
+
+		cairo_save (cr);
+
+		cairo_set_dash (cr, dash_list, 2, 0.0);
+		cairo_set_line_cap (cr, CAIRO_LINE_CAP_BUTT);
+		cairo_set_line_join (cr, CAIRO_LINE_JOIN_BEVEL);
+
 		pix = (gs->pair->x + 0.5) * zoom;
 		piy = (gs->pair->y + 0.5) * zoom;
-		gdk_draw_line(drawable, gc_pline, ix, iy, pix, piy);
-		g_object_unref (gc_pline);
+
+		cairo_move_to (cr, ix, iy);
+		cairo_line_to (cr, pix, piy);
+		cairo_stroke (cr);
+
+		cairo_restore (cr);
 	}
+
 	if (P_INT(DO_SHOW_DELTAS) &&
 	    (gs->s != NULL) && (CAT_STAR(gs->s)->flags & INFO_POS)) {
 		int pix, piy;
@@ -302,13 +308,18 @@ static void draw_star_helper(struct gui_star *gs, GdkWindow *drawable, struct gu
 		       CAT_STAR(gs->s)->pos[POS_DX] + 0.5) * zoom;
 		piy = (P_DBL(WCS_PLOT_ERR_SCALE) *
 		       CAT_STAR(gs->s)->pos[POS_DY] + 0.5) * zoom;
+
 		if ((pix < -4) || (pix > 4) || (piy < -4) || (piy > 4)) {
-			gdk_draw_line(drawable, gc, ix, iy, ix+pix, iy+piy);
-			gdk_draw_arc(drawable, gc, TRUE, ix+pix-2, iy+piy-2,
-				     4, 4, 0, 360*64);
+
+			cairo_move_to (cr, ix, iy);
+			cairo_line_to (cr, ix + pix, iy + piy);
+			cairo_stroke (cr);
+
+			cairo_arc (cr, ix + pix, iy + piy, 2, 0, 2 * M_PI);
+			cairo_close_path (cr);
+			cairo_fill (cr);
 		}
 	}
-
 }
 
 /* compute display size for a cat_star */
@@ -332,10 +343,10 @@ double cat_star_size(struct cat_star *cats)
  * draw_star_helper for expose redraws */
 void draw_gui_star(struct gui_star *gs, GtkWidget *window)
 {
-	GdkGC *gc;
 	GtkWidget *darea;
 	struct map_geometry *geom;
 	struct gui_star_list *gsl;
+	cairo_t *cr;
 
 	darea = g_object_get_data(G_OBJECT(window), "image");
 	if (darea == NULL)
@@ -346,9 +357,12 @@ void draw_gui_star(struct gui_star *gs, GtkWidget *window)
 	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl == NULL)
 		return;
-	gc = gdk_gc_new(darea->window);
-	draw_star_helper(gs, darea->window, gsl, gc, geom->zoom, gtk_style_get_font(darea->style));
-	g_object_unref(gc);
+
+	cr = gdk_cairo_create (darea->window);
+
+	draw_star_helper(gs, cr, gsl, geom->zoom);
+
+	cairo_destroy(cr);
 }
 
 /* draw a GSList of gui_stars
@@ -358,10 +372,10 @@ void draw_star_list(GSList *stars, GtkWidget *window)
 {
 	struct gui_star *gs;
 	GSList *sl = NULL;
-	GdkGC *gc;
 	GtkWidget *darea;
 	struct map_geometry *geom;
 	struct gui_star_list *gsl;
+	cairo_t *cr;
 
 	darea = g_object_get_data(G_OBJECT(window), "image");
 	if (darea == NULL)
@@ -372,22 +386,22 @@ void draw_star_list(GSList *stars, GtkWidget *window)
 	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl == NULL)
 		return;
-	gc = gdk_gc_new(darea->window);
+
+	cr = gdk_cairo_create (darea->window);
 	sl = stars;
 	while(sl != NULL) {
 		gs = GUI_STAR(sl->data);
 		sl = g_slist_next(sl);
-		draw_star_helper(gs, darea->window, gsl, gc, geom->zoom, gtk_style_get_font(darea->style));
+		draw_star_helper(gs, cr, gsl, geom->zoom);
 	}
-	g_object_unref(gc);
+	cairo_destroy (cr);
 }
-
 
 /* hook function for sources drawing on expose */
 void draw_sources_hook(GtkWidget *darea, GtkWidget *window, GdkRectangle *area)
 {
-	GdkGC *gc;
 	GSList *sl = NULL;
+	cairo_t *cr;
 	struct map_geometry *geom;
 	struct gui_star_list *gsl;
 	struct gui_star *gs;
@@ -399,8 +413,10 @@ void draw_sources_hook(GtkWidget *darea, GtkWidget *window, GdkRectangle *area)
 	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl == NULL)
 		return;
+
 	gui_star_list_update_colors(gsl);
-	gc = gdk_gc_new(darea->window);
+
+	cr = gdk_cairo_create(darea->window);
 
 /*  	d3_printf("expose area is %d by %d starting at %d, %d\n", */
 /*  		  area->width, area->height, area->x, area->y); */
@@ -414,20 +430,20 @@ void draw_sources_hook(GtkWidget *darea, GtkWidget *window, GdkRectangle *area)
 		iy = (gs->y + 0.5) * geom->zoom;
 		isz = gs->size * geom->zoom + gsl->max_size;
 		if (star_near_area(ix, iy, area, isz)) {
-			draw_star_helper(gs, darea->window, gsl, gc,
-					 geom->zoom, gtk_style_get_font(darea->style));
+			draw_star_helper(gs, cr, gsl, geom->zoom);
 		}
+
 		if (gs->pair != NULL) {
 			ix = (gs->pair->x + 0.5) * geom->zoom;
 			iy = (gs->pair->y + 0.5) * geom->zoom;
 			isz = gs->pair->size * geom->zoom + gsl->max_size;
 			if (star_near_area(ix, iy, area, isz)) {
-				draw_star_helper(gs, darea->window, gsl,
-						 gc, geom->zoom, gtk_style_get_font(darea->style));
+				draw_star_helper(gs, cr, gsl, geom->zoom);
 			}
 		}
 	}
-	g_object_unref(gc);
+
+	cairo_destroy(cr);
 }
 
 
@@ -549,12 +565,12 @@ void find_stars_cb(gpointer window, guint action, GtkWidget *menu_item)
 		}
 		info_printf_sb2(window, "Searching for stars...");
 //		d3_printf("Star det SNR: %f(%d)\n", P_DBL(SD_SNR), SD_SNR);
-/* give the mainloop a change to redraw under the popup */
+		/* give the mainloop a change to redraw under the popup */
 		while (gtk_events_pending ())
 			gtk_main_iteration ();
 		extract_stars(i_ch->fr, NULL, 0, P_DBL(SD_SNR), src);
 		remove_stars_of_type(gsl, TYPE_MASK(STAR_TYPE_SIMPLE), 0);
-/* now add to the list */
+		/* now add to the list */
 		for (i = 0; i < src->ns; i++) {
 			if (src->s[i].peak > P_DBL(AP_SATURATION))
 				continue;
@@ -1256,7 +1272,8 @@ static void do_sources_popup(GtkWidget *window, GtkItemFactory *star_if,
 		}
 	}
 	g_slist_free(selection);
-/* fix the menu */
+
+	/* fix the menu */
 	mi = gtk_item_factory_get_widget(star_if, "/Create Pair");
 	if (mi != NULL)
 		gtk_widget_set_sensitive(mi, pairp);

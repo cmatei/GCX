@@ -51,8 +51,9 @@ struct gui_star {
 /* structure holding the gui_star list and general parameters for their display */
 struct gui_star_list {
 	int ref_count;
-	GdkColor selected_color; /* color we paint the selected stars with */
-	GdkColor color[STAR_TYPES]; /* colors we paint the various types with */
+
+	int selected_color; /* color we paint the selected stars with */
+	int color[STAR_TYPES]; /* colors we paint the various types with */
 	int shape[STAR_TYPES]; /* shapes we use to paint stars */
 	int display_mask; /* a bit field showing which types we display */
 	int select_mask; /* a bit field showing which types we select from */
