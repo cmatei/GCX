@@ -12,6 +12,7 @@ void file_save_action(GtkAction *action, gpointer data);
 void file_export_pnm8_action(GtkAction *action, gpointer data);
 void file_export_pnm16_action(GtkAction *action, gpointer data);
 void file_add_mband_action(GtkAction *action, gpointer data);
+void file_load_recipy_action(GtkAction *action, gpointer data);
 
 int load_rcp_to_window(gpointer window, char *rcpf, char *object);
 char *find_file_in_path(char *pattern, char *path);

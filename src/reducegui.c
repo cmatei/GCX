@@ -152,6 +152,33 @@ static GtkWidget *get_main_menu_bar(GtkWidget *window)
 	GtkUIManager *ui;
 	GError *error;
 	GtkActionGroup *action_group;
+	static char *reduce_ui =
+		"<menubar name='reduce-menubar'>"
+		"  <menu name='reduce-file' action='reduce-file'>"
+		"    <menuitem name='Add Files' action='reduce-add-files'/>"
+		"    <menuitem name='Remove Selected Files' action='reduce-remove-selected'/>"
+		"    <menuitem name='Reload Selected Files' action='reduce-reload-selected'/>"
+		"    <separator name='separator1'/>"
+		"    <menuitem name='Display Frame' action='reduce-display-frame'/>"
+		"    <menuitem name='Next Frame' action='reduce-next-frame'/>"
+		"    <menuitem name='Previous Frame' action='reduce-prev-frame'/>"
+		"    <separator name='separator2'/>"
+		"    <menuitem name='Skip Selected Frames' action='reduce-skip-selected'/>"
+		"    <menuitem name='Unskip Selected Frames' action='reduce-unskip-selected'/>"
+		"  </menu>"
+		"  <menu name='reduce-edit' action='reduce-edit'>"
+		"    <menuitem name='Select All' action='reduce-select-all'/>"
+		"  </menu>"
+		"  <menu name='Reduce' action='reduce-reduce'>"
+		"    <menuitem name='Reduce All' action='reduce-reduce-all'/>"
+		"    <menuitem name='Reduce One Frame' action='reduce-reduce-one'/>"
+		"    <menuitem name='Qphot One Frame' action='reduce-qphot-one'/>"
+		"    <separator name='separator1'/>"
+		"    <menuitem name='Show Alignment Stars' action='reduce-show-alignment-stars'/>"
+		"    <separator name='separator2'/>"
+		"    <menuitem name='Multi-frame Photometry...' action='reduce-multi-frame'/>"
+		"  </menu>"
+		"</menubar>";
 
 	action_group = gtk_action_group_new ("ReduceActions");
 	gtk_action_group_add_actions (action_group, reduce_menu_actions,
@@ -161,7 +188,7 @@ static GtkWidget *get_main_menu_bar(GtkWidget *window)
 	gtk_ui_manager_insert_action_group (ui, action_group, 0);
 
 	error = NULL;
-	gtk_ui_manager_add_ui_from_file (ui, "menus.ui", &error);
+	gtk_ui_manager_add_ui_from_string (ui, reduce_ui, strlen(reduce_ui), &error);
 	if (error) {
 		g_message ("building menus failed: %s", error->message);
 		g_error_free (error);

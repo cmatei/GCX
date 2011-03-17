@@ -96,8 +96,11 @@ struct gui_star_list {
 
 /* from sourcesdraw.c */
 void gsl_unselect_all(GtkWidget *window);
-extern void find_stars_cb(gpointer window, guint action, GtkWidget *menu_item);
+extern void find_stars_cb(gpointer window, guint action);
+
 extern void stars_add_detect_action (GtkAction *action, gpointer data);
+extern void stars_show_target_action (GtkAction *action, gpointer data);
+extern void stars_add_catalog_action (GtkAction *action, gpointer data);
 
 extern void draw_sources_hook(GtkWidget *darea, GtkWidget *window,
 			      GdkRectangle *area);
@@ -114,7 +117,6 @@ extern int add_stars_from_gsc(struct gui_star_list *gsl, struct wcs *fim,
 extern GSList * stars_under_click(GtkWidget *window, GdkEventButton *event);
 //extern void selection_mode_cb(gpointer data, guint action, GtkWidget *menu_item);
 //extern void change_selection_mode(GtkWidget *window, int mode, char *param);
-extern void star_popup_cb(gpointer data, guint action, GtkWidget *menu_item);
 extern gboolean sources_clicked_cb(GtkWidget *w, GdkEventButton *event, gpointer data);
 extern GSList *filter_selection(GSList *sl, int type_mask, guint and_mask, guint or_mask);
 extern void search_remove_pair_from(struct gui_star *gs, struct gui_star_list *gsl);
@@ -130,8 +132,22 @@ void attach_star_list(struct gui_star_list *gsl, GtkWidget *window);
 void gui_star_list_update_colors(struct gui_star_list *gsl);
 void star_list_update_size(GtkWidget *window);
 void star_list_update_labels(GtkWidget *window);
-void star_display_cb(gpointer window, guint action, GtkWidget *menu_item);
-void star_edit_cb(gpointer window, guint action, GtkWidget *menu_item);
+
+extern void star_display_brighter_action(GtkAction *action, gpointer window);
+extern void star_display_fainter_action(GtkAction *action, gpointer window);
+extern void star_display_redraw_action(GtkAction *action, gpointer window);
+
+extern void stars_edit_action(GtkAction *action, gpointer window);
+
+extern void starp_edit_ap_action (GtkAction *action, gpointer window);
+extern void starp_unmark_star_action (GtkAction *action, gpointer window);
+extern void starp_pair_add_action (GtkAction *action, gpointer window);
+extern void starp_pair_rm_action (GtkAction *action, gpointer window);
+extern void starp_move_star_action (GtkAction *action, gpointer window);
+extern void starp_plot_profile_action (GtkAction *action, gpointer window);
+extern void starp_measure_star_action (GtkAction *action, gpointer window);
+extern void starp_plot_skyhist_action (GtkAction *action, gpointer window);
+extern void starp_fit_psf_action (GtkAction *action, gpointer window);
 
 /* starlist.c */
 

@@ -71,7 +71,7 @@ static void set_named_callback(void *dialog, char *name, char *callback, void *f
 
 
 /* show the current frame's fits header in a text window */
-void fits_header_cb(gpointer window, guint action, GtkWidget *menu_item)
+void fits_header_action(GtkAction *action, gpointer window)
 {
 	GtkWidget *dialog;
 	struct image_channel *i_chan;
@@ -107,7 +107,7 @@ void fits_header_cb(gpointer window, guint action, GtkWidget *menu_item)
 }
 
 /* show a help page in a text window */
-void help_page_cb(gpointer window, guint action, GtkWidget *menu_item)
+static void help_page_cb(gpointer window, guint action)
 {
 	GtkWidget *dialog;
 	char *page = NULL;
@@ -150,6 +150,27 @@ void help_page_cb(gpointer window, guint action, GtkWidget *menu_item)
 	}
 	gtk_window_set_title(GTK_WINDOW(dialog), "Help");
 }
+
+void help_bindings_action(GtkAction *action, gpointer window)
+{
+	help_page_cb (window, HELP_BINDINGS);
+}
+
+void help_usage_action(GtkAction *action, gpointer window)
+{
+	help_page_cb (window, HELP_USAGE);
+}
+
+void help_obscript_action(GtkAction *action, gpointer window)
+{
+	help_page_cb (window, HELP_OBSCRIPT);
+}
+
+void help_repconv_action(GtkAction *action, gpointer window)
+{
+	help_page_cb (window, HELP_REPCONV);
+}
+
 
 static void update_help_text(GtkWidget *dialog, char *page)
 {

@@ -226,7 +226,7 @@ int synth_stars_to_frame(struct ccd_frame * fr, struct wcs *wcs, GList *sl)
 }
 
 /* menu callback */
-void add_synth_stars_cb(gpointer window, guint action, GtkWidget *menu_item)
+void stars_add_synth_action(GtkAction *action, gpointer window)
 {
 	struct image_channel *i_ch;
 	struct wcs *wcs;

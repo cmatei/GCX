@@ -81,7 +81,7 @@ static void close_wcs_dialog( GtkWidget *widget, gpointer data )
 }
 
 /* show the current frame's fits header in a text window */
-void wcsedit_cb(gpointer window, guint action, GtkWidget *menu_item)
+void wcs_edit_action(GtkAction *action, gpointer window)
 {
 	GtkWidget *dialog;
 //	struct image_channel *i_chan;
@@ -341,27 +341,26 @@ static int wcsentry_cb(GtkWidget *widget, gpointer dialog)
 	return ret;
 }
 
-void wcs_cb(gpointer data, guint action, GtkWidget *menu_item)
+static void wcs_cb(gpointer window, guint action)
 {
-	GtkWidget *window = data;
 	struct image_channel *i_chan;
 	struct wcs *wcs;
 	struct gui_star_list *gsl;
 	switch(action) {
 	case WCS_EXISTING:
-/* we just do the "spw" here */
-		find_stars_cb(data, ADD_STARS_DETECT, NULL);
-		if (window_auto_pairs(data) < 1)
+		/* we just do the "spw" here */
+		find_stars_cb(window, ADD_STARS_DETECT);
+		if (window_auto_pairs(window) < 1)
 			return;
 		window_fit_wcs(window);
 		gtk_widget_queue_draw(window);
 		break;
 	case WCS_AUTO:
-/* we just do the "sgpw" here */
-		find_stars_cb(data, ADD_STARS_DETECT, NULL);
-		find_stars_cb(data, ADD_STARS_GSC, NULL);
-		find_stars_cb(data, ADD_STARS_TYCHO2, NULL);
-		if (window_auto_pairs(data) < 1)
+		/* we just do the "sgpw" here */
+		find_stars_cb(window, ADD_STARS_DETECT);
+		find_stars_cb(window, ADD_STARS_GSC);
+		find_stars_cb(window, ADD_STARS_TYCHO2);
+		if (window_auto_pairs(window) < 1)
 			return;
 	/* fallthrough */
 	case WCS_FIT:
@@ -369,18 +368,18 @@ void wcs_cb(gpointer data, guint action, GtkWidget *menu_item)
 		gtk_widget_queue_draw(window);
 		break;
 	case WCS_QUIET_AUTO:
-/* we just do the "sgpw<shift>f<shift>s" here */
-		wcs = g_object_get_data(G_OBJECT(data), "wcs_of_window");
+		/* we just do the "sgpw<shift>f<shift>s" here */
+		wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
 //		if (wcs != NULL && wcs->wcsset == WCS_VALID)
 //			break;
-		find_stars_cb(data, ADD_STARS_DETECT, NULL);
-		find_stars_cb(data, ADD_STARS_GSC, NULL);
-		find_stars_cb(data, ADD_STARS_TYCHO2, NULL);
-		if (window_auto_pairs(data) < 1)
+		find_stars_cb(window, ADD_STARS_DETECT);
+		find_stars_cb(window, ADD_STARS_GSC);
+		find_stars_cb(window, ADD_STARS_TYCHO2);
+		if (window_auto_pairs(window) < 1)
 			return;
 		window_fit_wcs(window);
-		star_rm_cb(data, STAR_RM_FIELD, NULL);
-		star_rm_cb(data, STAR_RM_FR, NULL);
+		star_rm_cb(window, STAR_RM_FIELD, NULL);
+		star_rm_cb(window, STAR_RM_FR, NULL);
 		break;
 	case WCS_RELOAD:
 		wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
@@ -412,12 +411,47 @@ void wcs_cb(gpointer data, guint action, GtkWidget *menu_item)
 	wcsedit_refresh(window);
 }
 
+void wcs_auto_action(GtkAction *action, gpointer window)
+{
+	wcs_cb (window, WCS_AUTO);
+}
+
+void wcs_quiet_auto_action(GtkAction *action, gpointer window)
+{
+	wcs_cb (window, WCS_QUIET_AUTO);
+}
+
+void wcs_existing_action(GtkAction *action, gpointer window)
+{
+	wcs_cb (window, WCS_EXISTING);
+}
+
+void wcs_fit_pairs_action(GtkAction *action, gpointer window)
+{
+	wcs_cb (window, WCS_FIT);
+}
+
+void wcs_reload_action(GtkAction *action, gpointer window)
+{
+	wcs_cb (window, WCS_RELOAD);
+}
+
+void wcs_validate_action(GtkAction *action, gpointer window)
+{
+	wcs_cb (window, WCS_FORCE_VALID);
+}
+
+void wcs_invalidate_action(GtkAction *action, gpointer window)
+{
+	wcs_cb (window, WCS_RESET);
+}
+
 /* a simulated wcs 'auto match' command */
 /* should return -1 if no match found */
 int match_field_in_window(void * image_window)
 {
 	struct wcs *wcs;
-	wcs_cb(image_window, WCS_AUTO, NULL);
+	wcs_cb(image_window, WCS_AUTO);
 	wcs = g_object_get_data(G_OBJECT(image_window), "wcs_of_window");
 	if (wcs == NULL) {
 		err_printf("No WCS found\n");
@@ -435,7 +469,7 @@ int match_field_in_window(void * image_window)
 int match_field_in_window_quiet(void * image_window)
 {
 	struct wcs *wcs;
-	wcs_cb(image_window, WCS_QUIET_AUTO, NULL);
+	wcs_cb(image_window, WCS_QUIET_AUTO);
 	wcs = g_object_get_data(G_OBJECT(image_window), "wcs_of_window");
 	if (wcs == NULL) {
 		err_printf("No WCS found\n");

@@ -214,23 +214,6 @@ static void draw_a_star(cairo_t *cr, int x, int y, int size, int shape,
 	}
 }
 
-/* get the proper drawing type for the star */
-/*
-static int draw_type (struct gui_star *gs)
-{
-	if ((TYPE_MASK_GSTAR(gs) & TYPE_MASK(STAR_TYPE_CAT)) && (gs->s != NULL)) {
-		if (CAT_STAR(gs->s)->flags & CAT_VARIABLE)
-			return STAR_TYPE_APSTAR;
-		if (CAT_STAR(gs->s)->flags & CAT_PHOTOMET)
-			return STAR_TYPE_APSTD;
-		if (CAT_STAR(gs->s)->flags & CAT_ASTROMET)
-			return STAR_TYPE_SREF;
-		return STAR_TYPE_CAT;
-	}
-	return gs->flags & STAR_TYPE_M;
-}
-*/
-
 static void set_foreground_color (cairo_t *cr, int color)
 {
 	cairo_set_source_rgb (cr, colors[color].red, colors[color].green, colors[color].blue);
@@ -420,6 +403,7 @@ void draw_sources_hook(GtkWidget *darea, GtkWidget *window, GdkRectangle *area)
 
 /*  	d3_printf("expose area is %d by %d starting at %d, %d\n", */
 /*  		  area->width, area->height, area->x, area->y); */
+
 	sl = gsl->sl;
 	while (sl != NULL) {
 		gs = GUI_STAR(sl->data);
@@ -469,7 +453,7 @@ static double star_size_flux(double flux, double ref_flux, double fwhm)
  * if the list exists, remove all the stars of type SIMPLE
  * from it first
  */
-void find_stars_cb(gpointer window, guint action, GtkWidget *menu_item)
+void find_stars_cb(gpointer window, guint action)
 {
 	struct sources *src;
 	struct gui_star_list *gsl;
@@ -628,7 +612,17 @@ void find_stars_cb(gpointer window, guint action, GtkWidget *menu_item)
 
 void stars_add_detect_action(GtkAction *action, gpointer window)
 {
-	find_stars_cb (window, ADD_STARS_DETECT, NULL);
+	find_stars_cb (window, ADD_STARS_DETECT);
+}
+
+void stars_show_target_action (GtkAction *action, gpointer window)
+{
+	find_stars_cb (window, ADD_STARS_OBJECT);
+}
+
+void stars_add_catalog_action(GtkAction *action, gpointer window)
+{
+	find_stars_cb (window, ADD_FROM_CATALOG);
 }
 
 /*
@@ -897,7 +891,7 @@ static void try_unmark_star(GtkWidget *window, GSList *found)
 
 	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl == NULL) {
-		g_warning("try_unmark_pair: window really should have a star list\n");
+		g_warning("try_unmark_star: window really should have a star list\n");
 		return;
 	}
 	sl = found;
@@ -1107,36 +1101,34 @@ void plot_profile(GtkWidget *window, GSList *found)
 
 
 /*
- * the item factory's data containg the list of stars under the cursor,
- * data is the image window. If selected stars are found under the cursor,
- * only those will be reach here.
+ * the window contains the list of stars under the cursor,
+ * If selected stars are found under the cursor,
+ * only those will be reached here.
  * The list must be copied and the stars must be ref'd
  * before holding a pointer to them.
  */
-void star_popup_cb(gpointer data, guint action, GtkWidget *menu_item)
+static void star_popup_cb(guint action, GtkWidget *window)
 {
-	GtkWidget *window = data;
 	GSList *found, *sl;
-	found = gtk_item_factory_popup_data_from_widget (menu_item);
+
+	found = g_object_get_data (G_OBJECT(window), "popup_star_list");
+
 	sl = found;
 	switch(action) {
+	case STARP_EDIT_AP:
+		star_edit_dialog(window, found);
+		break;
 	case STARP_UNMARK_STAR:
 		try_unmark_star(window, found);
-		break;
-	case STARP_PAIR_RM:
-		try_remove_pair(window, found);
-		break;
-	case STARP_INFO:
-		print_stars(window, found);
 		break;
 	case STARP_PAIR:
 		try_attach_pair(window, found);
 		break;
+	case STARP_PAIR_RM:
+		try_remove_pair(window, found);
+		break;
 	case STARP_MOVE:
 		move_star(window, found);
-		break;
-	case STARP_EDIT_AP:
-		star_edit_dialog(window, found);
 		break;
 	case STARP_PROFILE:
 		plot_profile(window, found);
@@ -1150,16 +1142,65 @@ void star_popup_cb(gpointer data, guint action, GtkWidget *menu_item)
 	case STARP_FIT_PSF:
 		do_fit_psf(window, found);
 		break;
+	case STARP_INFO:
+		print_stars(window, found);
+		break;
+
 	default:
 		g_warning("star_popup_cb: unknown action %d\n", action);
 	}
+}
+
+void starp_edit_ap_action (GtkAction *action, gpointer window)
+{
+	star_popup_cb (STARP_EDIT_AP, window);
+}
+
+void starp_unmark_star_action (GtkAction *action, gpointer window)
+{
+	star_popup_cb (STARP_UNMARK_STAR, window);
+}
+
+void starp_pair_add_action (GtkAction *action, gpointer window)
+{
+	star_popup_cb (STARP_PAIR, window);
+}
+
+void starp_pair_rm_action (GtkAction *action, gpointer window)
+{
+	star_popup_cb (STARP_PAIR_RM, window);
+}
+
+void starp_move_star_action (GtkAction *action, gpointer window)
+{
+	star_popup_cb (STARP_MOVE, window);
+}
+
+void starp_plot_profile_action (GtkAction *action, gpointer window)
+{
+	star_popup_cb (STARP_PROFILE, window);
+}
+
+void starp_measure_star_action (GtkAction *action, gpointer window)
+{
+	star_popup_cb (STARP_MEASURE, window);
+}
+
+void starp_plot_skyhist_action (GtkAction *action, gpointer window)
+{
+	star_popup_cb (STARP_SKYHIST, window);
+}
+
+void starp_fit_psf_action (GtkAction *action, gpointer window)
+{
+	star_popup_cb (STARP_FIT_PSF, window);
 }
 
 /*
  * get a good position for the given itemfactory menu
  * (near the pointer, but visible if at the edge of screen)
  */
-void popup_position (gpointer ifac, int *x, int *y)
+void popup_position (GtkMenu *popup, gint *x, gint *y, gboolean *push_in, gpointer data)
 {
 	gint screen_width;
 	gint screen_height;
@@ -1174,7 +1215,10 @@ void popup_position (gpointer ifac, int *x, int *y)
 
 	*x = CLAMP (*x - 2, 0, MAX (0, screen_width - width));
 	*y = CLAMP (*y - 2, 0, MAX (0, screen_height - height));
+
+	*push_in = TRUE;
 }
+
 
 /*
  * filter a selection to include only stars matching the star mask,
@@ -1204,23 +1248,24 @@ GSList *filter_selection(GSList *sl, int type_mask, guint and_mask, guint or_mas
 /*
  * fix and show the sources popup
  */
-static void do_sources_popup(GtkWidget *window, GtkItemFactory *star_if,
+static void do_sources_popup(GtkWidget *window, GtkWidget *star_popup,
 			     GSList *found, GdkEventButton *event)
 {
-	gint cx, cy;
-	GSList *selection = NULL, *pair = NULL, *sl, *push = NULL;
-	GtkWidget *mi;
+	GSList *selection = NULL, *pair = NULL, *sl, *push;
 	struct gui_star *gs;
 	struct wcs *wcs;
 
 	int delp = 0, pairp = 0, unmarkp = 0, editp = 0, mkstdp = 0;
 
+	push = g_object_get_data (G_OBJECT(window), "popup_star_list");
+	g_slist_free (push);
+	push = NULL;
+
 	wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
 
-	popup_position(star_if, &cx, &cy);
 	selection = get_selection_from_window(GTK_WIDGET(window), TYPE_MASK_ALL);
 
-/* see if any stars under cursor are selected - if so, keep them in 'push'*/
+       /* see if any stars under cursor are selected - if so, keep them in 'push'*/
 	sl = found;
 	while (sl != NULL) {
 		if ((g_slist_find(selection, sl->data)) != NULL) {
@@ -1242,7 +1287,7 @@ static void do_sources_popup(GtkWidget *window, GtkItemFactory *star_if,
 		gs = GUI_STAR(sl->data);
 		sl = g_slist_next(sl);
 		if (gs->flags & STAR_HAS_PAIR) {
-		/* possible pair deletion */
+			/* possible pair deletion */
 			delp = 1;
 		}
 		if ((wcs != NULL) && (wcs->wcsset & WCS_VALID)) {
@@ -1274,34 +1319,30 @@ static void do_sources_popup(GtkWidget *window, GtkItemFactory *star_if,
 	g_slist_free(selection);
 
 	/* fix the menu */
-	mi = gtk_item_factory_get_widget(star_if, "/Create Pair");
-	if (mi != NULL)
-		gtk_widget_set_sensitive(mi, pairp);
+	GtkAction *action;
+	GtkActionGroup *group;
 
-	mi = gtk_item_factory_get_widget(star_if, "/Move Star");
-	if (mi != NULL)
-		gtk_widget_set_sensitive(mi, pairp);
+	group = g_object_get_data (G_OBJECT(star_popup), "actions");
 
-	mi = gtk_item_factory_get_widget(star_if, "/Remove Pair");
-		if (mi != NULL)
-			gtk_widget_set_sensitive(mi, delp);
+	action = gtk_action_group_get_action (group, "star-edit");
+	gtk_action_set_sensitive (action, editp);
 
-	mi = gtk_item_factory_get_widget(star_if, "/Remove Star");
-		if (mi != NULL)
-			gtk_widget_set_sensitive(mi, unmarkp);
+	gtk_action_set_sensitive ( gtk_action_group_get_action(group, "star-pair-add"), pairp);
+	gtk_action_set_sensitive ( gtk_action_group_get_action(group, "star-pair-rm"), delp);
+	gtk_action_set_sensitive ( gtk_action_group_get_action(group, "star-remove"), unmarkp);
+	gtk_action_set_sensitive ( gtk_action_group_get_action(group, "star-move"), pairp);
+	gtk_action_set_sensitive ( gtk_action_group_get_action(group, "star-move"), pairp);
 
-	mi = gtk_item_factory_get_widget(star_if, "/Make Std Star");
-		if (mi != NULL)
-			gtk_widget_set_sensitive(mi, mkstdp);
 
-	mi = gtk_item_factory_get_widget(star_if, "/Edit Star");
-		if (mi != NULL)
-			gtk_widget_set_sensitive(mi, editp);
+//	mi = gtk_item_factory_get_widget(star_popup, "/Make Std Star");
+//		if (mi != NULL)
+//			gtk_widget_set_sensitive(mi, mkstdp);
 
-	gtk_item_factory_popup_with_data( star_if, push,
-					  (GDestroyNotify)g_slist_free,
-					  cx, cy, event->button,
-					  event->time);
+	/* must arrange to free this somehow */
+	g_object_set_data (G_OBJECT(window), "popup_star_list", push);
+
+	gtk_menu_popup (GTK_MENU (star_popup), NULL, NULL,
+			popup_position, NULL, event->button, event->time);
 }
 
 /* toggle selection of the given star list */
@@ -1501,14 +1542,14 @@ static void show_star_data(GSList *found, GtkWidget *window)
 gint sources_clicked_cb(GtkWidget *w, GdkEventButton *event, gpointer data)
 {
 	GSList *found, *filt;
-	GtkItemFactory *star_if;
+	GtkWidget *star_if;
 
 	d3_printf("star_popup\n");
 	switch(event->button) {
 	case 3:
 		found = stars_under_click(GTK_WIDGET(data), event);
 		if (found != NULL) {
-			star_if = g_object_get_data(G_OBJECT(data), "star_popup_if");
+			star_if = g_object_get_data(G_OBJECT(data), "star_popup");
 			if (star_if == NULL) {
 				g_slist_free(found);
 				return FALSE;
@@ -1543,7 +1584,7 @@ gint sources_clicked_cb(GtkWidget *w, GdkEventButton *event, gpointer data)
 }
 
 /* adjust star display options */
-void star_display_cb(gpointer window, guint action, GtkWidget *menu_item)
+static void star_display_cb(guint action, gpointer window)
 {
 	switch(action) {
 	case STAR_FAINTER:
@@ -1569,7 +1610,22 @@ void star_display_cb(gpointer window, guint action, GtkWidget *menu_item)
 	gtk_widget_queue_draw(window);
 }
 
-void star_edit_cb(gpointer window, guint action, GtkWidget *menu_item)
+void star_display_brighter_action(GtkAction *action, gpointer window)
+{
+	star_display_cb (STAR_BRIGHTER, window);
+}
+
+void star_display_fainter_action(GtkAction *action, gpointer window)
+{
+	star_display_cb (STAR_FAINTER, window);
+}
+
+void star_display_redraw_action(GtkAction *action, gpointer window)
+{
+	star_display_cb (STAR_REDRAW, window);
+}
+
+void stars_edit_action(GtkAction *action, gpointer window)
 {
 	GSList *sl = NULL;
 

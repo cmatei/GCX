@@ -44,6 +44,12 @@
 
 #define GUIDE_BOX_SIZE 96 	/* size of guide box */
 
+gboolean guide_window_delete(GtkWidget *widget, GdkEvent *event, gpointer data)
+{
+	g_object_set_data(G_OBJECT(data), "guide_window", NULL);
+	return TRUE;
+}
+
 /* name, stock id, label, accel, tooltip, callback */
 static GtkActionEntry guide_menu_actions[] = {
 	{ "guide-file",   NULL, "_File"  },
@@ -78,7 +84,6 @@ static GtkActionEntry guide_menu_actions[] = {
 	{ "guide-cuts-6", NULL, "22 _sigma", "6", NULL, G_CALLBACK (cuts_contrast_6_action) },
 	{ "guide-cuts-7", NULL, "45 s_igma", "7", NULL, G_CALLBACK (cuts_contrast_7_action) },
 	{ "guide-cuts-8", NULL, "90 si_gma", "8", NULL, G_CALLBACK (cuts_contrast_8_action) },
-	{ "guide-cuts-minmax", NULL, "_Min-Max", NULL, NULL, G_CALLBACK (cuts_minmax_action) },
 
 	/* Stars */
 	{ "guide-stars-add-detect",  NULL, "_Detect Sources",        "S",          NULL, G_CALLBACK (stars_add_detect_action)  },
@@ -88,11 +93,6 @@ static GtkActionEntry guide_menu_actions[] = {
 	{ "guide-stars-rm-all",      NULL, "Remove _All",            "<shift>A",   NULL, G_CALLBACK (stars_rm_detected_action) },
 };
 
-gboolean guide_window_delete(GtkWidget *widget, GdkEvent *event, gpointer data)
-{
-	g_object_set_data(G_OBJECT(data), "guide_window", NULL);
-	return TRUE;
-}
 
 /* create the menu bar */
 static GtkWidget *get_main_menu_bar(GtkWidget *window)
@@ -101,6 +101,56 @@ static GtkWidget *get_main_menu_bar(GtkWidget *window)
 	GtkUIManager *ui;
 	GError *error;
 	GtkActionGroup *action_group;
+	static char *guide_ui =
+		"<menubar name='guide-menubar'>"
+		"  <!-- File -->"
+		"  <menu name='guide-file' action='guide-file'>"
+		"    <menuitem name='guide-open' action='guide-open'/>"
+		"    <separator name='separator1'/>"
+		"    <menuitem name='guide-save' action='guide-save'/>"
+		"    <menu name='guide-export' action='guide-export'>"
+		"	<menuitem name='guide-export-pnm8' action='guide-export-pnm8'/>"
+		"    </menu>"
+		"  </menu>"
+		"  <!-- Image -->"
+		"  <menu name='guide-image' action='guide-image'>"
+		"    <menuitem name='guide-curves' action='guide-curves'/>"
+		"    <separator name='separator1'/>"
+		"    <menuitem name='guide-zoom-in' action='guide-zoom-in'/>"
+		"    <menuitem name='guide-zoom-out' action='guide-zoom-out'/>"
+		"    <menuitem name='guide-zoom-pixels' action='guide-zoom-pixels'/>"
+		"    <separator name='separator2'/>"
+		"    <menuitem name='guide-pan-center' action='guide-pan-center'/>"
+		"    <menuitem name='guide-pan-cursor' action='guide-pan-cursor'/>"
+		"    <separator name='separator3'/>"
+		"    <menuitem name='guide-cuts-auto' action='guide-cuts-auto'/>"
+		"    <menuitem name='guide-cuts-minmax' action='guide-cuts-minmax'/>"
+		"    <menuitem name='guide-cuts-flatter' action='guide-cuts-flatter'/>"
+		"    <menuitem name='guide-cuts-sharper' action='guide-cuts-sharper'/>"
+		"    <menuitem name='guide-cuts-brighter' action='guide-cuts-brighter'/>"
+		"    <menuitem name='guide-cuts-darker' action='guide-cuts-darker'/>"
+		"    <menu name='guide-set-contrast' action='guide-set-contrast'>"
+		"	<menuitem name='guide-cuts-1' action='guide-cuts-1'/>"
+		"	<menuitem name='guide-cuts-2' action='guide-cuts-2'/>"
+		"	<menuitem name='guide-cuts-3' action='guide-cuts-3'/>"
+		"	<menuitem name='guide-cuts-4' action='guide-cuts-4'/>"
+		"	<menuitem name='guide-cuts-5' action='guide-cuts-5'/>"
+		"	<menuitem name='guide-cuts-6' action='guide-cuts-6'/>"
+		"	<menuitem name='guide-cuts-7' action='guide-cuts-7'/>"
+		"	<menuitem name='guide-cuts-8' action='guide-cuts-8'/>"
+		"	<menuitem name='guide-cuts-minmax'    action='guide-cuts-minmax'/>"
+		"    </menu>"
+		"  </menu>"
+		"  <!-- Stars -->"
+		"  <menu name='guide-stars' action='guide-stars'>"
+		"    <menuitem name='guide-stars-add-detect' action='guide-stars-add-detect'/>"
+		"    <separator name='separator1'/>"
+		"    <menuitem name='guide-stars-rm-selected' action='guide-stars-rm-selected'/>"
+		"    <menuitem name='guide-stars-rm-detected' action='guide-stars-rm-detected'/>"
+		"    <menuitem name='guide-stars-rm-user' action='guide-stars-rm-user'/>"
+		"    <menuitem name='guide-stars-rm-all' action='guide-stars-rm-all'/>"
+		"  </menu>"
+		"</menubar>";
 
 	action_group = gtk_action_group_new ("GuideActions");
 	gtk_action_group_add_actions (action_group, guide_menu_actions,
@@ -110,7 +160,7 @@ static GtkWidget *get_main_menu_bar(GtkWidget *window)
 	gtk_ui_manager_insert_action_group (ui, action_group, 0);
 
 	error = NULL;
-	gtk_ui_manager_add_ui_from_file (ui, "menus.ui", &error);
+	gtk_ui_manager_add_ui_from_string (ui, guide_ui, strlen(guide_ui), &error);
 	if (error) {
 		g_message ("building menus failed: %s", error->message);
 		g_error_free (error);
@@ -147,7 +197,7 @@ static gboolean image_clicked_cb(GtkWidget *w, GdkEventButton *event, gpointer d
 	if (event->button == 3) {
 		show_region_stats(data, event->x, event->y);
 /*		found = stars_under_click(GTK_WIDGET(data), event);
-		star_if = g_object_get_data(G_OBJECT(data), "star_popup_if");
+		star_if = g_object_get_data(G_OBJECT(data), "star_popup");
 		menu = g_object_get_data(G_OBJECT(data), "image_popup");
 		if (found != NULL && star_if != NULL) {
 			if (found != NULL)
@@ -708,9 +758,8 @@ static gboolean wait_for_indi_cb(gpointer data)
 }
 
 /* create / open the guiding dialog */
-void open_guide_cb(gpointer data, guint action, GtkWidget *menu_item)
+void open_guide_action(GtkAction *action, gpointer window)
 {
-	GtkWidget *window = data;
 	GtkWidget *gwindow, *vb, *hb, *menubar, *im, *scw;
 	GtkWidget *statuslabel1;
 	long signal;

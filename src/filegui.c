@@ -823,9 +823,19 @@ void file_export_pnm8_action(GtkAction *action, gpointer data)
 	file_popup_cb (data, FILE_EXPORT_PNM8, NULL);
 }
 
+void file_export_pnm16_action(GtkAction *action, gpointer data)
+{
+	file_popup_cb (data, FILE_EXPORT_PNM16, NULL);
+}
+
 void file_add_mband_action(GtkAction *action, gpointer data)
 {
 	file_popup_cb (data, FILE_ADD_TO_MBAND, NULL);
+}
+
+void file_load_recipy_action(GtkAction *action, gpointer data)
+{
+	file_popup_cb (data, FILE_OPEN_RCP, NULL);
 }
 
 /* return the first filename matching pattern that is found in path,

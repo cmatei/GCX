@@ -224,16 +224,22 @@ void error_beep(void);
 void warning_beep(void);
 int err_printf_sb2(gpointer window, const char *fmt, ...);
 int info_printf_sb2(gpointer window, const char *fmt, ...);
-void star_pairs_cb(gpointer data, guint action, GtkWidget *menu_item);
 int modal_yes_no(char *text, char *title);
 int modal_entry_prompt(char *text, char *title, char *initial, char **value);
 int window_auto_pairs(gpointer window);
+
+void star_pairs_action(GtkAction *action, gpointer window);
 
 void star_rm_cb(gpointer data, guint action, GtkWidget *menu_item);
 void stars_rm_selected_action(GtkAction *action, gpointer data);
 void stars_rm_detected_action(GtkAction *action, gpointer data);
 void stars_rm_user_action(GtkAction *action, gpointer data);
+void stars_rm_field_action(GtkAction *action, gpointer data);
+void stars_rm_cat_action(GtkAction *action, gpointer data);
+void stars_rm_off_action(GtkAction *action, gpointer data);
 void stars_rm_all_action(GtkAction *action, gpointer data);
+void stars_rm_pairs_all_action(GtkAction *action, gpointer data);
+void stars_rm_pairs_sel_action(GtkAction *action, gpointer data);
 
 /* from imadjust.c */
 extern void set_default_channel_cuts(struct image_channel* channel);
@@ -274,7 +280,7 @@ void histogram_cb(gpointer data, guint action, GtkWidget *menu_item);
 extern void histogram_action (GtkAction *action, gpointer data);
 
 /* paramsgui.c */
-void edit_options_cb(gpointer data, guint action, GtkWidget *menu_item);
+void edit_options_action(GtkAction *action, gpointer window);
 
 /* staredit.c */
 
@@ -285,29 +291,39 @@ void do_edit_star(GtkWidget *window, GSList *found, int make_std);
 void add_star_from_catalog(gpointer window);
 
 /* textgui.c */
-void fits_header_cb(gpointer window, guint action, GtkWidget *menu_item);
-void help_page_cb(gpointer window, guint action, GtkWidget *menu_item);
+void fits_header_action(GtkAction *action, gpointer window);
+void help_bindings_action(GtkAction *action, gpointer window);
+void help_usage_action(GtkAction *action, gpointer window);
+void help_obscript_action(GtkAction *action, gpointer window);
+void help_repconv_action(GtkAction *action, gpointer window);
 
 /* photometry.c */
 void photometry_cb(gpointer window, guint action, GtkWidget *menu_item);
 char * phot_to_fd(gpointer window, FILE *fd, int format);
 
 /* wcsedit.c */
-void wcsedit_cb(gpointer window, guint action, GtkWidget *menu_item);
 void wcsedit_refresh(gpointer window);
 int match_field_in_window_quiet(void * image_window);
 int match_field_in_window(void * image_window);
-void wcs_cb(gpointer data, guint action, GtkWidget *menu_item);
+
+void wcs_auto_action(GtkAction *action, gpointer window);
+void wcs_quiet_auto_action(GtkAction *action, gpointer window);
+void wcs_existing_action(GtkAction *action, gpointer window);
+void wcs_fit_pairs_action(GtkAction *action, gpointer window);
+void wcs_validate_action(GtkAction *action, gpointer window);
+void wcs_invalidate_action(GtkAction *action, gpointer window);
+void wcs_reload_action(GtkAction *action, gpointer window);
+void wcs_edit_action(GtkAction *action, gpointer window);
 
 /* recipy.c */
-void create_recipe_cb(gpointer window, guint action, GtkWidget *menu_item);
+void create_recipe_action(GtkAction *action, gpointer window);
 
 /* reducegui.c */
 void processing_cb(gpointer window, guint action, GtkWidget *menu_item);
 void switch_frame_cb(gpointer window, guint action, GtkWidget *menu_item);
 
 /* guidegui.c */
-void open_guide_cb(gpointer data, guint action, GtkWidget *menu_item);
+void open_guide_action(GtkAction *action, gpointer window);
 
 /* mbandgui.c */
 void mband_open_cb(gpointer data, guint action, GtkWidget *menu_item);
@@ -334,6 +350,6 @@ void mband_plot_zptime_action(GtkAction *action, gpointer data);
 void mband_plot_magtime_action(GtkAction *action, gpointer data);
 
 /* synth.c */
-void add_synth_stars_cb(gpointer window, guint action, GtkWidget *menu_item);
+void stars_add_synth_action(GtkAction *action, gpointer window);
 
 #endif

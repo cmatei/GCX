@@ -1308,6 +1308,46 @@ static GtkWidget *get_main_menu_bar(GtkWidget *window)
 	GtkUIManager *ui;
 	GError *error;
 	GtkActionGroup *action_group;
+	static char *mband_ui =
+		"<menubar name='mband-menubar'>"
+		"  <!-- File -->"
+		"  <menu name='mband-file' action='mband-file'>"
+		"    <menuitem name='mband-file-add' action='mband-file-add'/>"
+		"    <menuitem name='mband-file-save' action='mband-file-save'/>"
+		"    <menuitem name='mband-file-close' action='mband-file-close'/>"
+		"    <separator name='separator1'/>"
+		"    <menuitem name='mband-report-aavso' action='mband-report-aavso'/>"
+		"    <separator name='separator2'/>"
+		"    <menuitem name='mband-close' action='mband-close'/>"
+		"  </menu>"
+		"  <!-- Edit -->"
+		"  <menu name='mband-edit' action='mband-edit'>"
+		"    <menuitem name='mband-select-all' action='mband-select-all'/>"
+		"    <menuitem name='mband-unselect-all' action='mband-unselect-all'/>"
+		"    <menuitem name='mband-hide-selected' action='mband-hide-selected'/>"
+		"    <menuitem name='mband-unhide-all' action='mband-unhide-all'/>"
+		"  </menu>"
+		"  <!-- Reduce -->"
+		"  <menu name='mband-reduce' action='mband-reduce'>"
+		"    <menuitem name='mband-fit-zpoints' action='mband-fit-zpoints'/>"
+		"    <menuitem name='mband-fit-zp-wtrans' action='mband-fit-zp-wtrans'/>"
+		"    <menuitem name='mband-fit-trans' action='mband-fit-trans'/>"
+		"    <menuitem name='mband-fit-allsky' action='mband-fit-allsky'/>"
+		"  </menu>"
+		"  <!-- Plot -->"
+		"  <menu name='mband-plot' action='mband-plot'>"
+		"    <menuitem name='mband-plot-residuals-magnitude' action='mband-plot-residuals-magnitude'/>"
+		"    <menuitem name='mband-plot-residuals-color' action='mband-plot-residuals-color'/>"
+		"    <menuitem name='mband-plot-errors-magnitude' action='mband-plot-errors-magnitude'/>"
+		"    <menuitem name='mband-plot-errors-color' action='mband-plot-errors-color'/>"
+		"    <separator name='separator1'/>"
+		"    <menuitem name='mband-plot-zp-airmass' action='mband-plot-zp-airmass'/>"
+		"    <menuitem name='mband-plot-zp-time' action='mband-plot-zp-time'/>"
+		"    <separator name='separator2'/>"
+		"    <menuitem name='mband-plot-magnitude-time' action='mband-plot-magnitude-time'/>"
+		"  </menu>"
+		"</menubar>";
+
 
 	action_group = gtk_action_group_new ("MBActions");
 	gtk_action_group_add_actions (action_group, mband_menu_actions,
@@ -1317,7 +1357,7 @@ static GtkWidget *get_main_menu_bar(GtkWidget *window)
 	gtk_ui_manager_insert_action_group (ui, action_group, 0);
 
 	error = NULL;
-	gtk_ui_manager_add_ui_from_file (ui, "menus.ui", &error);
+	gtk_ui_manager_add_ui_from_string (ui, mband_ui, strlen(mband_ui), &error);
 	if (error) {
 		g_message ("building menus failed: %s", error->message);
 		g_error_free (error);

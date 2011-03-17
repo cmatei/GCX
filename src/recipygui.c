@@ -91,7 +91,7 @@ static void update_rcp_dialog(gpointer window, GtkWidget *dialog)
 }
 
 /* show the current frame's fits header in a text window */
-void create_recipe_cb(gpointer window, guint action, GtkWidget *menu_item)
+void create_recipe_action(GtkAction *action, gpointer window)
 {
 	GtkWidget *dialog;
 
