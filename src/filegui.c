@@ -838,6 +838,11 @@ void file_load_recipy_action(GtkAction *action, gpointer data)
 	file_popup_cb (data, FILE_OPEN_RCP, NULL);
 }
 
+void file_load_gsc2_action(GtkAction *action, gpointer data)
+{
+	file_popup_cb (data, FILE_LOAD_GSC2, NULL);
+}
+
 /* return the first filename matching pattern that is found in path,
    or null if it couldn't be found */
 char *find_file_in_path(char *pattern, char *path)

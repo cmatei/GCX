@@ -795,7 +795,7 @@ static int logw_print(char *msg, void *data)
 }
 
 
-void cds_query_cb(gpointer window, guint action, GtkWidget *menu_item)
+static void cds_query(gpointer window, guint action)
 {
 	GtkWidget *logw;
 	struct wcs *wcs;
@@ -841,4 +841,24 @@ void cds_query_cb(gpointer window, guint action, GtkWidget *menu_item)
 	merge_cat_star_list_to_window(window, tsl);
 	gtk_widget_queue_draw(window);
 	g_list_free(tsl);
+}
+
+void cds_query_gsc_act_action(GtkAction *action, gpointer window)
+{
+	cds_query (window, QUERY_GSC_ACT);
+}
+
+void cds_query_ucac2_action(GtkAction *action, gpointer window)
+{
+	cds_query (window, QUERY_UCAC2);
+}
+
+void cds_query_gsc2_action(GtkAction *action, gpointer window)
+{
+	cds_query (window, QUERY_GSC2);
+}
+
+void cds_query_usnob_action(GtkAction *action, gpointer window)
+{
+	cds_query (window, QUERY_USNOB);
 }

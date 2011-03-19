@@ -1377,9 +1377,8 @@ static GtkWidget *get_main_menu_bar(GtkWidget *window)
 }
 
 /* create / open the guiding dialog */
-void mband_open_cb(gpointer data, guint action, GtkWidget *menu_item)
+void mband_open_action(GtkAction *action, gpointer window)
 {
-	GtkWidget *window = data;
 	GtkWidget *dialog, *vb, *menubar;
 
 	dialog = g_object_get_data(G_OBJECT(window), "mband_window");

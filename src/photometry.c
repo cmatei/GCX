@@ -602,7 +602,7 @@ int stf_centering_stats(struct stf *stf, struct wcs *wcs, double *rms, double *m
 }
 
 /* photometry callback from menu; report goes to stdout */
-void photometry_cb(gpointer window, guint action, GtkWidget *menu_item)
+static void photometry_cb(gpointer window, guint action)
 {
 	struct gui_star_list *gsl = NULL;
 	struct image_channel *i_chan = NULL;
@@ -678,7 +678,7 @@ void photometry_cb(gpointer window, guint action, GtkWidget *menu_item)
 			gpointer mbd;
 			mbd = g_object_get_data(G_OBJECT(window), "mband_window");
 			if (mbd == NULL) {
-				mband_open_cb(window, 0, NULL);
+				mband_open_action(NULL, window);
 				mbd = g_object_get_data(G_OBJECT(window), "mband_window");
 			}
 			stf_to_mband(mbd, stf);
@@ -738,6 +738,37 @@ void photometry_cb(gpointer window, guint action, GtkWidget *menu_item)
 		err_printf("unknown action %d in photometry_cb\n", action);
 	}
 }
+
+void phot_center_stars_action(GtkAction *action, gpointer window)
+{
+	photometry_cb (window, PHOT_CENTER_STARS);
+}
+
+void phot_quick_action(GtkAction *action, gpointer window)
+{
+	photometry_cb (window, PHOT_RUN);
+}
+
+void phot_multi_frame_action(GtkAction *action, gpointer window)
+{
+	photometry_cb (window, PHOT_RUN | PHOT_TO_MBDS);
+}
+
+void phot_to_file_action(GtkAction *action, gpointer window)
+{
+	photometry_cb (window, PHOT_RUN | PHOT_TO_FILE);
+}
+
+void phot_to_aavso_action(GtkAction *action, gpointer window)
+{
+	photometry_cb (window, PHOT_RUN | PHOT_TO_FILE_AA);
+}
+
+void phot_to_stdout_action(GtkAction *action, gpointer window)
+{
+	photometry_cb (window, PHOT_RUN | PHOT_TO_STDOUT);
+}
+
 
 /* run photometry on the stars in window, writing report to fd
  * a 'short' result (malloced string) is returned (NULL for an error) */

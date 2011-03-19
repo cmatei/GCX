@@ -101,6 +101,9 @@ extern void find_stars_cb(gpointer window, guint action);
 extern void stars_add_detect_action (GtkAction *action, gpointer data);
 extern void stars_show_target_action (GtkAction *action, gpointer data);
 extern void stars_add_catalog_action (GtkAction *action, gpointer data);
+extern void stars_add_gsc_action (GtkAction *action, gpointer data);
+extern void stars_add_tycho2_action (GtkAction *action, gpointer data);
+
 
 extern void draw_sources_hook(GtkWidget *darea, GtkWidget *window,
 			      GdkRectangle *area);

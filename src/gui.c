@@ -589,6 +589,7 @@ static GtkItemFactoryEntry image_popup_menu_items[] = {
 static GtkActionEntry image_actions[] = {
 	{ "image-file", NULL, "_File" },
 
+	/* File */
 	{ "image-new", NULL, "_New Frame", "<control>N", NULL, G_CALLBACK (new_frame_action) },
 	{ "image-open", NULL, "_Open Image...", "<control>O", NULL, G_CALLBACK (file_open_action) },
 	{ "image-save", NULL, "_Save Fits As...", "<control>S", NULL, G_CALLBACK (file_save_action) },
@@ -603,6 +604,7 @@ static GtkActionEntry image_actions[] = {
 	{ "guide-control", NULL, "Guiding...", "<shift>T", NULL, G_CALLBACK (open_guide_action) },
 	{ "user-quit", NULL, "_Quit", "<control>Q", NULL, G_CALLBACK (user_quit_action) },
 
+	/* Image */
 	{ "image-image", NULL, "_Image" },
 	{ "image-set-contrast", NULL, "Set _Contrast" },
 	{ "image-curves", NULL, "Curves&Histogram...", "C", NULL, G_CALLBACK (histogram_action) },
@@ -648,7 +650,7 @@ static GtkActionEntry image_actions[] = {
 	{ "image-stars-plot-profiles", NULL, "Plo_t Star Profiles",  NULL,         NULL, G_CALLBACK (starp_plot_profile_action)    },
 
 	/* WCS */
-	{ "image-wcs", NULL, "_Wcs" },
+	{ "wcs-menu", NULL, "_Wcs" },
 	{ "image-wcs-edit", NULL, "_Edit Wcs", "<control>W", NULL, G_CALLBACK (wcs_edit_action) },
 	{ "image-wcs-auto", NULL, "_Auto Wcs", "M", NULL, G_CALLBACK (wcs_auto_action) },
 	{ "image-wcs-quiet-auto", NULL, "_Quiet Auto Wcs", "<shift>M", NULL, G_CALLBACK (wcs_quiet_auto_action) },
@@ -659,9 +661,35 @@ static GtkActionEntry image_actions[] = {
 	{ "image-wcs-validate", NULL, "_Force Validate", "<control>V", NULL, G_CALLBACK (wcs_validate_action) },
 	{ "image-wcs-invalidate", NULL, "_Invalidate", "<control>I", NULL, G_CALLBACK (wcs_invalidate_action) },
 
+	/* Catalogs */
+	{ "catalogs-menu",         NULL, "_Catalogs" },
+	{ "catalogs-add-gsc",      NULL, "Load Field Stars From _GSC Catalog",    "G",          NULL, G_CALLBACK (stars_add_gsc_action) },
+	{ "catalogs-add-tycho2",   NULL, "Load Field Stars From _Tycho2 Catalog", "<control>T", NULL, G_CALLBACK (stars_add_tycho2_action) },
+	{ "catalogs-add-gsc-file", NULL, "Load Field Stars From GSC-_2 File",     "<control>G", NULL, G_CALLBACK (file_load_gsc2_action) },
+	{ "catalogs-add-gsc-act",  NULL, "Download GSC-_ACT stars from CDS",      NULL,         NULL, G_CALLBACK (cds_query_gsc_act_action) },
+	{ "catalogs-add-ucac2",    NULL, "Download _UCAC-2 stars from CDS",       NULL,         NULL, G_CALLBACK (cds_query_ucac2_action) },
+	{ "catalogs-add-gsc2",     NULL, "Download G_SC-2 stars from CDS",        NULL,         NULL, G_CALLBACK (cds_query_gsc2_action) },
+	{ "catalogs-add-usnob",    NULL, "Download USNO-_B stars from CDS",       NULL,         NULL, G_CALLBACK (cds_query_usnob_action) },
+
+	/* Processing */
+	{ "processing-menu", NULL, "_Processing" },
+	{ "swf-next",   NULL, "_Next Frame",           "N", NULL, G_CALLBACK (switch_frame_next_action) },
+	{ "swf-skip",   NULL, "_Skip Frame",           "K", NULL, G_CALLBACK (switch_frame_skip_action) },
+	{ "swf-prev",   NULL, "_Previous Frame",       "J", NULL, G_CALLBACK (switch_frame_prev_action) },
+	{ "swf-reduce", NULL, "_Reduce Current",       "Y", NULL, G_CALLBACK (switch_frame_reduce_action) },
+	{ "swf-qphot",  NULL, "_Qphot Reduce Current", "T", NULL, G_CALLBACK (switch_frame_qphot_action) },
+	{ "phot-center-stars",  NULL, "_Center Stars",              NULL,         NULL, G_CALLBACK (phot_center_stars_action) },
+	{ "phot-quick",         NULL, "Quick Aperture P_hotometry", "<shift>P",   NULL, G_CALLBACK (phot_quick_action) },
+	{ "phot-multi-frame",   NULL, "Photometry to _Multi-Frame", "<control>P", NULL, G_CALLBACK (phot_multi_frame_action) },
+	{ "phot-to-file",       NULL, "Photometry to _File",        NULL,         NULL, G_CALLBACK (phot_to_file_action) },
+	{ "phot-to-aavso-file", NULL, "Photometry to _AAVSO File",  NULL,         NULL, G_CALLBACK (phot_to_aavso_action) },
+	{ "phot-to-stdout",     NULL, "Photometry to _stdout",      NULL,         NULL, G_CALLBACK (phot_to_stdout_action) },
+	{ "ccd-reduction",         NULL, "_CCD Reduction...",         "L",          NULL, G_CALLBACK (processing_action) },
+	{ "multi-frame-reduction", NULL, "_Multi-frame Reduction...", "<control>M", NULL, G_CALLBACK (mband_open_action) },
+
 
 	/* Help */
-	{ "help", NULL, "_Help" },
+	{ "help-menu", NULL, "_Help" },
 	{ "help-bindings", NULL, "_GUI help",                   "F1", NULL, G_CALLBACK (help_bindings_action) },
 	{ "help-usage",    NULL, "Show _Command Line Options",  NULL, NULL, G_CALLBACK (help_usage_action) },
 	{ "help-obscript", NULL, "Show _Obscript Commands",     NULL, NULL, G_CALLBACK (help_obscript_action) },
@@ -743,7 +771,7 @@ static char *image_common_ui =
 	"  <separator name='separator6'/>"
 	"  <menuitem name='image-stars-plot-profiles' action='image-stars-plot-profiles'/>"
 	"</menu>"
-	"<menu name='image-wcs' action='image-wcs'>"
+	"<menu name='wcs' action='wcs-menu'>"
 	"  <menuitem name='image-wcs-edit' action='image-wcs-edit'/>"
 	"  <menuitem name='image-wcs-auto' action='image-wcs-auto'/>"
 	"  <menuitem name='image-wcs-quiet-auto' action='image-wcs-quiet-auto'/>"
@@ -754,13 +782,40 @@ static char *image_common_ui =
 	"  <menuitem name='image-wcs-validate' action='image-wcs-validate'/>"
 	"  <menuitem name='image-wcs-invalidate' action='image-wcs-invalidate'/>"
 	"</menu>"
-	"<menu name='help' action='help'>"
+	"<menu name='processing' action='processing-menu'>"
+	"  <menuitem name='swf-next' action='swf-next'/>"
+	"  <menuitem name='swf-skip' action='swf-skip'/>"
+	"  <menuitem name='swf-prev' action='swf-prev'/>"
+	"  <menuitem name='swf-reduce' action='swf-reduce'/>"
+	"  <menuitem name='swf-qphot' action='swf-qphot'/>"
+	"  <separator name='separator1'/>"
+	"  <menuitem name='phot-center-stars' action='phot-center-stars'/>"
+	"  <menuitem name='phot-quick' action='phot-quick'/>"
+	"  <menuitem name='phot-multi-frame' action='phot-multi-frame'/>"
+	"  <menuitem name='phot-to-file' action='phot-to-file'/>"
+	"  <menuitem name='phot-to-aavso-file' action='phot-to-aavso-file'/>"
+	"  <menuitem name='phot-to-stdout' action='phot-to-stdout'/>"
+	"  <separator name='separator2'/>"
+	"  <menuitem name='ccd-reduction' action='ccd-reduction'/>"
+	"  <menuitem name='multi-frame-reduction' action='multi-frame-reduction'/>"
+	"</menu>"
+	"<menu name='catalogs' action='catalogs-menu'>"
+	"  <menuitem name='catalogs-add-gsc' action='catalogs-add-gsc'/>"
+	"  <menuitem name='catalogs-add-tycho2' action='catalogs-add-tycho2'/>"
+	"  <separator name='separator1'/>"
+	"  <menuitem name='catalogs-add-gsc-file' action='catalogs-add-gsc-file'/>"
+	"  <separator name='separator2'/>"
+	"  <menuitem name='catalogs-add-gsc-act' action='catalogs-add-gsc-act'/>"
+	"  <menuitem name='catalogs-add-ucac2' action='catalogs-add-ucac2'/>"
+	"  <menuitem name='catalogs-add-gsc2' action='catalogs-add-gsc2'/>"
+	"  <menuitem name='catalogs-add-usnob' action='catalogs-add-usnob'/>"
+	"</menu>"
+	"<menu name='help' action='help-menu'>"
 	"  <menuitem name='help-bindings' action='help-bindings'/>"
 	"  <menuitem name='help-usage' action='help-usage'/>"
 	"  <menuitem name='help-obscript' action='help-obscript'/>"
 	"  <menuitem name='help-about' action='help-about'/>"
 	"</menu>";
-
 
 GtkWidget *get_image_popup_menu(GtkWidget *window)
 {

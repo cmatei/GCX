@@ -625,6 +625,16 @@ void stars_add_catalog_action(GtkAction *action, gpointer window)
 	find_stars_cb (window, ADD_FROM_CATALOG);
 }
 
+void stars_add_gsc_action(GtkAction *action, gpointer window)
+{
+	find_stars_cb (window, ADD_STARS_GSC);
+}
+
+void stars_add_tycho2_action(GtkAction *action, gpointer window)
+{
+	find_stars_cb (window, ADD_STARS_TYCHO2);
+}
+
 /*
  * check that the distance between the star and (bx, by) is less than maxd
  */

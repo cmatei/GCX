@@ -16,6 +16,5 @@ enum {
 extern char *query_catalog_names[];
 
 int make_cat_rcp(char *obj, char *catalog, double box, FILE *outf, double mag_limit) ;
-void cds_query_cb(gpointer data, guint action, GtkWidget *menu_item);
 
 #endif

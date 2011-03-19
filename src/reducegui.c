@@ -92,7 +92,7 @@ static void mframe_cb(GtkAction *action, gpointer dialog)
 	im_window = g_object_get_data(G_OBJECT(dialog), "im_window");
 	g_return_if_fail(im_window != NULL);
 
-	mband_open_cb(im_window, 1, NULL);
+	mband_open_action(NULL, im_window);
 }
 
 /* name, stock id, label, accel, tooltip, callback */
@@ -879,7 +879,7 @@ static void imf_reload_cb(GtkAction *action, gpointer dialog)
 	update_selected_status_label(dialog);
 }
 
-void switch_frame_cb(gpointer window, guint action, GtkWidget *menu_item)
+static void switch_frame_cb(gpointer window, guint action)
 {
 	GtkWidget *dialog;
 	dialog = g_object_get_data(G_OBJECT(window), "processing");
@@ -906,6 +906,31 @@ void switch_frame_cb(gpointer window, guint action, GtkWidget *menu_item)
 		break;
 	}
 	update_selected_status_label(dialog);
+}
+
+void switch_frame_next_action(GtkAction *action, gpointer window)
+{
+	switch_frame_cb (window, SWF_NEXT);
+}
+
+void switch_frame_prev_action(GtkAction *action, gpointer window)
+{
+	switch_frame_cb (window, SWF_PREV);
+}
+
+void switch_frame_skip_action(GtkAction *action, gpointer window)
+{
+	switch_frame_cb (window, SWF_SKIP);
+}
+
+void switch_frame_qphot_action(GtkAction *action, gpointer window)
+{
+	switch_frame_cb (window, SWF_QPHOT);
+}
+
+void switch_frame_reduce_action(GtkAction *action, gpointer window)
+{
+	switch_frame_cb (window, SWF_RED);
 }
 
 static void imf_update_status_label(GtkTreeModel *list, GtkTreeIter *iter)
@@ -1310,7 +1335,7 @@ static void ccdred_run_cb(GtkAction *action, gpointer dialog)
 			im_window = g_object_get_data(G_OBJECT(dialog), "im_window");
 			mbd = g_object_get_data(G_OBJECT(im_window), "mband_window");
 			if (mbd == NULL) {
-				mband_open_cb(im_window, 0, NULL);
+				mband_open_action(NULL, im_window);
 				mbd = g_object_get_data(G_OBJECT(im_window), "mband_window");
 			}
 			g_object_ref(GTK_WIDGET(mbd));
@@ -1548,7 +1573,7 @@ static void ccdred_one_cb(GtkAction *action, gpointer dialog)
 			im_window = g_object_get_data(G_OBJECT(dialog), "im_window");
 			mbd = g_object_get_data(G_OBJECT(im_window), "mband_window");
 			if (mbd == NULL) {
-				mband_open_cb(im_window, 0, NULL);
+				mband_open_action(NULL, im_window);
 				mbd = g_object_get_data(G_OBJECT(im_window), "mband_window");
 			}
 			g_object_ref(GTK_WIDGET(mbd));
@@ -1699,7 +1724,7 @@ static void imf_red_activate_cb(GtkWidget *wid, gpointer dialog)
 
 
 
-void processing_cb(gpointer window, guint action, GtkWidget *menu_item)
+void processing_action(GtkAction *action, gpointer window)
 {
 	GtkWidget *dialog;
 

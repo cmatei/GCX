@@ -298,8 +298,15 @@ void help_obscript_action(GtkAction *action, gpointer window);
 void help_repconv_action(GtkAction *action, gpointer window);
 
 /* photometry.c */
-void photometry_cb(gpointer window, guint action, GtkWidget *menu_item);
 char * phot_to_fd(gpointer window, FILE *fd, int format);
+
+void phot_center_stars_action(GtkAction *action, gpointer window);
+void phot_quick_action(GtkAction *action, gpointer window);
+void phot_multi_frame_action(GtkAction *action, gpointer window);
+void phot_to_file_action(GtkAction *action, gpointer window);
+void phot_to_aavso_action(GtkAction *action, gpointer window);
+void phot_to_stdout_action(GtkAction *action, gpointer window);
+
 
 /* wcsedit.c */
 void wcsedit_refresh(gpointer window);
@@ -319,14 +326,18 @@ void wcs_edit_action(GtkAction *action, gpointer window);
 void create_recipe_action(GtkAction *action, gpointer window);
 
 /* reducegui.c */
-void processing_cb(gpointer window, guint action, GtkWidget *menu_item);
-void switch_frame_cb(gpointer window, guint action, GtkWidget *menu_item);
+void processing_action(GtkAction *action, gpointer window);
+void switch_frame_next_action(GtkAction *action, gpointer window);
+void switch_frame_prev_action(GtkAction *action, gpointer window);
+void switch_frame_skip_action(GtkAction *action, gpointer window);
+void switch_frame_qphot_action(GtkAction *action, gpointer window);
+void switch_frame_reduce_action(GtkAction *action, gpointer window);
 
 /* guidegui.c */
 void open_guide_action(GtkAction *action, gpointer window);
 
 /* mbandgui.c */
-void mband_open_cb(gpointer data, guint action, GtkWidget *menu_item);
+void mband_open_action(GtkAction *action, gpointer window);
 void add_to_mband(gpointer dialog, char *fn);
 
 void mband_save_dataset_action(GtkAction *action, gpointer data);
@@ -351,5 +362,11 @@ void mband_plot_magtime_action(GtkAction *action, gpointer data);
 
 /* synth.c */
 void stars_add_synth_action(GtkAction *action, gpointer window);
+
+/* query.c */
+void cds_query_gsc_act_action(GtkAction *action, gpointer window);
+void cds_query_ucac2_action(GtkAction *action, gpointer window);
+void cds_query_gsc2_action(GtkAction *action, gpointer window);
+void cds_query_usnob_action(GtkAction *action, gpointer window);
 
 #endif
