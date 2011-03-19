@@ -40,8 +40,19 @@
 #include "misc.h"
 #include "query.h"
 
-/* yes/no modal dialog */
+/* remove stars actions */
+#define STAR_RM_ALL 1
+#define STAR_RM_FR 2
+#define STAR_RM_USER 3
+#define STAR_RM_CAT 4
+#define STAR_RM_SEL 5
+#define STAR_RM_PAIRS_ALL 6
+#define STAR_RM_PAIRS_SEL 7
+#define STAR_RM_FIELD 8
+#define STAR_RM_OFF 10
 
+
+/* yes/no modal dialog */
 static void yes_no_yes( GtkWidget *widget, gpointer data )
 {
 	int *retv;
@@ -285,7 +296,7 @@ static void new_frame_action (GtkAction *action, gpointer window)
 	frame_to_channel(fr, window, "i_channel");
 }
 
-void star_rm_cb(gpointer data, guint action, GtkWidget *menu_item)
+void star_rm_cb(gpointer data, guint action)
 {
 	GtkWidget *window = data;
 	int ret;
@@ -329,47 +340,47 @@ void star_rm_cb(gpointer data, guint action, GtkWidget *menu_item)
 
 void stars_rm_all_action (GtkAction *action, gpointer window)
 {
-	star_rm_cb (window, STAR_RM_ALL, NULL);
+	star_rm_cb (window, STAR_RM_ALL);
 }
 
 void stars_rm_selected_action (GtkAction *action, gpointer window)
 {
-	star_rm_cb (window, STAR_RM_SEL, NULL);
+	star_rm_cb (window, STAR_RM_SEL);
 }
 
 void stars_rm_user_action (GtkAction *action, gpointer window)
 {
-	star_rm_cb (window, STAR_RM_USER, NULL);
+	star_rm_cb (window, STAR_RM_USER);
 }
 
 void stars_rm_field_action (GtkAction *action, gpointer window)
 {
-	star_rm_cb (window, STAR_RM_FIELD, NULL);
+	star_rm_cb (window, STAR_RM_FIELD);
 }
 
 void stars_rm_cat_action (GtkAction *action, gpointer window)
 {
-	star_rm_cb (window, STAR_RM_CAT, NULL);
+	star_rm_cb (window, STAR_RM_CAT);
 }
 
 void stars_rm_off_action (GtkAction *action, gpointer window)
 {
-	star_rm_cb (window, STAR_RM_OFF, NULL);
+	star_rm_cb (window, STAR_RM_OFF);
 }
 
 void stars_rm_detected_action (GtkAction *action, gpointer window)
 {
-	star_rm_cb (window, STAR_RM_FR, NULL);
+	star_rm_cb (window, STAR_RM_FR);
 }
 
 void stars_rm_pairs_all_action (GtkAction *action, gpointer window)
 {
-	star_rm_cb (window, STAR_RM_PAIRS_ALL, NULL);
+	star_rm_cb (window, STAR_RM_PAIRS_ALL);
 }
 
 void stars_rm_pairs_sel_action (GtkAction *action, gpointer window)
 {
-	star_rm_cb (window, STAR_RM_PAIRS_SEL, NULL);
+	star_rm_cb (window, STAR_RM_PAIRS_SEL);
 }
 
 
@@ -544,45 +555,6 @@ GtkWidget *get_star_popup_menu (gpointer window)
 	return ret;
 }
 
-
-#if 0
-static GtkItemFactoryEntry image_popup_menu_items[] = {
-
-	{ "/_Processing",         	NULL,         	NULL, 		0, "<Branch>" },
-	{ "/Processing/_Next Frame",  "n",    	switch_frame_cb, SWF_NEXT, "<Item>" },
-	{ "/Processing/_Skip Frame",  "k",	switch_frame_cb, SWF_SKIP, "<Item>" },
-	{ "/Processing/_Previous Frame",  "j",	switch_frame_cb, SWF_PREV, "<Item>" },
-	{ "/Processing/_Reduce Current",  "y",	switch_frame_cb, SWF_RED, "<Item>" },
-	{ "/Processing/_Qphot Reduce Current",  "t",	switch_frame_cb, SWF_QPHOT, "<Item>" },
-	{ "/Processing/sep",		NULL,         	NULL,  		0, "<Separator>" },
-	{ "/Processing/_Center Stars",  NULL, photometry_cb, PHOT_CENTER_STARS, "<Item>" },
-//	{ "/Processing/_Center Stars and Plot Errors",  NULL, photometry_cb, PHOT_CENTER_PLOT, "<Item>" },
-	{ "/Processing/Quick Aperture P_hotometry",  "<shift>p", photometry_cb, PHOT_RUN, "<Item>" },
-	{ "/Processing/Photometry to _Multi-Frame",  "<control>p", photometry_cb, PHOT_RUN|PHOT_TO_MBDS, "<Item>" },
-	{ "/Processing/Photometry to _File", NULL, photometry_cb, PHOT_RUN|PHOT_TO_FILE, "<Item>" },
-	{ "/Processing/Photometry to _AAVSO File", NULL, photometry_cb, PHOT_RUN|PHOT_TO_FILE_AA, "<Item>" },
-	{ "/Processing/Photometry to _stdout", NULL, photometry_cb, PHOT_RUN|PHOT_TO_STDOUT, "<Item>" },
-	{ "/Processing/sep",		NULL,         	NULL,  		0, "<Separator>" },
-	{ "/Processing/_CCD Reduction...", 	"l",  	processing_cb, 		1, "<Item>" },
-	{ "/Processing/_Multi-frame Reduction...", "<control>m", mband_open_cb, 1, "<Item>" },
-
-	{ "/_Catalogs",         	NULL,         	NULL, 		0, "<Branch>" },
-	{ "/Catalogs/Load Field Stars From _GSC Catalog", "g", find_stars_cb,
-	  ADD_STARS_GSC, "<Item>"},
-	{ "/Catalogs/Load Field Stars From _Tycho2 Catalog", "<control>t", find_stars_cb,
-	  ADD_STARS_TYCHO2, "<Item>"},
-	{ "/Catalogs/sep",		NULL,         	NULL,  		0, "<Separator>" },
-	{ "/Catalogs/Load Field Stars From GSC-_2 File", "<control>g", file_popup_cb,
-	  FILE_LOAD_GSC2, "<Item>"},
-	{ "/Catalogs/sep",		NULL,         	NULL,  		0, "<Separator>" },
-	{ "/Catalogs/Download GSC-_ACT stars from CDS", NULL, cds_query_cb, QUERY_GSC_ACT, "<Item>"},
-	{ "/Catalogs/Download _UCAC-2 stars from CDS", NULL, cds_query_cb, QUERY_UCAC2, "<Item>"},
-	{ "/Catalogs/Download G_SC-2 stars from CDS", NULL, cds_query_cb, QUERY_GSC2, "<Item>"},
-	{ "/Catalogs/Download USNO-_B stars from CDS", NULL, cds_query_cb, QUERY_USNOB, "<Item>"},
-
-};
-
-#endif
 
 /* these actions are common for the image window menu and popup menu */
 /* name, stock id, label, accel, tooltip, callback */

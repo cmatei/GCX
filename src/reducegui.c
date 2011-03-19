@@ -51,6 +51,16 @@
 #include "wcs.h"
 
 
+
+/* file switch actions */
+#define SWF_NEXT 1
+#define SWF_SKIP 2
+#define SWF_PREV 3
+#define SWF_QPHOT 4
+#define SWF_RED 5
+
+
+
 static int progress_pr(char *msg, void *dialog);
 static int log_msg(char *msg, void *dialog);
 

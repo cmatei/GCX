@@ -53,6 +53,19 @@
 #include "psf.h"
 #include "misc.h"
 
+/* photometry actions */
+#define PHOT_CENTER_STARS 1
+#define PHOT_RUN 2
+#define PHOT_ACTION_MASK 0xff
+#define PHOT_CENTER_PLOT 3
+
+#define PHOT_TO_STDOUT 0x400
+#define PHOT_TO_STDOUT_AA 0x500
+#define PHOT_TO_FILE 0x100
+#define PHOT_TO_FILE_AA 0x600
+#define PHOT_TO_MBDS 0x200
+#define PHOT_OUTPUT_MASK 0xff00
+
 static double stf_scint(struct stf *stf);
 
 static double distance(double x1, double y1, double x2, double y2)

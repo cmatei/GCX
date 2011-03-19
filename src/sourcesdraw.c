@@ -46,6 +46,35 @@
 #include "psf.h"
 #include "filegui.h"
 
+/* star popup action codes */
+#define STARP_UNMARK_STAR 1
+#define STARP_REMOVE_SEL 2
+#define STARP_INFO 3
+#define STARP_PAIR 4
+#define STARP_PAIR_RM 5
+#define STARP_MAKE_CAT 6
+#define STARP_MAKE_STD 7
+#define STARP_EDIT_AP 8
+#define STARP_GROWTH 9
+#define STARP_PROFILE 10
+#define STARP_MEASURE 11
+#define STARP_SKYHIST 12
+#define STARP_MOVE 13
+#define STARP_FIT_PSF 14
+
+/* add star action codes */
+#define ADD_STARS_DETECT 1
+#define ADD_STARS_GSC 2
+#define ADD_STARS_OBJECT 3
+#define ADD_STARS_TYCHO2 4
+#define ADD_FROM_CATALOG 5
+
+
+/* star display */
+#define STAR_BRIGHTER 1
+#define STAR_FAINTER 2
+#define STAR_REDRAW 3
+
 static struct {
 	double red;
 	double green;

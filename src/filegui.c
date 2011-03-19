@@ -54,6 +54,17 @@
 #define F_OPEN GTK_FILE_CHOOSER_ACTION_OPEN
 #define F_SAVE GTK_FILE_CHOOSER_ACTION_SAVE
 
+/* file actions */
+#define FILE_OPEN 1
+#define FILE_CLOSE 2
+#define FILE_SAVE_AS 3
+#define FILE_EXPORT_PNM8 4
+#define FILE_EXPORT_PNM16 5
+#define FILE_FITS_HEADER 6
+#define FILE_OPEN_RCP 7
+#define FILE_LOAD_GSC2 8
+#define FILE_ADD_TO_MBAND 100
+
 struct file_action {
 	GtkWidget *chooser;
 	GtkWidget *window;

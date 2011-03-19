@@ -39,6 +39,13 @@
 #include "params.h"
 #include "helpmsg.h"
 
+
+/* help actions */
+#define HELP_BINDINGS 1
+#define HELP_USAGE 2
+#define HELP_OBSCRIPT 3
+#define HELP_REPCONV 4
+
 static void update_fits_header_dialog(GtkWidget *dialog, struct ccd_frame *fr);
 static void update_help_text(GtkWidget *dialog, char * page);
 

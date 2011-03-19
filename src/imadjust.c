@@ -49,6 +49,27 @@ static float sigmas[SIGMAS_VALS] = {
 
 #define MIN_SPAN 32
 
+/* action values for cuts callback */
+#define CUTS_AUTO 0x100
+#define CUTS_MINMAX 0x200
+#define CUTS_FLATTER 0x300
+#define CUTS_SHARPER 0x400
+#define CUTS_BRIGHTER 0x500
+#define CUTS_DARKER 0x600
+#define CUTS_CONTRAST 0x700
+#define CUTS_INVERT 0x800
+#define CUTS_VAL_MASK 0x000000ff
+#define CUTS_ACT_MASK 0x0000ff00
+
+/* action values for view (zoom/pan) callback */
+#define VIEW_ZOOM_IN 0x100
+#define VIEW_ZOOM_OUT 0x200
+#define VIEW_ZOOM_FIT 0x300
+#define VIEW_PIXELS 0x400
+#define VIEW_PAN_CENTER 0x500
+#define VIEW_PAN_CURSOR 0x600
+
+
 void channel_set_lut_from_gamma(struct image_channel *channel);
 
 
@@ -500,7 +521,7 @@ void cuts_contrast_8_action (GtkAction *action, gpointer window)
 /*
  * zoom/pan
  */
-void view_option_cb(gpointer window, guint action, GtkWidget *menu_item)
+static void view_option_cb(gpointer window, guint action)
 {
 	GtkWidget *image;
 	int x, y, w, h;
@@ -564,34 +585,34 @@ void view_option_cb(gpointer window, guint action, GtkWidget *menu_item)
 
 void view_zoom_in_action (GtkAction *action, gpointer data)
 {
-	view_option_cb (data, VIEW_ZOOM_IN, NULL);
+	view_option_cb (data, VIEW_ZOOM_IN);
 }
 
 void view_zoom_out_action (GtkAction *action, gpointer data)
 {
-	view_option_cb (data, VIEW_ZOOM_OUT, NULL);
+	view_option_cb (data, VIEW_ZOOM_OUT);
 }
 
 void view_pixels_action (GtkAction *action, gpointer data)
 {
-	view_option_cb (data, VIEW_PIXELS, NULL);
+	view_option_cb (data, VIEW_PIXELS);
 }
 
 void view_pan_center_action (GtkAction *action, gpointer data)
 {
-	view_option_cb (data, VIEW_PAN_CENTER, NULL);
+	view_option_cb (data, VIEW_PAN_CENTER);
 }
 
 void view_pan_cursor_action (GtkAction *action, gpointer data)
 {
-	view_option_cb (data, VIEW_PAN_CURSOR, NULL);
+	view_option_cb (data, VIEW_PAN_CURSOR);
 }
 
 /*
  * display image stats in status bar
  * does not use action or menu_item
  */
-void stats_cb(gpointer data, guint action, GtkWidget *menu_item)
+void stats_cb(gpointer data, guint action)
 {
 	gpointer ret;
 	struct image_channel *i_channel;

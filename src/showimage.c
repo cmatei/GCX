@@ -1085,7 +1085,7 @@ int frame_to_channel(struct ccd_frame *fr, GtkWidget *window, char *chname)
 	remove_stars(window, TYPE_MASK_FRSTAR, 0);
 //	redraw_cat_stars(window);
 
-	stats_cb(window, 0, NULL);
+	stats_cb(window, 0);
 	show_zoom_cuts(window);
 	gtk_widget_queue_draw(GTK_WIDGET(window));
 	return 0;

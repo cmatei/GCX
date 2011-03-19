@@ -231,7 +231,7 @@ void star_append_comments(struct cat_star *cats, char *ncom)
 
 /* place a copy of src into dest; in desc is non-null, free it first
  */
-void update_dynamic_string(char **dest, char *src)
+static void update_dynamic_string(char **dest, char *src)
 {
 	if (*dest != NULL)
 		free(*dest);
