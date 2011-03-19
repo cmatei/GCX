@@ -619,6 +619,7 @@ static GtkActionEntry image_actions[] = {
 	{ "image-cuts-sharper", NULL, "S_harper", "H", NULL, G_CALLBACK (cuts_sharper_action) },
 	{ "image-cuts-brighter", NULL, "_Brighter", "B", NULL, G_CALLBACK (cuts_brighter_action) },
 	{ "image-cuts-darker", NULL, "_Darker", "D", NULL, G_CALLBACK (cuts_darker_action) },
+	{ "image-cuts-invert", NULL, "_Invert", "I", NULL, G_CALLBACK (cuts_invert_action) },
 	{ "image-cuts-1", NULL, "_4 sigma", "1", NULL, G_CALLBACK (cuts_contrast_1_action) },
 	{ "image-cuts-2", NULL, "5_.6 sigma", "2", NULL, G_CALLBACK (cuts_contrast_2_action) },
 	{ "image-cuts-3", NULL, "_8 sigma", "3", NULL, G_CALLBACK (cuts_contrast_3_action) },
@@ -733,6 +734,7 @@ static char *image_common_ui =
 	"  <menuitem name='image-cuts-sharper' action='image-cuts-sharper'/>"
 	"  <menuitem name='image-cuts-brighter' action='image-cuts-brighter'/>"
 	"  <menuitem name='image-cuts-darker' action='image-cuts-darker'/>"
+	"  <menuitem name='image-cuts-invert' action='image-cuts-invert'/>"
 	"  <menu name='image-set-contrast' action='image-set-contrast'>"
 	"    <menuitem name='image-cuts-1' action='image-cuts-1'/>"
 	"    <menuitem name='image-cuts-2' action='image-cuts-2'/>"

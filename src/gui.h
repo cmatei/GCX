@@ -250,14 +250,13 @@ extern void stats_cb(gpointer data, guint action, GtkWidget *menu_item);
 extern void show_region_stats(GtkWidget *window, double x, double y);
 extern void show_zoom_cuts(GtkWidget * window);
 
-extern void cuts_option_cb(gpointer data, guint action, GtkWidget *menu_item);
-
 extern void cuts_auto_action (GtkAction *action, gpointer data);
 extern void cuts_minmax_action (GtkAction *action, gpointer data);
 extern void cuts_flatter_action (GtkAction *action, gpointer data);
 extern void cuts_sharper_action (GtkAction *action, gpointer data);
 extern void cuts_brighter_action (GtkAction *action, gpointer data);
 extern void cuts_darker_action (GtkAction *action, gpointer data);
+extern void cuts_invert_action (GtkAction *action, gpointer window);
 extern void cuts_contrast_1_action (GtkAction *action, gpointer data);
 extern void cuts_contrast_2_action (GtkAction *action, gpointer data);
 extern void cuts_contrast_3_action (GtkAction *action, gpointer data);

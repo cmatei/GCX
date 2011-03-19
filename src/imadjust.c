@@ -403,7 +403,7 @@ void pan_cursor(GtkWidget *window)
 /*
  * changing cuts (brightness/contrast)
  */
-void cuts_option_cb(gpointer data, guint action, GtkWidget *menu_item)
+static void cuts_option_cb(gpointer data, guint action)
 {
 	GtkWidget *window = data;
 	struct image_channel* channel;
@@ -420,6 +420,81 @@ void cuts_option_cb(gpointer data, guint action, GtkWidget *menu_item)
 	channel_cuts_action(channel, action);
 	show_zoom_cuts(window);
 	gtk_widget_queue_draw(window);
+}
+
+void cuts_brighter_action(GtkAction *action, gpointer window)
+{
+	cuts_option_cb(window, CUTS_BRIGHTER);
+}
+
+void cuts_auto_action(GtkAction *action, gpointer window)
+{
+	cuts_option_cb(window, CUTS_AUTO);
+}
+
+void cuts_minmax_action(GtkAction *action, gpointer window)
+{
+	cuts_option_cb(window, CUTS_MINMAX);
+}
+
+void cuts_darker_action(GtkAction *action, gpointer window)
+{
+	cuts_option_cb(window, CUTS_DARKER);
+}
+
+void cuts_invert_action(GtkAction *action, gpointer window)
+{
+	cuts_option_cb(window, CUTS_INVERT);
+}
+
+void cuts_flatter_action(GtkAction *action, gpointer window)
+{
+	cuts_option_cb(window, CUTS_FLATTER);
+}
+
+void cuts_sharper_action(GtkAction *action, gpointer window)
+{
+	cuts_option_cb(window, CUTS_SHARPER);
+}
+
+void cuts_contrast_1_action (GtkAction *action, gpointer window)
+{
+	cuts_option_cb(window, CUTS_CONTRAST|1);
+}
+
+void cuts_contrast_2_action (GtkAction *action, gpointer window)
+{
+	cuts_option_cb(window, CUTS_CONTRAST|2);
+}
+
+void cuts_contrast_3_action (GtkAction *action, gpointer window)
+{
+	cuts_option_cb(window, CUTS_CONTRAST|3);
+}
+
+void cuts_contrast_4_action (GtkAction *action, gpointer window)
+{
+	cuts_option_cb(window, CUTS_CONTRAST|4);
+}
+
+void cuts_contrast_5_action (GtkAction *action, gpointer window)
+{
+	cuts_option_cb(window, CUTS_CONTRAST|5);
+}
+
+void cuts_contrast_6_action (GtkAction *action, gpointer window)
+{
+	cuts_option_cb(window, CUTS_CONTRAST|6);
+}
+
+void cuts_contrast_7_action (GtkAction *action, gpointer window)
+{
+	cuts_option_cb(window, CUTS_CONTRAST|7);
+}
+
+void cuts_contrast_8_action (GtkAction *action, gpointer window)
+{
+	cuts_option_cb(window, CUTS_CONTRAST|8);
 }
 
 /*
@@ -976,75 +1051,6 @@ void imadj_lut_updated (GtkWidget *spinbutton, gpointer dialog)
 
 }
 
-void cuts_brighter_action(GtkAction *action, gpointer window)
-{
-	cuts_option_cb(window, CUTS_BRIGHTER, NULL);
-}
-
-void cuts_auto_action(GtkAction *action, gpointer window)
-{
-	cuts_option_cb(window, CUTS_AUTO, NULL);
-}
-
-void cuts_minmax_action(GtkAction *action, gpointer window)
-{
-	cuts_option_cb(window, CUTS_MINMAX, NULL);
-}
-
-void cuts_darker_action(GtkAction *action, gpointer window)
-{
-	cuts_option_cb(window, CUTS_DARKER, NULL);
-}
-
-void cuts_flatter_action(GtkAction *action, gpointer window)
-{
-	cuts_option_cb(window, CUTS_FLATTER, NULL);
-}
-
-void cuts_sharper_action(GtkAction *action, gpointer window)
-{
-	cuts_option_cb(window, CUTS_SHARPER, NULL);
-}
-
-void cuts_contrast_1_action (GtkAction *action, gpointer window)
-{
-	cuts_option_cb(window, CUTS_CONTRAST|1, NULL);
-}
-
-void cuts_contrast_2_action (GtkAction *action, gpointer window)
-{
-	cuts_option_cb(window, CUTS_CONTRAST|2, NULL);
-}
-
-void cuts_contrast_3_action (GtkAction *action, gpointer window)
-{
-	cuts_option_cb(window, CUTS_CONTRAST|3, NULL);
-}
-
-void cuts_contrast_4_action (GtkAction *action, gpointer window)
-{
-	cuts_option_cb(window, CUTS_CONTRAST|4, NULL);
-}
-
-void cuts_contrast_5_action (GtkAction *action, gpointer window)
-{
-	cuts_option_cb(window, CUTS_CONTRAST|5, NULL);
-}
-
-void cuts_contrast_6_action (GtkAction *action, gpointer window)
-{
-	cuts_option_cb(window, CUTS_CONTRAST|6, NULL);
-}
-
-void cuts_contrast_7_action (GtkAction *action, gpointer window)
-{
-	cuts_option_cb(window, CUTS_CONTRAST|7, NULL);
-}
-
-void cuts_contrast_8_action (GtkAction *action, gpointer window)
-{
-	cuts_option_cb(window, CUTS_CONTRAST|8, NULL);
-}
 
 void imadj_set_callbacks(GtkWidget *dialog)
 {
