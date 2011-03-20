@@ -916,7 +916,7 @@ int run_obs_file(gpointer window, char *obsf)
 	d3_printf("run obs: %s\n", obsf);
 
 	/* launch the cam dialog */
-	camera_action(NULL, window);
+	act_control_camera(NULL, window);
 
 	dialog = g_object_get_data(G_OBJECT(window), "cam_dialog");
 	if (dialog == NULL) {

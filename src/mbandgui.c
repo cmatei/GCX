@@ -204,12 +204,12 @@ static void rep_cb(gpointer data, guint action, GtkWidget *menu_item)
 	file_select(data, "Report File", "", rep_file_cb, action);
 }
 
-void mband_save_dataset_action(GtkAction *action, gpointer data)
+void act_mband_save_dataset (GtkAction *action, gpointer data)
 {
 	rep_cb(data, REP_DATASET | REP_ALL, NULL);
 }
 
-void mband_close_dataset_action(GtkAction *action, gpointer data)
+void act_mband_close_dataset (GtkAction *action, gpointer data)
 {
 	struct mband_dataset *mbds;
 	GtkWidget *list;
@@ -237,7 +237,7 @@ void mband_close_dataset_action(GtkAction *action, gpointer data)
 		g_object_set_data(G_OBJECT(data), "mbds", NULL);
 }
 
-void mband_report_action(GtkAction *action, gpointer data)
+void act_mband_report (GtkAction *action, gpointer data)
 {
 	rep_cb(data, REP_TGT | REP_AAVSO, NULL);
 }
@@ -325,22 +325,22 @@ static void select_cb(gpointer data, guint action, GtkWidget *menu_item)
 	}
 }
 
-void mband_select_all_action (GtkAction *action, gpointer data)
+void act_mband_select_all (GtkAction *action, gpointer data)
 {
 	select_cb (data, SEL_ALL, NULL);
 }
 
-void mband_unselect_all_action (GtkAction *action, gpointer data)
+void act_mband_unselect_all (GtkAction *action, gpointer data)
 {
 	select_cb (data, UNSEL_ALL, NULL);
 }
 
-void mband_hide_action (GtkAction *action, gpointer data)
+void act_mband_hide (GtkAction *action, gpointer data)
 {
 	select_cb (data, HIDE_SEL, NULL);
 }
 
-void mband_unhide_action (GtkAction *action, gpointer data)
+void act_mband_unhide (GtkAction *action, gpointer data)
 {
 	select_cb (data, UNHIDE_ALL, NULL);
 }
@@ -508,37 +508,37 @@ static void plot_cb(gpointer data, guint action, GtkWidget *menu_item)
 	g_list_free(ofrs);
 }
 
-void mband_plot_resmag_action(GtkAction *action, gpointer data)
+void act_mband_plot_resmag (GtkAction *action, gpointer data)
 {
 	plot_cb (data, PLOT_RES_SM, NULL);
 }
 
-void mband_plot_rescol_action(GtkAction *action, gpointer data)
+void act_mband_plot_rescol (GtkAction *action, gpointer data)
 {
 	plot_cb (data, PLOT_RES_COL, NULL);
 }
 
-void mband_plot_errmag_action(GtkAction *action, gpointer data)
+void act_mband_plot_errmag (GtkAction *action, gpointer data)
 {
 	plot_cb (data, PLOT_RES_SM | PLOT_WEIGHTED, NULL);
 }
 
-void mband_plot_errcol_action(GtkAction *action, gpointer data)
+void act_mband_plot_errcol (GtkAction *action, gpointer data)
 {
 	plot_cb (data, PLOT_RES_COL | PLOT_WEIGHTED, NULL);
 }
 
-void mband_plot_zpairmass_action(GtkAction *action, gpointer data)
+void act_mband_plot_zpairmass (GtkAction *action, gpointer data)
 {
 	plot_cb (data, PLOT_ZP_AIRMASS, NULL);
 }
 
-void mband_plot_zptime_action(GtkAction *action, gpointer data)
+void act_mband_plot_zptime (GtkAction *action, gpointer data)
 {
 	plot_cb (data, PLOT_ZP_TIME, NULL);
 }
 
-void mband_plot_magtime_action(GtkAction *action, gpointer data)
+void act_mband_plot_magtime (GtkAction *action, gpointer data)
 {
 	plot_cb (data, PLOT_STAR, NULL);
 }
@@ -735,22 +735,22 @@ static void fit_cb(gpointer data, guint action, GtkWidget *menu_item)
 	g_list_free(ofrs);
 }
 
-void mband_fit_zpoints_action(GtkAction *action, gpointer data)
+void act_mband_fit_zp_null (GtkAction *action, gpointer data)
 {
 	fit_cb (data, FIT_ZPOINTS, NULL);
 }
 
-void mband_fit_zp_wtrans_action(GtkAction *action, gpointer data)
+void act_mband_fit_zp_current (GtkAction *action, gpointer data)
 {
 	fit_cb (data, FIT_ZP_WTRANS, NULL);
 }
 
-void mband_fit_trans_action(GtkAction *action, gpointer data)
+void act_mband_fit_zp_trans (GtkAction *action, gpointer data)
 {
 	fit_cb (data, FIT_TRANS, NULL);
 }
 
-void mband_fit_allsky_action(GtkAction *action, gpointer data)
+void act_mband_fit_allsky (GtkAction *action, gpointer data)
 {
 	fit_cb (data, FIT_ALL_SKY, NULL);
 }
@@ -1260,45 +1260,44 @@ gboolean mband_window_delete(GtkWidget *widget, GdkEvent *event, gpointer data)
 	return TRUE;
 }
 
-void mband_close_action(GtkAction *action, gpointer data)
+void act_mband_close_window (GtkAction *action, gpointer data)
 {
 	mband_window_delete(data, NULL, NULL);
 }
 
 /* name, stock id, label, accel, tooltip, callback */
 static GtkActionEntry mband_menu_actions[] = {
-	{ "mband-file",   NULL, "_File" },
-	{ "mband-edit",   NULL, "_Edit" },
-	{ "mband-reduce", NULL, "_Reduce" },
-	{ "mband-plot",   NULL, "_Plot" },
-
         /* File */
-        { "mband-file-add", NULL, "_Add to Dataset", "<control>O", NULL, G_CALLBACK (file_add_mband_action) },
-	{ "mband-file-save", NULL, "_Save Dataset", "<control>S", NULL, G_CALLBACK (mband_save_dataset_action) },
-	{ "mband-file-close", NULL, "_Close Dataset", "<control>W", NULL, G_CALLBACK (mband_close_dataset_action) },
-	{ "mband-report-aavso", NULL, "Report _Targets in AAVSO Format", NULL, NULL, G_CALLBACK(mband_report_action) },
-	{ "mband-close", NULL, "Close Window", "<control>Q", NULL, G_CALLBACK(mband_close_action) },
+	{ "file-menu",    NULL, "_File" },
+        { "file-add",     NULL, "_Add to Dataset",                 "<control>O", NULL, G_CALLBACK (act_mband_add_file) },
+	{ "file-save",    NULL, "_Save Dataset",                   "<control>S", NULL, G_CALLBACK (act_mband_save_dataset) },
+	{ "file-close",   NULL, "_Close Dataset",                  "<control>W", NULL, G_CALLBACK (act_mband_close_dataset) },
+	{ "report-aavso", NULL, "Report _Targets in AAVSO Format", NULL,         NULL, G_CALLBACK (act_mband_report) },
+	{ "close-window", NULL, "Close Window",                    "<control>Q", NULL, G_CALLBACK (act_mband_close_window) },
 
 	/* Edit */
-	{ "mband-select-all", NULL, "Select _All", "<control>A", NULL, G_CALLBACK(mband_select_all_action) },
-	{ "mband-unselect-all", NULL, "_Unselect All", "<control>U", NULL, G_CALLBACK(mband_unselect_all_action) },
-	{ "mband-hide-selected", NULL, "_Hide Selected", "H", NULL, G_CALLBACK(mband_hide_action) },
-	{ "mband-unhide-all", NULL, "Unhi_de All", "<shift>H", NULL, G_CALLBACK(mband_unhide_action) },
+	{ "edit-menu",          NULL, "_Edit" },
+	{ "edit-select-all",    NULL, "Select _All",    "<control>A", NULL, G_CALLBACK (act_mband_select_all) },
+	{ "edit-unselect-all",  NULL, "_Unselect All",  "<control>U", NULL, G_CALLBACK (act_mband_unselect_all) },
+	{ "edit-hide-selected", NULL, "_Hide Selected", "H",          NULL, G_CALLBACK (act_mband_hide) },
+	{ "edit-unhide-all",    NULL, "Unhi_de All",    "<shift>H",   NULL, G_CALLBACK (act_mband_unhide) },
 
 	/* Reduce */
-	{ "mband-fit-zpoints", NULL, "Fit _Zero Points with Null Coefficients", NULL, NULL, G_CALLBACK(mband_fit_zpoints_action) },
-	{ "mband-fit-zp-wtrans", NULL, "Fit Zero Points with _Current Coefficients", NULL, NULL, G_CALLBACK(mband_fit_zp_wtrans_action) },
-	{ "mband-fit-trans", NULL, "Fit Zero Points and _Transformation Coefficients", NULL, NULL, G_CALLBACK(mband_fit_trans_action) },
-	{ "mband-fit-allsky", NULL, "Fit Extinction and All-Sky Zero Points", NULL, NULL, G_CALLBACK(mband_fit_allsky_action) },
+	{ "reduce-menu",          NULL, "_Reduce" },
+	{ "reduce-fit-zpoints",   NULL, "Fit _Zero Points with Null Coefficients",          NULL, NULL, G_CALLBACK (act_mband_fit_zp_null) },
+	{ "reduce-fit-zp-wtrans", NULL, "Fit Zero Points with _Current Coefficients",       NULL, NULL, G_CALLBACK (act_mband_fit_zp_current) },
+	{ "reduce-fit-trans",     NULL, "Fit Zero Points and _Transformation Coefficients", NULL, NULL, G_CALLBACK (act_mband_fit_zp_trans) },
+	{ "reduce-fit-allsky",    NULL, "Fit Extinction and All-Sky Zero Points",           NULL, NULL, G_CALLBACK (act_mband_fit_allsky) },
 
 	/* Plot */
-	{ "mband-plot-residuals-magnitude", NULL, "_Residuals vs Magnitude", NULL, NULL, G_CALLBACK(mband_plot_resmag_action) },
-	{ "mband-plot-residuals-color", NULL, "Residuals vs _Color", NULL, NULL, G_CALLBACK(mband_plot_rescol_action) },
-	{ "mband-plot-errors-magnitude", NULL, "Standard _Errors vs Magnitude", NULL, NULL, G_CALLBACK(mband_plot_errmag_action) },
-	{ "mband-plot-errors-color", NULL, "_Standard Errors vs Color", NULL, NULL, G_CALLBACK(mband_plot_errcol_action) },
-	{ "mband-plot-zp-airmass", NULL, "_Zeropoints vs Airmass", NULL, NULL, G_CALLBACK(mband_plot_zpairmass_action) },
-	{ "mband-plot-zp-time", NULL, "Zeropoints vs _Time", NULL, NULL, G_CALLBACK(mband_plot_zptime_action) },
-	{ "mband-plot-magnitude-time", NULL, "Star _Magnitude vs Time", NULL, NULL, G_CALLBACK(mband_plot_magtime_action) },
+	{ "plot-menu",   NULL, "_Plot" },
+	{ "plot-residuals-magnitude", NULL, "_Residuals vs Magnitude",       NULL, NULL, G_CALLBACK(act_mband_plot_resmag) },
+	{ "plot-residuals-color",     NULL, "Residuals vs _Color",           NULL, NULL, G_CALLBACK(act_mband_plot_rescol) },
+	{ "plot-errors-magnitude",    NULL, "Standard _Errors vs Magnitude", NULL, NULL, G_CALLBACK(act_mband_plot_errmag) },
+	{ "plot-errors-color",        NULL, "_Standard Errors vs Color",     NULL, NULL, G_CALLBACK(act_mband_plot_errcol) },
+	{ "plot-zp-airmass",          NULL, "_Zeropoints vs Airmass",        NULL, NULL, G_CALLBACK(act_mband_plot_zpairmass) },
+	{ "plot-zp-time",             NULL, "Zeropoints vs _Time",           NULL, NULL, G_CALLBACK(act_mband_plot_zptime) },
+	{ "plot-magnitude-time",      NULL, "Star _Magnitude vs Time",       NULL, NULL, G_CALLBACK(act_mband_plot_magtime) },
 };
 
 /* create the menu bar */
@@ -1311,40 +1310,40 @@ static GtkWidget *get_main_menu_bar(GtkWidget *window)
 	static char *mband_ui =
 		"<menubar name='mband-menubar'>"
 		"  <!-- File -->"
-		"  <menu name='mband-file' action='mband-file'>"
-		"    <menuitem name='mband-file-add' action='mband-file-add'/>"
-		"    <menuitem name='mband-file-save' action='mband-file-save'/>"
-		"    <menuitem name='mband-file-close' action='mband-file-close'/>"
+		"  <menu name='file' action='file-menu'>"
+		"    <menuitem name='file-add' action='file-add'/>"
+		"    <menuitem name='file-save' action='file-save'/>"
+		"    <menuitem name='file-close' action='file-close'/>"
 		"    <separator name='separator1'/>"
-		"    <menuitem name='mband-report-aavso' action='mband-report-aavso'/>"
+		"    <menuitem name='report-aavso' action='report-aavso'/>"
 		"    <separator name='separator2'/>"
-		"    <menuitem name='mband-close' action='mband-close'/>"
+		"    <menuitem name='close-window' action='close-window'/>"
 		"  </menu>"
 		"  <!-- Edit -->"
-		"  <menu name='mband-edit' action='mband-edit'>"
-		"    <menuitem name='mband-select-all' action='mband-select-all'/>"
-		"    <menuitem name='mband-unselect-all' action='mband-unselect-all'/>"
-		"    <menuitem name='mband-hide-selected' action='mband-hide-selected'/>"
-		"    <menuitem name='mband-unhide-all' action='mband-unhide-all'/>"
+		"  <menu name='edit' action='edit-menu'>"
+		"    <menuitem name='edit-select-all' action='edit-select-all'/>"
+		"    <menuitem name='edit-unselect-all' action='edit-unselect-all'/>"
+		"    <menuitem name='edit-hide-selected' action='edit-hide-selected'/>"
+		"    <menuitem name='edit-unhide-all' action='edit-unhide-all'/>"
 		"  </menu>"
 		"  <!-- Reduce -->"
-		"  <menu name='mband-reduce' action='mband-reduce'>"
-		"    <menuitem name='mband-fit-zpoints' action='mband-fit-zpoints'/>"
-		"    <menuitem name='mband-fit-zp-wtrans' action='mband-fit-zp-wtrans'/>"
-		"    <menuitem name='mband-fit-trans' action='mband-fit-trans'/>"
-		"    <menuitem name='mband-fit-allsky' action='mband-fit-allsky'/>"
+		"  <menu name='reduce' action='reduce-menu'>"
+		"    <menuitem name='reduce-fit-zpoints' action='reduce-fit-zpoints'/>"
+		"    <menuitem name='reduce-fit-zp-wtrans' action='reduce-fit-zp-wtrans'/>"
+		"    <menuitem name='reduce-fit-trans' action='reduce-fit-trans'/>"
+		"    <menuitem name='reduce-fit-allsky' action='reduce-fit-allsky'/>"
 		"  </menu>"
 		"  <!-- Plot -->"
-		"  <menu name='mband-plot' action='mband-plot'>"
-		"    <menuitem name='mband-plot-residuals-magnitude' action='mband-plot-residuals-magnitude'/>"
-		"    <menuitem name='mband-plot-residuals-color' action='mband-plot-residuals-color'/>"
-		"    <menuitem name='mband-plot-errors-magnitude' action='mband-plot-errors-magnitude'/>"
-		"    <menuitem name='mband-plot-errors-color' action='mband-plot-errors-color'/>"
+		"  <menu name='plot' action='plot-menu'>"
+		"    <menuitem name='plot-residuals-magnitude' action='plot-residuals-magnitude'/>"
+		"    <menuitem name='plot-residuals-color' action='plot-residuals-color'/>"
+		"    <menuitem name='plot-errors-magnitude' action='plot-errors-magnitude'/>"
+		"    <menuitem name='plot-errors-color' action='plot-errors-color'/>"
 		"    <separator name='separator1'/>"
-		"    <menuitem name='mband-plot-zp-airmass' action='mband-plot-zp-airmass'/>"
-		"    <menuitem name='mband-plot-zp-time' action='mband-plot-zp-time'/>"
+		"    <menuitem name='plot-zp-airmass' action='plot-zp-airmass'/>"
+		"    <menuitem name='plot-zp-time' action='plot-zp-time'/>"
 		"    <separator name='separator2'/>"
-		"    <menuitem name='mband-plot-magnitude-time' action='mband-plot-magnitude-time'/>"
+		"    <menuitem name='plot-magnitude-time' action='plot-magnitude-time'/>"
 		"  </menu>"
 		"</menubar>";
 
@@ -1377,7 +1376,7 @@ static GtkWidget *get_main_menu_bar(GtkWidget *window)
 }
 
 /* create / open the guiding dialog */
-void mband_open_action(GtkAction *action, gpointer window)
+void act_control_mband(GtkAction *action, gpointer window)
 {
 	GtkWidget *dialog, *vb, *menubar;
 
@@ -1387,7 +1386,7 @@ void mband_open_action(GtkAction *action, gpointer window)
 		g_object_ref(dialog);
 		g_object_set_data_full(G_OBJECT(window), "mband_window", dialog,
 				       (GDestroyNotify) g_object_unref);
-		g_object_set_data(G_OBJECT(dialog), "in_window", window);
+		g_object_set_data(G_OBJECT(dialog), "im_window", window);
 		vb = g_object_get_data(G_OBJECT(dialog), "mband_vbox");
 		g_signal_connect(G_OBJECT(dialog), "delete_event",
 				 G_CALLBACK(mband_window_delete), window);

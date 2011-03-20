@@ -48,16 +48,6 @@
 
 #define INV_DBL -10000.0
 
-
-/* wcs actions */
-#define WCS_FIT 1
-#define WCS_AUTO 2
-#define WCS_RELOAD 3
-#define WCS_FORCE_VALID 4
-#define WCS_QUIET_AUTO 5
-#define WCS_RESET 6
-#define WCS_EXISTING 7
-
 /* Pertti's code begin */
 static void wcs_north_cb( GtkWidget *widget, gpointer data );
 static void wcs_south_cb( GtkWidget *widget, gpointer data );
@@ -91,7 +81,7 @@ static void close_wcs_dialog( GtkWidget *widget, gpointer data )
 }
 
 /* show the current frame's fits header in a text window */
-void wcs_edit_action(GtkAction *action, gpointer window)
+void act_control_wcs (GtkAction *action, gpointer window)
 {
 	GtkWidget *dialog;
 //	struct image_channel *i_chan;
@@ -173,7 +163,7 @@ static void update_wcs_dialog(GtkWidget *dialog, struct wcs *wcs)
 	switch(wcs->wcsset) {
 	case WCS_INVALID:
 		set_named_checkb_val(dialog, "wcs_unset_rb", 1);
-/* also clear the fields here */
+		/* also clear the fields here */
 		return;
 	case WCS_INITIAL:
 		set_named_checkb_val(dialog, "wcs_initial_rb", 1);
@@ -211,7 +201,7 @@ static int wcs_dialog_to_wcs(GtkWidget *dialog, struct wcs *wcs)
 		xs = INV_DBL, ys = INV_DBL, rot = INV_DBL, d;
 	int ret = 0, chg = 0;
 
-/* parse the fields */
+	/* parse the fields */
 	text = named_entry_text(dialog, "wcs_ra_entry");
 //	d3_printf("ra text is |%s|\n", text);
 	if (!dms_to_degrees(text, &d))
@@ -351,109 +341,103 @@ static int wcsentry_cb(GtkWidget *widget, gpointer dialog)
 	return ret;
 }
 
-static void wcs_cb(gpointer window, guint action)
+
+void act_wcs_auto (GtkAction *action, gpointer window)
+{
+	/* we just do the "sgpw" here */
+	act_stars_add_detected(NULL, window);
+	act_stars_add_gsc(NULL, window);
+	act_stars_add_tycho2(NULL, window);
+
+	if (window_auto_pairs(window) < 1)
+		return;
+
+	window_fit_wcs(window);
+	gtk_widget_queue_draw(window);
+
+	wcsedit_refresh(window);
+}
+
+void act_wcs_quiet_auto (GtkAction *action, gpointer window)
+{
+	/* we just do the "sgpw<shift>f<shift>s" here */
+	act_stars_add_detected(NULL, window);
+	act_stars_add_gsc(NULL, window);
+	act_stars_add_tycho2(NULL, window);
+
+	if (window_auto_pairs(window) < 1)
+		return;
+	window_fit_wcs(window);
+
+	act_stars_rm_field(NULL, window);
+	act_stars_rm_detected(NULL, window);
+
+	wcsedit_refresh(window);
+}
+
+void act_wcs_existing (GtkAction *action, gpointer window)
+{
+	/* we just do the "spw" here */
+	act_stars_add_detected(NULL, window);
+	if (window_auto_pairs(window) < 1)
+		return;
+
+	window_fit_wcs(window);
+	gtk_widget_queue_draw(window);
+
+	wcsedit_refresh(window);
+}
+
+void act_wcs_fit_pairs (GtkAction *action, gpointer window)
+{
+	window_fit_wcs(window);
+	gtk_widget_queue_draw(window);
+
+	wcsedit_refresh(window);
+}
+
+void act_wcs_reload (GtkAction *action, gpointer window)
 {
 	struct image_channel *i_chan;
 	struct wcs *wcs;
 	struct gui_star_list *gsl;
-	switch(action) {
-	case WCS_EXISTING:
-		/* we just do the "spw" here */
-		stars_add_detect_action(NULL, window);
-		if (window_auto_pairs(window) < 1)
-			return;
-		window_fit_wcs(window);
-		gtk_widget_queue_draw(window);
-		break;
-	case WCS_AUTO:
-		/* we just do the "sgpw" here */
-		stars_add_detect_action(NULL, window);
-		stars_add_gsc_action(NULL, window);
-		stars_add_tycho2_action(NULL, window);
-		if (window_auto_pairs(window) < 1)
-			return;
-	/* fallthrough */
-	case WCS_FIT:
-		window_fit_wcs(window);
-		gtk_widget_queue_draw(window);
-		break;
-	case WCS_QUIET_AUTO:
-		/* we just do the "sgpw<shift>f<shift>s" here */
-		wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
-//		if (wcs != NULL && wcs->wcsset == WCS_VALID)
-//			break;
-		stars_add_detect_action(NULL, window);
-		stars_add_gsc_action(NULL, window);
-		stars_add_tycho2_action(NULL, window);
-		if (window_auto_pairs(window) < 1)
-			return;
-		window_fit_wcs(window);
-		stars_rm_field_action(NULL, window);
-		stars_rm_detected_action(NULL, window);
-		break;
-	case WCS_RELOAD:
-		wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
-		i_chan = g_object_get_data(G_OBJECT(window), "i_channel");
-		if (wcs == NULL || i_chan == NULL || i_chan->fr == NULL)
-			break;
-		wcs_from_frame(i_chan->fr, wcs);
-		gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
-		if (gsl != NULL) {
-			cat_change_wcs(gsl->sl, wcs);
-		}
-		gtk_widget_queue_draw(window);
-		break;
-	case WCS_FORCE_VALID:
-		wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
-		if (wcs != NULL) {
-			wcs->wcsset = WCS_VALID;
-		}
-		break;
-	case WCS_RESET:
-		wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
-		if (wcs != NULL) {
-			wcs->wcsset = WCS_INVALID;
-		}
-		break;
-	default:
-		err_printf("unknown action %d in wcs_cb\n", action);
-	}
+
+	wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
+	i_chan = g_object_get_data(G_OBJECT(window), "i_channel");
+	if (wcs == NULL || i_chan == NULL || i_chan->fr == NULL)
+		return;
+
+	wcs_from_frame(i_chan->fr, wcs);
+
+	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
+	if (gsl != NULL)
+		cat_change_wcs(gsl->sl, wcs);
+
+	gtk_widget_queue_draw(window);
+
 	wcsedit_refresh(window);
 }
 
-void wcs_auto_action(GtkAction *action, gpointer window)
+void act_wcs_validate (GtkAction *action, gpointer window)
 {
-	wcs_cb (window, WCS_AUTO);
+	struct wcs *wcs;
+
+	wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
+	if (wcs != NULL)
+		wcs->wcsset = WCS_VALID;
+
+	wcsedit_refresh(window);
 }
 
-void wcs_quiet_auto_action(GtkAction *action, gpointer window)
+void act_wcs_invalidate (GtkAction *action, gpointer window)
 {
-	wcs_cb (window, WCS_QUIET_AUTO);
-}
+	struct wcs *wcs;
 
-void wcs_existing_action(GtkAction *action, gpointer window)
-{
-	wcs_cb (window, WCS_EXISTING);
-}
+	wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
+	if (wcs != NULL)
+		wcs->wcsset = WCS_INVALID;
 
-void wcs_fit_pairs_action(GtkAction *action, gpointer window)
-{
-	wcs_cb (window, WCS_FIT);
-}
-
-void wcs_reload_action(GtkAction *action, gpointer window)
-{
-	wcs_cb (window, WCS_RELOAD);
-}
-
-void wcs_validate_action(GtkAction *action, gpointer window)
-{
-	wcs_cb (window, WCS_FORCE_VALID);
-}
-
-void wcs_invalidate_action(GtkAction *action, gpointer window)
-{
-	wcs_cb (window, WCS_RESET);
+	wcsedit_refresh(window);
 }
 
 /* a simulated wcs 'auto match' command */
@@ -461,7 +445,9 @@ void wcs_invalidate_action(GtkAction *action, gpointer window)
 int match_field_in_window(gpointer window)
 {
 	struct wcs *wcs;
-	wcs_cb(window, WCS_AUTO);
+
+	act_wcs_auto (NULL, window);
+
 	wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
 	if (wcs == NULL) {
 		err_printf("No WCS found\n");
@@ -479,7 +465,7 @@ int match_field_in_window(gpointer window)
 int match_field_in_window_quiet(gpointer window)
 {
 	struct wcs *wcs;
-	wcs_cb(window, WCS_QUIET_AUTO);
+	act_wcs_quiet_auto (NULL, window);
 	wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
 	if (wcs == NULL) {
 		err_printf("No WCS found\n");

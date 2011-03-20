@@ -712,9 +712,8 @@ void file_select_list(gpointer data, char *title, char *filter,
 }
 
 
-void file_popup_cb(gpointer data, guint action, GtkWidget *menu_item)
+static void file_popup_cb(gpointer window, guint action)
 {
-	GtkWidget *window = data;
 	GtkWidget *chooser;
 	struct image_channel *channel;
 	struct file_action *fa;
@@ -819,40 +818,42 @@ void file_popup_cb(gpointer data, guint action, GtkWidget *menu_item)
 
 }
 
-void file_open_action(GtkAction *action, gpointer data)
+void act_file_open (GtkAction *action, gpointer data)
 {
-	file_popup_cb (data, FILE_OPEN, NULL);
+	file_popup_cb (data, FILE_OPEN);
 }
 
-void file_save_action(GtkAction *action, gpointer data)
+void act_file_save (GtkAction *action, gpointer data)
 {
-	file_popup_cb (data, FILE_SAVE_AS, NULL);
+	file_popup_cb (data, FILE_SAVE_AS);
 }
 
-void file_export_pnm8_action(GtkAction *action, gpointer data)
+void act_file_export_pnm8 (GtkAction *action, gpointer data)
 {
-	file_popup_cb (data, FILE_EXPORT_PNM8, NULL);
+	file_popup_cb (data, FILE_EXPORT_PNM8);
 }
 
-void file_export_pnm16_action(GtkAction *action, gpointer data)
+void act_file_export_pnm16 (GtkAction *action, gpointer data)
 {
-	file_popup_cb (data, FILE_EXPORT_PNM16, NULL);
+	file_popup_cb (data, FILE_EXPORT_PNM16);
 }
 
-void file_add_mband_action(GtkAction *action, gpointer data)
+void act_mband_add_file (GtkAction *action, gpointer data)
 {
-	file_popup_cb (data, FILE_ADD_TO_MBAND, NULL);
+	file_popup_cb (data, FILE_ADD_TO_MBAND);
 }
 
-void file_load_recipy_action(GtkAction *action, gpointer data)
+void act_stars_add_gsc2_file (GtkAction *action, gpointer window)
 {
-	file_popup_cb (data, FILE_OPEN_RCP, NULL);
+	file_popup_cb (window, FILE_LOAD_GSC2);
 }
 
-void file_load_gsc2_action(GtkAction *action, gpointer data)
+void act_recipe_open (GtkAction *action, gpointer data)
 {
-	file_popup_cb (data, FILE_LOAD_GSC2, NULL);
+	file_popup_cb (data, FILE_OPEN_RCP);
 }
+
+
 
 /* return the first filename matching pattern that is found in path,
    or null if it couldn't be found */

@@ -14,6 +14,7 @@
 #include "interface.h"
 #include "params.h"
 
+
 GtkWidget*
 create_pstar (void)
 {

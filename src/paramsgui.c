@@ -537,7 +537,7 @@ static void close_parwin(GtkWidget *widget, GdkEvent *event, gpointer window )
 	g_object_set_data(G_OBJECT(window), "params_window", NULL);
 }
 
-void edit_options_action(GtkAction *action, gpointer window)
+void act_control_options (GtkAction *action, gpointer window)
 {
 	GtkWidget *parwin;
 	GtkWidget *tree1;

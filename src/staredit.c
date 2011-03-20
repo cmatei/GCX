@@ -609,7 +609,7 @@ void do_edit_star(GtkWidget *window, GSList *found, int make_std)
 	cats = CAT_STAR(GUI_STAR(gs)->s);
 	if (cats == NULL) {
 		if ((wcs != NULL) && (wcs->wcsset & WCS_VALID)) {
-/* we create a cat star here */
+			/* we create a cat star here */
 			d3_printf("making cats\n");
 			w_worldpos(wcs, gs->x, gs->y, &ra, &dec);
 			cats = cat_star_new();
@@ -641,7 +641,7 @@ void do_edit_star(GtkWidget *window, GSList *found, int make_std)
 }
 
 /* push a star from the found list in the dialog for editing
- * if the dialog doesn;t exist, create it
+ * if the dialog doesn't exist, create it
  */
 void star_edit_dialog(GtkWidget *window, GSList *found)
 {

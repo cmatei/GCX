@@ -443,77 +443,77 @@ static void cuts_option_cb(gpointer data, guint action)
 	gtk_widget_queue_draw(window);
 }
 
-void cuts_brighter_action(GtkAction *action, gpointer window)
+void act_view_cuts_brighter(GtkAction *action, gpointer window)
 {
 	cuts_option_cb(window, CUTS_BRIGHTER);
 }
 
-void cuts_auto_action(GtkAction *action, gpointer window)
+void act_view_cuts_auto(GtkAction *action, gpointer window)
 {
 	cuts_option_cb(window, CUTS_AUTO);
 }
 
-void cuts_minmax_action(GtkAction *action, gpointer window)
+void act_view_cuts_minmax(GtkAction *action, gpointer window)
 {
 	cuts_option_cb(window, CUTS_MINMAX);
 }
 
-void cuts_darker_action(GtkAction *action, gpointer window)
+void act_view_cuts_darker(GtkAction *action, gpointer window)
 {
 	cuts_option_cb(window, CUTS_DARKER);
 }
 
-void cuts_invert_action(GtkAction *action, gpointer window)
+void act_view_cuts_invert(GtkAction *action, gpointer window)
 {
 	cuts_option_cb(window, CUTS_INVERT);
 }
 
-void cuts_flatter_action(GtkAction *action, gpointer window)
+void act_view_cuts_flatter(GtkAction *action, gpointer window)
 {
 	cuts_option_cb(window, CUTS_FLATTER);
 }
 
-void cuts_sharper_action(GtkAction *action, gpointer window)
+void act_view_cuts_sharper(GtkAction *action, gpointer window)
 {
 	cuts_option_cb(window, CUTS_SHARPER);
 }
 
-void cuts_contrast_1_action (GtkAction *action, gpointer window)
+void act_view_cuts_contrast_1 (GtkAction *action, gpointer window)
 {
 	cuts_option_cb(window, CUTS_CONTRAST|1);
 }
 
-void cuts_contrast_2_action (GtkAction *action, gpointer window)
+void act_view_cuts_contrast_2 (GtkAction *action, gpointer window)
 {
 	cuts_option_cb(window, CUTS_CONTRAST|2);
 }
 
-void cuts_contrast_3_action (GtkAction *action, gpointer window)
+void act_view_cuts_contrast_3 (GtkAction *action, gpointer window)
 {
 	cuts_option_cb(window, CUTS_CONTRAST|3);
 }
 
-void cuts_contrast_4_action (GtkAction *action, gpointer window)
+void act_view_cuts_contrast_4 (GtkAction *action, gpointer window)
 {
 	cuts_option_cb(window, CUTS_CONTRAST|4);
 }
 
-void cuts_contrast_5_action (GtkAction *action, gpointer window)
+void act_view_cuts_contrast_5 (GtkAction *action, gpointer window)
 {
 	cuts_option_cb(window, CUTS_CONTRAST|5);
 }
 
-void cuts_contrast_6_action (GtkAction *action, gpointer window)
+void act_view_cuts_contrast_6 (GtkAction *action, gpointer window)
 {
 	cuts_option_cb(window, CUTS_CONTRAST|6);
 }
 
-void cuts_contrast_7_action (GtkAction *action, gpointer window)
+void act_view_cuts_contrast_7 (GtkAction *action, gpointer window)
 {
 	cuts_option_cb(window, CUTS_CONTRAST|7);
 }
 
-void cuts_contrast_8_action (GtkAction *action, gpointer window)
+void act_view_cuts_contrast_8 (GtkAction *action, gpointer window)
 {
 	cuts_option_cb(window, CUTS_CONTRAST|8);
 }
@@ -583,27 +583,27 @@ static void view_option_cb(gpointer window, guint action)
 	show_zoom_cuts(window);
 }
 
-void view_zoom_in_action (GtkAction *action, gpointer data)
+void act_view_zoom_in (GtkAction *action, gpointer data)
 {
 	view_option_cb (data, VIEW_ZOOM_IN);
 }
 
-void view_zoom_out_action (GtkAction *action, gpointer data)
+void act_view_zoom_out (GtkAction *action, gpointer data)
 {
 	view_option_cb (data, VIEW_ZOOM_OUT);
 }
 
-void view_pixels_action (GtkAction *action, gpointer data)
+void act_view_pixels (GtkAction *action, gpointer data)
 {
 	view_option_cb (data, VIEW_PIXELS);
 }
 
-void view_pan_center_action (GtkAction *action, gpointer data)
+void act_view_pan_center (GtkAction *action, gpointer data)
 {
 	view_option_cb (data, VIEW_PAN_CENTER);
 }
 
-void view_pan_cursor_action (GtkAction *action, gpointer data)
+void act_view_pan_cursor (GtkAction *action, gpointer data)
 {
 	view_option_cb (data, VIEW_PAN_CURSOR);
 }
@@ -1126,35 +1126,42 @@ void imadj_set_callbacks(GtkWidget *dialog)
 
 	window = g_object_get_data(G_OBJECT(dialog), "image_window");
 
+	/* FIXME: we use the action functions; they're ignoring the
+	   first argument, which will be a GtkButton in this case.
+
+	   This should be handled by gtk_action_connect_proxy^H^H^H^H
+	   gtk_activatable_set_related_action, but I don't see a
+	   convenient way to get to the actual GtkAction.
+	*/
 	button = g_object_get_data(G_OBJECT(dialog), "cuts_darker");
 	if (button != NULL) {
 		g_signal_connect(G_OBJECT(button), "clicked",
-			   G_CALLBACK (cuts_darker_action), window);
+				 G_CALLBACK (act_view_cuts_darker), window);
 	}
 	button = g_object_get_data(G_OBJECT(dialog), "cuts_sharper");
 	if (button != NULL) {
 		g_signal_connect(G_OBJECT(button), "clicked",
-			   G_CALLBACK (cuts_sharper_action), window);
+				 G_CALLBACK (act_view_cuts_sharper), window);
 	}
 	button = g_object_get_data(G_OBJECT(dialog), "cuts_duller");
 	if (button != NULL) {
 		g_signal_connect(G_OBJECT(button), "clicked",
-			   G_CALLBACK (cuts_flatter_action), window);
+			   G_CALLBACK (act_view_cuts_flatter), window);
 	}
 	button = g_object_get_data(G_OBJECT(dialog), "cuts_auto");
 	if (button != NULL) {
 		g_signal_connect(G_OBJECT(button), "clicked",
-			   G_CALLBACK (cuts_auto_action), window);
+			   G_CALLBACK (act_view_cuts_auto), window);
 	}
 	button = g_object_get_data(G_OBJECT(dialog), "cuts_min_max");
 	if (button != NULL) {
 		g_signal_connect(G_OBJECT(button), "clicked",
-			   G_CALLBACK (cuts_minmax_action), window);
+			   G_CALLBACK (act_view_cuts_minmax), window);
 	}
 	button = g_object_get_data(G_OBJECT(dialog), "cuts_brighter");
 	if (button != NULL) {
 		g_signal_connect(G_OBJECT(button), "clicked",
-			   G_CALLBACK (cuts_brighter_action), window);
+			   G_CALLBACK (act_view_cuts_brighter), window);
 	}
 
 }
@@ -1191,9 +1198,8 @@ void close_imadj_dialog( GtkWidget *widget, gpointer data )
 }
 
 
-void histogram_cb(gpointer data, guint action, GtkWidget *menu_item)
+void act_control_histogram(GtkAction *action, gpointer window)
 {
-	GtkWidget *window = data;
 	GtkWidget *dialog, *close, *darea;
 	void *ret;
 	GtkWidget* create_imadj_dialog (void);
@@ -1233,10 +1239,6 @@ void histogram_cb(gpointer data, guint action, GtkWidget *menu_item)
 	imadj_dialog_edit(dialog);
 }
 
-void histogram_action(GtkAction *action, gpointer data)
-{
-	histogram_cb (data, 0, NULL);
-}
 
 /* from Glade */
 

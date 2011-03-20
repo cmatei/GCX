@@ -102,56 +102,33 @@ static void mframe_cb(GtkAction *action, gpointer dialog)
 	im_window = g_object_get_data(G_OBJECT(dialog), "im_window");
 	g_return_if_fail(im_window != NULL);
 
-	mband_open_action(NULL, im_window);
+	act_control_mband(NULL, im_window);
 }
 
 /* name, stock id, label, accel, tooltip, callback */
 static GtkActionEntry reduce_menu_actions[] = {
-	{ "reduce-file",   NULL, "_File" },
-	{ "reduce-edit",   NULL, "_Edit" },
-	{ "reduce-reduce", NULL, "_Reduce" },
+	/* File */
+	{ "file-menu",             NULL, "_File" },
+	{ "file-add",              NULL, "_Add Files",              "<control>O", NULL, G_CALLBACK (imf_add_cb) },
+	{ "file-remove-selected",  NULL, "Remove Selecte_d Files",  "<control>D", NULL, G_CALLBACK (imf_rm_cb) },
+	{ "file-reload-selected",  NULL, "Reload Selected Files",   "<control>R", NULL, G_CALLBACK (imf_reload_cb) },
+	{ "frame-display",         NULL, "_Display Frame",          "D",          NULL, G_CALLBACK (imf_display_cb) },
+	{ "frame-next",            NULL, "_Next Frame",             "N",          NULL, G_CALLBACK (imf_next_cb) },
+	{ "frame-prev",            NULL, "_Previous Frame",         "J",          NULL, G_CALLBACK (imf_prev_cb) },
+	{ "frame-skip-selected",   NULL, "S_kip Selected Frames",   "K",          NULL, G_CALLBACK (imf_skip_cb) },
+	{ "frame-unskip-selected", NULL, "_Unskip Selected Frames", "U",          NULL, G_CALLBACK (imf_unskip_cb) },
 
-	{ "reduce-add-files",            NULL, "_Add Files",
-	  "<control>O", NULL, G_CALLBACK (imf_add_cb) },
+	/* Edit */
+	{ "edit-menu",  NULL, "_Edit" },
+	{ "select-all", NULL, "Select _All", "<control>A", NULL, G_CALLBACK (imf_selall_cb) },
 
-	{ "reduce-remove-selected",      NULL, "Remove Selecte_d Files",
-	  "<control>D", NULL, G_CALLBACK (imf_rm_cb) },
-
-	{ "reduce-reload-selected",      NULL, "Reload Selected Files",
-	  "<control>R", NULL, G_CALLBACK (imf_reload_cb) },
-
-	{ "reduce-display-frame",        NULL, "_Display Frame",
-	  "D", NULL, G_CALLBACK (imf_display_cb) },
-
-	{ "reduce-next-frame",           NULL, "_Next Frame",
-	  "N", NULL, G_CALLBACK (imf_next_cb) },
-
-	{ "reduce-prev-frame",           NULL, "_Previous Frame",
-	  "J", NULL, G_CALLBACK (imf_prev_cb) },
-
-	{ "reduce-skip-selected",        NULL, "S_kip Selected Frames",
-	  "K", NULL, G_CALLBACK (imf_skip_cb) },
-
-	{ "reduce-unskip-selected",      NULL, "_Unskip Selected Frames",
-	  "U", NULL, G_CALLBACK (imf_unskip_cb) },
-
-	{ "reduce-select-all",           NULL, "Select _All",
-	  "<control>A", NULL, G_CALLBACK (imf_selall_cb) },
-
-	{ "reduce-reduce-all",           NULL, "Reduce All",
-	  "<shift>R", NULL, G_CALLBACK (ccdred_run_cb) },
-
-	{ "reduce-reduce-one",           NULL, "Reduce One Frame",
-	  "y", NULL, G_CALLBACK (ccdred_one_cb) },
-
-	{ "reduce-qphot-one",            NULL, "Qphot One Frame",
-	  "t", NULL, G_CALLBACK (ccdred_qphotone_cb) },
-
-	{ "reduce-show-alignment-stars", NULL, "Show Alignment Stars",
-	  "A", NULL, G_CALLBACK (show_align_cb) },
-
-	{ "reduce-multi-frame", NULL, "_Multi-frame Photometry...",
-	  "<control>m", NULL, G_CALLBACK (mframe_cb) },
+	/* Reduce */
+	{ "reduce-menu",          NULL, "_Reduce" },
+	{ "reduce-all",           NULL, "Reduce All",                 "<shift>R",   NULL, G_CALLBACK (ccdred_run_cb) },
+	{ "reduce-one",           NULL, "Reduce One Frame",           "Y",          NULL, G_CALLBACK (ccdred_one_cb) },
+	{ "qphot-one",            NULL, "Qphot One Frame",            "T",          NULL, G_CALLBACK (ccdred_qphotone_cb) },
+	{ "show-alignment-stars", NULL, "Show Alignment Stars",       "A",          NULL, G_CALLBACK (show_align_cb) },
+	{ "phot-multi-frame",     NULL, "_Multi-frame Photometry...", "<control>M", NULL, G_CALLBACK (mframe_cb) },
 
 };
 
@@ -164,29 +141,29 @@ static GtkWidget *get_main_menu_bar(GtkWidget *window)
 	GtkActionGroup *action_group;
 	static char *reduce_ui =
 		"<menubar name='reduce-menubar'>"
-		"  <menu name='reduce-file' action='reduce-file'>"
-		"    <menuitem name='Add Files' action='reduce-add-files'/>"
-		"    <menuitem name='Remove Selected Files' action='reduce-remove-selected'/>"
-		"    <menuitem name='Reload Selected Files' action='reduce-reload-selected'/>"
+		"  <menu name='file' action='file-menu'>"
+		"    <menuitem name='Add Files' action='file-add'/>"
+		"    <menuitem name='Remove Selected Files' action='file-remove-selected'/>"
+		"    <menuitem name='Reload Selected Files' action='file-reload-selected'/>"
 		"    <separator name='separator1'/>"
-		"    <menuitem name='Display Frame' action='reduce-display-frame'/>"
-		"    <menuitem name='Next Frame' action='reduce-next-frame'/>"
-		"    <menuitem name='Previous Frame' action='reduce-prev-frame'/>"
+		"    <menuitem name='Display Frame' action='frame-display'/>"
+		"    <menuitem name='Next Frame' action='frame-next'/>"
+		"    <menuitem name='Previous Frame' action='frame-prev'/>"
 		"    <separator name='separator2'/>"
-		"    <menuitem name='Skip Selected Frames' action='reduce-skip-selected'/>"
-		"    <menuitem name='Unskip Selected Frames' action='reduce-unskip-selected'/>"
+		"    <menuitem name='Skip Selected Frames' action='frame-skip-selected'/>"
+		"    <menuitem name='Unskip Selected Frames' action='frame-unskip-selected'/>"
 		"  </menu>"
-		"  <menu name='reduce-edit' action='reduce-edit'>"
-		"    <menuitem name='Select All' action='reduce-select-all'/>"
+		"  <menu name='edit' action='edit-menu'>"
+		"    <menuitem name='Select All' action='select-all'/>"
 		"  </menu>"
-		"  <menu name='Reduce' action='reduce-reduce'>"
-		"    <menuitem name='Reduce All' action='reduce-reduce-all'/>"
-		"    <menuitem name='Reduce One Frame' action='reduce-reduce-one'/>"
-		"    <menuitem name='Qphot One Frame' action='reduce-qphot-one'/>"
+		"  <menu name='Reduce' action='reduce-menu'>"
+		"    <menuitem name='Reduce All' action='reduce-all'/>"
+		"    <menuitem name='Reduce One Frame' action='reduce-one'/>"
+		"    <menuitem name='Qphot One Frame' action='qphot-one'/>"
 		"    <separator name='separator1'/>"
-		"    <menuitem name='Show Alignment Stars' action='reduce-show-alignment-stars'/>"
+		"    <menuitem name='Show Alignment Stars' action='show-alignment-stars'/>"
 		"    <separator name='separator2'/>"
-		"    <menuitem name='Multi-frame Photometry...' action='reduce-multi-frame'/>"
+		"    <menuitem name='Multi-frame Photometry...' action='phot-multi-frame'/>"
 		"  </menu>"
 		"</menubar>";
 
@@ -918,27 +895,27 @@ static void switch_frame_cb(gpointer window, guint action)
 	update_selected_status_label(dialog);
 }
 
-void switch_frame_next_action(GtkAction *action, gpointer window)
+void act_process_next (GtkAction *action, gpointer window)
 {
 	switch_frame_cb (window, SWF_NEXT);
 }
 
-void switch_frame_prev_action(GtkAction *action, gpointer window)
+void act_process_prev (GtkAction *action, gpointer window)
 {
 	switch_frame_cb (window, SWF_PREV);
 }
 
-void switch_frame_skip_action(GtkAction *action, gpointer window)
+void act_process_skip (GtkAction *action, gpointer window)
 {
 	switch_frame_cb (window, SWF_SKIP);
 }
 
-void switch_frame_qphot_action(GtkAction *action, gpointer window)
+void act_process_qphot (GtkAction *action, gpointer window)
 {
 	switch_frame_cb (window, SWF_QPHOT);
 }
 
-void switch_frame_reduce_action(GtkAction *action, gpointer window)
+void act_process_reduce (GtkAction *action, gpointer window)
 {
 	switch_frame_cb (window, SWF_RED);
 }
@@ -1345,7 +1322,7 @@ static void ccdred_run_cb(GtkAction *action, gpointer dialog)
 			im_window = g_object_get_data(G_OBJECT(dialog), "im_window");
 			mbd = g_object_get_data(G_OBJECT(im_window), "mband_window");
 			if (mbd == NULL) {
-				mband_open_action(NULL, im_window);
+				act_control_mband(NULL, im_window);
 				mbd = g_object_get_data(G_OBJECT(im_window), "mband_window");
 			}
 			g_object_ref(GTK_WIDGET(mbd));
@@ -1583,7 +1560,7 @@ static void ccdred_one_cb(GtkAction *action, gpointer dialog)
 			im_window = g_object_get_data(G_OBJECT(dialog), "im_window");
 			mbd = g_object_get_data(G_OBJECT(im_window), "mband_window");
 			if (mbd == NULL) {
-				mband_open_action(NULL, im_window);
+				act_control_mband(NULL, im_window);
 				mbd = g_object_get_data(G_OBJECT(im_window), "mband_window");
 			}
 			g_object_ref(GTK_WIDGET(mbd));
@@ -1734,7 +1711,7 @@ static void imf_red_activate_cb(GtkWidget *wid, gpointer dialog)
 
 
 
-void processing_action(GtkAction *action, gpointer window)
+void act_control_processing (GtkAction *action, gpointer window)
 {
 	GtkWidget *dialog;
 

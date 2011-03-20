@@ -639,27 +639,27 @@ void find_stars_cb(gpointer window, guint action)
 	gtk_widget_queue_draw(window);
 }
 
-void stars_add_detect_action(GtkAction *action, gpointer window)
+void act_stars_add_detected(GtkAction *action, gpointer window)
 {
 	find_stars_cb (window, ADD_STARS_DETECT);
 }
 
-void stars_show_target_action (GtkAction *action, gpointer window)
+void act_stars_show_target (GtkAction *action, gpointer window)
 {
 	find_stars_cb (window, ADD_STARS_OBJECT);
 }
 
-void stars_add_catalog_action(GtkAction *action, gpointer window)
+void act_stars_add_catalog(GtkAction *action, gpointer window)
 {
 	find_stars_cb (window, ADD_FROM_CATALOG);
 }
 
-void stars_add_gsc_action(GtkAction *action, gpointer window)
+void act_stars_add_gsc(GtkAction *action, gpointer window)
 {
 	find_stars_cb (window, ADD_STARS_GSC);
 }
 
-void stars_add_tycho2_action(GtkAction *action, gpointer window)
+void act_stars_add_tycho2(GtkAction *action, gpointer window)
 {
 	find_stars_cb (window, ADD_STARS_TYCHO2);
 }
@@ -1190,47 +1190,47 @@ static void star_popup_cb(guint action, GtkWidget *window)
 	}
 }
 
-void starp_edit_ap_action (GtkAction *action, gpointer window)
+void act_stars_popup_edit (GtkAction *action, gpointer window)
 {
 	star_popup_cb (STARP_EDIT_AP, window);
 }
 
-void starp_unmark_star_action (GtkAction *action, gpointer window)
+void act_stars_popup_unmark (GtkAction *action, gpointer window)
 {
 	star_popup_cb (STARP_UNMARK_STAR, window);
 }
 
-void starp_pair_add_action (GtkAction *action, gpointer window)
+void act_stars_popup_add_pair (GtkAction *action, gpointer window)
 {
 	star_popup_cb (STARP_PAIR, window);
 }
 
-void starp_pair_rm_action (GtkAction *action, gpointer window)
+void act_stars_popup_rm_pair (GtkAction *action, gpointer window)
 {
 	star_popup_cb (STARP_PAIR_RM, window);
 }
 
-void starp_move_star_action (GtkAction *action, gpointer window)
+void act_stars_popup_move (GtkAction *action, gpointer window)
 {
 	star_popup_cb (STARP_MOVE, window);
 }
 
-void starp_plot_profile_action (GtkAction *action, gpointer window)
+void act_stars_popup_plot_profiles (GtkAction *action, gpointer window)
 {
 	star_popup_cb (STARP_PROFILE, window);
 }
 
-void starp_measure_star_action (GtkAction *action, gpointer window)
+void act_stars_popup_measure (GtkAction *action, gpointer window)
 {
 	star_popup_cb (STARP_MEASURE, window);
 }
 
-void starp_plot_skyhist_action (GtkAction *action, gpointer window)
+void act_stars_popup_plot_skyhist (GtkAction *action, gpointer window)
 {
 	star_popup_cb (STARP_SKYHIST, window);
 }
 
-void starp_fit_psf_action (GtkAction *action, gpointer window)
+void act_stars_popup_fit_psf (GtkAction *action, gpointer window)
 {
 	star_popup_cb (STARP_FIT_PSF, window);
 }
@@ -1649,22 +1649,22 @@ static void star_display_cb(guint action, gpointer window)
 	gtk_widget_queue_draw(window);
 }
 
-void star_display_brighter_action(GtkAction *action, gpointer window)
+void act_stars_brighter (GtkAction *action, gpointer window)
 {
 	star_display_cb (STAR_BRIGHTER, window);
 }
 
-void star_display_fainter_action(GtkAction *action, gpointer window)
+void act_stars_fainter (GtkAction *action, gpointer window)
 {
 	star_display_cb (STAR_FAINTER, window);
 }
 
-void star_display_redraw_action(GtkAction *action, gpointer window)
+void act_stars_redraw (GtkAction *action, gpointer window)
 {
 	star_display_cb (STAR_REDRAW, window);
 }
 
-void stars_edit_action(GtkAction *action, gpointer window)
+void act_stars_edit (GtkAction *action, gpointer window)
 {
 	GSList *sl = NULL;
 
@@ -1675,5 +1675,9 @@ void stars_edit_action(GtkAction *action, gpointer window)
 	}
 	do_edit_star(window, sl, 0);
 	g_slist_free(sl);
+}
 
+void act_stars_plot_profiles (GtkAction *action, gpointer window)
+{
+	plot_profile (window, NULL);
 }

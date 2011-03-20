@@ -21,7 +21,7 @@
   Contact Information: radu@corlan.net
 *******************************************************************************/
 
-/* Here we handle the main image window and menus */
+/* Here we handle common GUI patterns */
 #define _GNU_SOURCE
 
 #include <stdio.h>
@@ -39,17 +39,6 @@
 #include "interface.h"
 #include "misc.h"
 #include "query.h"
-
-/* remove stars actions */
-#define STAR_RM_ALL 1
-#define STAR_RM_FR 2
-#define STAR_RM_USER 3
-#define STAR_RM_CAT 4
-#define STAR_RM_SEL 5
-#define STAR_RM_PAIRS_ALL 6
-#define STAR_RM_PAIRS_SEL 7
-#define STAR_RM_FIELD 8
-#define STAR_RM_OFF 10
 
 
 /* yes/no modal dialog */
@@ -237,7 +226,7 @@ int err_printf_sb2(gpointer window, const char *fmt, ...)
 }
 
 
-static void about_cx_action(GtkAction *action, gpointer data)
+void act_about_cx (GtkAction *action, gpointer data)
 {
 	GtkWidget *about_cx;
 	about_cx = create_about_cx();
@@ -256,145 +245,18 @@ static int destroy_cb(GtkWidget *widget, gpointer data)
 	return 1;
 }
 
-static void user_quit_action(GtkAction *action, gpointer window)
+void act_user_quit(GtkAction *action, gpointer window)
 {
 	d3_printf("user quit\n");
 	gtk_widget_destroy(GTK_WIDGET(window));
 }
 
-int window_auto_pairs(gpointer window)
-{
-	struct gui_star_list *gsl;
-	int ret;
-
-	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
-	if (gsl == NULL)
-		return -1;
-	info_printf_sb2(window, "Looking for Star Pairs...");
-	while (gtk_events_pending ())
-		gtk_main_iteration ();
-	remove_pairs(window, 0);
-	ret = auto_pairs(gsl);
-	if (ret < 1) {
-		info_printf_sb2(window, "%s\n", last_err());
-	} else {
-		info_printf_sb2(window, "Found %d Matching Pairs", ret);
-	}
-	gtk_widget_queue_draw(window);
-	return ret;
-}
-
-void star_pairs_action(GtkAction *action, gpointer window)
-{
-	window_auto_pairs(window);
-}
-
-static void new_frame_action (GtkAction *action, gpointer window)
+void act_file_new (GtkAction *action, gpointer window)
 {
 	struct ccd_frame *fr;
 	fr = new_frame(P_INT(FILE_NEW_WIDTH), P_INT(FILE_NEW_HEIGHT));
 	frame_to_channel(fr, window, "i_channel");
 }
-
-void star_rm_cb(gpointer data, guint action)
-{
-	GtkWidget *window = data;
-	int ret;
-
-	switch(action) {
-	case STAR_RM_ALL:
-		remove_stars(window, TYPE_MASK_ALL, 0);
-		break;
-	case STAR_RM_FR:
-		remove_stars(window, TYPE_MASK(STAR_TYPE_SIMPLE), 0);
-		break;
-	case STAR_RM_USER:
-		remove_stars(window, TYPE_MASK(STAR_TYPE_USEL), 0);
-		break;
-	case STAR_RM_FIELD:
-		remove_stars(window, TYPE_MASK(STAR_TYPE_SREF), 0);
-		break;
-	case STAR_RM_CAT:
-		remove_stars(window, TYPE_MASK(STAR_TYPE_CAT), 0);
-		break;
-	case STAR_RM_SEL:
-		remove_stars(window, TYPE_MASK_ALL, STAR_SELECTED);
-		break;
-	case STAR_RM_PAIRS_ALL:
-		remove_pairs(window, 0);
-		break;
-	case STAR_RM_PAIRS_SEL:
-		remove_pairs(window, STAR_SELECTED);
-		break;
-	case STAR_RM_OFF:
-		ret = remove_off_frame_stars(window);
-		if (ret >= 0) {
-			info_printf_sb2(window, "stars", 5000,
-				       " %d off-frame stars removed", ret);
-		}
-		break;
-	default:
-		err_printf("unknown action %d in star_rm_cb\n", action);
-	}
-}
-
-void stars_rm_all_action (GtkAction *action, gpointer window)
-{
-	star_rm_cb (window, STAR_RM_ALL);
-}
-
-void stars_rm_selected_action (GtkAction *action, gpointer window)
-{
-	star_rm_cb (window, STAR_RM_SEL);
-}
-
-void stars_rm_user_action (GtkAction *action, gpointer window)
-{
-	star_rm_cb (window, STAR_RM_USER);
-}
-
-void stars_rm_field_action (GtkAction *action, gpointer window)
-{
-	star_rm_cb (window, STAR_RM_FIELD);
-}
-
-void stars_rm_cat_action (GtkAction *action, gpointer window)
-{
-	star_rm_cb (window, STAR_RM_CAT);
-}
-
-void stars_rm_off_action (GtkAction *action, gpointer window)
-{
-	star_rm_cb (window, STAR_RM_OFF);
-}
-
-void stars_rm_detected_action (GtkAction *action, gpointer window)
-{
-	star_rm_cb (window, STAR_RM_FR);
-}
-
-void stars_rm_pairs_all_action (GtkAction *action, gpointer window)
-{
-	star_rm_cb (window, STAR_RM_PAIRS_ALL);
-}
-
-void stars_rm_pairs_sel_action (GtkAction *action, gpointer window)
-{
-	star_rm_cb (window, STAR_RM_PAIRS_SEL);
-}
-
-
-void destroy( GtkWidget *widget,
-              gpointer   data )
-{
-	gtk_main_quit ();
-}
-
-void show_xy_status(GtkWidget *window, double x, double y)
-{
-	info_printf_sb2(window, "%.0f, %.0f", x, y);
-}
-
 
 /*
  * mouse button event callback. It is normally called after the callback in
@@ -490,19 +352,21 @@ static gint motion_event_cb (GtkWidget *widget, GdkEventMotion *event, gpointer 
 }
 
 
+
+
 /* name, stock id, label, accel, tooltip, callback */
 static GtkActionEntry star_popup_actions[] = {
 	{ "star-popup", NULL, NULL },
 
-	{ "star-edit",         NULL, "_Edit Star",     NULL, NULL, G_CALLBACK (starp_edit_ap_action) },
-	{ "star-remove",       NULL, "_Remove Star",   NULL, NULL, G_CALLBACK (starp_unmark_star_action) },
-	{ "star-pair-add",     NULL, "_Create Pair",   NULL, NULL, G_CALLBACK (starp_pair_add_action) },
-	{ "star-pair-rm",      NULL, "Remo_ve Pair",   NULL, NULL, G_CALLBACK (starp_pair_rm_action) },
-	{ "star-move",         NULL, "Move _Star",     NULL, NULL, G_CALLBACK (starp_move_star_action) },
-	{ "star-plot-profile", NULL, "Plot _Profile",  NULL, NULL, G_CALLBACK (starp_plot_profile_action) },
-	{ "star-measure",      NULL, "_Measure",       NULL, NULL, G_CALLBACK (starp_measure_star_action) },
-	{ "star-plot-skyhist", NULL, "Sky _Histogram", NULL, NULL, G_CALLBACK (starp_plot_skyhist_action) },
-	{ "star-fit-psf",      NULL, "_Fit Psf",       NULL, NULL, G_CALLBACK (starp_fit_psf_action) },
+	{ "star-edit",         NULL, "_Edit Star",     NULL, NULL, G_CALLBACK (act_stars_popup_edit) },
+	{ "star-remove",       NULL, "_Remove Star",   NULL, NULL, G_CALLBACK (act_stars_popup_unmark) },
+	{ "star-pair-add",     NULL, "_Create Pair",   NULL, NULL, G_CALLBACK (act_stars_popup_add_pair) },
+	{ "star-pair-rm",      NULL, "Remo_ve Pair",   NULL, NULL, G_CALLBACK (act_stars_popup_rm_pair) },
+	{ "star-move",         NULL, "Move _Star",     NULL, NULL, G_CALLBACK (act_stars_popup_move) },
+	{ "star-plot-profile", NULL, "Plot _Profile",  NULL, NULL, G_CALLBACK (act_stars_popup_plot_profiles) },
+	{ "star-measure",      NULL, "_Measure",       NULL, NULL, G_CALLBACK (act_stars_popup_measure) },
+	{ "star-plot-skyhist", NULL, "Sky _Histogram", NULL, NULL, G_CALLBACK (act_stars_popup_plot_skyhist) },
+	{ "star-fit-psf",      NULL, "_Fit Psf",       NULL, NULL, G_CALLBACK (act_stars_popup_fit_psf) },
 };
 
 GtkWidget *get_star_popup_menu (gpointer window)
@@ -512,19 +376,17 @@ GtkWidget *get_star_popup_menu (gpointer window)
 	GError *error;
 	GtkActionGroup *action_group;
 	static char *star_popup_ui =
-		"  <popup name='star-popup'>"
-		"    <menu name='starp' action='star-popup'>"
-		"      <menuitem name='Edit Star'     action='star-edit'/>"
-		"      <menuitem name='Remove Star'   action='star-remove'/>"
-		"      <menuitem name='Create Pair'   action='star-pair-add'/>"
-		"      <menuitem name='Remove Pair'   action='star-pair-rm'/>"
-		"      <menuitem name='Move Star'     action='star-move'/>"
-		"      <menuitem name='Plot Profile'  action='star-plot-profile'/>"
-		"      <menuitem name='Measure'       action='star-measure'/>"
-		"      <menuitem name='Sky Histogram' action='star-plot-skyhist'/>"
-		"      <menuitem name='Fit PSF'       action='star-fit-psf'/>"
-		"    </menu>"
-		"  </popup>";
+		"<popup name='star-popup'>"
+		"  <menuitem name='Edit Star'     action='star-edit'/>"
+		"  <menuitem name='Remove Star'   action='star-remove'/>"
+		"  <menuitem name='Create Pair'   action='star-pair-add'/>"
+		"  <menuitem name='Remove Pair'   action='star-pair-rm'/>"
+		"  <menuitem name='Move Star'     action='star-move'/>"
+		"  <menuitem name='Plot Profile'  action='star-plot-profile'/>"
+		"  <menuitem name='Measure'       action='star-measure'/>"
+		"  <menuitem name='Sky Histogram' action='star-plot-skyhist'/>"
+		"  <menuitem name='Fit PSF'       action='star-fit-psf'/>"
+		"</popup>";
 
 	action_group = gtk_action_group_new ("StarPopupActions");
 	gtk_action_group_add_actions (action_group, star_popup_actions,
@@ -559,138 +421,139 @@ GtkWidget *get_star_popup_menu (gpointer window)
 /* these actions are common for the image window menu and popup menu */
 /* name, stock id, label, accel, tooltip, callback */
 static GtkActionEntry image_actions[] = {
-	{ "image-file", NULL, "_File" },
 
 	/* File */
-	{ "image-new", NULL, "_New Frame", "<control>N", NULL, G_CALLBACK (new_frame_action) },
-	{ "image-open", NULL, "_Open Image...", "<control>O", NULL, G_CALLBACK (file_open_action) },
-	{ "image-save", NULL, "_Save Fits As...", "<control>S", NULL, G_CALLBACK (file_save_action) },
-	{ "image-export", NULL, "_Export Image" },
-	{ "image-export-pnm8", NULL, "_8-bit pnm", NULL, NULL, G_CALLBACK (file_export_pnm8_action) },
-	{ "image-export-pnm16", NULL, "_16-bit pnm", NULL, NULL, G_CALLBACK (file_export_pnm16_action) },
-	{ "recipe-open", NULL, "Load _Recipe", "R", NULL, G_CALLBACK (file_load_recipy_action) },
-	{ "recipe-create", NULL, "_Create Recipe", NULL, NULL, G_CALLBACK (create_recipe_action) },
-	{ "image-show-header", NULL, "Show Fits _Header...", "<shift>H", NULL, G_CALLBACK (fits_header_action) },
-	{ "options-edit", NULL, "Edit O_ptions", "O", NULL, G_CALLBACK (edit_options_action) },
-	{ "camera-scope-control", NULL, "Camera and Telescope...", "<shift>C", NULL, G_CALLBACK (camera_action) },
-	{ "guide-control", NULL, "Guiding...", "<shift>T", NULL, G_CALLBACK (open_guide_action) },
-	{ "user-quit", NULL, "_Quit", "<control>Q", NULL, G_CALLBACK (user_quit_action) },
+	{ "file-menu", NULL, "_File" },
+	{ "file-new",             NULL, "_New Frame",              "<control>N", NULL, G_CALLBACK (act_file_new) },
+	{ "file-open",            NULL, "_Open Image...",          "<control>O", NULL, G_CALLBACK (act_file_open) },
+	{ "file-save",            NULL, "_Save Fits As...",        "<control>S", NULL, G_CALLBACK (act_file_save) },
+	{ "file-export",          NULL, "_Export Image" },
+	{ "file-export-pnm8",     NULL, "_8-bit pnm",              NULL,         NULL, G_CALLBACK (act_file_export_pnm8) },
+	{ "file-export-pnm16",    NULL, "_16-bit pnm",             NULL,         NULL, G_CALLBACK (act_file_export_pnm16) },
+	{ "recipe-open",          NULL, "Load _Recipe",            "R",          NULL, G_CALLBACK (act_recipe_open) },
+	{ "recipe-create",        NULL, "_Create Recipe",          NULL,         NULL, G_CALLBACK (act_recipe_create) },
+	{ "show-fits-header",     NULL, "Show Fits _Header...",    "<shift>H",   NULL, G_CALLBACK (act_show_fits_headers) },
+
+	{ "edit-options",         NULL, "Edit O_ptions",           "O",          NULL, G_CALLBACK (act_control_options) },
+	{ "camera-scope-control", NULL, "Camera and Telescope...", "<shift>C",   NULL, G_CALLBACK (act_control_camera) },
+	{ "guide-control",        NULL, "Guiding...",              "<shift>T",   NULL, G_CALLBACK (act_control_guider) },
+	{ "user-quit",            NULL, "_Quit",                   "<control>Q", NULL, G_CALLBACK (act_user_quit) },
 
 	/* Image */
-	{ "image-image", NULL, "_Image" },
+	{ "image-menu", NULL, "_Image" },
 	{ "image-set-contrast", NULL, "Set _Contrast" },
-	{ "image-curves", NULL, "Curves&Histogram...", "C", NULL, G_CALLBACK (histogram_action) },
-	{ "image-zoom-in", NULL, "Zoom _In", "equal", NULL, G_CALLBACK (view_zoom_in_action) },
-	{ "image-zoom-out", NULL, "Zoom _Out", "minus", NULL, G_CALLBACK (view_zoom_out_action) },
-	{ "image-zoom-pixels", NULL, "Actual _Pixels", "bracketright", NULL, G_CALLBACK (view_pixels_action) },
-	{ "image-pan-center", NULL, "Pan _Center", "<control>L", NULL, G_CALLBACK (view_pan_center_action) },
-	{ "image-pan-cursor", NULL, "_Pan Cursor", "space", NULL, G_CALLBACK (view_pan_cursor_action) },
-	{ "image-cuts-auto", NULL, "_Auto Cuts", "0", NULL, G_CALLBACK (cuts_auto_action) },
-	{ "image-cuts-minmax", NULL, "_Min-Max Cuts", "9", NULL, G_CALLBACK (cuts_minmax_action) },
-	{ "image-cuts-flatter", NULL, "_Flatter", "F", NULL, G_CALLBACK (cuts_flatter_action) },
-	{ "image-cuts-sharper", NULL, "S_harper", "H", NULL, G_CALLBACK (cuts_sharper_action) },
-	{ "image-cuts-brighter", NULL, "_Brighter", "B", NULL, G_CALLBACK (cuts_brighter_action) },
-	{ "image-cuts-darker", NULL, "_Darker", "D", NULL, G_CALLBACK (cuts_darker_action) },
-	{ "image-cuts-invert", NULL, "_Invert", "I", NULL, G_CALLBACK (cuts_invert_action) },
-	{ "image-cuts-1", NULL, "_4 sigma", "1", NULL, G_CALLBACK (cuts_contrast_1_action) },
-	{ "image-cuts-2", NULL, "5_.6 sigma", "2", NULL, G_CALLBACK (cuts_contrast_2_action) },
-	{ "image-cuts-3", NULL, "_8 sigma", "3", NULL, G_CALLBACK (cuts_contrast_3_action) },
-	{ "image-cuts-4", NULL, "_11 sigma", "4", NULL, G_CALLBACK (cuts_contrast_4_action) },
-	{ "image-cuts-5", NULL, "1_6 sigma", "5", NULL, G_CALLBACK (cuts_contrast_5_action) },
-	{ "image-cuts-6", NULL, "22 _sigma", "6", NULL, G_CALLBACK (cuts_contrast_6_action) },
-	{ "image-cuts-7", NULL, "45 s_igma", "7", NULL, G_CALLBACK (cuts_contrast_7_action) },
-	{ "image-cuts-8", NULL, "90 si_gma", "8", NULL, G_CALLBACK (cuts_contrast_8_action) },
+	{ "image-curves",        NULL, "Curves&Histogram...", "C",       NULL, G_CALLBACK (act_control_histogram) },
+	{ "image-zoom-in",       NULL, "Zoom _In",       "equal",        NULL, G_CALLBACK (act_view_zoom_in) },
+	{ "image-zoom-out",      NULL, "Zoom _Out",      "minus",        NULL, G_CALLBACK (act_view_zoom_out) },
+	{ "image-zoom-pixels",   NULL, "Actual _Pixels", "bracketright", NULL, G_CALLBACK (act_view_pixels) },
+	{ "image-pan-center",    NULL, "Pan _Center",    "<control>L",   NULL, G_CALLBACK (act_view_pan_center) },
+	{ "image-pan-cursor",    NULL, "_Pan Cursor",    "space",        NULL, G_CALLBACK (act_view_pan_cursor) },
+	{ "image-cuts-auto",     NULL, "_Auto Cuts",     "0",            NULL, G_CALLBACK (act_view_cuts_auto) },
+	{ "image-cuts-minmax",   NULL, "_Min-Max Cuts",  "9",            NULL, G_CALLBACK (act_view_cuts_minmax) },
+	{ "image-cuts-flatter",  NULL, "_Flatter",       "F",            NULL, G_CALLBACK (act_view_cuts_flatter) },
+	{ "image-cuts-sharper",  NULL, "S_harper",       "H",            NULL, G_CALLBACK (act_view_cuts_sharper) },
+	{ "image-cuts-brighter", NULL, "_Brighter",      "B",            NULL, G_CALLBACK (act_view_cuts_brighter) },
+	{ "image-cuts-darker",   NULL, "_Darker",        "D",            NULL, G_CALLBACK (act_view_cuts_darker) },
+	{ "image-cuts-invert",   NULL, "_Invert",        "I",            NULL, G_CALLBACK (act_view_cuts_invert) },
+	{ "image-cuts-1",        NULL, "_4 sigma",       "1",            NULL, G_CALLBACK (act_view_cuts_contrast_1) },
+	{ "image-cuts-2",        NULL, "5_.6 sigma",     "2",            NULL, G_CALLBACK (act_view_cuts_contrast_2) },
+	{ "image-cuts-3",        NULL, "_8 sigma",       "3",            NULL, G_CALLBACK (act_view_cuts_contrast_3) },
+	{ "image-cuts-4",        NULL, "_11 sigma",      "4",            NULL, G_CALLBACK (act_view_cuts_contrast_4) },
+	{ "image-cuts-5",        NULL, "1_6 sigma",      "5",            NULL, G_CALLBACK (act_view_cuts_contrast_5) },
+	{ "image-cuts-6",        NULL, "22 _sigma",      "6",            NULL, G_CALLBACK (act_view_cuts_contrast_6) },
+	{ "image-cuts-7",        NULL, "45 s_igma",      "7",            NULL, G_CALLBACK (act_view_cuts_contrast_7) },
+	{ "image-cuts-8",        NULL, "90 si_gma",      "8",            NULL, G_CALLBACK (act_view_cuts_contrast_8) },
 
 	/* Stars */
-	{ "image-stars", NULL, "_Stars" },
-	{ "image-stars-add-detect",  NULL, "_Detect Sources",        "S",          NULL, G_CALLBACK (stars_add_detect_action)  },
-	{ "image-stars-show-target", NULL, "Show Tar_get",           "T",          NULL, G_CALLBACK (stars_show_target_action) },
-	{ "image-stars-add-catalog", NULL, "Add From _Catalog",      "A",          NULL, G_CALLBACK (stars_add_catalog_action) },
-	{ "image-stars-synthetic",   NULL, "_Create Synthetic Stars", NULL,        NULL, G_CALLBACK (stars_add_synth_action)   },
-	{ "image-stars-edit",        NULL, "_Edit",                  "<control>E", NULL, G_CALLBACK (stars_edit_action)        },
-	{ "image-stars-rm-selected", NULL, "Remove Selecte_d",       "<control>D", NULL, G_CALLBACK (stars_rm_selected_action) },
-	{ "image-stars-rm-detected", NULL, "Remove Detected _Stars", "<shift>S",   NULL, G_CALLBACK (stars_rm_detected_action) },
-	{ "image-stars-rm-user",     NULL, "Remove _User Stars",     "<shift>U",   NULL, G_CALLBACK (stars_rm_user_action)     },
-	{ "image-stars-rm-field",    NULL, "Remove _Field Stars",    "<shift>F",   NULL, G_CALLBACK (stars_rm_field_action)    },
-	{ "image-stars-rm-cat",      NULL, "Remove Catalo_g Objects","<shift>G",   NULL, G_CALLBACK (stars_rm_cat_action)      },
-	{ "image-stars-rm-off",      NULL, "Remove _Off-Frame",      "<shift>O",   NULL, G_CALLBACK (stars_rm_off_action)      },
-	{ "image-stars-rm-all",      NULL, "Remove _All",            "<shift>A",   NULL, G_CALLBACK (stars_rm_all_action)      },
-	{ "image-stars-rm-pairs-all",NULL, "Remove All Pa_irs",      "<shift>P",   NULL, G_CALLBACK (stars_rm_pairs_all_action)},
-	{ "image-stars-rm-pairs-sel",NULL, "Remove Selected _Pairs", NULL,         NULL, G_CALLBACK (stars_rm_pairs_sel_action)},
-	{ "image-stars-brighter",    NULL, "_Brighter",              "<control>B", NULL, G_CALLBACK (star_display_brighter_action) },
-	{ "image-stars-fainter",     NULL, "_Fainter",               "<control>F", NULL, G_CALLBACK (star_display_fainter_action)  },
-	{ "image-stars-redraw",      NULL, "_Redraw",                "<control>R", NULL, G_CALLBACK (star_display_redraw_action)   },
-	{ "image-stars-plot-profiles", NULL, "Plo_t Star Profiles",  NULL,         NULL, G_CALLBACK (starp_plot_profile_action)    },
+	{ "stars-menu", NULL, "_Stars" },
+	{ "stars-add-detect",  NULL, "_Detect Sources",        "S",          NULL, G_CALLBACK (act_stars_add_detected)  },
+	{ "stars-show-target", NULL, "Show Tar_get",           "T",          NULL, G_CALLBACK (act_stars_show_target) },
+	{ "stars-add-catalog", NULL, "Add From _Catalog",      "A",          NULL, G_CALLBACK (act_stars_add_catalog) },
+	{ "stars-synthetic",   NULL, "_Create Synthetic Stars", NULL,        NULL, G_CALLBACK (act_stars_add_synthetic)   },
+	{ "stars-edit",        NULL, "_Edit",                  "<control>E", NULL, G_CALLBACK (act_stars_edit)        },
+	{ "stars-rm-selected", NULL, "Remove Selecte_d",       "<control>D", NULL, G_CALLBACK (act_stars_rm_selected) },
+	{ "stars-rm-detected", NULL, "Remove Detected _Stars", "<shift>S",   NULL, G_CALLBACK (act_stars_rm_detected) },
+	{ "stars-rm-user",     NULL, "Remove _User Stars",     "<shift>U",   NULL, G_CALLBACK (act_stars_rm_user) },
+	{ "stars-rm-field",    NULL, "Remove _Field Stars",    "<shift>F",   NULL, G_CALLBACK (act_stars_rm_field) },
+	{ "stars-rm-cat",      NULL, "Remove Catalo_g Objects","<shift>G",   NULL, G_CALLBACK (act_stars_rm_catalog) },
+	{ "stars-rm-off",      NULL, "Remove _Off-Frame",      "<shift>O",   NULL, G_CALLBACK (act_stars_rm_off_frame) },
+	{ "stars-rm-all",      NULL, "Remove _All",            "<shift>A",   NULL, G_CALLBACK (act_stars_rm_all) },
+	{ "stars-rm-pairs-all",NULL, "Remove All Pa_irs",      "<shift>P",   NULL, G_CALLBACK (act_stars_rm_pairs_all)},
+	{ "stars-rm-pairs-sel",NULL, "Remove Selected _Pairs", NULL,         NULL, G_CALLBACK (act_stars_rm_pairs_selected)},
+	{ "stars-brighter",    NULL, "_Brighter",              "<control>B", NULL, G_CALLBACK (act_stars_brighter) },
+	{ "stars-fainter",     NULL, "_Fainter",               "<control>F", NULL, G_CALLBACK (act_stars_fainter)  },
+	{ "stars-redraw",      NULL, "_Redraw",                "<control>R", NULL, G_CALLBACK (act_stars_redraw)   },
+	{ "stars-plot-profiles", NULL, "Plo_t Star Profiles",  NULL,         NULL, G_CALLBACK (act_stars_plot_profiles) },
 
 	/* WCS */
-	{ "wcs-menu", NULL, "_Wcs" },
-	{ "image-wcs-edit", NULL, "_Edit Wcs", "<control>W", NULL, G_CALLBACK (wcs_edit_action) },
-	{ "image-wcs-auto", NULL, "_Auto Wcs", "M", NULL, G_CALLBACK (wcs_auto_action) },
-	{ "image-wcs-quiet-auto", NULL, "_Quiet Auto Wcs", "<shift>M", NULL, G_CALLBACK (wcs_quiet_auto_action) },
-	{ "image-wcs-existing", NULL, "_Match Existing Stars", "W", NULL, G_CALLBACK (wcs_existing_action) },
-	{ "image-wcs-auto-pairs", NULL, "Auto _Pairs", "p", NULL, G_CALLBACK (star_pairs_action) },
-	{ "image-wcs-fit-pairs", NULL, "Fit _Wcs from Pairs", "<shift>W", NULL, G_CALLBACK (wcs_fit_pairs_action) },
-	{ "image-wcs-reload", NULL, "_Reload from Frame", "<shift>R", NULL, G_CALLBACK (wcs_reload_action) },
-	{ "image-wcs-validate", NULL, "_Force Validate", "<control>V", NULL, G_CALLBACK (wcs_validate_action) },
-	{ "image-wcs-invalidate", NULL, "_Invalidate", "<control>I", NULL, G_CALLBACK (wcs_invalidate_action) },
+	{ "wcs-menu",       NULL, "_Wcs" },
+	{ "wcs-edit",       NULL, "_Edit Wcs",             "<control>W", NULL, G_CALLBACK (act_control_wcs) },
+	{ "wcs-auto",       NULL, "_Auto Wcs",             "M",          NULL, G_CALLBACK (act_wcs_auto) },
+	{ "wcs-quiet-auto", NULL, "_Quiet Auto Wcs",       "<shift>M",   NULL, G_CALLBACK (act_wcs_quiet_auto) },
+	{ "wcs-existing",   NULL, "_Match Existing Stars", "W",          NULL, G_CALLBACK (act_wcs_existing) },
+	{ "wcs-auto-pairs", NULL, "Auto _Pairs",           "P",          NULL, G_CALLBACK (act_stars_auto_pairs) },
+	{ "wcs-fit-pairs",  NULL, "Fit _Wcs from Pairs",   "<shift>W",   NULL, G_CALLBACK (act_wcs_fit_pairs) },
+	{ "wcs-reload",     NULL, "_Reload from Frame",    "<shift>R",   NULL, G_CALLBACK (act_wcs_reload) },
+	{ "wcs-validate",   NULL, "_Force Validate",       "<control>V", NULL, G_CALLBACK (act_wcs_validate) },
+	{ "wcs-invalidate", NULL, "_Invalidate",           "<control>I", NULL, G_CALLBACK (act_wcs_invalidate) },
 
 	/* Catalogs */
 	{ "catalogs-menu",         NULL, "_Catalogs" },
-	{ "catalogs-add-gsc",      NULL, "Load Field Stars From _GSC Catalog",    "G",          NULL, G_CALLBACK (stars_add_gsc_action) },
-	{ "catalogs-add-tycho2",   NULL, "Load Field Stars From _Tycho2 Catalog", "<control>T", NULL, G_CALLBACK (stars_add_tycho2_action) },
-	{ "catalogs-add-gsc-file", NULL, "Load Field Stars From GSC-_2 File",     "<control>G", NULL, G_CALLBACK (file_load_gsc2_action) },
-	{ "catalogs-add-gsc-act",  NULL, "Download GSC-_ACT stars from CDS",      NULL,         NULL, G_CALLBACK (cds_query_gsc_act_action) },
-	{ "catalogs-add-ucac2",    NULL, "Download _UCAC-2 stars from CDS",       NULL,         NULL, G_CALLBACK (cds_query_ucac2_action) },
-	{ "catalogs-add-gsc2",     NULL, "Download G_SC-2 stars from CDS",        NULL,         NULL, G_CALLBACK (cds_query_gsc2_action) },
-	{ "catalogs-add-usnob",    NULL, "Download USNO-_B stars from CDS",       NULL,         NULL, G_CALLBACK (cds_query_usnob_action) },
+	{ "catalogs-add-gsc",      NULL, "Load Field Stars From _GSC Catalog",    "G",          NULL, G_CALLBACK (act_stars_add_gsc) },
+	{ "catalogs-add-tycho2",   NULL, "Load Field Stars From _Tycho2 Catalog", "<control>T", NULL, G_CALLBACK (act_stars_add_tycho2) },
+	{ "catalogs-add-gsc-file", NULL, "Load Field Stars From GSC-_2 File",     "<control>G", NULL, G_CALLBACK (act_stars_add_gsc2_file) },
+	{ "catalogs-add-gsc-act",  NULL, "Download GSC-_ACT stars from CDS",      NULL,         NULL, G_CALLBACK (act_stars_add_cds_gsc_act) },
+	{ "catalogs-add-ucac2",    NULL, "Download _UCAC-2 stars from CDS",       NULL,         NULL, G_CALLBACK (act_stars_add_cds_ucac2) },
+	{ "catalogs-add-gsc2",     NULL, "Download G_SC-2 stars from CDS",        NULL,         NULL, G_CALLBACK (act_stars_add_cds_gsc2) },
+	{ "catalogs-add-usnob",    NULL, "Download USNO-_B stars from CDS",       NULL,         NULL, G_CALLBACK (act_stars_add_cds_usnob) },
 
 	/* Processing */
-	{ "processing-menu", NULL, "_Processing" },
-	{ "swf-next",   NULL, "_Next Frame",           "N", NULL, G_CALLBACK (switch_frame_next_action) },
-	{ "swf-skip",   NULL, "_Skip Frame",           "K", NULL, G_CALLBACK (switch_frame_skip_action) },
-	{ "swf-prev",   NULL, "_Previous Frame",       "J", NULL, G_CALLBACK (switch_frame_prev_action) },
-	{ "swf-reduce", NULL, "_Reduce Current",       "Y", NULL, G_CALLBACK (switch_frame_reduce_action) },
-	{ "swf-qphot",  NULL, "_Qphot Reduce Current", "T", NULL, G_CALLBACK (switch_frame_qphot_action) },
-	{ "phot-center-stars",  NULL, "_Center Stars",              NULL,         NULL, G_CALLBACK (phot_center_stars_action) },
-	{ "phot-quick",         NULL, "Quick Aperture P_hotometry", "<shift>P",   NULL, G_CALLBACK (phot_quick_action) },
-	{ "phot-multi-frame",   NULL, "Photometry to _Multi-Frame", "<control>P", NULL, G_CALLBACK (phot_multi_frame_action) },
-	{ "phot-to-file",       NULL, "Photometry to _File",        NULL,         NULL, G_CALLBACK (phot_to_file_action) },
-	{ "phot-to-aavso-file", NULL, "Photometry to _AAVSO File",  NULL,         NULL, G_CALLBACK (phot_to_aavso_action) },
-	{ "phot-to-stdout",     NULL, "Photometry to _stdout",      NULL,         NULL, G_CALLBACK (phot_to_stdout_action) },
-	{ "ccd-reduction",         NULL, "_CCD Reduction...",         "L",          NULL, G_CALLBACK (processing_action) },
-	{ "multi-frame-reduction", NULL, "_Multi-frame Reduction...", "<control>M", NULL, G_CALLBACK (mband_open_action) },
+	{ "processing-menu",       NULL, "_Processing" },
+	{ "process-next",          NULL, "_Next Frame",                "N",          NULL, G_CALLBACK (act_process_next) },
+	{ "process-skip",          NULL, "_Skip Frame",                "K",          NULL, G_CALLBACK (act_process_skip) },
+	{ "process-prev",          NULL, "_Previous Frame",            "J",          NULL, G_CALLBACK (act_process_prev) },
+	{ "process-reduce",        NULL, "_Reduce Current",            "Y",          NULL, G_CALLBACK (act_process_reduce) },
+	{ "process-qphot",         NULL, "_Qphot Reduce Current",      "T",          NULL, G_CALLBACK (act_process_qphot) },
+	{ "phot-center-stars",     NULL, "_Center Stars",              NULL,         NULL, G_CALLBACK (act_phot_center_stars) },
+	{ "phot-quick",            NULL, "Quick Aperture P_hotometry", "<shift>P",   NULL, G_CALLBACK (act_phot_quick) },
+	{ "phot-multi-frame",      NULL, "Photometry to _Multi-Frame", "<control>P", NULL, G_CALLBACK (act_phot_multi_frame) },
+	{ "phot-to-file",          NULL, "Photometry to _File",        NULL,         NULL, G_CALLBACK (act_phot_to_file) },
+	{ "phot-to-aavso-file",    NULL, "Photometry to _AAVSO File",  NULL,         NULL, G_CALLBACK (act_phot_to_aavso) },
+	{ "phot-to-stdout",        NULL, "Photometry to _stdout",      NULL,         NULL, G_CALLBACK (act_phot_to_stdout) },
+	{ "ccd-reduction",         NULL, "_CCD Reduction...",         "L",           NULL, G_CALLBACK (act_control_processing) },
+	{ "multi-frame-reduction", NULL, "_Multi-frame Reduction...", "<control>M",  NULL, G_CALLBACK (act_control_mband) },
 
 
 	/* Help */
 	{ "help-menu", NULL, "_Help" },
-	{ "help-bindings", NULL, "_GUI help",                   "F1", NULL, G_CALLBACK (help_bindings_action) },
-	{ "help-usage",    NULL, "Show _Command Line Options",  NULL, NULL, G_CALLBACK (help_usage_action) },
-	{ "help-obscript", NULL, "Show _Obscript Commands",     NULL, NULL, G_CALLBACK (help_obscript_action) },
-	{ "help-repconv",  NULL, "Show _Report Converter Help", NULL, NULL, G_CALLBACK (help_repconv_action) },
-	{ "help-about",    NULL, "_About",                      NULL, NULL, G_CALLBACK (about_cx_action) },
+	{ "help-bindings", NULL, "_GUI help",                   "F1", NULL, G_CALLBACK (act_help_bindings) },
+	{ "help-usage",    NULL, "Show _Command Line Options",  NULL, NULL, G_CALLBACK (act_help_usage) },
+	{ "help-obscript", NULL, "Show _Obscript Commands",     NULL, NULL, G_CALLBACK (act_help_obscript) },
+	{ "help-repconv",  NULL, "Show _Report Converter Help", NULL, NULL, G_CALLBACK (act_help_repconv) },
+	{ "help-about",    NULL, "_About",                      NULL, NULL, G_CALLBACK (act_about_cx) },
 };
 
 static char *image_common_ui =
-	"<menu name='file' action='image-file'>"
-	"  <menuitem name='New Frame'  action='image-new'/>"
-	"  <menuitem name='Open Image' action='image-open'/>"
-	"  <menuitem name='Save Image' action='image-save'/>"
-	"  <menu name='export' action='image-export'>"
-	"	<menuitem name='8-bit pnm'  action='image-export-pnm8'/>"
-	"	<menuitem name='16-bit pnm' action='image-export-pnm16'/>"
+	"<menu name='file' action='file-menu'>"
+	"  <menuitem name='New Frame'  action='file-new'/>"
+	"  <menuitem name='Open Image' action='file-open'/>"
+	"  <menuitem name='Save Image' action='file-save'/>"
+	"  <menu name='export' action='file-export'>"
+	"	<menuitem name='8-bit pnm'  action='file-export-pnm8'/>"
+	"	<menuitem name='16-bit pnm' action='file-export-pnm16'/>"
 	"  </menu>"
 	"  <separator name='separator1'/>"
 	"  <menuitem name='Load Recipe'   action='recipe-open'/>"
 	"  <menuitem name='Create Recipe' action='recipe-create'/>"
 	"  <separator name='separator2'/>"
-	"  <menuitem name='Show FITS Header' action='image-show-header'/>"
-	"  <menuitem name='Edit Options' action='options-edit'/>"
+	"  <menuitem name='Show FITS Header' action='show-fits-header'/>"
+	"  <menuitem name='Edit Options' action='edit-options'/>"
 	"  <menuitem name='Camera/Scope' action='camera-scope-control'/>"
 	"  <menuitem name='Guiding'      action='guide-control'/>"
 	"  <separator name='separator3'/>"
 	"  <menuitem name='Quit'         action='user-quit'/>"
 	"</menu>"
-	"<menu name='image-image' action='image-image'>"
+	"<menu name='image' action='image-menu'>"
 	"  <menuitem name='image-curves' action='image-curves'/>"
 	"  <separator name='separator1'/>"
 	"  <menuitem name='image-zoom-in' action='image-zoom-in'/>"
@@ -719,49 +582,49 @@ static char *image_common_ui =
 	"    <menuitem name='image-cuts-minmax'    action='image-cuts-minmax'/>"
 	"  </menu>"
 	"</menu>"
-	"<menu name='image-stars' action='image-stars'>"
-	"  <menuitem name='image-stars-add-detect' action='image-stars-add-detect'/>"
-	"  <menuitem name='image-stars-show-target' action='image-stars-show-target'/>"
-	"  <menuitem name='image-stars-add-catalog' action='image-stars-add-catalog'/>"
+	"<menu name='stars' action='stars-menu'>"
+	"  <menuitem name='stars-add-detect' action='stars-add-detect'/>"
+	"  <menuitem name='stars-show-target' action='stars-show-target'/>"
+	"  <menuitem name='stars-add-catalog' action='stars-add-catalog'/>"
 	"  <separator name='separator1'/>"
-	"  <menuitem name='image-stars-synthetic' action='image-stars-synthetic'/>"
+	"  <menuitem name='stars-synthetic' action='stars-synthetic'/>"
 	"  <separator name='separator2'/>"
-	"  <menuitem name='image-stars-edit' action='image-stars-edit'/>"
+	"  <menuitem name='stars-edit' action='stars-edit'/>"
 	"  <separator name='separator3'/>"
-	"  <menuitem name='image-stars-rm-selected' action='image-stars-rm-selected'/>"
-	"  <menuitem name='image-stars-rm-detected' action='image-stars-rm-detected'/>"
-	"  <menuitem name='image-stars-rm-user' action='image-stars-rm-user'/>"
-	"  <menuitem name='image-stars-rm-field' action='image-stars-rm-field'/>"
-	"  <menuitem name='image-stars-rm-cat' action='image-stars-rm-cat'/>"
-	"  <menuitem name='image-stars-rm-off' action='image-stars-rm-off'/>"
-	"  <menuitem name='image-stars-rm-all' action='image-stars-rm-all'/>"
+	"  <menuitem name='stars-rm-selected' action='stars-rm-selected'/>"
+	"  <menuitem name='stars-rm-detected' action='stars-rm-detected'/>"
+	"  <menuitem name='stars-rm-user' action='stars-rm-user'/>"
+	"  <menuitem name='stars-rm-field' action='stars-rm-field'/>"
+	"  <menuitem name='stars-rm-cat' action='stars-rm-cat'/>"
+	"  <menuitem name='stars-rm-off' action='stars-rm-off'/>"
+	"  <menuitem name='stars-rm-all' action='stars-rm-all'/>"
 	"  <separator name='separator4'/>"
-	"  <menuitem name='image-stars-rm-pairs-all' action='image-stars-rm-pairs-all'/>"
-	"  <menuitem name='image-stars-rm-pairs-sel' action='image-stars-rm-pairs-sel'/>"
+	"  <menuitem name='stars-rm-pairs-all' action='stars-rm-pairs-all'/>"
+	"  <menuitem name='stars-rm-pairs-sel' action='stars-rm-pairs-sel'/>"
 	"  <separator name='separator5'/>"
-	"  <menuitem name='image-stars-brighter' action='image-stars-brighter'/>"
-	"  <menuitem name='image-stars-fainter' action='image-stars-fainter'/>"
-	"  <menuitem name='image-stars-redraw' action='image-stars-redraw'/>"
+	"  <menuitem name='stars-brighter' action='stars-brighter'/>"
+	"  <menuitem name='stars-fainter' action='stars-fainter'/>"
+	"  <menuitem name='stars-redraw' action='stars-redraw'/>"
 	"  <separator name='separator6'/>"
-	"  <menuitem name='image-stars-plot-profiles' action='image-stars-plot-profiles'/>"
+	"  <menuitem name='stars-plot-profiles' action='stars-plot-profiles'/>"
 	"</menu>"
 	"<menu name='wcs' action='wcs-menu'>"
-	"  <menuitem name='image-wcs-edit' action='image-wcs-edit'/>"
-	"  <menuitem name='image-wcs-auto' action='image-wcs-auto'/>"
-	"  <menuitem name='image-wcs-quiet-auto' action='image-wcs-quiet-auto'/>"
-	"  <menuitem name='image-wcs-existing' action='image-wcs-existing'/>"
-	"  <menuitem name='image-wcs-auto-pairs' action='image-wcs-auto-pairs'/>"
-	"  <menuitem name='image-wcs-fit-pairs' action='image-wcs-fit-pairs'/>"
-	"  <menuitem name='image-wcs-reload' action='image-wcs-reload'/>"
-	"  <menuitem name='image-wcs-validate' action='image-wcs-validate'/>"
-	"  <menuitem name='image-wcs-invalidate' action='image-wcs-invalidate'/>"
+	"  <menuitem name='wcs-edit' action='wcs-edit'/>"
+	"  <menuitem name='wcs-auto' action='wcs-auto'/>"
+	"  <menuitem name='wcs-quiet-auto' action='wcs-quiet-auto'/>"
+	"  <menuitem name='wcs-existing' action='wcs-existing'/>"
+	"  <menuitem name='wcs-auto-pairs' action='wcs-auto-pairs'/>"
+	"  <menuitem name='wcs-fit-pairs' action='wcs-fit-pairs'/>"
+	"  <menuitem name='wcs-reload' action='wcs-reload'/>"
+	"  <menuitem name='wcs-validate' action='wcs-validate'/>"
+	"  <menuitem name='wcs-invalidate' action='wcs-invalidate'/>"
 	"</menu>"
 	"<menu name='processing' action='processing-menu'>"
-	"  <menuitem name='swf-next' action='swf-next'/>"
-	"  <menuitem name='swf-skip' action='swf-skip'/>"
-	"  <menuitem name='swf-prev' action='swf-prev'/>"
-	"  <menuitem name='swf-reduce' action='swf-reduce'/>"
-	"  <menuitem name='swf-qphot' action='swf-qphot'/>"
+	"  <menuitem name='process-next' action='process-next'/>"
+	"  <menuitem name='process-skip' action='process-skip'/>"
+	"  <menuitem name='process-prev' action='process-prev'/>"
+	"  <menuitem name='process-reduce' action='process-reduce'/>"
+	"  <menuitem name='process-qphot' action='process-qphot'/>"
 	"  <separator name='separator1'/>"
 	"  <menuitem name='phot-center-stars' action='phot-center-stars'/>"
 	"  <menuitem name='phot-quick' action='phot-quick'/>"
@@ -867,28 +730,8 @@ static GtkWidget *get_main_menu_bar(GtkWidget *window)
 	g_object_unref (ui);
 
 	return ret;
-
-#if 0
-	GtkWidget *ret;
-	GtkItemFactory *item_factory;
-	GtkAccelGroup *accel_group;
-	gint nmenu_items = sizeof (image_popup_menu_items) /
-		sizeof (image_popup_menu_items[0]);
-	accel_group = gtk_accel_group_new ();
-
-	item_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR,
-					     "<main_menu>", accel_group);
-	gtk_item_factory_create_items (item_factory, nmenu_items,
-				       image_popup_menu_items, window);
-
-  /* Attach the new accelerator group to the window. */
-	gtk_window_add_accel_group (GTK_WINDOW (window), accel_group);
-
-    /* Finally, return the actual menu bar created by the item factory. */
-	ret = gtk_item_factory_get_widget (item_factory, "<main_menu>");
-	return ret;
-#endif
 }
+
 
 
 GtkWidget * create_image_window()
@@ -1169,4 +1012,96 @@ GtkWidget* create_about_cx (void)
 
 	return about_cx;
 }
+
+
+int window_auto_pairs(gpointer window)
+{
+	struct gui_star_list *gsl;
+	int ret;
+
+	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
+	if (gsl == NULL)
+		return -1;
+	info_printf_sb2(window, "Looking for Star Pairs...");
+	while (gtk_events_pending ())
+		gtk_main_iteration ();
+	remove_pairs(window, 0);
+	ret = auto_pairs(gsl);
+	if (ret < 1) {
+		info_printf_sb2(window, "%s\n", last_err());
+	} else {
+		info_printf_sb2(window, "Found %d Matching Pairs", ret);
+	}
+	gtk_widget_queue_draw(window);
+	return ret;
+}
+
+void act_stars_auto_pairs (GtkAction *action, gpointer window)
+{
+	window_auto_pairs(window);
+}
+
+void act_stars_rm_all (GtkAction *action, gpointer window)
+{
+	remove_stars (window, TYPE_MASK_ALL, 0);
+}
+
+void act_stars_rm_selected (GtkAction *action, gpointer window)
+{
+	remove_stars(window, TYPE_MASK_ALL, STAR_SELECTED);
+}
+
+void act_stars_rm_user (GtkAction *action, gpointer window)
+{
+	remove_stars(window, TYPE_MASK(STAR_TYPE_USEL), 0);
+}
+
+void act_stars_rm_field (GtkAction *action, gpointer window)
+{
+	remove_stars(window, TYPE_MASK(STAR_TYPE_SREF), 0);
+}
+
+void act_stars_rm_catalog (GtkAction *action, gpointer window)
+{
+	remove_stars(window, TYPE_MASK(STAR_TYPE_CAT), 0);
+}
+
+void act_stars_rm_off_frame (GtkAction *action, gpointer window)
+{
+	int ret;
+
+	ret = remove_off_frame_stars(window);
+	if (ret >= 0) {
+		info_printf_sb2(window, "stars", 5000,
+				" %d off-frame stars removed", ret);
+	}
+}
+
+void act_stars_rm_detected (GtkAction *action, gpointer window)
+{
+	remove_stars(window, TYPE_MASK(STAR_TYPE_SIMPLE), 0);
+}
+
+void act_stars_rm_pairs_all (GtkAction *action, gpointer window)
+{
+	remove_pairs(window, 0);
+}
+
+void act_stars_rm_pairs_selected (GtkAction *action, gpointer window)
+{
+	remove_pairs(window, STAR_SELECTED);
+}
+
+
+void destroy( GtkWidget *widget,
+              gpointer   data )
+{
+	gtk_main_quit ();
+}
+
+void show_xy_status(GtkWidget *window, double x, double y)
+{
+	info_printf_sb2(window, "%.0f, %.0f", x, y);
+}
+
 

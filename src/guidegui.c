@@ -52,45 +52,46 @@ gboolean guide_window_delete(GtkWidget *widget, GdkEvent *event, gpointer data)
 
 /* name, stock id, label, accel, tooltip, callback */
 static GtkActionEntry guide_menu_actions[] = {
-	{ "guide-file",   NULL, "_File"  },
-	{ "guide-image",  NULL, "_Image" },
-	{ "guide-stars",  NULL, "_Stars" },
-	{ "guide-export", NULL, "_Export Image" },
-	{ "guide-set-contrast", NULL, "Set _Contrast" },
 
 	/* File */
-	{ "guide-open", NULL, "_Open Fits", "<control>O", NULL, G_CALLBACK (file_open_action) },
-	{ "guide-save", NULL, "_Save Fits As...", "<control>S", NULL, G_CALLBACK (file_save_action) },
-	{ "guide-export-pnm8", NULL, "_8-bit pnm", NULL, NULL, G_CALLBACK (file_export_pnm8_action) },
+	{ "file-menu",        NULL, "_File"  },
+	{ "file-open",        NULL, "_Open Fits",       "<control>O", NULL, G_CALLBACK (act_file_open) },
+	{ "file-save",        NULL, "_Save Fits As...", "<control>S", NULL, G_CALLBACK (act_file_save) },
+	{ "file-export",      NULL, "_Export Image" },
+	{ "file-export-pnm8", NULL, "_8-bit pnm",       NULL,         NULL, G_CALLBACK (act_file_export_pnm8) },
 
 	/* Image */
-	{ "guide-curves", NULL, "Curves&Histogram...", "C", NULL, G_CALLBACK (histogram_action) },
-	{ "guide-zoom-in", NULL, "Zoom _In", "equal", NULL, G_CALLBACK (view_zoom_in_action) },
-	{ "guide-zoom-out", NULL, "Zoom _Out", "minus", NULL, G_CALLBACK (view_zoom_out_action) },
-	{ "guide-zoom-pixels", NULL, "Actual _Pixels", "bracketright", NULL, G_CALLBACK (view_pixels_action) },
-	{ "guide-pan-center", NULL, "Pan _Center", "<control>L", NULL, G_CALLBACK (view_pan_center_action) },
-	{ "guide-pan-cursor", NULL, "_Pan Cursor", "space", NULL, G_CALLBACK (view_pan_cursor_action) },
-	{ "guide-cuts-auto", NULL, "_Auto Cuts", "0", NULL, G_CALLBACK (cuts_auto_action) },
-	{ "guide-cuts-minmax", NULL, "_Min-Max Cuts", "9", NULL, G_CALLBACK (cuts_minmax_action) },
-	{ "guide-cuts-flatter", NULL, "_Flatter", "F", NULL, G_CALLBACK (cuts_flatter_action) },
-	{ "guide-cuts-sharper", NULL, "S_harper", "H", NULL, G_CALLBACK (cuts_sharper_action) },
-	{ "guide-cuts-brighter", NULL, "_Brighter", "B", NULL, G_CALLBACK (cuts_brighter_action) },
-	{ "guide-cuts-darker", NULL, "_Darker", "D", NULL, G_CALLBACK (cuts_darker_action) },
-	{ "guide-cuts-1", NULL, "_4 sigma", "1", NULL, G_CALLBACK (cuts_contrast_1_action) },
-	{ "guide-cuts-2", NULL, "5_.6 sigma", "2", NULL, G_CALLBACK (cuts_contrast_2_action) },
-	{ "guide-cuts-3", NULL, "_8 sigma", "3", NULL, G_CALLBACK (cuts_contrast_3_action) },
-	{ "guide-cuts-4", NULL, "_11 sigma", "4", NULL, G_CALLBACK (cuts_contrast_4_action) },
-	{ "guide-cuts-5", NULL, "1_6 sigma", "5", NULL, G_CALLBACK (cuts_contrast_5_action) },
-	{ "guide-cuts-6", NULL, "22 _sigma", "6", NULL, G_CALLBACK (cuts_contrast_6_action) },
-	{ "guide-cuts-7", NULL, "45 s_igma", "7", NULL, G_CALLBACK (cuts_contrast_7_action) },
-	{ "guide-cuts-8", NULL, "90 si_gma", "8", NULL, G_CALLBACK (cuts_contrast_8_action) },
+	{ "image-menu",          NULL, "_Image" },
+	{ "image-curves",        NULL, "Curves&Histogram...", "C",       NULL, G_CALLBACK (act_control_histogram) },
+	{ "image-zoom-in",       NULL, "Zoom _In",       "equal",        NULL, G_CALLBACK (act_view_zoom_in) },
+	{ "image-zoom-out",      NULL, "Zoom _Out",      "minus",        NULL, G_CALLBACK (act_view_zoom_out) },
+	{ "image-zoom-pixels",   NULL, "Actual _Pixels", "bracketright", NULL, G_CALLBACK (act_view_pixels) },
+	{ "image-pan-center",    NULL, "Pan _Center",    "<control>L",   NULL, G_CALLBACK (act_view_pan_center) },
+	{ "image-pan-cursor",    NULL, "_Pan Cursor",    "space",        NULL, G_CALLBACK (act_view_pan_cursor) },
+	{ "image-cuts-auto",     NULL, "_Auto Cuts",     "0",            NULL, G_CALLBACK (act_view_cuts_auto) },
+	{ "image-cuts-minmax",   NULL, "_Min-Max Cuts",  "9",            NULL, G_CALLBACK (act_view_cuts_minmax) },
+	{ "image-cuts-flatter",  NULL, "_Flatter",       "F",            NULL, G_CALLBACK (act_view_cuts_flatter) },
+	{ "image-cuts-sharper",  NULL, "S_harper",       "H",            NULL, G_CALLBACK (act_view_cuts_sharper) },
+	{ "image-cuts-brighter", NULL, "_Brighter",      "B",            NULL, G_CALLBACK (act_view_cuts_brighter) },
+	{ "image-cuts-darker",   NULL, "_Darker",        "D",            NULL, G_CALLBACK (act_view_cuts_darker) },
+	{ "image-cuts-invert",   NULL, "_Invert",        "I",            NULL, G_CALLBACK (act_view_cuts_invert) },
+	{ "image-set-contrast",  NULL, "Set _Contrast" },
+	{ "image-cuts-1",        NULL, "_4 sigma",       "1",            NULL, G_CALLBACK (act_view_cuts_contrast_1) },
+	{ "image-cuts-2",        NULL, "5_.6 sigma",     "2",            NULL, G_CALLBACK (act_view_cuts_contrast_2) },
+	{ "image-cuts-3",        NULL, "_8 sigma",       "3",            NULL, G_CALLBACK (act_view_cuts_contrast_3) },
+	{ "image-cuts-4",        NULL, "_11 sigma",      "4",            NULL, G_CALLBACK (act_view_cuts_contrast_4) },
+	{ "image-cuts-5",        NULL, "1_6 sigma",      "5",            NULL, G_CALLBACK (act_view_cuts_contrast_5) },
+	{ "image-cuts-6",        NULL, "22 _sigma",      "6",            NULL, G_CALLBACK (act_view_cuts_contrast_6) },
+	{ "image-cuts-7",        NULL, "45 s_igma",      "7",            NULL, G_CALLBACK (act_view_cuts_contrast_7) },
+	{ "image-cuts-8",        NULL, "90 si_gma",      "8",            NULL, G_CALLBACK (act_view_cuts_contrast_8) },
 
 	/* Stars */
-	{ "guide-stars-add-detect",  NULL, "_Detect Sources",        "S",          NULL, G_CALLBACK (stars_add_detect_action)  },
-	{ "guide-stars-rm-selected", NULL, "Remove Selecte_d",       "<control>D", NULL, G_CALLBACK (stars_rm_selected_action) },
-	{ "guide-stars-rm-detected", NULL, "Remove _Detected Stars", "<shift>S",   NULL, G_CALLBACK (stars_rm_detected_action) },
-	{ "guide-stars-rm-user",     NULL, "Remove _User Stars",     "<shift>U",   NULL, G_CALLBACK (stars_rm_user_action)     },
-	{ "guide-stars-rm-all",      NULL, "Remove _All",            "<shift>A",   NULL, G_CALLBACK (stars_rm_detected_action) },
+	{ "stars-menu",  NULL, "_Stars" },
+	{ "stars-add-detect",  NULL, "_Detect Sources",        "S",          NULL, G_CALLBACK (act_stars_add_detected)},
+	{ "stars-rm-selected", NULL, "Remove Selecte_d",       "<control>D", NULL, G_CALLBACK (act_stars_rm_selected) },
+	{ "stars-rm-detected", NULL, "Remove _Detected Stars", "<shift>S",   NULL, G_CALLBACK (act_stars_rm_detected) },
+	{ "stars-rm-user",     NULL, "Remove _User Stars",     "<shift>U",   NULL, G_CALLBACK (act_stars_rm_user)     },
+	{ "stars-rm-all",      NULL, "Remove _All",            "<shift>A",   NULL, G_CALLBACK (act_stars_rm_detected) },
 };
 
 
@@ -104,51 +105,51 @@ static GtkWidget *get_main_menu_bar(GtkWidget *window)
 	static char *guide_ui =
 		"<menubar name='guide-menubar'>"
 		"  <!-- File -->"
-		"  <menu name='guide-file' action='guide-file'>"
-		"    <menuitem name='guide-open' action='guide-open'/>"
+		"  <menu name='file' action='file-menu'>"
+		"    <menuitem name='file-open' action='file-open'/>"
 		"    <separator name='separator1'/>"
-		"    <menuitem name='guide-save' action='guide-save'/>"
-		"    <menu name='guide-export' action='guide-export'>"
-		"	<menuitem name='guide-export-pnm8' action='guide-export-pnm8'/>"
+		"    <menuitem name='file-save' action='file-save'/>"
+		"    <menu name='file-export' action='file-export'>"
+		"	<menuitem name='file-export-pnm8' action='file-export-pnm8'/>"
 		"    </menu>"
 		"  </menu>"
 		"  <!-- Image -->"
-		"  <menu name='guide-image' action='guide-image'>"
-		"    <menuitem name='guide-curves' action='guide-curves'/>"
+		"  <menu name='image' action='image-menu'>"
+		"    <menuitem name='image-curves' action='image-curves'/>"
 		"    <separator name='separator1'/>"
-		"    <menuitem name='guide-zoom-in' action='guide-zoom-in'/>"
-		"    <menuitem name='guide-zoom-out' action='guide-zoom-out'/>"
-		"    <menuitem name='guide-zoom-pixels' action='guide-zoom-pixels'/>"
+		"    <menuitem name='image-zoom-in' action='image-zoom-in'/>"
+		"    <menuitem name='image-zoom-out' action='image-zoom-out'/>"
+		"    <menuitem name='image-zoom-pixels' action='image-zoom-pixels'/>"
 		"    <separator name='separator2'/>"
-		"    <menuitem name='guide-pan-center' action='guide-pan-center'/>"
-		"    <menuitem name='guide-pan-cursor' action='guide-pan-cursor'/>"
+		"    <menuitem name='image-pan-center' action='image-pan-center'/>"
+		"    <menuitem name='image-pan-cursor' action='image-pan-cursor'/>"
 		"    <separator name='separator3'/>"
-		"    <menuitem name='guide-cuts-auto' action='guide-cuts-auto'/>"
-		"    <menuitem name='guide-cuts-minmax' action='guide-cuts-minmax'/>"
-		"    <menuitem name='guide-cuts-flatter' action='guide-cuts-flatter'/>"
-		"    <menuitem name='guide-cuts-sharper' action='guide-cuts-sharper'/>"
-		"    <menuitem name='guide-cuts-brighter' action='guide-cuts-brighter'/>"
-		"    <menuitem name='guide-cuts-darker' action='guide-cuts-darker'/>"
-		"    <menu name='guide-set-contrast' action='guide-set-contrast'>"
-		"	<menuitem name='guide-cuts-1' action='guide-cuts-1'/>"
-		"	<menuitem name='guide-cuts-2' action='guide-cuts-2'/>"
-		"	<menuitem name='guide-cuts-3' action='guide-cuts-3'/>"
-		"	<menuitem name='guide-cuts-4' action='guide-cuts-4'/>"
-		"	<menuitem name='guide-cuts-5' action='guide-cuts-5'/>"
-		"	<menuitem name='guide-cuts-6' action='guide-cuts-6'/>"
-		"	<menuitem name='guide-cuts-7' action='guide-cuts-7'/>"
-		"	<menuitem name='guide-cuts-8' action='guide-cuts-8'/>"
-		"	<menuitem name='guide-cuts-minmax'    action='guide-cuts-minmax'/>"
+		"    <menuitem name='image-cuts-auto' action='image-cuts-auto'/>"
+		"    <menuitem name='image-cuts-minmax' action='image-cuts-minmax'/>"
+		"    <menuitem name='image-cuts-flatter' action='image-cuts-flatter'/>"
+		"    <menuitem name='image-cuts-sharper' action='image-cuts-sharper'/>"
+		"    <menuitem name='image-cuts-brighter' action='image-cuts-brighter'/>"
+		"    <menuitem name='image-cuts-darker' action='image-cuts-darker'/>"
+		"    <menu name='image-set-contrast' action='image-set-contrast'>"
+		"	<menuitem name='image-cuts-1' action='image-cuts-1'/>"
+		"	<menuitem name='image-cuts-2' action='image-cuts-2'/>"
+		"	<menuitem name='image-cuts-3' action='image-cuts-3'/>"
+		"	<menuitem name='image-cuts-4' action='image-cuts-4'/>"
+		"	<menuitem name='image-cuts-5' action='image-cuts-5'/>"
+		"	<menuitem name='image-cuts-6' action='image-cuts-6'/>"
+		"	<menuitem name='image-cuts-7' action='image-cuts-7'/>"
+		"	<menuitem name='image-cuts-8' action='image-cuts-8'/>"
+		"	<menuitem name='image-cuts-minmax'    action='image-cuts-minmax'/>"
 		"    </menu>"
 		"  </menu>"
 		"  <!-- Stars -->"
-		"  <menu name='guide-stars' action='guide-stars'>"
-		"    <menuitem name='guide-stars-add-detect' action='guide-stars-add-detect'/>"
+		"  <menu name='stars' action='stars-menu'>"
+		"    <menuitem name='stars-add-detect' action='stars-add-detect'/>"
 		"    <separator name='separator1'/>"
-		"    <menuitem name='guide-stars-rm-selected' action='guide-stars-rm-selected'/>"
-		"    <menuitem name='guide-stars-rm-detected' action='guide-stars-rm-detected'/>"
-		"    <menuitem name='guide-stars-rm-user' action='guide-stars-rm-user'/>"
-		"    <menuitem name='guide-stars-rm-all' action='guide-stars-rm-all'/>"
+		"    <menuitem name='stars-rm-selected' action='stars-rm-selected'/>"
+		"    <menuitem name='stars-rm-detected' action='stars-rm-detected'/>"
+		"    <menuitem name='stars-rm-user' action='stars-rm-user'/>"
+		"    <menuitem name='stars-rm-all' action='stars-rm-all'/>"
 		"  </menu>"
 		"</menubar>";
 
@@ -758,7 +759,7 @@ static gboolean wait_for_indi_cb(gpointer data)
 }
 
 /* create / open the guiding dialog */
-void open_guide_action(GtkAction *action, gpointer window)
+void act_control_guider (GtkAction *action, gpointer window)
 {
 	GtkWidget *gwindow, *vb, *hb, *menubar, *im, *scw;
 	GtkWidget *statuslabel1;

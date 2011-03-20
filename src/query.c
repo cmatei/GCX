@@ -843,22 +843,22 @@ static void cds_query(gpointer window, guint action)
 	g_list_free(tsl);
 }
 
-void cds_query_gsc_act_action(GtkAction *action, gpointer window)
+void act_stars_add_cds_gsc_act (GtkAction *action, gpointer window)
 {
 	cds_query (window, QUERY_GSC_ACT);
 }
 
-void cds_query_ucac2_action(GtkAction *action, gpointer window)
+void act_stars_add_cds_ucac2 (GtkAction *action, gpointer window)
 {
 	cds_query (window, QUERY_UCAC2);
 }
 
-void cds_query_gsc2_action(GtkAction *action, gpointer window)
+void act_stars_add_cds_gsc2 (GtkAction *action, gpointer window)
 {
 	cds_query (window, QUERY_GSC2);
 }
 
-void cds_query_usnob_action(GtkAction *action, gpointer window)
+void act_stars_add_cds_usnob (GtkAction *action, gpointer window)
 {
 	cds_query (window, QUERY_USNOB);
 }

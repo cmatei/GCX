@@ -5,16 +5,6 @@ typedef void (* get_file_list_type) (GSList *fl, gpointer window);
 typedef void (* get_file_type) (char *fn, gpointer window, unsigned arg);
 
 
-void file_popup_cb(gpointer data, guint action, GtkWidget *menu_item);
-
-void file_open_action(GtkAction *action, gpointer data);
-void file_save_action(GtkAction *action, gpointer data);
-void file_export_pnm8_action(GtkAction *action, gpointer data);
-void file_export_pnm16_action(GtkAction *action, gpointer data);
-void file_add_mband_action(GtkAction *action, gpointer data);
-void file_load_recipy_action(GtkAction *action, gpointer data);
-void file_load_gsc2_action(GtkAction *action, gpointer data);
-
 int load_rcp_to_window(gpointer window, char *rcpf, char *object);
 char *find_file_in_path(char *pattern, char *path);
 char *add_extension(char *fn, char *ext);

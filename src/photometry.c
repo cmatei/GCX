@@ -691,7 +691,7 @@ static void photometry_cb(gpointer window, guint action)
 			gpointer mbd;
 			mbd = g_object_get_data(G_OBJECT(window), "mband_window");
 			if (mbd == NULL) {
-				mband_open_action(NULL, window);
+				act_control_mband(NULL, window);
 				mbd = g_object_get_data(G_OBJECT(window), "mband_window");
 			}
 			stf_to_mband(mbd, stf);
@@ -752,32 +752,32 @@ static void photometry_cb(gpointer window, guint action)
 	}
 }
 
-void phot_center_stars_action(GtkAction *action, gpointer window)
+void act_phot_center_stars (GtkAction *action, gpointer window)
 {
 	photometry_cb (window, PHOT_CENTER_STARS);
 }
 
-void phot_quick_action(GtkAction *action, gpointer window)
+void act_phot_quick (GtkAction *action, gpointer window)
 {
 	photometry_cb (window, PHOT_RUN);
 }
 
-void phot_multi_frame_action(GtkAction *action, gpointer window)
+void act_phot_multi_frame (GtkAction *action, gpointer window)
 {
 	photometry_cb (window, PHOT_RUN | PHOT_TO_MBDS);
 }
 
-void phot_to_file_action(GtkAction *action, gpointer window)
+void act_phot_to_file (GtkAction *action, gpointer window)
 {
 	photometry_cb (window, PHOT_RUN | PHOT_TO_FILE);
 }
 
-void phot_to_aavso_action(GtkAction *action, gpointer window)
+void act_phot_to_aavso (GtkAction *action, gpointer window)
 {
 	photometry_cb (window, PHOT_RUN | PHOT_TO_FILE_AA);
 }
 
-void phot_to_stdout_action(GtkAction *action, gpointer window)
+void act_phot_to_stdout (GtkAction *action, gpointer window)
 {
 	photometry_cb (window, PHOT_RUN | PHOT_TO_STDOUT);
 }

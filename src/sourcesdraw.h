@@ -98,13 +98,6 @@ struct gui_star_list {
 void gsl_unselect_all(GtkWidget *window);
 extern void find_stars_cb(gpointer window, guint action);
 
-extern void stars_add_detect_action (GtkAction *action, gpointer data);
-extern void stars_show_target_action (GtkAction *action, gpointer data);
-extern void stars_add_catalog_action (GtkAction *action, gpointer data);
-extern void stars_add_gsc_action (GtkAction *action, gpointer data);
-extern void stars_add_tycho2_action (GtkAction *action, gpointer data);
-
-
 extern void draw_sources_hook(GtkWidget *darea, GtkWidget *window,
 			      GdkRectangle *area);
 extern void toggle_selection(GtkWidget *window, GSList *stars);
@@ -136,21 +129,6 @@ void gui_star_list_update_colors(struct gui_star_list *gsl);
 void star_list_update_size(GtkWidget *window);
 void star_list_update_labels(GtkWidget *window);
 
-extern void star_display_brighter_action(GtkAction *action, gpointer window);
-extern void star_display_fainter_action(GtkAction *action, gpointer window);
-extern void star_display_redraw_action(GtkAction *action, gpointer window);
-
-extern void stars_edit_action(GtkAction *action, gpointer window);
-
-extern void starp_edit_ap_action (GtkAction *action, gpointer window);
-extern void starp_unmark_star_action (GtkAction *action, gpointer window);
-extern void starp_pair_add_action (GtkAction *action, gpointer window);
-extern void starp_pair_rm_action (GtkAction *action, gpointer window);
-extern void starp_move_star_action (GtkAction *action, gpointer window);
-extern void starp_plot_profile_action (GtkAction *action, gpointer window);
-extern void starp_measure_star_action (GtkAction *action, gpointer window);
-extern void starp_plot_skyhist_action (GtkAction *action, gpointer window);
-extern void starp_fit_psf_action (GtkAction *action, gpointer window);
 
 /* starlist.c */
 

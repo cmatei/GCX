@@ -10,6 +10,4 @@ void test_camera_open(void);
 void status_message(GtkWidget *dialog, char *msg);
 int capture_image( GtkWidget *window);
 
-void camera_action(GtkAction *action, gpointer data);
-
 #endif
