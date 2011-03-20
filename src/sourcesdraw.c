@@ -240,6 +240,7 @@ static void draw_a_star(cairo_t *cr, int x, int y, int size, int shape,
 	if (label != NULL) {
 		cairo_move_to (cr, xl, yl);
 		cairo_show_text (cr, label);
+		cairo_stroke (cr);
 	}
 }
 
