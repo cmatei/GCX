@@ -265,6 +265,7 @@ extern void act_stars_add_synthetic(GtkAction *action, gpointer window);
 /* query.c */
 extern void act_stars_add_cds_gsc_act (GtkAction *action, gpointer window);
 extern void act_stars_add_cds_ucac2 (GtkAction *action, gpointer window);
+extern void act_stars_add_cds_ucac3 (GtkAction *action, gpointer window);
 extern void act_stars_add_cds_gsc2 (GtkAction *action, gpointer window);
 extern void act_stars_add_cds_usnob (GtkAction *action, gpointer window);
 

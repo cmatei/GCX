@@ -56,11 +56,12 @@ enum {
 	QTABLE_GSC2,
 	QTABLE_USNOB,
 	QTABLE_GSC_ACT,
+	QTABLE_UCAC3,
 	QTABLES,
 };
 
 char *table_names[] = {"I_289_out", "I_294_ucac2bss", "I_271_out", "I_284_out",
-		       "I_255_out"};
+		       "I_255_out", "I_315_out"};
 
 static int detabify(char *line, int cols[], int n)
 {
@@ -260,6 +261,101 @@ static struct cat_star * parse_cat_line_ucac2_bss(char *line)
 	cats->astro->flags = ASTRO_HAS_PM;
 
 	cats->astro->catalog = strdup("ucac2bss");
+	return cats;
+}
+
+static struct cat_star * parse_cat_line_ucac3(char *line)
+{
+	struct cat_star * cats;
+	int cols[32];
+	int nc;
+	double u, v, w, x;
+	double uc, m, j, k;
+	char *endp;
+	int ret = 0;
+
+	nc = detabify(line, cols, 32);
+
+	d4_printf("[ucac3-%d]%s\n", nc, line);
+
+	if (nc < 12)
+		return NULL;
+
+	u = strtod(line+cols[1], &endp);
+	if (line+cols[1] == endp)
+		return NULL;
+	v = strtod(line+cols[2], &endp);
+	if (line+cols[2] == endp)
+		return NULL;
+
+	cats = cat_star_new();
+	snprintf(cats->name, CAT_STAR_NAME_SZ, "ucac3%s", line+cols[0]);
+	cats->ra = u;
+	cats->dec = v;
+	cats->equinox = 2000.0;
+	cats->flags = CAT_STAR_TYPE_SREF;
+
+/*
+#Column 3UC     (a10)   UCAC3 designation (1)   [ucd=meta.id;meta.main]
+#Column RAJ2000 (F11.7) Right ascension (degrees), ICRS, Ep=J2000       [ucd=pos.eq.ra;meta.main]
+#Column DEJ2000 (F11.7) Declination (degrees), ICRS, Ep=J2000   [ucd=pos.eq.dec;meta.main]
+#Column ePos    (I4)    Error of position at Epoch=J2000 (9)    [ucd=stat.error;pos]
+#Column f.mag   (F6.3)  ? UCAC fit model magnitude (579-642nm) (2)      [ucd=phot.mag;em.opt]
+#Column ot      (I2)    [-2,3] UCAC object classification flag (4)      [ucd=src.class.starGalaxy]
+#Column db      (I1)    [0,7] double star flag (5)      [ucd=meta.code]
+#Column pmRA    (F8.1)  ? Proper motion in RA(*cos(Dec)) \ifnum\Vphase>3{\fg{gray40}(in gray if catflg indicates less than 2 good matches)}\fi  [ucd=pos.pm;pos.eq.ra]
+#Column pmDE    (F8.1)  ? Proper motion in Dec \ifnum\Vphase>3{\fg{gray40}(in gray if catflg indicates less than 2 good matches)}\fi    [ucd=pos.pm;pos.eq.dec]
+#Column Jmag    (F6.3)  ? J magnitude (1.2um) from 2MASS \ifnum\Vphase>3{\fg{gray40}(in gray if upper limit)}\fi        [ucd=phot.mag;em.IR.J]
+#Column Kmag    (F6.3)  ? K magnitude (2.2um) from 2MASS \ifnum\Vphase>3{\fg{gray40}(in gray if upper limit)}\fi        [ucd=phot.mag;em.IR.K]
+#Column catflg  (a10)   matching flags for 10 catalogues (12)   [ucd=meta.code]
+
+*/
+
+	u = strtod(line+cols[3], &endp);
+	if (u > 0) {
+		cats->perr = u / 1000; // is epos in mas ?
+	} else {
+		cats->perr = BIG_ERR;
+	}
+
+	uc = strtod(line+cols[4], &endp);
+	cats->mag = uc;
+
+	/* what is "p=..." ? */
+	m = strtod(line+cols[5], &endp);
+	asprintf(&cats->comments, "ucac3_class=%.0f", m);
+
+	j = strtod(line+cols[9], &endp);
+	k = strtod(line+cols[10], &endp);
+	cats->smags = NULL;
+
+	if (j > 0.0 && k > 0.0) {
+		if (uc == 0)
+			ret = asprintf(&cats->smags, "j=%.3f k=%.3f", j, k);
+		else
+			ret = asprintf(&cats->smags, "uc=%.3f j=%.3f k=%.3f", uc, j, k);
+	}
+
+	w = strtod(line+cols[7], &endp);
+	if (line+cols[7] == endp)
+		return cats;
+	x = strtod(line+cols[8], &endp);
+	if (line+cols[8] == endp)
+		return cats;
+
+	cats->flags |= CAT_ASTROMET;
+
+	cats->astro = calloc(1, sizeof(struct cats_astro));
+	g_return_val_if_fail(cats->astro != NULL, cats);
+
+	cats->astro->epoch = 2000.0;
+	cats->astro->ra_err = 0; // cats->perr instead ?!
+	cats->astro->dec_err = 0;
+	cats->astro->ra_pm = w;
+	cats->astro->dec_pm = x;
+	cats->astro->flags = ASTRO_HAS_PM;
+
+	cats->astro->catalog = strdup("ucac3");
 	return cats;
 }
 
@@ -518,6 +614,8 @@ static struct cat_star * parse_cat_line_usnob(char *line)
 static struct cat_star * parse_cat_line(char *line, int tnum)
 {
 	switch(tnum) {
+	case QTABLE_UCAC3:
+		return parse_cat_line_ucac3(line);
 	case QTABLE_UCAC2:
 		return parse_cat_line_ucac2_main(line);
 	case QTABLE_UCAC2_BSS:
@@ -851,6 +949,11 @@ void act_stars_add_cds_gsc_act (GtkAction *action, gpointer window)
 void act_stars_add_cds_ucac2 (GtkAction *action, gpointer window)
 {
 	cds_query (window, QUERY_UCAC2);
+}
+
+void act_stars_add_cds_ucac3 (GtkAction *action, gpointer window)
+{
+	cds_query (window, QUERY_UCAC3);
 }
 
 void act_stars_add_cds_gsc2 (GtkAction *action, gpointer window)
