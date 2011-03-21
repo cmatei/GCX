@@ -278,7 +278,7 @@ static struct cat_star * parse_cat_line_gsc2(char *line)
 
 	d4_printf("[gsc2-%d]%s\n", nc, line);
 
-	if (nc < 8)
+	if (nc < 9)
 		return NULL;
 
 	u = strtod(line+cols[1], &endp);
@@ -295,11 +295,11 @@ static struct cat_star * parse_cat_line_gsc2(char *line)
 	cats->equinox = 2000.0;
 	cats->flags = CAT_STAR_TYPE_SREF;
 
-	fr = strtod(line+cols[3], &endp);
-	fre = strtod(line+cols[4], &endp);
-	bj = strtod(line+cols[5], &endp);
-	bje = strtod(line+cols[6], &endp);
-	class = strtod(line+cols[7], &endp);
+	fr = strtod(line+cols[4], &endp);
+	fre = strtod(line+cols[5], &endp);
+	bj = strtod(line+cols[6], &endp);
+	bje = strtod(line+cols[7], &endp);
+	class = strtod(line+cols[8], &endp);
 
 	if (fr > 0)
 		cats->mag = fr;
