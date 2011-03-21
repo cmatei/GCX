@@ -495,6 +495,7 @@ void find_stars_cb(gpointer window, guint action)
 	double ref_flux = 0.0, ref_fwhm = 0.0;
 	double radius;
 	struct wcs *wcs;
+	int nstars;
 
 	i_ch = g_object_get_data(G_OBJECT(window), "i_channel");
 
@@ -592,6 +593,8 @@ void find_stars_cb(gpointer window, guint action)
 			ref_fwhm = src->s[i].fwhm;
 			break;
 		}
+
+		nstars = 0;
 		for (i = 0; i < src->ns; i++) {
 			if (src->s[i].peak > P_DBL(AP_SATURATION))
 				continue;
@@ -605,11 +608,12 @@ void find_stars_cb(gpointer window, guint action)
 			}
 			gs->flags = STAR_TYPE_SIMPLE;
 			gsl->sl = g_slist_prepend(gsl->sl, gs);
+			nstars++;
 		}
 		gsl->display_mask |= TYPE_MASK(STAR_TYPE_SIMPLE);
 		gsl->select_mask |= TYPE_MASK(STAR_TYPE_SIMPLE);
 
-		info_printf_sb2(window, "Found %d stars (SNR > %.1f)", src->ns, P_DBL(SD_SNR));
+		info_printf_sb2(window, "Found %d stars (SNR > %.1f)", nstars, P_DBL(SD_SNR));
 		release_sources(src);
 		break;
 	case ADD_STARS_OBJECT:
