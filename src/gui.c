@@ -645,8 +645,7 @@ static char *image_common_ui =
 	"  <separator name='separator2'/>"
 	"  <menuitem name='catalogs-add-gsc-act' action='catalogs-add-gsc-act'/>"
 	"  <menuitem name='catalogs-add-ucac2' action='catalogs-add-ucac2'/>"
-/* Leave this disabled as it seems that UCAC-3 has a number of issues    */
-/* "  <menuitem name='catalogs-add-ucac3' action='catalogs-add-ucac3'/>" */
+	"  <menuitem name='catalogs-add-ucac3' action='catalogs-add-ucac3'/>"
 	"  <menuitem name='catalogs-add-gsc2' action='catalogs-add-gsc2'/>"
 	"  <menuitem name='catalogs-add-usnob' action='catalogs-add-usnob'/>"
 	"</menu>"
