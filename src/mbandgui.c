@@ -780,31 +780,28 @@ static void mbds_ofr_to_list(GtkWidget *dialog, GtkWidget *list)
 	}
 }
 
-
-void ofr_bpress_cb(GtkTreeView *ofr_list, GdkEventButton *event, gpointer data)
+/* rebuild star list in stars tab based on the first frame in the current selection */
+static void ofr_selection_cb(GtkWidget *selection, gpointer dialog)
 {
-	int x, y;
 	struct o_frame *ofr;
 	GtkTreeModel *ofr_store;
 	GtkTreePath *path;
 	GtkTreeIter iter;
+	GList *list;
 
-	g_return_if_fail(event->window == gtk_tree_view_get_bin_window(ofr_list));
+	list = gtk_tree_selection_get_selected_rows (GTK_TREE_SELECTION(selection), &ofr_store);
 
-	x = floor(event->x);
-	y = floor(event->y);
+	if (list != NULL) {
+		path = list->data;
+		gtk_tree_model_get_iter (ofr_store, &iter, path);
+		gtk_tree_model_get (ofr_store, &iter, 0, &ofr, -1);
+		g_return_if_fail (ofr != NULL);
 
-	if (gtk_tree_view_get_path_at_pos(ofr_list, x, y, &path, NULL, NULL, NULL)) {
-
-		ofr_store = gtk_tree_view_get_model(ofr_list);
-		if (gtk_tree_model_get_iter(ofr_store, &iter, path)) {
-
-			gtk_tree_model_get(ofr_store, &iter, 0, &ofr, -1);
-			g_return_if_fail(ofr != NULL);
-
-			mb_rebuild_sob_list(data, ofr->sol);
-		}
+		mb_rebuild_sob_list (dialog, ofr->sol);
 	}
+
+	g_list_foreach (list, (GFunc) gtk_tree_path_free, NULL);
+	g_list_free (list);
 }
 
 static void mb_rebuild_ofr_list(gpointer dialog)
@@ -816,6 +813,7 @@ static void mb_rebuild_ofr_list(gpointer dialog)
 			  "Outliers", "MEU", "Airmass", "MJD", NULL};
 	int i;
 	GtkTreeViewColumn *column;
+	GtkTreeSelection *selection;
 
 	ofr_list = g_object_get_data(G_OBJECT(dialog), "ofr_list");
 	if (ofr_list == NULL) {
@@ -844,11 +842,11 @@ static void mb_rebuild_ofr_list(gpointer dialog)
 		g_object_set_data_full(G_OBJECT(dialog), "ofr_list",
 					 ofr_list, (GDestroyNotify) gtk_widget_destroy);
 
-		gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(ofr_list)),
-					    GTK_SELECTION_MULTIPLE);
+		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(ofr_list));
+		gtk_tree_selection_set_mode(selection, GTK_SELECTION_MULTIPLE);
 
-		g_signal_connect(G_OBJECT(ofr_list), "button-press-event",
-				 G_CALLBACK(ofr_bpress_cb), dialog);
+		g_signal_connect (G_OBJECT(selection), "changed",
+				  G_CALLBACK(ofr_selection_cb), dialog);
 
 		gtk_widget_show(ofr_list);
 	} else {
