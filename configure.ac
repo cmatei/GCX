@@ -1,5 +1,5 @@
 
-AC_INIT([gcx], [1.1])
+AC_INIT([gcx], [1.3])
 AM_INIT_AUTOMAKE
 
 AC_CONFIG_HEADERS([src/config.h])
@@ -16,7 +16,7 @@ AC_REPLACE_FUNCS(dirname)
 AC_REPLACE_FUNCS(getline)
 
 
-AM_PATH_GTK_2_0(2.4.0, , AC_MSG_ERROR(Cannot find GTK: is pkg-config in path?))
+AM_PATH_GTK_2_0(2.20.0, , AC_MSG_ERROR(Cannot find GTK: is pkg-config in path?))
 
 AC_CONFIG_FILES([
 	makedeb
