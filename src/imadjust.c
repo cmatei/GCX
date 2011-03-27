@@ -855,18 +855,9 @@ void plot_histogram(GtkWidget *darea, GdkRectangle *area,
 {
 	int firstx, lcx, hcx;
 	int i, h;
-	GdkGC *fgc, *redgc;
-	GdkColor red;
-	GdkColormap *cmap;
+	cairo_t *cr;
 
-	cmap = gdk_colormap_get_system();
-	red.red = 65535;
-	red.green = 0;
-	red.blue = 0;
-	gdk_colormap_alloc_color(cmap, &red, FALSE, TRUE);
-
-	redgc = gdk_gc_new(darea->window);
-	gdk_gc_set_foreground(redgc, &red);
+	cr = gdk_cairo_create (darea->window);
 
 	firstx = area->x / dskip;
 	lcx = darea->allocation.width * (1 - CUTS_FACTOR) / 2;
@@ -874,20 +865,32 @@ void plot_histogram(GtkWidget *darea, GdkRectangle *area,
 
 	d3_printf("aw=%d lc=%d hc=%d\n", darea->allocation.width, lcx, hcx);
 
-/* clear the area */
-	gdk_draw_rectangle(darea->window, darea->style->white_gc,
-			   1, area->x, 0, area->width, darea->allocation.height);
-	fgc = darea->style->black_gc;
-//	gdk_gc_set_line_attributes(fgc, dskip, GDK_LINE_SOLID, GDK_CAP_BUTT, GDK_JOIN_ROUND);
+        /* clear the area */
+	cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
+	cairo_rectangle (cr, area->x, 0, area->width, darea->allocation.height);
+	cairo_fill (cr);
+
+	cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
+
 	for (i = firstx; i < (area->x + area->width) / dskip + 1 && i < dbins; i++) {
 		h = darea->allocation.height - rbh[i] * darea->allocation.height;
 //		d3_printf("hist line v=%.3f x=%d  h=%d\n", rbh[i], i, h);
-		gdk_draw_line(darea->window, fgc, i*dskip, darea->allocation.height, i*dskip, h);
+		cairo_move_to (cr, i * dskip, darea->allocation.height);
+		cairo_line_to (cr, i * dskip, h);
+		cairo_stroke (cr);
 	}
-	gdk_draw_line(darea->window, redgc, lcx, darea->allocation.height, lcx, 0);
-	gdk_draw_line(darea->window, redgc, hcx, darea->allocation.height, hcx, 0);
 
-	g_object_unref (redgc);
+	cairo_set_source_rgb (cr, 1.0, 0.0, 0.0);
+
+	cairo_move_to (cr, lcx, darea->allocation.height);
+	cairo_line_to (cr, lcx, 0);
+	cairo_stroke (cr);
+
+	cairo_move_to (cr, hcx, darea->allocation.height);
+	cairo_line_to (cr, hcx, 0);
+	cairo_stroke (cr);
+
+	cairo_destroy (cr);
 }
 
 /* draw the curve over the histogram area */
@@ -895,38 +898,30 @@ void plot_curve(GtkWidget *darea, GdkRectangle *area, struct image_channel *chan
 {
 	int lcx, hcx, span;
 	int i, ci;
-	GdkGC *greengc;
-	GdkColor green;
-	GdkColormap *cmap;
-	GdkPoint *points;
+	cairo_t *cr;
 
-	cmap = gdk_colormap_get_system();
-	green.red = 10000;
-	green.green = 40000;
-	green.blue = 10000;
-	gdk_colormap_alloc_color(cmap, &green, FALSE, TRUE);
+	cr = gdk_cairo_create (darea->window);
 
-	greengc = gdk_gc_new(darea->window);
-	gdk_gc_set_foreground(greengc, &green);
-	gdk_gc_set_line_attributes(greengc, 2, GDK_LINE_SOLID, GDK_CAP_ROUND, GDK_JOIN_ROUND);
+	cairo_set_source_rgb (cr, 0.15, 0.60, 0.15);
+	cairo_set_line_width (cr, 2.0);
+	cairo_set_line_join (cr, CAIRO_LINE_JOIN_ROUND);
+	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
 
 	lcx = darea->allocation.width * (1 - CUTS_FACTOR) / 2;
 	hcx = darea->allocation.width - darea->allocation.width * (1 - CUTS_FACTOR) / 2;
 	span = hcx - lcx;
-	points = calloc((span+1), sizeof(GdkPoint));
-	points[0].x = 0;
-	points[0].y = darea->allocation.height
-			- darea->allocation.height * channel->lut[0] / 65536;
+
+	cairo_move_to (cr, 0, darea->allocation.height -
+		       darea->allocation.height * channel->lut[0] / 65536);
 	for (i = 0; i < span; i++) {
 		ci = LUT_SIZE * i / span;
-		points[i+1].x = lcx+i;
-		points[i+1].y = darea->allocation.height
-			- darea->allocation.height * channel->lut[ci] / 65536;
-	}
-	gdk_draw_lines(darea->window, greengc, points, span+1);
-	free(points);
 
-	g_object_unref(greengc);
+		cairo_line_to (cr, lcx + i, darea->allocation.height -
+			       darea->allocation.height * channel->lut[ci] / 65536);
+	}
+	cairo_stroke (cr);
+
+	cairo_destroy (cr);
 }
 
 
