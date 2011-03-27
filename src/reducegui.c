@@ -133,12 +133,14 @@ static GtkActionEntry reduce_menu_actions[] = {
 };
 
 /* create the menu bar */
-static GtkWidget *get_main_menu_bar(GtkWidget *window)
+static GtkWidget *get_main_menu_bar(GtkWidget *window, GtkWidget *notebook_page)
 {
 	GtkWidget *ret;
 	GtkUIManager *ui;
 	GError *error;
 	GtkActionGroup *action_group;
+	GtkAccelGroup *accel_group;
+
 	static char *reduce_ui =
 		"<menubar name='reduce-menubar'>"
 		"  <menu name='file' action='file-menu'>"
@@ -184,9 +186,12 @@ static GtkWidget *get_main_menu_bar(GtkWidget *window)
 
 	ret = gtk_ui_manager_get_widget (ui, "/reduce-menubar");
 
-        /* Make sure that the accelerators work */
-	gtk_window_add_accel_group (GTK_WINDOW (window),
-				    gtk_ui_manager_get_accel_group (ui));
+	/* save the accelerators on the page */
+	accel_group = gtk_ui_manager_get_accel_group (ui);
+	g_object_ref (accel_group);
+
+	g_object_set_data_full (G_OBJECT(notebook_page), "reduce-accel-group", accel_group,
+				(GDestroyNotify) g_object_unref);
 
 	g_object_ref (ret);
 	g_object_unref (ui);
@@ -194,6 +199,29 @@ static GtkWidget *get_main_menu_bar(GtkWidget *window)
 	return ret;
 }
 
+static void reduce_switch_accels (GtkNotebook *notebook, GtkWidget *page, int page_num, gpointer window)
+{
+	GtkAccelGroup *accel_group;
+	GtkWidget *opage;
+	int i;
+
+	/* remove accel groups created by us */
+	for (i = 0; i < 2; i++) {
+		opage = gtk_notebook_get_nth_page (notebook, i);
+
+		accel_group = g_object_get_data (G_OBJECT(opage), "reduce-accel-group");
+		g_return_if_fail (accel_group != NULL);
+
+		/* seems we can't remove an accel group which isn't there. The list
+		   returned by gtk_accel_groups_from_object should not be freed. */
+		if (g_slist_index(gtk_accel_groups_from_object(G_OBJECT(window)), accel_group) != -1)
+			gtk_window_remove_accel_group (GTK_WINDOW(window), accel_group);
+	}
+
+	/* add current page accel group */
+	accel_group = g_object_get_data (G_OBJECT(page), "reduce-accel-group");
+	gtk_window_add_accel_group (GTK_WINDOW(window), accel_group);
+}
 
 
 
@@ -203,6 +231,9 @@ static GtkWidget *make_image_processing(gpointer window)
 {
 	GtkWidget *dialog;
 	GtkWidget *menubar, *top_hb;
+	GtkNotebook *notebook;
+	GtkWidget *page;
+	GtkAccelGroup *accel_group;
 
 	dialog = create_image_processing();
 	g_object_set_data(G_OBJECT(dialog), "im_window", window);
@@ -238,7 +269,30 @@ static GtkWidget *make_image_processing(gpointer window)
 	set_named_callback (G_OBJECT (dialog), "recipe_entry", "activate",
 			    G_CALLBACK (imf_red_activate_cb));
 
-	menubar = get_main_menu_bar(dialog);
+	/* each page should remember its accelerators, we need to switch them
+	   (as they apply on the whole window) when switching pages */
+	notebook = g_object_get_data (G_OBJECT(dialog), "notebook3");
+	g_return_val_if_fail (notebook != NULL, NULL);
+
+	page = gtk_notebook_get_nth_page (notebook, 0);
+	menubar = get_main_menu_bar(dialog, page);
+
+	/* activate reduce page accels for the dialog */
+	accel_group = g_object_get_data(G_OBJECT(page), "reduce-accel-group");
+	gtk_window_add_accel_group (GTK_WINDOW (dialog), accel_group);
+
+	/* setup dummy accels for the setup page */
+	page = gtk_notebook_get_nth_page (notebook, 1);
+	accel_group = gtk_accel_group_new ();
+	g_object_ref (accel_group);
+	g_object_set_data_full (G_OBJECT(page), "reduce-accel-group", accel_group,
+				(GDestroyNotify) g_object_unref);
+
+	/* the ole switcheroo */
+	g_signal_connect (G_OBJECT(notebook), "switch-page",
+			  G_CALLBACK (reduce_switch_accels), dialog);
+
+
 	g_object_set_data(G_OBJECT(dialog), "menubar", menubar);
 
 	top_hb = g_object_get_data(G_OBJECT(dialog), "top_hbox");
