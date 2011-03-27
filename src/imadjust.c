@@ -1568,7 +1568,7 @@ GtkWidget* create_imadj_dialog (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (hist_close);
   gtk_container_add (GTK_CONTAINER (hbuttonbox1), hist_close);
-  GTK_WIDGET_SET_FLAGS (hist_close, GTK_CAN_DEFAULT);
+  gtk_widget_set_can_default (hist_close, TRUE);
 
   hist_apply = gtk_button_new_with_label (("Apply"));
   g_object_ref (hist_apply);
@@ -1576,7 +1576,7 @@ GtkWidget* create_imadj_dialog (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (hist_apply);
   gtk_container_add (GTK_CONTAINER (hbuttonbox1), hist_apply);
-  GTK_WIDGET_SET_FLAGS (hist_apply, GTK_CAN_DEFAULT);
+  gtk_widget_set_can_default (hist_apply, TRUE);
 
   hist_redraw = gtk_button_new_with_label (("Redraw"));
   g_object_ref (hist_redraw);
@@ -1584,7 +1584,7 @@ GtkWidget* create_imadj_dialog (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (hist_redraw);
   gtk_container_add (GTK_CONTAINER (hbuttonbox1), hist_redraw);
-  GTK_WIDGET_SET_FLAGS (hist_redraw, GTK_CAN_DEFAULT);
+  gtk_widget_set_can_default (hist_redraw, TRUE);
 
   return imadj_dialog;
 }

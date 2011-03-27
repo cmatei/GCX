@@ -332,7 +332,7 @@ create_pstar (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (ok_button);
   gtk_container_add (GTK_CONTAINER (hbuttonbox1), ok_button);
-  GTK_WIDGET_SET_FLAGS (ok_button, GTK_CAN_DEFAULT);
+  gtk_widget_set_can_default (ok_button, TRUE);
   gtk_widget_set_tooltip_text (ok_button, "Accept changes and exit");
   gtk_widget_add_accelerator (ok_button, "clicked", accel_group,
                               GDK_Return, 0,
@@ -897,7 +897,7 @@ create_camera_control (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (scope_goto_button);
   gtk_container_add (GTK_CONTAINER (hbuttonbox3), scope_goto_button);
-  GTK_WIDGET_SET_FLAGS (scope_goto_button, GTK_CAN_DEFAULT);
+  gtk_widget_set_can_default (scope_goto_button, TRUE);
   gtk_widget_set_tooltip_text (scope_goto_button, "Goto selected object");
 
   scope_abort_button = gtk_button_new_with_label ("Abort");
@@ -906,7 +906,7 @@ create_camera_control (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (scope_abort_button);
   gtk_container_add (GTK_CONTAINER (hbuttonbox3), scope_abort_button);
-  GTK_WIDGET_SET_FLAGS (scope_abort_button, GTK_CAN_DEFAULT);
+  gtk_widget_set_can_default (scope_abort_button, TRUE);
   gtk_widget_set_tooltip_text (scope_abort_button, "Abort goto operation");
 
   scope_auto_button = gtk_button_new_with_label ("Center");
@@ -915,7 +915,7 @@ create_camera_control (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (scope_auto_button);
   gtk_container_add (GTK_CONTAINER (hbuttonbox3), scope_auto_button);
-  GTK_WIDGET_SET_FLAGS (scope_auto_button, GTK_CAN_DEFAULT);
+  gtk_widget_set_can_default (scope_auto_button, TRUE);
   gtk_widget_set_tooltip_text (scope_auto_button, "Match field and center target object");
 
   label10 = gtk_label_new ("Obs");
@@ -1453,7 +1453,7 @@ create_camera_control (void)
   gtk_widget_show (scope_park_button);
   gtk_container_add (GTK_CONTAINER (hbuttonbox13), scope_park_button);
   gtk_widget_set_sensitive (scope_park_button, FALSE);
-  GTK_WIDGET_SET_FLAGS (scope_park_button, GTK_CAN_DEFAULT);
+  gtk_widget_set_can_default (scope_park_button, TRUE);
   gtk_widget_set_tooltip_text (scope_park_button, "Slew telescope to parking position");
 
   scope_sync_button = gtk_button_new_with_label ("Sync");
@@ -1462,7 +1462,7 @@ create_camera_control (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (scope_sync_button);
   gtk_container_add (GTK_CONTAINER (hbuttonbox13), scope_sync_button);
-  GTK_WIDGET_SET_FLAGS (scope_sync_button, GTK_CAN_DEFAULT);
+  gtk_widget_set_can_default (scope_sync_button, TRUE);
   gtk_widget_set_tooltip_text (scope_sync_button, "Synchronise telescope pointing to current obs coordinates");
 
   scope_dither_button = gtk_button_new_with_label ("Dither");
@@ -1471,7 +1471,7 @@ create_camera_control (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (scope_dither_button);
   gtk_container_add (GTK_CONTAINER (hbuttonbox13), scope_dither_button);
-  GTK_WIDGET_SET_FLAGS (scope_dither_button, GTK_CAN_DEFAULT);
+  gtk_widget_set_can_default (scope_dither_button, TRUE);
   gtk_widget_set_tooltip_text (scope_dither_button, "Dither (small random) telescope movement");
 
   label86 = gtk_label_new ("Telescope");
@@ -1835,7 +1835,7 @@ create_wcs_edit (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (wcs_ok_button);
   gtk_container_add (GTK_CONTAINER (hbuttonbox4), wcs_ok_button);
-  GTK_WIDGET_SET_FLAGS (wcs_ok_button, GTK_CAN_DEFAULT);
+  gtk_widget_set_can_default (wcs_ok_button, TRUE);
 
   wcs_close_button = gtk_button_new_with_label ("Close");
   g_object_ref (wcs_close_button);
@@ -1843,7 +1843,7 @@ create_wcs_edit (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (wcs_close_button);
   gtk_container_add (GTK_CONTAINER (hbuttonbox4), wcs_close_button);
-  GTK_WIDGET_SET_FLAGS (wcs_close_button, GTK_CAN_DEFAULT);
+  gtk_widget_set_can_default (wcs_close_button, TRUE);
 
   gtk_window_add_accel_group (GTK_WINDOW (wcs_edit), accel_group);
 
@@ -1908,7 +1908,7 @@ create_show_text (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (close_button);
   gtk_container_add (GTK_CONTAINER (hbuttonbox7), close_button);
-  GTK_WIDGET_SET_FLAGS (close_button, GTK_CAN_DEFAULT);
+  gtk_widget_set_can_default (close_button, TRUE);
 
   return show_text;
 }
@@ -2193,7 +2193,7 @@ create_create_recipe (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (mkrcp_ok_button);
   gtk_container_add (GTK_CONTAINER (hbuttonbox9), mkrcp_ok_button);
-  GTK_WIDGET_SET_FLAGS (mkrcp_ok_button, GTK_CAN_DEFAULT);
+  gtk_widget_set_can_default (mkrcp_ok_button, TRUE);
 
   mkrcp_close_button = gtk_button_new_with_label ("Close");
   g_object_ref (mkrcp_close_button);
@@ -2201,7 +2201,7 @@ create_create_recipe (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (mkrcp_close_button);
   gtk_container_add (GTK_CONTAINER (hbuttonbox9), mkrcp_close_button);
-  GTK_WIDGET_SET_FLAGS (mkrcp_close_button, GTK_CAN_DEFAULT);
+  gtk_widget_set_can_default (mkrcp_close_button, TRUE);
 
   gtk_widget_grab_focus (recipe_file_entry);
   gtk_widget_grab_default (mkrcp_ok_button);
@@ -2271,7 +2271,7 @@ create_yes_no (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (yes_button);
   gtk_container_add (GTK_CONTAINER (hbuttonbox10), yes_button);
-  GTK_WIDGET_SET_FLAGS (yes_button, GTK_CAN_DEFAULT);
+  gtk_widget_set_can_default (yes_button, TRUE);
 
   no_button = gtk_button_new_with_label ("No");
   g_object_ref (no_button);
@@ -2279,7 +2279,7 @@ create_yes_no (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (no_button);
   gtk_container_add (GTK_CONTAINER (hbuttonbox10), no_button);
-  GTK_WIDGET_SET_FLAGS (no_button, GTK_CAN_DEFAULT);
+  gtk_widget_set_can_default (no_button, TRUE);
 
   gtk_widget_grab_focus (yes_button);
   gtk_widget_grab_default (yes_button);
@@ -3259,7 +3259,7 @@ create_par_edit (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (par_save);
   gtk_container_add (GTK_CONTAINER (hbuttonbox16), par_save);
-  GTK_WIDGET_SET_FLAGS (par_save, GTK_CAN_DEFAULT);
+  gtk_widget_set_can_default (par_save, TRUE);
   gtk_widget_set_tooltip_text (par_save, "Save parameters to ~/.gcxrc");
 
   par_default = gtk_button_new_with_label ("Default");
@@ -3268,7 +3268,7 @@ create_par_edit (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (par_default);
   gtk_container_add (GTK_CONTAINER (hbuttonbox16), par_default);
-  GTK_WIDGET_SET_FLAGS (par_default, GTK_CAN_DEFAULT);
+  gtk_widget_set_can_default (par_default, TRUE);
   gtk_widget_set_tooltip_text (par_default, "Restore default value of parameter");
 
   par_load = gtk_button_new_with_label ("Reload");
@@ -3277,7 +3277,7 @@ create_par_edit (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (par_load);
   gtk_container_add (GTK_CONTAINER (hbuttonbox16), par_load);
-  GTK_WIDGET_SET_FLAGS (par_load, GTK_CAN_DEFAULT);
+  gtk_widget_set_can_default (par_load, TRUE);
   gtk_widget_set_tooltip_text (par_load, "Reload options file");
 
   par_close = gtk_button_new_with_label ("Close");
@@ -3286,7 +3286,8 @@ create_par_edit (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (par_close);
   gtk_container_add (GTK_CONTAINER (hbuttonbox16), par_close);
-  GTK_WIDGET_SET_FLAGS (par_close, GTK_CAN_DEFAULT);
+  gtk_widget_set_can_default (par_close, TRUE);
+
   gtk_widget_set_tooltip_text (par_close, "Close Dialog");
 
   return par_edit;
@@ -3362,7 +3363,8 @@ create_entry_prompt (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (ok_button);
   gtk_container_add (GTK_CONTAINER (hbuttonbox17), ok_button);
-  GTK_WIDGET_SET_FLAGS (ok_button, GTK_CAN_DEFAULT);
+  gtk_widget_set_can_default (ok_button, TRUE);
+
   gtk_widget_add_accelerator (ok_button, "clicked", accel_group,
                               GDK_Return, 0,
                               GTK_ACCEL_VISIBLE);
@@ -3373,7 +3375,7 @@ create_entry_prompt (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (cancel_button);
   gtk_container_add (GTK_CONTAINER (hbuttonbox17), cancel_button);
-  GTK_WIDGET_SET_FLAGS (cancel_button, GTK_CAN_DEFAULT);
+  gtk_widget_set_can_default (cancel_button, TRUE);
 
   gtk_widget_grab_focus (entry);
   gtk_widget_grab_default (ok_button);
