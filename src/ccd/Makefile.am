@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-INCLUDES = \
+AM_CPPFLAGS = \
 	@GTK_CFLAGS@
 AM_CFLAGS = -Wall
 noinst_LIBRARIES = libccd.a

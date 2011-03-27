@@ -8,4 +8,10 @@ EXTRA_DIST = \
 	gcx.glade
 
 CLEANFILES = *~ docs/*~
-DISTCLEANFILES = docs/Makefile 
+DISTCLEANFILES = docs/Makefile
+
+docs: src
+
+realclean:
+	$(MAKE) -C docs realclean
+

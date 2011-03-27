@@ -2,7 +2,7 @@
 
 SUBDIRS = ccd gsc
 
-INCLUDES = @GTK_CFLAGS@
+AM_CPPFLAGS = @GTK_CFLAGS@
 
 AM_CFLAGS = -Wall
 bin_PROGRAMS = gcx

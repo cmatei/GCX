@@ -1,58 +1,75 @@
 
+# The pre-compiled documentation is included in the dist, so you don't
+# need latex et. all installed to build it.
+
 PICTS	= aucyg-res-std.gpl aucyg-wres-std.gpl v-res-mag-zponly.gpl v-se-color.gpl \
 	  v-se-color-zponly.gpl zp-am-1.gpl zp-am-2.gpl zp-t-1.gpl zp-t-2.gpl
 
-EPSPICT	= $(PICTS:.gpl=.eps)
-PDFPICT = $(PICTS:.gpl=.pdf)
+BASEPICTS = $(PICTS:.gpl=)
+EPS_PICTS = $(PICTS:.gpl=.eps)
+PDF_PICTS = $(PICTS:.gpl=.pdf)
 
 
-EXTRA_DIST	= Makefile.in gcx.ltx gpl2eps.gp $(PICTS) \
+EXTRA_DIST	= gcx.ltx gpl2eps.gp $(PICTS) \
 		  html gcx.pdf gcx.dvi gcx.1
 
 man1_MANS	= gcx.1
 doc_DATA	= gcx.pdf gcx.dvi
 
-htmldir		= $(docdir)/html
+OPTFILES	= options.ltx cmdline.txt repconv.txt
 
-all-local: gcx.pdf gcx.dvi gcx.html
+# slow and safe
+.NOTPARALLEL:
 
+all-local: gcx.dvi gcx.pdf html/index.html
+
+# use html from build-dir (e.g. distcheck alternate dir compilation)
+# if available, or fallback to srcdir
 install-data-hook:
-	$(MKDIR_P) $(htmldir)
-	$(INSTALL_DATA) html/* $(htmldir)
+	$(mkinstalldirs) $(DESTDIR)$(docdir)/html
+	if test -d html; then 							\
+		$(INSTALL_DATA) html/* $(DESTDIR)$(docdir)/html ;		\
+	else									\
+		$(INSTALL_DATA) $(srcdir)/html/* $(DESTDIR)$(docdir)/html ; 	\
+	fi
 
-.gpl.eps:
-	gnuplot gpl2eps.gp $^ > $@
+uninstall-hook:
+	( cd $(DESTDIR)$(docdir) && rm -rf html )
 
-.gpl.pdf:
-	gnuplot gpl2eps.gp $^ | epstopdf -f > $@
+define do_extras
+	../src/gcx --options-doc > options.ltx
+	-echo '\begin{verbatim}' > cmdline.txt
+	../src/gcx --help 2>> cmdline.txt
+	-echo '\end{verbatim}' >> cmdline.txt
+	-echo '\begin{verbatim}' > repconv.txt
+	../src/gcx --help-rep-conv >> repconv.txt
+	-echo '\end{verbatim}' >> repconv.txt
 
-pictures: $(EPSPICT) $(PDFPICT)
-	touch pictures
+	for f in $(BASEPICTS); do 					\
+		gnuplot $(srcdir)/gpl2eps.gp $$f.gpl > $$f.eps ;	\
+		epstopdf $$f.eps > $$f.pdf ;				\
+	done
+endef
 
-options: ../src/gcx
-	../src/gcx --options-doc >options.ltx
-	echo '\begin{verbatim}' >cmdline.txt
-	../src/gcx --help 2>>cmdline.txt
-	echo '\end{verbatim}' >>cmdline.txt
-	echo '\begin{verbatim}' >repconv.txt
-	../src/gcx --help-rep-conv >>repconv.txt
-	echo '\end{verbatim}' >>repconv.txt
-	touch options
 
-gcx.pdf: gcx.ltx options pictures
-	pdflatex gcx.ltx
+gcx.dvi: gcx.ltx
+	$(do_extras)
+	while ( latex $(srcdir)/gcx.ltx ; \
+	        grep -q "Rerun to get cross-references right" gcx.log ) do true ; \
+	done
 
-gcx.dvi: gcx.ltx options pictures
-	latex gcx.ltx 
+# do these after the .dvi, so we have options, pictures, .aux and .toc
+gcx.pdf: gcx.ltx gcx.dvi
+	pdflatex $(srcdir)/gcx.ltx
 
-gcx.html: gcx.ltx options pictures
-	latex2html --split=3 --dir html --mkdir gcx.ltx
-	touch gcx.html
+html/index.html: gcx.ltx gcx.dvi
+	latex2html --split=3 --dir html --mkdir $(srcdir)/gcx.ltx
 
-clean:
-	rm -f *~ *.aux *.toc *.log *.eps *.dvi *.pdf
-	rm -f gcx.html options pictures
-	rm -rf html
+clean-local:
+	rm -f *~ *.aux *.toc *.log $(OPTFILES) $(EPS_PICTS) $(PDF_PICTS)
 
-distclean: clean
+distclean-local: clean-local
+
+realclean:
+	rm -rf gcx.dvi gcx.pdf html
 
