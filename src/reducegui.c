@@ -218,6 +218,9 @@ static void reduce_switch_accels (GtkNotebook *notebook, GtkWidget *page, int pa
 			gtk_window_remove_accel_group (GTK_WINDOW(window), accel_group);
 	}
 
+	/* workaround for gtk 2.20, where I don't know what's wrong with the page argument */
+	page = gtk_notebook_get_nth_page (notebook, page_num);
+
 	/* add current page accel group */
 	accel_group = g_object_get_data (G_OBJECT(page), "reduce-accel-group");
 	gtk_window_add_accel_group (GTK_WINDOW(window), accel_group);
