@@ -1,7 +1,7 @@
 #ifndef _IMGLIST_H_
 #define _IMGLIST_H_
 
-/* an image file we may or may not have already loaded into memory; 
+/* an image file we may or may not have already loaded into memory;
    we generally keep a GList of those around */
 
 struct image_file {
@@ -32,7 +32,7 @@ struct image_file {
 #define IMG_DIRTY 0x40000 /* image has unsaved changes */
 #define IMG_SKIP 0x80000 /* image has been marked to be skipped on processing */
 
-#define IMG_QUICKPHOT 0x100000			/* request only "quick" photometry, 
+#define IMG_QUICKPHOT 0x100000			/* request only "quick" photometry,
 						   rather than going to the mbds */
 
 /* not using 40_0000 and 80_0000 */
@@ -82,9 +82,9 @@ void image_file_list_release(struct image_file_list *imfl);
 
 int batch_reduce_frames(struct image_file_list *imfl, struct ccd_reduce *ccdr,
 			char *outf);
-int reduce_frames(struct image_file_list *imfl, struct ccd_reduce *ccdr, 
+int reduce_frames(struct image_file_list *imfl, struct ccd_reduce *ccdr,
 		   int (* progress)(char *msg, void *data), void *data);
-int ccd_reduce_imf(struct image_file *imf, struct ccd_reduce *ccdr, 
+int ccd_reduce_imf(struct image_file *imf, struct ccd_reduce *ccdr,
 		   int (* progress)(char *msg, void *data), void *data);
 int load_image_file(struct image_file *imf);
 int reduce_frame(struct image_file *imf, struct ccd_reduce *ccdr,
@@ -97,15 +97,15 @@ int save_image_file(struct image_file *imf, char *outf, int inplace, int *seq,
 		    int (* progress)(char *msg, void *data), void *data);
 
 int load_alignment_stars(struct ccd_reduce *ccdr);
-int align_imf(struct image_file *imf, struct ccd_reduce *ccdr, 
+int align_imf(struct image_file *imf, struct ccd_reduce *ccdr,
 	      int (* progress)(char *msg, void *data), void *data);
-int aphot_imf(struct image_file *imf, struct ccd_reduce *ccdr, 
+int aphot_imf(struct image_file *imf, struct ccd_reduce *ccdr,
 	      int (* progress)(char *msg, void *data), void *data);
 void free_alignment_stars(struct ccd_reduce *ccdr);
 
 /* from reducegui.h */
 
-void set_imfl_ccdr(gpointer window, struct ccd_reduce *ccdr, 
+void set_imfl_ccdr(gpointer window, struct ccd_reduce *ccdr,
 		   struct image_file_list *imfl);
 
 

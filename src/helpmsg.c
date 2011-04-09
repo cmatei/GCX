@@ -2,7 +2,7 @@
 
 #include "helpmsg.h"
 
-char help_bindings_page[] = 
+char help_bindings_page[] =
 "                       Image Navigation\n\n"
 "Middle click or space bar          Pan cursor\n"
 "'='                                Zoom in around cursor\n"
@@ -28,7 +28,7 @@ char help_bindings_page[] =
 "in the menus.\n"
 ;
 
-char help_usage_page[] = 
+char help_usage_page[] =
 "\ngcx version "VERSION"\n"
 "\nusage: gcx [options] [<fits file> ...]\n\n"
 "                       General options:\n"
@@ -65,9 +65,9 @@ char help_usage_page[] =
 "                                     with the --recipe option. Checks are made\n"
 "                                     for either positional or name duplicates.\n"
 "                                     Only stars brighter than mag_limit are\n"
-"                                     merged.\n" 
+"                                     merged.\n"
 "    --set-target                   Specify a target object to be merged into a\n"
-"                                     recipe file. It will also set the recipe\n" 
+"                                     recipe file. It will also set the recipe\n"
 "                                     object, ra and dec fields.\n"
 "    --make-tycho-rcp <radius>      Create a recipe file for the object specified\n"
 "                                     with --object using tycho2 stars in a box\n"
@@ -96,17 +96,18 @@ char help_usage_page[] =
 "                                     import and merge commands.\n"
 "\n"
 "                    CCD Reduction Options\n"
+"-e, --sextract <star_file>         Extract sources\n"
 "-d, --dark <dark_frame>            Set the dark frame / do dark subtraction\n"
 "-b, --bias <bias_frame>            Set the bias frame / do bias subtraction\n"
 "-f, --flat <flat_frame>            Set the flat field frame / flatfield\n"
-"-G, --gaussian-blur <fwhm >        Set blur FWHM / apply Gaussian blur\n" 
+"-G, --gaussian-blur <fwhm >        Set blur FWHM / apply Gaussian blur\n"
 "-a, --align <align_ref_frame>      Set the alignment reference frame\n"
 "                                      / align frames\n"
-/* "-B, --badpix <bad_pixel_file>      Set the bad pixels map file\n" */
+"-B, --badpix <bad_pixel_file>      Set the bad pixels map file\n"
 "-A, --add-bias <bias>              Set a constant bias to add to all frames\n"
-"                                      / add a bias to frames\n" 
-"-M, --multiply <multiplier>        Set a constant to multiply all frames with\n" 
-"                                      / multiply frames by a scalar\n" 
+"                                      / add a bias to frames\n"
+"-M, --multiply <multiplier>        Set a constant to multiply all frames with\n"
+"                                      / multiply frames by a scalar\n"
 "                                   Multiplication is performed before addition.\n"
 "-u, --update-file                  Save reduction results back to\n"
 "                                     the original files\n"
@@ -131,7 +132,7 @@ char help_usage_page[] =
 "    starts up in gui mode\n"
 ;
 
-char help_obscmd_page[] = 
+char help_obscmd_page[] =
 "             Observation Script Commands\n\n"
 "get              get and display an image without saving\n"
 "dark             get and display an dark frame without saving\n"
@@ -152,7 +153,7 @@ char help_obscmd_page[] =
 /*"mphot [<frames>] get, save and run photometry on a number of frames\n"*/
 ;
 
-char help_rep_conv_page[] = 
+char help_rep_conv_page[] =
 "             Report Converter Format String\n\n"
 "The report converter option converts the native gcx output to a\n"
 "fixed-width tabular format that is easy to import in other programs\n"

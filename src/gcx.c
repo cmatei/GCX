@@ -503,6 +503,41 @@ out_err:
 	exit(0);
 }
 
+int extract_sources(char *starf, char *outf)
+{
+	FILE *of = NULL;
+	struct image_file *imf;
+	struct sources *src;
+	int i;
+
+	imf = image_file_new();
+	imf->filename = strdup(starf);
+
+	if (load_image_file(imf) < 0)
+		exit(1);
+
+	src = new_sources(P_INT(SD_MAX_STARS));
+	extract_stars(imf->fr, NULL, 0, P_DBL(SD_SNR), src);
+
+	if (outf[0] != 0)
+		of = fopen(outf, "w");
+
+	if (of == NULL)
+		of = stdout;
+
+	for (i = 0; i < src->ns; i++) {
+		if (src->s[i].peak > P_DBL(AP_SATURATION))
+			continue;
+
+		fprintf(of, "%.2f %.2f %.2f\n",
+			src->s[i].x, src->s[i].y, src->s[i].flux);
+	}
+
+	fclose(of);
+
+	exit(0);
+}
+
 
 
 static struct ccd_frame *make_blank_obj_fr(char *obj)
@@ -559,6 +594,7 @@ int main(int ac, char **av)
 	char obj[1024] = ""; /* object */
 	char mband[1024] = ""; /* argument to mband */
 	char badpixf[1024] = ""; /* dark for badpix extraction */
+	char starf[1024] = ""; /* star list */
 	int to_pnm = 0;
 	int run_phot = 0;
 	int convert_recipe = 0;
@@ -568,6 +604,7 @@ int main(int ac, char **av)
 	int save_internal_cat = 0;
 	int update_files = 0;
 	int extract_badpix = 0;
+	int extract_stars = 0;
 	struct ccd_reduce *ccdr = NULL;
 	struct image_file_list *imfl = NULL; /* list of frames to load / process */
 	float mag_limit = 99.0; /* mag limit when generating rcp and cat files */
@@ -589,7 +626,7 @@ int main(int ac, char **av)
 
 	GtkWidget *window;
 
-	char *shortopts = "D:p:hP:V:vo:id:b:f:B:M:A:O:usa:T:S:nG:Nj:Fc";
+	char *shortopts = "D:p:hP:V:vo:id:b:f:B:M:A:O:usa:T:S:nG:Nj:FcX:e:";
 	struct option longopts[] = {
 		{"debug", required_argument, NULL, 'D'},
 		{"dark", required_argument, NULL, 'd'},
@@ -598,6 +635,8 @@ int main(int ac, char **av)
 
 		{"badpix", required_argument, NULL, 'B'},
 		{"extract-badpix", required_argument, NULL, 'X'},
+
+		{ "sextract", required_argument, NULL, 'e' },
 
 		{"add-bias", required_argument, NULL, 'A'},
 		{"multiply", required_argument, NULL, 'M'},
@@ -890,6 +929,11 @@ int main(int ac, char **av)
 			strncpy(badpixf, optarg, 1023);
 			break;
 
+		case 'e':
+			extract_stars = 1;
+			strncpy(starf, optarg, 1023);
+			break;
+
 		case 'c':
 			if (ccdr == NULL)
 				ccdr = ccd_reduce_new();
@@ -908,6 +952,10 @@ int main(int ac, char **av)
 
 	if (extract_badpix) {
 		extract_bad_pixels(badpixf, outf); /* does not return */
+	}
+
+	if (extract_stars) {
+		extract_sources(starf, outf); /* does not return */
 	}
 
 	if (mband[0] != 0) {
