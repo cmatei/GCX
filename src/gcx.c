@@ -529,8 +529,12 @@ int extract_sources(char *starf, char *outf)
 		if (src->s[i].peak > P_DBL(AP_SATURATION))
 			continue;
 
-		fprintf(of, "%.2f %.2f %.2f\n",
-			src->s[i].x, src->s[i].y, src->s[i].flux);
+		fprintf(of, "%.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n",
+			src->s[i].x, src->s[i].y,
+			src->s[i].flux, src->s[i].sky,
+			src->s[i].peak, src->s[i].starr,
+			src->s[i].fwhm,
+			src->s[i].fwhm_ec, src->s[i].fwhm_pa);
 	}
 
 	fclose(of);
