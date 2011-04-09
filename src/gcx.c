@@ -525,15 +525,16 @@ int extract_sources(char *starf, char *outf)
 	if (of == NULL)
 		of = stdout;
 
+	fprintf(of, "# X Y Flux FWHM AR Sky Peak EC PA\n");
 	for (i = 0; i < src->ns; i++) {
 		if (src->s[i].peak > P_DBL(AP_SATURATION))
 			continue;
 
-		fprintf(of, "%.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n",
+		fprintf(of, "%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\n",
 			src->s[i].x, src->s[i].y,
-			src->s[i].flux, src->s[i].sky,
-			src->s[i].peak, src->s[i].starr,
-			src->s[i].fwhm,
+			src->s[i].flux,	src->s[i].fwhm,
+			src->s[i].starr,
+			src->s[i].sky, src->s[i].peak,
 			src->s[i].fwhm_ec, src->s[i].fwhm_pa);
 	}
 
