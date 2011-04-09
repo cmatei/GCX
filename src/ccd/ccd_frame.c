@@ -270,7 +270,7 @@ void release_frame(struct ccd_frame *fr)
 int alloc_frame_data(struct ccd_frame *fr)
 {
 	if (!fr->dat) {
-		if ((fr->dat = malloc(fr->w * fr->h * fr->pix_size)) == NULL)
+		if ((fr->dat = malloc(fr->w * fr->h * sizeof(float))) == NULL)
 			return ERR_ALLOC;
 	}
 
@@ -281,17 +281,17 @@ int alloc_frame_data(struct ccd_frame *fr)
 int alloc_frame_rgb_data(struct ccd_frame *fr)
 {
 	if (!fr->rdat) {
-		if ((fr->rdat = malloc(fr->w * fr->h * fr->pix_size)) == NULL)
+		if ((fr->rdat = malloc(fr->w * fr->h * sizeof(float))) == NULL)
 			return ERR_ALLOC;
 	}
 
 	if (!fr->gdat) {
-		if ((fr->gdat = malloc(fr->w * fr->h * fr->pix_size)) == NULL)
+		if ((fr->gdat = malloc(fr->w * fr->h * sizeof(float))) == NULL)
 			return ERR_ALLOC;
 	}
 
 	if (!fr->bdat) {
-		if ((fr->bdat = malloc(fr->w * fr->h * fr->pix_size)) == NULL)
+		if ((fr->bdat = malloc(fr->w * fr->h * sizeof(float))) == NULL)
 			return ERR_ALLOC;
 	}
 
@@ -610,7 +610,7 @@ static struct ccd_frame *read_fits_file_generic(void *fp, char *fn, int force_un
 {
 	char lb[FITS_HCOLS + 1];
 	short v[FITS_HCOLS * FITS_HROWS / 2];
-	unsigned int fv[FITS_HCOLS * FITS_HROWS / 4];
+	unsigned int *fv = (unsigned int *) v;
 	int i, j, k, ef;
 	unsigned all, frame;
 	unsigned naxis;
@@ -635,7 +635,7 @@ static struct ccd_frame *read_fits_file_generic(void *fp, char *fn, int force_un
 			err_printf("read_fits_file_generic: error creating header\n");
 			return NULL;
 		}
-	for (i = 0; i < 20; i++)	{// at most 20 header blocks
+	for (i = 0; i < 50; i++)	{// at most 50 header blocks
 		for (j = 0; j < FITS_HROWS; j++) {	// 36 cards per block
 			for (k = 0; k < FITS_HCOLS; k++)	// chars per card
 				lb[k] = rd->fngetc(fp);

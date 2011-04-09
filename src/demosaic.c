@@ -391,7 +391,7 @@ int bayer_interpolate(struct ccd_frame *fr)
 {
 	int ret;
 
-	fr->rmeta.color_matrix = default_cfa[P_INT(FILE_DEFAULT_CFA)];
+	//fr->rmeta.color_matrix = default_cfa[P_INT(FILE_DEFAULT_CFA)];
 	if (! (fr->rmeta.color_matrix)) {
 		return 0;
 	}
