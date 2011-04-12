@@ -3690,7 +3690,7 @@ create_query_log_window (void)
 
   query_log_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   g_object_set_data (G_OBJECT (query_log_window), "query_log_window", query_log_window);
-  gtk_window_set_title (GTK_WINDOW (query_log_window), "Download Stars");
+  gtk_window_set_title (GTK_WINDOW (query_log_window), "Download");
   gtk_window_set_modal (GTK_WINDOW (query_log_window), TRUE);
   gtk_window_set_default_size (GTK_WINDOW (query_log_window), 500, 200);
 

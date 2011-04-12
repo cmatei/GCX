@@ -269,4 +269,7 @@ extern void act_stars_add_cds_ucac3 (GtkAction *action, gpointer window);
 extern void act_stars_add_cds_gsc2 (GtkAction *action, gpointer window);
 extern void act_stars_add_cds_usnob (GtkAction *action, gpointer window);
 
+/* skyview.c */
+extern void act_download_skyview (GtkAction *action, gpointer window);
+
 #endif

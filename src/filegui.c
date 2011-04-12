@@ -189,7 +189,7 @@ char *force_extension(char *fn, char *ext)
 /* path should be a malloced string (to which set_last_open */
 /* will hold a reference */
 
-static void set_last_open(gpointer object, char *file_class, char *path)
+void set_last_open(gpointer object, char *file_class, char *path)
 {
 	char *op;
 

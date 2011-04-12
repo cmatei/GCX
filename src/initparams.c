@@ -234,14 +234,14 @@ void init_ptable(void)
 	add_par_tree(PAR_SYNTH, PAR_NULL,
 		     "synth", "Synthetic Star Generation Options");
 	add_par_tree(PAR_QUERY, PAR_NULL,
-		     "query", "On-line Catalogs");
+		     "query", "On-line Resources");
 
 
 /* now leaves */
 /* leaves for query */
 	add_par_string(QUERY_VIZQUERY, PAR_QUERY, 0, "vizquery",
 		       "Vizquery command", "vizquery");
-	set_par_description(FILE_COMPRESS,
+	set_par_description(QUERY_VIZQUERY,
 			    "The command used to download catalog stars (normally "
 			    "vizquery from the cdstools package available from CDS. "
 			    "See file README.vizquery and the cds site for more details. "
@@ -258,6 +258,37 @@ void init_ptable(void)
 			    "in which we look for catalog stars. The "
 			    "actual radius depends on the frame size; this "
 			    "is a global limit. In minutes of arc.");
+
+	add_par_string(QUERY_WGET, PAR_QUERY, 0, "wget", "Wget command", "wget");
+	set_par_description(QUERY_WGET, "Path to the wget program.");
+
+	add_par_string(QUERY_SKYVIEW_RUNQUERY_URL, PAR_QUERY, 0, "skyview_runquery_url",
+		       "SkyView request URL",
+		       "http://skyview.gsfc.nasa.gov/cgi-bin/runquery.pl");
+	set_par_description(QUERY_SKYVIEW_RUNQUERY_URL,
+			    "The URL for the SkyView request form.");
+
+	add_par_string(QUERY_SKYVIEW_TEMPSPACE_URL, PAR_QUERY, 0, "skyview_tempspace_url",
+		       "SkyView result URL",
+		       "http://skyview.gsfc.nasa.gov/tempspace/fits/");
+	set_par_description(QUERY_SKYVIEW_TEMPSPACE_URL,
+			    "The URL for the SkyView result data directory. Gcx will "
+			    "look here for the file <resultname>.fits.");
+
+	add_par_string(QUERY_SKYVIEW_DIR, PAR_QUERY, 0, "skyview_dir",
+		       "SkyView download directory", "/tmp/");
+	set_par_description(QUERY_SKYVIEW_DIR,
+			    "Download directory for SkyView FITS files.");
+
+	add_par_int(QUERY_SKYVIEW_KEEPFILES, PAR_QUERY, FMT_BOOL, "skyview_keepfiles",
+		    "Keep downloaded SkyView files", 1);
+	set_par_description(QUERY_SKYVIEW_KEEPFILES,
+			    "Keep downloaded SkyView files.");
+
+	add_par_int(QUERY_SKYVIEW_PIXELS, PAR_QUERY, 0, "skyview_pixels",
+		    "SkyView image size in pixels", 800);
+	set_par_description(QUERY_SKYVIEW_PIXELS,
+			    "SkyView image size in pixels.");
 
 /* leaves for stardet */
 	add_par_double(SD_SNR, PAR_STAR_DET, PREC_1, "det_snr",

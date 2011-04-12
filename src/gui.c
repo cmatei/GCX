@@ -430,6 +430,7 @@ static GtkActionEntry image_actions[] = {
 	{ "file-export",          NULL, "_Export Image" },
 	{ "file-export-pnm8",     NULL, "_8-bit pnm",              NULL,         NULL, G_CALLBACK (act_file_export_pnm8) },
 	{ "file-export-pnm16",    NULL, "_16-bit pnm",             NULL,         NULL, G_CALLBACK (act_file_export_pnm16) },
+	{ "file-download-skyview", NULL, "_Download from SkyView", "<control>Y", NULL, G_CALLBACK (act_download_skyview) },
 	{ "recipe-open",          NULL, "Load _Recipe",            "R",          NULL, G_CALLBACK (act_recipe_open) },
 	{ "recipe-create",        NULL, "_Create Recipe",          NULL,         NULL, G_CALLBACK (act_recipe_create) },
 	{ "show-fits-header",     NULL, "Show Fits _Header...",    "<shift>H",   NULL, G_CALLBACK (act_show_fits_headers) },
@@ -543,6 +544,7 @@ static char *image_common_ui =
 	"	<menuitem name='8-bit pnm'  action='file-export-pnm8'/>"
 	"	<menuitem name='16-bit pnm' action='file-export-pnm16'/>"
 	"  </menu>"
+	"  <menuitem name='Download from SkyView' action='file-download-skyview'/>"
 	"  <separator name='separator1'/>"
 	"  <menuitem name='Load Recipe'   action='recipe-open'/>"
 	"  <menuitem name='Create Recipe' action='recipe-create'/>"

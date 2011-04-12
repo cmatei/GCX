@@ -117,7 +117,7 @@ typedef enum {
 	PAR_GUIDE,		/* guiding options */
 	PAR_MBAND,		/* multiframe reduction */
 	PAR_SYNTH,		/* synthetic star generation */
-	PAR_QUERY,		/* on-line catalog query */
+	PAR_QUERY,		/* on-line queries */
 
 /* leaves for stardet */
 	SD_SNR ,
@@ -362,6 +362,12 @@ typedef enum {
 	QUERY_VIZQUERY,
 	QUERY_MAX_RADIUS,
 	QUERY_MAX_STARS,
+	QUERY_WGET,
+	QUERY_SKYVIEW_RUNQUERY_URL,
+	QUERY_SKYVIEW_TEMPSPACE_URL,
+	QUERY_SKYVIEW_PIXELS,
+	QUERY_SKYVIEW_DIR,
+	QUERY_SKYVIEW_KEEPFILES,
 
 	PAR_TABLE_SIZE
 } GcxPar;
