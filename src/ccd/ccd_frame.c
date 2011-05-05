@@ -349,6 +349,8 @@ int frame_stats(struct ccd_frame *hd)
 	sum = 0.0;
 	sumsq = 0.0;
 
+	memset(hd->stats.avgs, 0, sizeof(hd->stats.avgs));
+
 // do the reading and calculate stats
 	all = hd->w * (hd->h);
 	min = max = get_pixel_luminence(hd, 0, 0);
@@ -380,6 +382,8 @@ int frame_stats(struct ccd_frame *hd)
 			}
 			sum += v;
 			sumsq += v * v;
+
+			hd->stats.avgs[y % 2 * 2 + x % 2] += v;
 		}
 	}
 
@@ -388,6 +392,12 @@ int frame_stats(struct ccd_frame *hd)
 	hd->stats.min = min;
 	hd->stats.max = max;
 	hd->stats.avg = sum / (1.0 * all);
+
+	hd->stats.avgs[0] = 4.0 * hd->stats.avgs[0] / (1.0 * all);
+	hd->stats.avgs[1] = 4.0 * hd->stats.avgs[1] / (1.0 * all);
+	hd->stats.avgs[2] = 4.0 * hd->stats.avgs[2] / (1.0 * all);
+	hd->stats.avgs[3] = 4.0 * hd->stats.avgs[3] / (1.0 * all);
+
 	hd->stats.sigma = sqrt(sumsq / (1.0 * all) - hd->stats.avg * hd->stats.avg);
 	hd->stats.hist.binmax = binmax;
 	hd->stats.hist.st = H_MIN - HIST_OFFSET;
@@ -824,7 +834,7 @@ static struct ccd_frame *read_fits_file_generic(void *fp, char *fn, int force_un
 //			data[j] = (r_data[j] + g_data[j] + b_data[j])/3;
 //		}
 		hd->magic |= FRAME_VALID_RGB;
-
+		hd->rmeta.color_matrix = 0;
 	}
 
 
@@ -1171,17 +1181,39 @@ int flat_frame(struct ccd_frame *fr, struct ccd_frame *fr1)
 		dp +=  xst + yst * fr->w;
 		dp1 += x1st + y1st * fr1->w;
 
-		for (y = 0; y < yovlap; y++) {
-			for (x = 0; x < xovlap; x++) {
-				if (*dp1 > ll)
-					*dp = *dp / *dp1 * mu;
-				else
-					*dp = *dp * MAX_FLAT_GAIN;
-				dp ++;
-				dp1 ++;
+		if (fr->rmeta.color_matrix) {
+			for (y = 0; y < yovlap; y++) {
+				for (x = 0; x < xovlap; x++) {
+
+					ll = fr1->stats.avgs[y % 2 * 2 + x % 2];
+					ll /= MAX_FLAT_GAIN;
+
+					if (*dp1 > ll)
+						*dp = *dp / *dp1 * fr->stats.avgs[y % 2 * 2 + x % 2];
+					else
+						*dp = *dp * MAX_FLAT_GAIN;
+
+					dp ++;
+					dp1 ++;
+				}
+				dp += fr->w - xovlap;
+				dp1 += fr1->w - xovlap;
 			}
-			dp += fr->w - xovlap;
-			dp1 += fr1->w - xovlap;
+		} else {
+			for (y = 0; y < yovlap; y++) {
+				for (x = 0; x < xovlap; x++) {
+					if (*dp1 > ll)
+						*dp = *dp / *dp1 * mu;
+					else
+						*dp = *dp * MAX_FLAT_GAIN;
+
+					dp ++;
+					dp1 ++;
+				}
+				dp += fr->w - xovlap;
+				dp1 += fr1->w - xovlap;
+			}
+
 		}
 	}
 	fr->stats.statsok = 0;

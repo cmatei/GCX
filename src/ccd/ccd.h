@@ -113,6 +113,7 @@ struct im_stats {
 	double cavg; 	// avg of center of population
 	double csigma;  // robust sigma estimate
 	double median;	// median of frame
+	double avgs[4];
 	struct im_histogram hist; // the histogram for the current image
 };
 
