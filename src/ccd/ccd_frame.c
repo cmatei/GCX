@@ -761,7 +761,7 @@ static struct ccd_frame *read_fits_file_generic(void *fp, char *fn, int force_un
 	while(j < all) {
 		k = rd->fnread (v, 1, FITS_HCOLS * FITS_HROWS, fp);
 		if (k != FITS_HCOLS * FITS_HROWS) {
-			err_printf("data is short!\n");
+			err_printf("data is short, got %d, expected %d!\n", k, FITS_HCOLS * FITS_HROWS);
 			break;
 		}
 		for(i = 0; i < ((FITS_HCOLS * FITS_HROWS) >> bytes_per_pixel) && j < all; i++) {

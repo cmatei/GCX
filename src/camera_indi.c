@@ -1,23 +1,23 @@
 /*******************************************************************************
   Copyright(c) 2009 Geoffrey Hausheer. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: gcx@phracturedblue.com <Geoffrey Hausheer>
 *******************************************************************************/
 
@@ -103,7 +103,7 @@ void camera_set_binning(struct camera_t *camera, int x, int y)
 	}
 	changed |= INDI_update_elem_if_changed(camera->binning_prop, "HOR_BIN", x);
 	changed |= INDI_update_elem_if_changed(camera->binning_prop, "VER_BIN", y);
-	if (changed) 
+	if (changed)
 		indi_send(camera->binning_prop, NULL);
 }
 
@@ -156,7 +156,7 @@ void camera_set_size(struct camera_t *camera, int width, int height, int x_offse
 	changed |= INDI_update_elem_if_changed(camera->frame_prop, "HEIGHT", height);
 	changed |= INDI_update_elem_if_changed(camera->frame_prop, "X",      x_offset);
 	changed |= INDI_update_elem_if_changed(camera->frame_prop, "Y",      y_offset);
-	if (changed) 
+	if (changed)
 		indi_send(camera->frame_prop, NULL);
 }
 
@@ -243,8 +243,8 @@ static void camera_connect(struct indi_prop_t *iprop, void *callback_data)
 		camera->has_blob = 1;
 		indi_prop_add_cb(iprop, (IndiPropCB)camera_capture_cb, camera);
 	}
-	else if (strcmp(iprop->name, "CCD_EXPOSURE") == 0) {
-		d4_printf("Found CCD_EXPOSURE for camera %s\n", iprop->idev->name);
+	else if (strcmp(iprop->name, "CCD_EXPOSURE_REQUEST") == 0) {
+		d4_printf("Found CCD_EXPOSURE_REQUEST for camera %s\n", iprop->idev->name);
 		camera->expose_prop = iprop;
 	}
 	else if (strcmp(iprop->name, "CCD_FRAME") == 0) {
@@ -282,7 +282,6 @@ void camera_set_ready_callback(void *window, int type, void *func, void *data)
 		return;
 	}
 	INDI_set_callback(INDI_COMMON (camera), CAMERA_CALLBACK_READY, func, data);
-
 }
 
 struct camera_t *camera_find(void *window, int type)

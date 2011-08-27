@@ -443,6 +443,11 @@ static int expose_cb(GtkWidget *window)
 			"guide.fit",
 		 	0,
 			NULL);
+
+		if (!fr) {
+			err_printf("Received an unreadable FITS from camera.");
+			return FALSE;
+		}
 		if (! get_named_checkb_val(GTK_WIDGET(window), "img_dark_checkb")) {
 			obs = (struct obs_data *)g_object_get_data(G_OBJECT(window), "obs_data");
 			ccd_frame_add_obs_info(fr, obs);

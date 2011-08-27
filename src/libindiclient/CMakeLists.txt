@@ -9,6 +9,9 @@ FIND_PACKAGE(wxWidgets)
 #gtk
 find_package(PkgConfig)
 
+
+find_package(ZLIB REQUIRED)
+
 set (common_SRCS
   ${CMAKE_SOURCE_DIR}/indi.c
   ${CMAKE_SOURCE_DIR}/lilxml.c
@@ -32,7 +35,7 @@ if (PKG_CONFIG_FOUND)
       ${CMAKE_SOURCE_DIR}/gtk/gtkled.c
       )
     add_executable(inditest_gtk ${inditest_gtk_SRCS})
-    target_link_libraries(inditest_gtk ${GTK_LIBRARIES})
+    target_link_libraries(inditest_gtk ${GTK_LIBRARIES} ${ZLIB_LIBRARIES})
 
   endif (GTK_FOUND)
 endif (PKG_CONFIG_FOUND)
@@ -52,6 +55,6 @@ if (wxWidgets_FOUND)
     ${CMAKE_SOURCE_DIR}/wx/indi_main.cpp
   )
   add_executable(inditest_wx ${inditest_wx_SRCS})
-  target_link_libraries(inditest_wx ${wxWidgets_LIBRARIES})
+  target_link_libraries(inditest_wx ${wxWidgets_LIBRARIES} ${ZLIB_LIBRARIES})
 endif(wxWidgets_FOUND)
 
