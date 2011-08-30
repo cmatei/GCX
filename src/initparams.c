@@ -1165,9 +1165,9 @@ void init_ptable(void)
 	add_par_string(INDI_SCOPE_PORT, PAR_INDI, 0, "scope_indi_port",
 		       "INDI port for telescope control", "/dev/ttyS0");
 	add_par_string(INDI_FWHEEL_NAME, PAR_INDI, 0, "fwheel_indi_name",
-		       "INDI name of Telescope", "Telescope Simulator");
+		       "INDI name of filter wheel", "Filter Wheel Simulator");
 	add_par_string(INDI_FWHEEL_PORT, PAR_INDI, 0, "fwheel_indi_port",
-		       "INDI port for telescope control", "/dev/ttyS0");
+		       "INDI port for filter wheel control", "/dev/ttyS0");
 
 	/* telescope control */
 	add_par_double(TELE_E_LIMIT, PAR_TELE, PREC_1, "elimit",

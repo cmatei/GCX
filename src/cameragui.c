@@ -238,19 +238,24 @@ static void maybe_save_frame(struct ccd_frame *fr, GtkWidget *dialog)
 		    && get_named_checkb_val(GTK_WIDGET(dialog), "file_match_wcs_checkb")
 		    && !get_named_checkb_val(GTK_WIDGET(dialog), "img_dark_checkb"))
 			match_field_in_window_quiet(imwin);
+
 		save_frame_auto_name(fr, dialog);
-/* restart exposure if needed */
+                /* restart exposure if needed */
 		if (P_INT(TELE_DITHER_ENABLE)) {
 			dither_move(dialog, P_DBL(TELE_DITHER_AMOUNT));
 		}
 		text = named_entry_text(dialog, "current_frame_entry");
 		seq = strtol(text, NULL, 10);
 		g_free(text);
+
+		d4_printf("Sequence %d\n", seq);
 		if (seq > 0) {
 			seq --;
 			if (seq > 0) {
-				if (capture_image(dialog))
+				if (capture_image(dialog)) {
 					seq = 0;
+					d4_printf("aborting sequence\n");
+				}
 			}
 			sprintf(mb, "%d", seq);
 			named_entry_set(dialog, "current_frame_entry", mb);

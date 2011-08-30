@@ -175,7 +175,7 @@ void camera_get_temperature(struct camera_t *camera, float *value, float *min, f
 		err_printf("Camera doesn't support temperature control\n");
 		return;
 	}
-	elem = indi_find_elem(camera->temp_prop, "CCD_TEMPERATURE_VALUE");
+	elem = indi_find_elem(camera->temp_prop, "CCD_TEMPERATURE_CURRENT_VALUE");
 	if (elem)
 	{
 		*value = elem->value.num.value;
@@ -259,8 +259,8 @@ static void camera_connect(struct indi_prop_t *iprop, void *callback_data)
 		d4_printf("Found CCD_BINNING for camera %s\n", iprop->idev->name);
 		camera->binning_prop = iprop;
 	}
-	else if (strcmp(iprop->name, "CCD_TEMPERATURE_VALUE") == 0) {
-		d4_printf("Found CCD_TEMPERATURE_VALUE for camera %s\n", iprop->idev->name);
+	else if (strcmp(iprop->name, "CCD_TEMPERATURE") == 0) {
+		d4_printf("Found CCD_TEMPERATURE for camera %s\n", iprop->idev->name);
 		camera->temp_prop = iprop;
 		indi_prop_add_cb(iprop, (IndiPropCB)camera_temp_change_cb, camera);
 	}
