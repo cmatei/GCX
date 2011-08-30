@@ -165,7 +165,7 @@ void camera_get_temperature(struct camera_t *camera, float *value, float *min, f
 	struct indi_elem_t *elem = NULL;
 
 	*value = 0;
-	*min = 0;
+	*min = -273;
 	*max = 99999;
 	if (! camera->ready) {
 		err_printf("Camera isn't ready.  Can't get temperature\n");
