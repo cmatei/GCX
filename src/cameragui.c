@@ -468,6 +468,7 @@ static int expose_cb(GtkWidget *window)
 		frame_stats(fr);
 		frame_to_channel(fr, main_window, "i_channel");
 		r = maybe_save_frame(fr, window);
+		release_frame(fr);
 	} else {
 		err_printf("Received unsupported image format: %s\n", camera->image_format);
 	}
