@@ -224,7 +224,7 @@ static void scope_dither_cb( GtkWidget *widget, gpointer data )
 
 /* see if we need to save the frame and save it if we do; update names and
  * start the next frame if required */
-static void maybe_save_frame(struct ccd_frame *fr, GtkWidget *dialog)
+static int maybe_save_frame(struct ccd_frame *fr, GtkWidget *dialog)
 {
 	GtkWidget *togb, *imwin;
 	char mb[1024];
@@ -262,13 +262,20 @@ static void maybe_save_frame(struct ccd_frame *fr, GtkWidget *dialog)
 		}
 		if (seq == 0) {
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(togb), 0);
+			return FALSE;
 		}
-		return;
+
+		/* don't remove the callback, wait for next exposure */
+		return TRUE;
 	}
 	togb = g_object_get_data(G_OBJECT(dialog), "img_focus_button");
 	if (togb != NULL && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(togb))) {
 		capture_image(dialog);
+
+		return TRUE;
 	}
+
+	return FALSE;
 }
 
 static void set_filter_list(GtkWidget *dialog, struct fwheel_t *fw)
@@ -433,6 +440,7 @@ static int expose_cb(GtkWidget *window)
 	struct camera_t *camera;
 	struct ccd_frame *fr;
 	struct obs_data *obs;
+	int r = FALSE;
 
 	main_window = g_object_get_data(G_OBJECT(window), "image_window");
 	camera = camera_find(main_window, CAMERA_MAIN);
@@ -459,14 +467,16 @@ static int expose_cb(GtkWidget *window)
 		}
 		frame_stats(fr);
 		frame_to_channel(fr, main_window, "i_channel");
-		maybe_save_frame(fr, window);
+		r = maybe_save_frame(fr, window);
 	} else {
 		err_printf("Received unsupported image format: %s\n", camera->image_format);
 	}
+
 	//fwheel_poll(dialog);
 	//obs_list_sm(dialog);
-	//Return FALSE to remove the callback event
-	return FALSE;
+
+	// FALSE will remove the callback event
+	return r;
 }
 
 /* called when the temp setpoint is changed */
