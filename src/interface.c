@@ -539,7 +539,7 @@ create_camera_control (void)
   gtk_combo_box_append_text(GTK_COMBO_BOX (img_bin_combo), "4x4");
   gtk_combo_box_set_active(GTK_COMBO_BOX (img_bin_combo), 0);
 
-  img_exp_spin_adj = gtk_adjustment_new (1, 0, 3600, 1, 10, 0);
+  img_exp_spin_adj = gtk_adjustment_new (1, 0, 3600, 0.01, 10, 0);
   img_exp_spin = gtk_spin_button_new (GTK_ADJUSTMENT (img_exp_spin_adj), 1, 2);
   g_object_ref (img_exp_spin);
   g_object_set_data_full (G_OBJECT (camera_control), "img_exp_spin", img_exp_spin,
