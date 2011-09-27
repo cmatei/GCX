@@ -186,9 +186,9 @@ static int find_index(const char *tycho, // same as above, the files of the cata
 	int minrai, maxrai, mindeci, maxdeci, rail, decil;
 	int ret;
 
-	d4_printf("dec %.3f/%.3f (%.3f) ra: %.3f/%.3f (%.3f)\n", 
+	d4_printf("dec %.3f/%.3f (%.3f) ra: %.3f/%.3f (%.3f)\n",
 		  mindec, maxdec, maxdec-mindec, minra, maxra, maxra-minra);
-  
+
 	raf = fopen(raixx, "r");
 	if (raf==NULL) {
 		err_printf("Can't open ra index index for read\n");
@@ -267,19 +267,24 @@ static int find_index(const char *tycho, // same as above, the files of the cata
 	dj=0;
 	i = 0;  // index in the output vector
 	while((rj<rail) && (dj<decil) && (i<retsize)) {
-		if(rai[rj].offs<deci[dj].offs)
+		if(rai[rj].offs<deci[dj].offs) {
 			rj++;
-		if(rai[rj].offs>deci[dj].offs)
+			continue;
+		}
+
+		if(rai[rj].offs>deci[dj].offs) {
 			dj++;
+			continue;
+		}
 		if(rai[rj].offs==deci[dj].offs) {
 			if ((rai[rj].param>=minra) && (rai[rj].param<=maxra) &&
-			    (deci[dj].param>=mindec) && (deci[dj].param<=maxdec)) 
+			    (deci[dj].param>=mindec) && (deci[dj].param<=maxdec))
 				retvals[i++] = rai[rj].offs;
 			rj++;
 			dj++;
 		}
 	}
-  
+
 	free(rai);
 	free(deci);
 	return i;
@@ -297,11 +302,11 @@ static int file_readable(char *name)
 	return 1;
 }
 
-/* search tycho2 stars in a wxh box (degrees) centerd on ra,dec. Fill the 
- * buf with zero-terminated ascii records from the file. Return 
+/* search tycho2 stars in a wxh box (degrees) centerd on ra,dec. Fill the
+ * buf with zero-terminated ascii records from the file. Return
  * the number of record read, or a negative error */
 /* path is the full pathname to the tycho2 catalog file */
-int tycho2_search(double ra, double dec, double w, double h, 
+int tycho2_search(double ra, double dec, double w, double h,
 		  char *buf, int sz, char *path)
 {
 	long rets[CAT_GET_SIZE];
@@ -341,16 +346,16 @@ int tycho2_search(double ra, double dec, double w, double h,
 
 
 	retl = find_index(path, raix, decix, raixx, decixx,
-			  ra-w/2 >= 0 ? ra-w/2 : 0, 
-			  ra+w/2 < 360.0 ? ra+w/2 : 360.0, 
-			  dec-h/2 > -90.0 ? dec-h/2 : -90.0, 
-			  dec+h/2 < 90.0 ? dec+h/2 : 90.0, 
+			  ra-w/2 >= 0 ? ra-w/2 : 0,
+			  ra+w/2 < 360.0 ? ra+w/2 : 360.0,
+			  dec-h/2 > -90.0 ? dec-h/2 : -90.0,
+			  dec+h/2 < 90.0 ? dec+h/2 : 90.0,
 			  CAT_GET_SIZE, rets);
 
 	d4_printf("find index returns: %d\n", retl);
 
   	i = 0;
-	while (!feof(tf) && i < retl && sz > TYCRECSZ + 1) {  
+	while (!feof(tf) && i < retl && sz > TYCRECSZ + 1) {
 		fseek(tf, TYCRECSZ*rets[i], SEEK_SET);
 		if (fread(buf, 1, TYCRECSZ, tf) < TYCRECSZ)
 			break;
