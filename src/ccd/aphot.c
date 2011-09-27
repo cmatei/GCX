@@ -1,23 +1,23 @@
 /*******************************************************************************
   Copyright(c) 2000 - 2003 Radu Corlan. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: radu@corlan.net
 *******************************************************************************/
 
@@ -39,7 +39,7 @@
 
 
 /* compute the average and median of the k-s clipped histogram */
-double hist_clip_avg(struct rstats *rs, double *median, double sigmas, 
+double hist_clip_avg(struct rstats *rs, double *median, double sigmas,
 		     double *lclip, double *hclip)
 {
 	int ix, it=0;
@@ -83,13 +83,13 @@ double hist_clip_avg(struct rstats *rs, double *median, double sigmas,
 		d4_printf("hist clip: [%d %d] (m=%.1f s=%.1f)\n", s+H_START, e+H_START,
 			  m, s2);
 		it ++;
-	
+
 	} while (it < 10 && (it == 1 || fabs(so - s2) > 0.00001) && (s != e));
 
-	if (s == e) 
+	if (s == e)
 		m = s + H_START;
 	if (median) {
-		if (s == e) 
+		if (s == e)
 			*median = s + H_START;
 		iy = 0;
 		for (ix = s; ix < e; ix++) { /* get the median */
@@ -121,9 +121,9 @@ nullhist:
 
 // compute ring statistics between r1 and r2; ring has the origin at x, y;
 // values lower than min or larger than max are skipped
-// quads contains a bitfield enabling the measurement of quadrants; bit 0 is Q0 (dx>=0,dy>=0), 
-// bit 1 is Q1 (dx<0, dy>=0) etc. 
-int ring_stats(struct ccd_frame *fr, double x, double y, 
+// quads contains a bitfield enabling the measurement of quadrants; bit 0 is Q0 (dx>=0,dy>=0),
+// bit 1 is Q1 (dx<0, dy>=0) etc.
+int ring_stats(struct ccd_frame *fr, double x, double y,
 	       double r1, double r2, int quads, struct rstats *rs,
 	       double min, double max)
 {
@@ -141,12 +141,12 @@ int ring_stats(struct ccd_frame *fr, double x, double y,
 // flux measurement
 
 	xc = (int)floor(x+0.5);
-	yc = (int)floor(y+0.5); 
+	yc = (int)floor(y+0.5);
 
-	xs = (int)(xc-r2); 
-	xe = (int)(xc+r2+1); 
-	ys = (int)(yc-r2); 
-	ye = (int)(yc+r2+1); 
+	xs = (int)(xc-r2);
+	xe = (int)(xc+r2+1);
+	ys = (int)(yc-r2);
+	ye = (int)(yc+r2+1);
 	w = fr->w;
 
 	if (xs < 0)
@@ -176,10 +176,10 @@ int ring_stats(struct ccd_frame *fr, double x, double y,
 	rs->max = -HUGE;
 	for (iy = ys; iy < ye; iy++) {
 		for (ix = xs; ix < xe; ix++) {
-			v = get_pixel_luminence(fr, ix, iy);
-			if (((r = sqr(ix - xc + 0.0) + sqr(iy - yc + 0.0)) 
-			     < sqr(r1) || r >= sqr(r2)))
+			r = sqr(ix - xc + 0.0) + sqr(iy - yc + 0.0);
+			if (r < sqr(r1) || r >= sqr(r2))
 				continue;
+
 			if (((quads & QUAD1) == 0) && ix-xc >= 0 && iy-yc >= 0)
 				continue;
 			if (((quads & QUAD2) == 0) && ix-xc < 0 && iy-yc >= 0)
@@ -188,8 +188,10 @@ int ring_stats(struct ccd_frame *fr, double x, double y,
 				continue;
 			if (((quads & QUAD4) == 0) && ix-xc >= 0 && iy-yc < 0)
 				continue;
+
 			nring ++;
-			if (v < H_START || v > H_START+H_SIZE) {
+			v = get_pixel_luminence(fr, ix, iy);
+			if (v < H_START || v >= H_START+H_SIZE) {
 				nskipped ++;
 				continue;
 			}
@@ -200,12 +202,16 @@ int ring_stats(struct ccd_frame *fr, double x, double y,
 			rs->h[(int)floor(v) - H_START] ++;
 			sum += v;
 			sumsq += v*v;
-			if (v < rs->min) 
+			if (v < rs->min)
 				rs->min = v;
-			if (v > rs->max) 
+			if (v > rs->max)
 				rs->max = v;
 		}
 	}
+
+	if (nring - nskipped <= 0)
+		return -1;
+
 // fill the result structure with the stats
 	rs->all = nring;
 	rs->used = nring - nskipped;
@@ -222,14 +228,14 @@ int ring_stats(struct ccd_frame *fr, double x, double y,
 	}
 //	d3_printf("ix = %d iy = %d\n", ix, iy);
 	rs->median = ix + H_START;
-	d3_printf("ringstats avg:%.2f sum:%.2f sigma%.2f, min%.2f max%.2f\n", 
-		  rs->avg, rs->sum, rs->sigma, rs->min, rs->max); 
+	d3_printf("ringstats avg:%.2f sum:%.2f sigma:%.2f, min:%.2f max:%.2f\n",
+		  rs->avg, rs->sum, rs->sigma, rs->min, rs->max);
 	return 0;
 }
 
-// get the sky value and error; we assume that the star position 
+// get the sky value and error; we assume that the star position
 // has been checked against the edges
-static int ap_get_sky(struct ccd_frame *fr, struct star *s, 
+static int ap_get_sky(struct ccd_frame *fr, struct star *s,
 	       struct ap_params *p, struct bad_pix_map *bp)
 {
 	struct rstats rs;
@@ -258,7 +264,7 @@ static int ap_get_sky(struct ccd_frame *fr, struct star *s,
 		mean = hist_clip_avg(&rs, &median, p->sigmas, NULL, NULL);
 		if (mean > median)
 			s->aph.sky = 3 * median - 2 * mean;
-		else 
+		else
 			s->aph.sky = (median + mean) / 2;
 		d4_printf("med %.3f, mean %.3f\n", median, mean);
 		break;
@@ -286,7 +292,7 @@ static int ap_get_sky(struct ccd_frame *fr, struct star *s,
 
 /* calculate total flux inside an aperture of radius r centered on x, y;
  * update min, max, npix */
-static double aperture_flux(struct ccd_frame *fr, double r, double x, double y, 
+static double aperture_flux(struct ccd_frame *fr, double r, double x, double y,
 			    double *minv, double *maxv, double *npix, double *ssq)
 {
 	int ix, iy;
@@ -304,12 +310,12 @@ static double aperture_flux(struct ccd_frame *fr, double r, double x, double y,
 // flux measurement
 
 	xc = (int)floor(x+0.5);
-	yc = (int)floor(y+0.5); 
+	yc = (int)floor(y+0.5);
 
-	xs = (int)(xc-r); 
-	xe = (int)(xc+r+1); 
-	ys = (int)(yc-r); 
-	ye = (int)(yc+r+1); 
+	xs = (int)(xc-r);
+	xe = (int)(xc+r+1);
+	ys = (int)(yc-r);
+	ye = (int)(yc+r+1);
 	w = fr->w;
 
 	if (xs < 0)
@@ -334,13 +340,13 @@ static double aperture_flux(struct ccd_frame *fr, double r, double x, double y,
 				we = 0.0;
 			else if (d < r - 0.5)
 				we = 1.0;
-			else 
+			else
 				we = r + 0.5 - d;
 			sum += v * we;
 			sumsq += sqr(v * we);
-			if (v < min && we > 0.5) 
+			if (v < min && we > 0.5)
 				min = v;
-			if (v > max && we > 0.5) 
+			if (v > max && we > 0.5)
 				max = v;
 			n += we;
 		}
@@ -357,10 +363,10 @@ static double aperture_flux(struct ccd_frame *fr, double r, double x, double y,
 	return sum;
 }
 
-/* calculate the centroid inside the aperture, using only pixels above 
+/* calculate the centroid inside the aperture, using only pixels above
    threshold; return total flux above threshold */
-static double aperture_centroid(struct ccd_frame *fr, double r, double x, double y, 
-				double threshold, double *cx, double *cy, 
+static double aperture_centroid(struct ccd_frame *fr, double r, double x, double y,
+				double threshold, double *cx, double *cy,
 				double *cxerr, double *cyerr)
 {
 	int ix, iy;
@@ -374,12 +380,12 @@ static double aperture_centroid(struct ccd_frame *fr, double r, double x, double
 	double n, d, we;
 
 	xc = (int)floor(x+0.5);
-	yc = (int)floor(y+0.5); 
+	yc = (int)floor(y+0.5);
 
-	xs = (int)(xc-r); 
-	xe = (int)(xc+r+1); 
-	ys = (int)(yc-r); 
-	ye = (int)(yc+r+1); 
+	xs = (int)(xc-r);
+	xe = (int)(xc+r+1);
+	ys = (int)(yc-r);
+	ye = (int)(yc+r+1);
 	w = fr->w;
 
 	if (xs < 0)
@@ -403,7 +409,7 @@ static double aperture_centroid(struct ccd_frame *fr, double r, double x, double
 				we = 0.0;
 			else if (d < r - 0.5)
 				we = 1.0;
-			else 
+			else
 				we = r + 0.5 - d;
 			if (v > threshold) {
 				sum += (v - threshold) * we;
@@ -448,17 +454,17 @@ static double aperture_centroid(struct ccd_frame *fr, double r, double x, double
 
 
 // get the star flux
-static int ap_get_star(struct ccd_frame *fr, struct star *s, 
+static int ap_get_star(struct ccd_frame *fr, struct star *s,
 	       struct ap_params *p, struct bad_pix_map *bp)
 {
 	double phn, flnsq, fsq;
 
 
-	s->aph.tflux = aperture_flux(fr, p->r1, s->x, s->y, 
-				     &s->aph.star_min, &s->aph.star_max, 
+	s->aph.tflux = aperture_flux(fr, p->r1, s->x, s->y,
+				     &s->aph.star_min, &s->aph.star_max,
 				     &s->aph.star_all, &fsq);
 
-	phn = sqrt(fabs(s->aph.tflux - fr->exp.bias * s->aph.star_all) 
+	phn = sqrt(fabs(s->aph.tflux - fr->exp.bias * s->aph.star_all)
 		   * fr->exp.scale) / fr->exp.scale; // total photon shot noise
 	flnsq = sqr(fr->exp.flat_noise) * (fsq);
 	s->aph.flux_err = sqrt((sqr(fr->exp.rdnoise) * s->aph.star_all + sqr(phn) + flnsq));
@@ -468,7 +474,7 @@ static int ap_get_star(struct ccd_frame *fr, struct star *s,
 		s->aph.flags |= AP_BURNOUT;
 	else if (s->aph.star_max > p->sat_limit / 2)
 		s->aph.flags |= AP_BRIGHT;
-//	d3_printf("flux %.4g pixels %.3f pshotn %.4f fluxerr %.4f flat %.4f\n", s->aph.tflux, 
+//	d3_printf("flux %.4g pixels %.3f pshotn %.4f fluxerr %.4f flat %.4f\n", s->aph.tflux,
 //		  s->aph.star_all, phn, s->aph.flux_err, sqrt(flnsq));
 	return 0;
 
@@ -478,7 +484,7 @@ static int ap_get_star(struct ccd_frame *fr, struct star *s,
 // do aperture photometry for star s; star image coordinates are taken from s. The function
 // fills up the results in s. If an error (!= 0) is returned, the values in s are undefined.
 // the bad pix map is used for flagging possible data errors due to the presence of bad pixels
-int aperture_photometry(struct ccd_frame *fr, struct star *s, 
+int aperture_photometry(struct ccd_frame *fr, struct star *s,
 			struct ap_params *p, struct bad_pix_map *bp)
 {
 	double rm;
@@ -502,8 +508,8 @@ int aperture_photometry(struct ccd_frame *fr, struct star *s,
 
 	if (p->center) {
 		for (i=0; i< 10; i++) {
-			rm = aperture_centroid(fr, p->r1, s->x, s->y, 
-					       s->aph.sky + 2 * fr->stats.csigma, &cx, &cy, 
+			rm = aperture_centroid(fr, p->r1, s->x, s->y,
+					       s->aph.sky + 2 * fr->stats.csigma, &cx, &cy,
 					       &cxerr, &cyerr);
 			if (fabs(cx - s->x) < 0.0001 && fabs(cx - s->x) < 0.0001)
 				break;
@@ -527,7 +533,7 @@ int aperture_photometry(struct ccd_frame *fr, struct star *s,
 		return ret;
 
 
-	d4_printf("r1=%.1f, star+sky=%.5f sky=%.5f, flux=%.5f\n", 
+	d4_printf("r1=%.1f, star+sky=%.5f sky=%.5f, flux=%.5f\n",
 		  p->r1,
 		  s->aph.tflux, s->aph.star_all * s->aph.sky,
 		  s->aph.tflux - s->aph.star_all * s->aph.sky);
@@ -538,9 +544,9 @@ int aperture_photometry(struct ccd_frame *fr, struct star *s,
 	s->aph.star_err = sqrt(sqr(s->aph.flux_err) + sqr(s->aph.star_all * s->aph.sky_err));
 
 
-	if (cxerr < BIG_ERR && rm > 1) 
+	if (cxerr < BIG_ERR && rm > 1)
 		s->xerr = cxerr * sqrt(rm) * s->aph.star_err / s->aph.star;
-	if (cyerr < BIG_ERR && rm > 1) 
+	if (cyerr < BIG_ERR && rm > 1)
 		s->yerr = cyerr * sqrt(rm) * s->aph.star_err / s->aph.star;
 
 
@@ -557,10 +563,10 @@ int aperture_photometry(struct ccd_frame *fr, struct star *s,
 // compute limiting magnitude as the magnitude at which the SNR = 1
 	skn = sqr(s->aph.star_all * s->aph.sky_err);
 	rdn = s->aph.star_all * sqr(fr->exp.rdnoise);
-//	d3_printf("mag: %.4g; star error before log: %.3f\n", s->aph.star, 
+//	d3_printf("mag: %.4g; star error before log: %.3f\n", s->aph.star,
 //		  s->aph.star_err / s->aph.star);
 // temporary magerr that doesn't include scintillation
-	s->aph.magerr = fabs(flux_to_absmag(s->aph.star + s->aph.star_err) 
+	s->aph.magerr = fabs(flux_to_absmag(s->aph.star + s->aph.star_err)
 		- flux_to_absmag(s->aph.star));
 	s->aph.flags |= AP_MEASURED;
 	return 0;
@@ -572,7 +578,7 @@ double flux_to_absmag(double flux)
 	return -2.5*log10(flux);
 }
 
-// compute flux from absolute magnitude 
+// compute flux from absolute magnitude
 double absmag_to_flux(double mag)
 {
 	return pow(10, -mag / 2.5);
@@ -583,8 +589,8 @@ double absmag_to_flux(double mag)
 static void print_star_results(struct ph_star *s)
 {
 	info_printf("imag:%8.3f err:%8.3f\n", s->absmag, s->magerr);
-	info_printf("Sky pixels:%f used:%f value:%.2f error:%.2f\n", 
-		    s->sky_all, s->sky_used, s->sky, s->sky_err); 
+	info_printf("Sky pixels:%f used:%f value:%.2f error:%.2f\n",
+		    s->sky_all, s->sky_used, s->sky, s->sky_err);
 	info_printf("Star pixels:%f tflux:%.2f flux:%.2f err:%.2f mag:%.2f\n",
 		    s->star_all, s->tflux, s->star, s->star_err, s->absmag);
 	info_printf("Star min:%.2f max:%.2f flags:%x\n",
@@ -658,7 +664,7 @@ double scint_noise(struct ccd_frame *fr, struct vs_recipy *vs)
 }
 
 
-// max shift of a star from the std position 
+// max shift of a star from the std position
 #define MAX_SHIFT 3
 // measure the stars in a recipy; return 0 if no error occured
 int measure_stars(struct ccd_frame *fr, struct vs_recipy *vs)
@@ -677,9 +683,9 @@ int measure_stars(struct ccd_frame *fr, struct vs_recipy *vs)
 	for(i = 0; i < vs->cnt; i++) {
 		s = &(vs->s[i]);
 		if (vs->usewcs) {
-			xypix(s->ra, s->dec, fr->fim.xref, fr->fim.yref, 
+			xypix(s->ra, s->dec, fr->fim.xref, fr->fim.yref,
 
-			      fr->fim.xrefpix, fr->fim.yrefpix, fr->fim.xinc, 
+			      fr->fim.xrefpix, fr->fim.yrefpix, fr->fim.xinc,
 			      fr->fim.yinc, fr->fim.rot,
 			      "-TAN", &s->x, &s->y);
 			info_printf("Star near %.1f %.1f ", s->x, s->y);
@@ -742,7 +748,7 @@ void get_ph_solution(struct vs_recipy *vs)
 			vs->s[i].aph.stdmag = vs->s[i].aph.absmag + std_cal;
 			vs->s[i].aph.magerr = sqrt(sqr(vs->s[i].aph.magerr) + sqr(std_cal_err));
 		} else {
-			vs->s[i].aph.residual = vs->s[i].aph.absmag 
+			vs->s[i].aph.residual = vs->s[i].aph.absmag
 				+ std_cal - vs->s[i].aph.stdmag;
 		}
 	}

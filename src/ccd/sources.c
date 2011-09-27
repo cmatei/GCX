@@ -1,23 +1,23 @@
 /*******************************************************************************
   Copyright(c) 2000 - 2003 Radu Corlan. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: radu@corlan.net
 *******************************************************************************/
 
@@ -39,7 +39,7 @@
 
 // parameters for source extraction
 #define	MAXSR		50		// max star radius
-#define	MINSR		2		// min star radius 
+#define	MINSR		2		// min star radius
 #define	SKYR		2		// measure sky @ starr
 #define	MINSEP		3		// min star separation
 #define	NWALK		8		// n pixels surrounding a pixel
@@ -54,7 +54,7 @@
 
 // compute ring statistics of pixels in the r1-radius ring that has the center at x, y;
 // values lower than min or larger than max are skipped
-static int thin_ring_stats(struct ccd_frame *fr, int x, int y, 
+static int thin_ring_stats(struct ccd_frame *fr, int x, int y,
 		int r2, struct rstats *rs, double min, double max)
 {
 	int ix, iy;
@@ -74,13 +74,13 @@ static int thin_ring_stats(struct ccd_frame *fr, int x, int y,
 
 
 	xc = x;
-	yc = y; 
+	yc = y;
 
 
-	xs = (xc-r2); 
-	xe = (xc+r2+1); 
-	ys = (yc-r2); 
-	ye = (yc+r2+1); 
+	xs = (xc-r2);
+	xe = (xc+r2+1);
+	ys = (yc-r2);
+	ye = (yc+r2+1);
 	w = fr->w;
 
 	if (xs < 0)
@@ -105,7 +105,7 @@ static int thin_ring_stats(struct ccd_frame *fr, int x, int y,
 		dy2 = (iy - yc) * (iy - yc);
 		for (ix = xs; ix < xe; ix++) {
 			v = get_pixel_luminence(fr, ix, iy);
-			if (((r = (ix - xc) * (ix - xc) + dy2)) 
+			if (((r = (ix - xc) * (ix - xc) + dy2))
 			    < rsq1 || r > rsq2)
 				continue;
 			if (v < min || v > max) {
@@ -116,7 +116,7 @@ static int thin_ring_stats(struct ccd_frame *fr, int x, int y,
 				ring[nring++] = v;
 			sum += v;
 			sumsq += v*v;
-			if (v < rs->min) 
+			if (v < rs->min)
 				rs->min = v;
 			if (v > rs->max) {
 				rs->max = v;
@@ -134,15 +134,15 @@ static int thin_ring_stats(struct ccd_frame *fr, int x, int y,
 	rs->avg = sum / rs->used;
 	rs->sigma = sqrt(sumsq / rs->used - sqr(sum / rs->used));
 	rs->median = dmedian(ring, nring);
-//	d3_printf("thinrs x:%d y:%d r:%d avg:%.2f sum:%.2f sigma%.2f, min%.2f max%.2f\n", 
+//	d3_printf("thinrs x:%d y:%d r:%d avg:%.2f sum:%.2f sigma%.2f, min%.2f max%.2f\n",
 //		  x, y, r2,
-//		  rs->avg, rs->sum, rs->sigma, rs->min, rs->max); 
+//		  rs->avg, rs->sum, rs->sigma, rs->min, rs->max);
 	return 0;
 }
 
 // compute moments of disk of radius r
 // only pixels larger than sky are considered
-static int star_moments(struct ccd_frame *fr, double x, double y, 
+static int star_moments(struct ccd_frame *fr, double x, double y,
 		double r, double sky, struct moments *m)
 {
 	int ix, iy;
@@ -161,12 +161,12 @@ static int star_moments(struct ccd_frame *fr, double x, double y,
 // flux measurement
 
 	xc = (int)floor(x+0.5);
-	yc = (int)floor(y+0.5); 
+	yc = (int)floor(y+0.5);
 
-	xs = (int)(xc-r); 
-	xe = (int)(xc+r+1); 
-	ys = (int)(yc-r); 
-	ye = (int)(yc+r+1); 
+	xs = (int)(xc-r);
+	xe = (int)(xc+r+1);
+	ys = (int)(yc-r);
+	ye = (int)(yc+r+1);
 	w = fr->w;
 
 	if (xs < 0)
@@ -249,7 +249,7 @@ static int moments_to_ecc(struct moments *m, double *pa, double *ecc)
 
 	if (m->mx2 + m->my2 == 0)	// 'null' star
 		return -1;
-	if (m->mx2 != m->my2) { 
+	if (m->mx2 != m->my2) {
 		tg2a = - 2 * m->mxy / (m->mx2 - m->my2);
 		a = 0.5 * atan(tg2a);
 	} else { //we have a round star, make angle = 0
@@ -276,7 +276,7 @@ static int moments_to_ecc(struct moments *m, double *pa, double *ecc)
 }
 
 // search for the edge of the 'star' image; sky is an estimate of the
-// background near the star. 
+// background near the star.
 // returns the star radius, or a negative value if found to be an improper
 // star
 static int star_radius(struct ccd_frame *fr, int x, int y, double peak, double sky, double *fwhm)
@@ -300,7 +300,7 @@ static int star_radius(struct ccd_frame *fr, int x, int y, double peak, double s
 	hm = (peak - sky) / 2 + sky;
 	bhf = peak;
 	for (rn = 1; rn < MAXSR; rn++) {
-		thin_ring_stats(fr, x, y, rn, rsn, -HUGE, HUGE); 
+		thin_ring_stats(fr, x, y, rn, rsn, -HUGE, HUGE);
 /*		if (rsn->max >= BURN) {
 			d4_printf("burnt out\n");
 			free(rsn);
@@ -322,11 +322,11 @@ static int star_radius(struct ccd_frame *fr, int x, int y, double peak, double s
 
 // search for the star edge
 		if (rsn->max > lmax && (peak - lmax) > mindip) {
-			starr = rn; 
+			starr = rn;
 			break;
 		}
 		lmax = rsn->max;
-	}			
+	}
 // see if we found the edge before reaching MAXSR
 	if (rn == MAXSR) {
 		d4_printf("MAXSR reached\n");
@@ -341,18 +341,18 @@ static int star_radius(struct ccd_frame *fr, int x, int y, double peak, double s
 	d4_printf(" starr is %d\n", starr);
 
 	*fwhm = (2.0 * bhr + 1.0) + (bhf - hm) / (bhf - ahf);
-//	d4_printf("FWHM= %.1f + %.1f\n", (2.0 * bhr + 1.0), (bhf - hm) / (bhf - ahf)); 
+//	d4_printf("FWHM= %.1f + %.1f\n", (2.0 * bhr + 1.0), (bhf - hm) / (bhf - ahf));
 	free(rsn);
 	return starr;
 }
 
-// find the 'star' closest to the designated position; 
-// search a circular region from the center out, and stop 
-// when a star of the required flux is found. 
-// returns 0 if a star is found, negative if not. 
+// find the 'star' closest to the designated position;
+// search a circular region from the center out, and stop
+// when a star of the required flux is found.
+// returns 0 if a star is found, negative if not.
 // the star's centroided position, estimated flux and size are updated in
 // the result structure
-int locate_star(struct ccd_frame *fr, double x, double y, double r, double min_flux, 
+int locate_star(struct ccd_frame *fr, double x, double y, double r, double min_flux,
 		struct star *s)
 {
 	struct rstats *rsn, *rs, *reg;
@@ -394,12 +394,12 @@ int locate_star(struct ccd_frame *fr, double x, double y, double r, double min_f
 		do {
 			thin_ring_stats(fr, xc, yc, ring, rs, -HUGE, rmax);
 			if (rs->max < minpk || rs->used == 0) {// no peak found, go to next ring
-				d4_printf("Ring %d has no peak larger than %.2f\n", ring, minpk); 
+				d4_printf("Ring %d has no peak larger than %.2f\n", ring, minpk);
 				break;
 			}
 // now check if the star is valid
 			ret = star_radius(fr, rs->max_x, rs->max_y, rs->max, reg->median, &fwhm);
-			if (ret < 0) 
+			if (ret < 0)
 				goto badstar;
 			else starr = ret;
 
@@ -409,7 +409,7 @@ int locate_star(struct ccd_frame *fr, double x, double y, double r, double min_f
 				rn = MAXSR;
 
 			thin_ring_stats(fr, rs->max_x, rs->max_y, rn, rsn, -HUGE, HUGE);
-			if (fr->stats.statsok && fr->stats.csigma < rsn->sigma) 
+			if (fr->stats.statsok && fr->stats.csigma < rsn->sigma)
 				skycut = NSIGMA * fr->stats.csigma;
 			else
 				skycut = NSIGMA * rsn->sigma;
@@ -420,7 +420,7 @@ int locate_star(struct ccd_frame *fr, double x, double y, double r, double min_f
 				goto badstar;
 			}
 // check that we have a few connected pixels above the cut
-			ring_stats(fr, 1.0*rs->max_x, 1.0*rs->max_y, 0, 3, 
+			ring_stats(fr, 1.0*rs->max_x, 1.0*rs->max_y, 0, 3,
 				   QUAD1|QUAD2|QUAD3|QUAD4, rsn, skycut, HUGE);
 			if (rsn->used < NCONN) {
 				d4_printf("only %d connected pixels found\n", rsn->used);
@@ -514,7 +514,7 @@ static int star_pos_search(struct sources *src, double flux)
 	return i;
 }
 
-// insert a star in the sources structure; only the first src->maxn 
+// insert a star in the sources structure; only the first src->maxn
 // brightest stars are kept; src->ns is updated to reflect the
 // actual number of stars.
 // returns 1 if the star was inserted, 0 is it was discarded, negative
@@ -524,7 +524,7 @@ static int insert_star(struct sources *src, struct star *s)
 	int pos, i;
 
 //	if (src->ns < 20)
-//		d3_printf("insert (ns:%d maxn:%d flux:%.1f xy:%.1f,%.1f)\n", 
+//		d3_printf("insert (ns:%d maxn:%d flux:%.1f xy:%.1f,%.1f)\n",
 //			  src->ns, src->maxn, s->flux, s->x, s->y);
 
 	if (src->ns == 0 || src->s[src->ns-1].flux > s->flux) { // insert star at the end
@@ -542,7 +542,7 @@ static int insert_star(struct sources *src, struct star *s)
 
 //	if (src->ns < 20)
 //		d3_printf("ns:%d maxn:%d pos:%d\n", src->ns, src->maxn, pos);
-	
+
 	if (pos > src->ns - 1) {
 		err_printf("bad search result, aborting\n");
 		return 0;
@@ -567,7 +567,7 @@ static int check_multiple(struct sources *src, struct star *s)
 	int i;
 	for (i = 0; i < src->ns; i++) {
 		if (fabs(s->x - src->s[i].x) + fabs(s->y - src->s[i].y) < MINSEP) {
-			if (s->flux > src->s[i].flux) 
+			if (s->flux > src->s[i].flux)
 				memcpy(&src->s[i], s, sizeof(struct star));
 			return 0;
 		}
@@ -577,8 +577,8 @@ static int check_multiple(struct sources *src, struct star *s)
 
 
 // find the src->maxn brightest 'stars' in the supplied region;
-// if region is NULL, search the whole frame 
-// returns the actual number of stars found, a neagtive number for errors. 
+// if region is NULL, search the whole frame
+// returns the actual number of stars found, a neagtive number for errors.
 // the star centroided positions, estimated fluxes and sizes are updated in
 // the result table
 int extract_stars(struct ccd_frame *fr, struct region *reg, double min_flux, double sigmas, struct sources *src)
@@ -632,7 +632,7 @@ int extract_stars(struct ccd_frame *fr, struct region *reg, double min_flux, dou
 			}
 // now check if the star is valid
 			ret = star_radius(fr, x, y, pk, minpk, &fwhm);
-			if (ret < 0) 
+			if (ret < 0)
 				continue;
 			else starr = ret;
 // estimate sky here
@@ -649,7 +649,7 @@ int extract_stars(struct ccd_frame *fr, struct region *reg, double min_flux, dou
 				continue;
 			}
 // check that we have a few connected pixels above the cut
-			ring_stats(fr, 1.0*x, 1.0*y, 0, 2, 
+			ring_stats(fr, 1.0*x, 1.0*y, 0, 2,
 				   QUAD1|QUAD2|QUAD3|QUAD4, rsn, skycut, HUGE);
 			if (rsn->used < NCONN) {
 //				d3_printf("only %d connected pixels found\n", rsn->used);
@@ -687,7 +687,7 @@ int extract_stars(struct ccd_frame *fr, struct region *reg, double min_flux, dou
 }
 
 
-// create an (empty) sources structure that can hold n stars 
+// create an (empty) sources structure that can hold n stars
 struct sources *new_sources(int n)
 {
 	void *stbl;

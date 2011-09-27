@@ -1,23 +1,23 @@
 /*******************************************************************************
   Copyright(c) 2000 - 2003 Radu Corlan. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: radu@corlan.net
 *******************************************************************************/
 
@@ -59,7 +59,7 @@ char *cat_flag_names[]=FLAG_NAMES_INIT;
 
 static struct cat_star *local_search_files(char *name);
 
-/* return a (static) NULL-terminated list of strings 
+/* return a (static) NULL-terminated list of strings
  * with the supported catalog types */
 char ** cat_list(void)
 {
@@ -77,13 +77,13 @@ static double gsc_max_mag(double radius)
 
 static int mag_comp_fn (const void *a, const void *b)
 {
-	struct cat_star *ca = (struct cat_star *) a; 
-	struct cat_star *cb = (struct cat_star *) b; 
+	struct cat_star *ca = (struct cat_star *) a;
+	struct cat_star *cb = (struct cat_star *) b;
 	return (ca->mag > cb->mag) - (ca->mag < cb->mag);
 }
 
 /* gsc search method */
-static int gsc_search(struct cat_star *cst[], struct catalog *cat, 
+static int gsc_search(struct cat_star *cst[], struct catalog *cat,
 	       double ra, double dec, double radius, int n)
 {
 	int *regs, *ids;
@@ -102,15 +102,15 @@ static int gsc_search(struct cat_star *cst[], struct catalog *cat,
 	tc = calloc(CAT_GET_SIZE, sizeof(struct cat_star));
 
 //	d3_printf("getgsc\n");
-	n_gsc = getgsc(ra, dec, radius, gsc_max_mag(radius), 
+	n_gsc = getgsc(ra, dec, radius, gsc_max_mag(radius),
 		    regs, ids, ras, decs, mags, CAT_GET_SIZE, P_STR(FILE_GSC_PATH));
 
 //	n_gsc = 0;
-//	d3_printf("got %d from gsc in a %.1f' radius, maxmag is %.1f\n", 
+//	d3_printf("got %d from gsc in a %.1f' radius, maxmag is %.1f\n",
 //		  n_gsc, radius, gsc_max_mag(radius));
 //	d3_printf("ra:%.4f, dec:%.4f\n", ra, dec);
 
-/* remove duplicates */
+	/* remove duplicates */
 	for(i=1, j=0; i<n_gsc; i++) {
 		while((regs[i] == regs[i-1]) && (ids[i] == ids[i-1]))
 			i++;
@@ -140,7 +140,7 @@ static int gsc_search(struct cat_star *cst[], struct catalog *cat,
 		if (-1 ==  asprintf(&cats->comments, "p=G "))
 			cats->comments = NULL;
 		cst[i] = cats;
-	}  
+	}
 	free(regs);
 	free(ids);
 	free(ras);
@@ -178,14 +178,14 @@ static struct catalog *cat_open_gsc(struct catalog *cat)
 
 static int cats_mag_comp_fn (const void *a, const void *b)
 {
-	struct cat_star *ca = *((struct cat_star **) a); 
-	struct cat_star *cb = *((struct cat_star **) b); 
+	struct cat_star *ca = *((struct cat_star **) a);
+	struct cat_star *cb = *((struct cat_star **) b);
 	return (ca->mag > cb->mag) - (ca->mag < cb->mag);
 }
 
 
 /* tycho2 search method */
-static int tycho2_cat_search(struct cat_star *cst[], struct catalog *cat, 
+static int tycho2_cat_search(struct cat_star *cst[], struct catalog *cat,
 	       double ra, double dec, double radius, int n)
 {
 	struct cat_star *cats;
@@ -196,7 +196,7 @@ static int tycho2_cat_search(struct cat_star *cst[], struct catalog *cat,
 	double verr, berr;
 	float raerr, decerr;
 	double rm;
-	
+
 	st = calloc(CAT_GET_SIZE, sizeof(struct cat_star *));
 
 	sz = TYCRECSZ * CAT_GET_SIZE + CAT_GET_SIZE;
@@ -204,12 +204,12 @@ static int tycho2_cat_search(struct cat_star *cst[], struct catalog *cat,
 
 	radius = fabs(radius);
 	f = cos(degrad(dec));
-	if (f < 0.1) 
+	if (f < 0.1)
 		f = 0.1;
 
-	d2_printf("running tycho2 search w:%.3f h:%.3f [%d] f=%.3f\n", 
+	d2_printf("running tycho2 search w:%.3f h:%.3f [%d] f=%.3f\n",
 		  radius*2/60 / f, radius*2/60, n, f);
-	ret = tycho2_search(ra, dec, radius*2/60 / f, radius*2/60, buf, sz, 
+	ret = tycho2_search(ra, dec, radius*2/60 / f, radius*2/60, buf, sz,
 			    P_STR(FILE_TYCHO2_PATH));
 	d2_printf("tycho2 returns %d\n", ret);
 	if (ret <= 0) {
@@ -218,8 +218,8 @@ static int tycho2_cat_search(struct cat_star *cst[], struct catalog *cat,
 	}
 	rm = ra - radius/60/f;
 	if (rm < 0) {
-		ret += tycho2_search(360 + rm/2, dec, -rm/2, radius*2/60, 
-				     buf + ret * (TYCRECSZ+1), sz - ret * (TYCRECSZ+1), 
+		ret += tycho2_search(360 + rm/2, dec, -rm/2, radius*2/60,
+				     buf + ret * (TYCRECSZ+1), sz - ret * (TYCRECSZ+1),
 				     P_STR(FILE_TYCHO2_PATH));
 	}
 
@@ -227,7 +227,7 @@ static int tycho2_cat_search(struct cat_star *cst[], struct catalog *cat,
 	for (i = 0; i < ret; i++) {
 		int r, s;
 		float ra, dec;
-		float vt = BIG_ERR, vterr = BIG_ERR, bt = BIG_ERR, bterr = BIG_ERR; 
+		float vt = BIG_ERR, vterr = BIG_ERR, bt = BIG_ERR, bterr = BIG_ERR;
 //		d3_printf("tycho star is: \n %s\n", p);
 		if ((sscanf(p, "%d %d", &r, &s)) != 2)
 			break;
@@ -257,10 +257,10 @@ static int tycho2_cat_search(struct cat_star *cst[], struct catalog *cat,
 				verr = 0.02;
 			if (bterr < 0.02)
 				berr = 0.02;
-			if (-1 == asprintf(&cats->smags, 
+			if (-1 == asprintf(&cats->smags,
 			                   "v=%.3f/%.3f b=%.3f/%.3f vt=%.3f/%.3f bt=%.3f/%.3f",
 			                   vt - 0.090 * (bt - vt), verr,
-			                   0.850 * (bt - vt) + vt - 0.090 * (bt - vt), 
+			                   0.850 * (bt - vt) + vt - 0.090 * (bt - vt),
 			                   berr, vt, vterr, bt, bterr))
 				cats->smags = NULL;
 			if (-1 == asprintf(&cats->comments, "p=T "))
@@ -317,11 +317,11 @@ static struct catalog *cat_open_tycho2(struct catalog *cat)
 /* local catalog code */
 
 /* local catalog methods */
-/* search for objects within a certain area 
- * the 'radius' is actually the max of the ra and dec 
+/* search for objects within a certain area
+ * the 'radius' is actually the max of the ra and dec
  * distances, with the ra distance adjusted for declination
  */
-int local_search(struct cat_star *cst[], struct catalog *cat, 
+int local_search(struct cat_star *cst[], struct catalog *cat,
 	       double ra, double dec, double radius, int n)
 {
 	GList *lcat = cat->data;
@@ -354,7 +354,7 @@ int local_search(struct cat_star *cst[], struct catalog *cat,
 }
 
 
-static int cached_local_get(struct cat_star *cst[], struct catalog *cat, 
+static int cached_local_get(struct cat_star *cst[], struct catalog *cat,
 	      char *name, int n)
 {
 	GList *lcat = cat->data;
@@ -363,7 +363,7 @@ static int cached_local_get(struct cat_star *cst[], struct catalog *cat,
 
 	g_return_val_if_fail(n != 0, 0);
 	g_return_val_if_fail(name != NULL, 0);
-	
+
 	if (cat->hash == NULL) {
 		while (lcat != NULL && i < n) {
 			if (!strcasecmp(name, CAT_STAR(lcat->data)->name)) {
@@ -383,11 +383,11 @@ static int cached_local_get(struct cat_star *cst[], struct catalog *cat,
 		} else {
 			ret = 0;
 		}
-	} 
+	}
 	return ret;
 }
 
-int local_get(struct cat_star *cst[], struct catalog *cat, 
+int local_get(struct cat_star *cst[], struct catalog *cat,
 	      char *name, int n)
 {
 	int ret;
@@ -395,15 +395,15 @@ int local_get(struct cat_star *cst[], struct catalog *cat,
 
 	g_return_val_if_fail(n != 0, 0);
 	g_return_val_if_fail(name != NULL, 0);
-	
+
 	ret = cached_local_get(cst, cat, name, n);
-	if (ret == 0) { 	
+	if (ret == 0) {
 		/* cannot find in preloaded stars */
 		cats = local_search_files(name);
 		if (cats != NULL) {
 			cst[0] = cats;
 			ret = 1;
-		} 
+		}
 	}
 	return ret;
 }
@@ -466,7 +466,7 @@ static void update_cat_star(struct cat_star *ocats, struct cat_star *cats)
  * if a star with the same designation exists, it is changed
  * the star is just referenced, not copied when added in the catalog
  * return the number of stars added, or -1 if there was an error
- */ 
+ */
 int local_add(struct cat_star *cats, struct catalog *cat)
 {
 	int ret;
@@ -516,7 +516,7 @@ static struct catalog *cat_open_local(struct catalog *cat)
 }
 
 
-int edb_get(struct cat_star *cst[], struct catalog *cat, 
+int edb_get(struct cat_star *cst[], struct catalog *cat,
 	      char *name, int n)
 {
 	struct cat_star *cats;
@@ -582,7 +582,7 @@ struct catalog *cat_lookup(char *catname)
 		if (cat_table[i].name != NULL && (!strcasecmp(catname, cat_table[i].name))) {
 			return &(cat_table[i]);
 		}
-	} 
+	}
 	return NULL;
 }
 
@@ -713,10 +713,10 @@ void close_catalog(struct catalog *cat)
  */
 
 
-/* crack a band name into bits, and determine it's type. return the type, 
- * and update the pointers/lengths to the band's elements. 
+/* crack a band name into bits, and determine it's type. return the type,
+ * and update the pointers/lengths to the band's elements.
  * returns the logical or of the flags
- * -1 is returned in case of errors 
+ * -1 is returned in case of errors
  * the function skips until the end of the band description (after the mag/err)
  * and updates end to point at the next band item in the text */
 
@@ -728,8 +728,8 @@ void close_catalog(struct catalog *cat)
 static inline int isident(char i) { return ((i == '_') || (isalnum(i)));}
 
 static int band_crack(char *text, char **name1, int *name1l,
-		      char ** name2, int *name2l, 
-		      char **qual, int *quall, 
+		      char ** name2, int *name2l,
+		      char **qual, int *quall,
 		      double *mag, double *magerr, char **endp)
 {
 	int ret = 0;
@@ -810,7 +810,7 @@ static int band_crack(char *text, char **name1, int *name1l,
 
 /* parse the magnitudes string and extract information for a
  * band. Return 0 if band is found. If no error record is found,
- * err is not updated. the format is <band_name>=<mag>/<err> 
+ * err is not updated. the format is <band_name>=<mag>/<err>
  * when given a mag without qualifier, we treat the qual as a don't
  * care. When given a color index, we look for either an index, or the
  * two magnitudes, in which case the error is calculated */
@@ -831,7 +831,7 @@ int get_band_by_name(char *mags, char *band, double *mag, double *err)
 	if (text == NULL || band == NULL)
 		return -1;
 
-	btype = band_crack(band, &bn1, &bn1l, &bn2, &bn2l, 
+	btype = band_crack(band, &bn1, &bn1l, &bn2, &bn2l,
 			   &bqual, &bquall, NULL, NULL, &bendp);
 
 	if (btype < 0)
@@ -839,7 +839,7 @@ int get_band_by_name(char *mags, char *band, double *mag, double *err)
 
 	if (btype & BAND_INDEX) { /* look for an index or a pair of mags */
 		do {
-			type = band_crack(text, &n1, &n1l, &n2, &n2l, 
+			type = band_crack(text, &n1, &n1l, &n2, &n2l,
 					  &qual, &quall, &m, &me, &endp);
 			text = endp;
 			if ((type < 0))
@@ -864,11 +864,11 @@ int get_band_by_name(char *mags, char *band, double *mag, double *err)
 					return 0;
 				}
 			} else {
-				if ((m1 >= BIG_ERR) && (bn1l == n1l) && 
+				if ((m1 >= BIG_ERR) && (bn1l == n1l) &&
 				    (!strncasecmp(bn1, n1, n1l)) ) {
-					if (((btype & BAND_QUAL) == 0) || 
-					    ((type & BAND_QUAL) 
-					     && (quall == bquall) 
+					if (((btype & BAND_QUAL) == 0) ||
+					    ((type & BAND_QUAL)
+					     && (quall == bquall)
 					     && !strncasecmp(qual, bqual, quall))) {
 						if (type & BAND_MAG) {
 							m1 = m;
@@ -878,12 +878,12 @@ int get_band_by_name(char *mags, char *band, double *mag, double *err)
 //						d3_printf("found m1=%f/%f\n", m1, me1);
 					}
 				}
-				if ((m2 >= BIG_ERR) && (bn2l == n1l) && 
+				if ((m2 >= BIG_ERR) && (bn2l == n1l) &&
 				    (!strncasecmp(bn2, n1, n1l)) ) {
 //					d3_printf("type= %x btype=%x\n", type, btype);
-					if (((btype & BAND_QUAL) == 0) || 
-					    ((type & BAND_QUAL) 
-					     && (quall == bquall) 
+					if (((btype & BAND_QUAL) == 0) ||
+					    ((type & BAND_QUAL)
+					     && (quall == bquall)
 					     && !strncasecmp(qual, bqual, quall))) {
 						if (type & BAND_MAG) {
 							m2 = m;
@@ -904,7 +904,7 @@ int get_band_by_name(char *mags, char *band, double *mag, double *err)
 		} while (type >= 0);
 	} else { /* look for a single-band mag */
 		do {
-			type = band_crack(text, &n1, &n1l, &n2, &n2l, 
+			type = band_crack(text, &n1, &n1l, &n2, &n2l,
 					  &qual, &quall, &m, &me, &endp);
 			text = endp;
 			if (type < 0)
@@ -959,7 +959,7 @@ int update_band_by_name(char **mags, char *band, double mag, double err)
 	if (*mags == NULL || *mags[0] == 0) {
 		if (err == 0.0)
 			ret = asprintf(&nb, "%s=%.3f", band, mag);
-		else 
+		else
 			ret = asprintf(&nb, "%s=%.3f/%.3f", band, mag, err);
 		if (*mags)
 			free(*mags);
@@ -969,11 +969,11 @@ int update_band_by_name(char **mags, char *band, double mag, double err)
 		return 0;
 	}
 
-	btype = band_crack(band, &bn1, &bn1l, &bn2, &bn2l, 
+	btype = band_crack(band, &bn1, &bn1l, &bn2, &bn2l,
 			   &bqual, &bquall, NULL, NULL, &bendp);
-	
+
 	do {
-		type = band_crack(text, &n1, &n1l, &n2, &n2l, 
+		type = band_crack(text, &n1, &n1l, &n2, &n2l,
 				  &qual, &quall, NULL, NULL, &endp);
 
 		if ((type < 0))
@@ -981,7 +981,7 @@ int update_band_by_name(char **mags, char *band, double mag, double err)
 
 		if ((type & (BAND_QUAL | BAND_INDEX)) == (btype & (BAND_QUAL | BAND_INDEX))
 		    && ((bn1l == n1l) && !strncasecmp(n1, bn1, n1l))
-		    && (!(type & BAND_QUAL) 
+		    && (!(type & BAND_QUAL)
 			|| ((bn2l == n2l) && !strncasecmp(n2, bn2, n2l)))) {
 			bs = text;
 			be = endp;
@@ -994,7 +994,7 @@ int update_band_by_name(char **mags, char *band, double mag, double err)
 	if (bs == NULL) {
 		if (err == 0.0)
 			ret = asprintf(&nb, "%s %s=%.3f", *mags, band, mag);
-		else 
+		else
 			ret = asprintf(&nb, "%s %s=%.3f/%.3f", *mags, band, mag, err);
 		if (*mags)
 			free(*mags);
@@ -1005,7 +1005,7 @@ int update_band_by_name(char **mags, char *band, double mag, double err)
 	}
 	if (err == 0.0)
 		ret = asprintf(&nb, "%s %s=%.3f", *mags, band, mag);
-	else 
+	else
 		ret = asprintf(&nb, "%s %s=%.3f/%.3f", *mags, band, mag, err);
 	if (ret != -1) {
 		do {
@@ -1042,7 +1042,7 @@ int local_load_file(char *fn)
 	}
 
 	stf = stf_read_frame(inf);
-	
+
 	if (stf == NULL)
 		return -1;
 
@@ -1082,7 +1082,7 @@ void local_load_catalogs(char *path)
 			}
 		}
 		globfree(&gl);
-		dir = strtok(NULL, ":");	
+		dir = strtok(NULL, ":");
 	}
 }
 
@@ -1102,7 +1102,7 @@ static struct cat_star *local_search_file(char *fn, char *name)
 		err_printf("cannot open catalog file: %s (%s)\n", fn, strerror(errno));
 		return NULL;
 	}
-	
+
 	do {
 		ret = getline(&lbuf, &len, inf);
 		if (ret < 0)
@@ -1115,7 +1115,7 @@ static struct cat_star *local_search_file(char *fn, char *name)
 			nm = NULL;
 		}
 	} while (ret > 0);
-	if (nm == NULL || ret == 0) { 
+	if (nm == NULL || ret == 0) {
 		if (lbuf)
 			free(lbuf);
 		fclose(inf);
@@ -1124,7 +1124,7 @@ static struct cat_star *local_search_file(char *fn, char *name)
 	d3_printf("found: \n%s\n", lbuf);
 
 	fseek(inf, nm - lbuf - ret + 1, SEEK_CUR);
-	
+
 	for (i = 0; i < 100000 && ftell(inf) > 0; i++) {
 		char c;
 		fseek(inf, -2, SEEK_CUR);
@@ -1136,7 +1136,7 @@ static struct cat_star *local_search_file(char *fn, char *name)
 				break;
 			}
 		}
-		if (c == ')') 
+		if (c == ')')
 			paren ++;
 	}
 	lseek(fileno(inf), ftell(inf), SEEK_SET);
@@ -1185,7 +1185,7 @@ static struct cat_star *local_search_files(char *name)
 			}
 		}
 		globfree(&gl);
-		dir = strtok(NULL, ":");	
+		dir = strtok(NULL, ":");
 	}
 	return cats;
 }

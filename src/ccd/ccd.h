@@ -454,7 +454,7 @@ struct vs_recipy {
 
 // size of histogram, and value of the first bin (for ring stats)
 #define H_START (-65535)
-#define H_SIZE (2*65535)
+#define H_SIZE (2*65535 + 1)
 
 // ring stats result
 struct rstats {
