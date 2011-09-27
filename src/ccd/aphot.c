@@ -131,7 +131,6 @@ int ring_stats(struct ccd_frame *fr, double x, double y,
 	int xs, ys;
 	int xe, ye;
 	int xc, yc;
-	int w;
 	int nring = 0, nskipped = 0;
 	float v;
 	double sum, sumsq, r;
@@ -147,14 +146,13 @@ int ring_stats(struct ccd_frame *fr, double x, double y,
 	xe = (int)(xc+r2+1);
 	ys = (int)(yc-r2);
 	ye = (int)(yc+r2+1);
-	w = fr->w;
 
 	if (xs < 0)
 		xs = 0;
 	if (ys < 0)
 		ys = 0;
-	if (xe >= w)
-		xe = w - 1;
+	if (xe >= fr->w)
+		xe = fr->w - 1;
 	if (ye >= fr->h)
 		ye = fr->h - 1;
 
