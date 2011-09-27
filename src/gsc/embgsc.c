@@ -1,7 +1,7 @@
 /*==================================================================
 ** NAME         :embgsc.c
 ** TYPE         :library
-** DESCRIPTION  :search by cone(coordinates) in GSC 
+** DESCRIPTION  :search by cone(coordinates) in GSC
 **              :finds regions of the GSC in file gsc_reg.bin
 **              :finds objects in selected regions
 ** INPUT        :RA(deci.h), Dec(dec.d), radius1 [,radius2] (arcmin)
@@ -72,7 +72,7 @@ How to search the Guide Star Catalogue (GSC1.1) by coordinates.\n\
 Input lines starting by # or ! are just echoed (interpreted as comments)\
 ";
 */
- 
+
 /*
   \n\
   If coordinates (or file with coordinates) are not specified, \n\
@@ -147,13 +147,13 @@ int nint ;	/* IN: The number of integers */
 	static INT value ;
 	char *v, *p, *e ;
 	int n ;
-  
+
 	value = 0x010203 ;
 	v = (char *)(&value) ;
 	if ((v[0] == 0) && (v[1] == 1) && (v[2] == 2)) {
 		return(0) ;	/* No swap necessary */
 	}
-    
+
 	p = (char *)array ; e = p + 4*nint ;
 
 	if ((v[0] == 1) && (v[1] == 0) && (v[2] == 3)) {	/* Half-word swap */
@@ -175,7 +175,7 @@ int nint ;	/* IN: The number of integers */
 		return(2) ;
 	}
 
-	fprintf(stderr, "****Irrationnal Byte Swap %02x%02x%02X%02x\n", 
+	fprintf(stderr, "****Irrationnal Byte Swap %02x%02x%02X%02x\n",
 		v[0]&0xff, v[1]&0xff, v[2]&0xff, v[3]&0xff) ;
 	exit(1) ;
 }
@@ -235,42 +235,42 @@ static int cmp_7 (a, b)   GSCREC *a, *b ;	/* Sort on mb		*/
 }
 
 static int cmp_8 (a, b)   GSCREC *a, *b ;	/* Sort on class	*/
-{	
+{
 	if(a->cl < b->cl) return(-order);
 	if(a->cl > b->cl) return(order);
 	return(cmp_1(a,b));
 }
 
 static int cmp_9 (a, b)   GSCREC *a, *b ;	/* Sort on plate	*/
-{ 
+{
 	int diff;
 	if ((diff = strcmp(a->plate, b->plate))) return(diff*order);
 	return(cmp_1(a,b));
 }
 
 static int cmp_10 (a, b)   GSCREC *a, *b ;	/* Sort on multiple	*/
-{ 
+{
 	if(a->mu < b->mu) return(-order);
 	if(a->mu > b->mu) return(order);
 	return(cmp_1(a,b));
 }
 
 static int cmp_11 (a, b)   GSCREC *a, *b ;	/* Sort on Distance	*/
-{ 
+{
 	if(a->dist < b->dist) return(-order);
 	if(a->dist > b->dist) return(order);
 	return(cmp_1(a,b));
 }
 
 static int cmp_12 (a, b)   GSCREC *a, *b ;	/* Sort on PosAngle	*/
-{ 
+{
 	if(a->posang < b->posang) return(-order);
 	if(a->posang > b->posang) return(order);
 	return(cmp_1(a,b));
 }
 
 static int cmp_13 (a, b)   GSCREC *a, *b ;	/* Sort on Epoch	*/
-{ 
+{
 	if(a->epoch < b->epoch) return(-order);
 	if(a->epoch > b->epoch) return(order);
 	return(cmp_1(a,b));
@@ -307,7 +307,7 @@ int GSCid[2] ;
 	char *p; int i;
 	GSCid[0] = GSCid[1] = 0;
 	for (p=str; isspace(*p); p++) ;
-	for (i=5; (--i>=0) && isdigit(*p); p++)  
+	for (i=5; (--i>=0) && isdigit(*p); p++)
 		GSCid[0] = GSCid[0]*10 + (*p - '0');
 	if (*p == '-') p++;
 	for (i=5; (--i>=0) && isdigit(*p); p++)
@@ -324,7 +324,7 @@ GSCREC *new;
   	/* (1) Find where in the list we've to insert the new record */
   	for (gc=last, gp=(LGSC *)0; gc && ((*compare)(new, &(gc->rec)) < 0);
   	     gp=gc, gc=gc->prev) ;
-  	     
+
      	/* (2) If max attained, remove or return */
      	if (igsc == mgsc) {
 		if (!gp) return(0);
@@ -371,7 +371,7 @@ int getgsc(float ra,         // ra of center (in degrees)
 	   float *decs,      // dec of each gsc object, returned
 	   float *mags,      // magnitude of each gsc object, returned
            int n,		// maximum objects to return
-	   char *catpath)            
+	   char *catpath)
 
 {
 	char *GSCDAT;
@@ -386,7 +386,7 @@ int getgsc(float ra,         // ra of center (in degrees)
 
 	char *ptr; int centers;
 	char line[256], *s, region[256], path[256];
-	int sum,k,i,stat=0,id;
+	int k,i,stat=0,id;
 	INT size,x1,x2,z1=0,z2,xx1,xx2,zz1,zz2;
 	INT alpha,hscale=1,hscad2=1,xr1=0,xr2=0;
 	int np,fz,f2,fr,n2,cc,nrec,tester;
@@ -416,7 +416,7 @@ int getgsc(float ra,         // ra of center (in degrees)
 /* ------ Find out the required path variables --------------------------*/
 	if (catpath == NULL || catpath[0] == 0) { /* use default path */
 		GSCDAT = getenv("GSCDAT") ;
-		if (!GSCDAT) 
+		if (!GSCDAT)
 			GSCDAT = GSC_PATH ;
 	} else {
 		GSCDAT = catpath;
@@ -433,8 +433,7 @@ int getgsc(float ra,         // ra of center (in degrees)
 /* ------ parse command-line options ------------------------------------*/
 
 	line[0] = '\0';
-	sum = 0;
-  
+
 	da0 = ra;
 	dd0 = dec;
 	opt[Oc] = 1;
@@ -452,12 +451,12 @@ int getgsc(float ra,         // ra of center (in degrees)
 
 	strcpy(path, GSCBIN), strcat(path, REGBIN);
 //	printf("path1 %s\n", path);
-	fz=open(path, O_BINARY);  
+	fz=open(path, O_BINARY);
 	if(fz < 0) { perror(path); goto err_ret; }
 
 	strcpy(path, GSCBIN), strcat(path, REGIND);
 //	printf("path2 %s\n", path);
-	f2=open(path, O_BINARY);  
+	f2=open(path, O_BINARY);
 	if(f2 < 0) { perror(path); goto err_ret; }
 	size = lseek(f2,0L,2);
 	lseek(f2,0L,0);
@@ -477,7 +476,7 @@ int getgsc(float ra,         // ra of center (in degrees)
 
 	/* ------ Loop on Central Coordinates -------------- */
 
-	a1 = a2 = d1 = d2 = 0; 
+	a1 = a2 = d1 = d2 = 0;
 	for( centers = 1 ; --centers >= 0 ; ) {
 		igsc = nout = 0;
 		tester = tested = 0;
@@ -511,18 +510,18 @@ int getgsc(float ra,         // ra of center (in degrees)
 				puts(s);
 			}
 		}
-    
+
 		if(opt[Og]) {
 			zz1 = z2 = 0;
 			goto Declination_LOOP ;
 		}
-    
+
 		alpha = da0*scale;
 		cosdec = cos(dd0/radian);
 		ra0 = da0;
-    
+
 		/* ------ find r.a. - dec box ------------------------------- */
-    
+
 		phi = phi2/60.;
 		d1 = dd0-phi;
 		d2 = dd0+phi;
@@ -530,7 +529,7 @@ int getgsc(float ra,         // ra of center (in degrees)
 		if(d2 >  90.0) d2= 90.0;
 		z1 = (d1+90.)*scale;
 		z2 = (d2+90.)*scale;
-    
+
 		hscale = 360.0*scale;
 		hscad2 = 180.0*scale;
 		if(fabs(dd0)+phi == 90.000000) {
@@ -550,14 +549,14 @@ int getgsc(float ra,         // ra of center (in degrees)
 		if(x2 > hscale) {
 			x2 -= hscale;
 			x1 -= hscale;
-			stat = 1;  
+			stat = 1;
 		}
 		if(x1 < 0) stat = 1;
 		xr1 = x1;
 		xr2 = x2;
-    
+
 		/* ------ searching regions in index ---------------------------- */
-    
+
 		/* printf("====Look in ind2[%d]", n2); */
 #if 0
 		for(i=0; i<n2; i++) {
@@ -573,40 +572,40 @@ int getgsc(float ra,         // ra of center (in degrees)
 		/* printf(" =>%d, seek to %ld\n", i, p); */
 		lseek(fz,p,0);
 		zz1 = -hscale;
-    
+
 	Declination_LOOP:
 		while((zz1 <= z2) && (nout <= opt[On])) {
 			if (opt[Og]) { nrec = 1 ; goto Regions_LOOP ; }
 			cc=read(fz,rec,sizeof(rec));
-			if(cc < 1) break; 
+			if(cc < 1) break;
 			nrec = cc/sizeof(tr_regions);
 			if (bin_swapped) swap(rec, cc/4) ;
-      
+
 			Regions_LOOP :
 				for(i=0;(i<nrec) && (zz1<=z2) && (nout <= opt[On]); i++) {
-					if (opt[Og]) { 
-						rec[i].nr = gid[0]; 
+					if (opt[Og]) {
+						rec[i].nr = gid[0];
 						zz1++ ;
-						goto Region_LOOP ; 
+						goto Region_LOOP ;
 					}
 					zz1 =rec[i].dec1;
 					zz2 =rec[i].dec2;
 					if(zz1 > z2) continue ;
 					if(zz2 < z1) continue ;
-	  
+
 					xx1 = rec[i].alf1;
 					xx2 = rec[i].alf2;
 					x1 = xr1;
 					x2 = xr2;
-					if(xx2 > hscale || (x1<0 && xx2>hscad2)) { 
+					if(xx2 > hscale || (x1<0 && xx2>hscad2)) {
 						xx1 -= hscale;
 						xx2 -= hscale;
 						if(stat == 0) {
 							x1 -= hscale;
-							x2 -= hscale; 
+							x2 -= hscale;
 						}
-					} 
-	  
+					}
+
 					if(xx1 > x2) continue ;
 					if(xx2 < x1) continue ;
 					a1 = (double)x1/scale;
@@ -615,24 +614,24 @@ int getgsc(float ra,         // ra of center (in degrees)
 						a1 += 360.0;
 						a2 += 360.0;
 					}
-	  
+
 					/* ------ open and decode selected region ----------- */
-	  
+
 				Region_LOOP:
 					find_reg(region, rec[i].nr, GSCDAT);
 					fr = open(region,O_BINARY);
 					if (fr < 0) { perror(region); continue ; }
-	  
+
 					if(opt[Ov]) printf("!...Look in file: %s\n", region);
 					tester +=1 ;
-	  
+
 					s = get_header(fr,&header);
 					/* lseek(fr,header.len,0); */
 					da1 = (a1-header.amin)*header.scale_ra+0.5;
 					da2 = (a2-header.amin)*header.scale_ra+0.5;
 					dd1 = (d1-header.dmin)*header.scale_dec+0.5;
 					dd2 = (d2-header.dmin)*header.scale_dec+0.5;
-	  
+
 					np = k = 1;
 					while ((np>0) && (nout<=opt[On])) { /* np = records read */
 						k-- ; c += 12 ;
@@ -640,8 +639,8 @@ int getgsc(float ra,         // ra of center (in degrees)
 							size = read(fr, table, 12*MAXNSORT);
 							if (size < 0) { perror(region); goto err_ret; }
 							np = (size/12); tested += np;
-							if(opt[Ov] > 1) 
-								printf("!....Read %d bytes (%d records)\n", 
+							if(opt[Ov] > 1)
+								printf("!....Read %d bytes (%d records)\n",
 								       size, np);
 							c = table - 12;
 							k = np + 1;
@@ -653,13 +652,13 @@ int getgsc(float ra,         // ra of center (in degrees)
 						da <<= 8;
 						da |= c[4];
 						da >>= 3;
-	    
+
 						dd = c[4] & 7;
 						dd <<= 8;
 						dd |= c[5];
 						dd <<= 8;
 						dd |= c[6];
-	    
+
 						if (opt[Og]) {		/* Test GSC-id	*/
 							id = ((c[0]&127)<<7)|(c[1]>>1);
 							if (gid[1] && id != gid[1]) continue ;
@@ -671,20 +670,20 @@ int getgsc(float ra,         // ra of center (in degrees)
 							if (dd > dd2) continue ;
 						}
 						s = decode_c(c,&header,&gscrec);
-	    
+
 						if (!opt[Og]) {
 							rar = gscrec.ra;
 							der = gscrec.dec;
 							gscrec.posang=dispos(&ra0,&dd0,&rar,&der,&dist);
 							gscrec.dist = dist;
-	      
+
 							if(dist < phi1) continue ;
 							if(dist > phi2) continue ;
 						}
 
 						if(gscrec.m < magmin) continue ;
 						if(gscrec.m > magmax) continue ;
-	    
+
 
 						ras[nout] = gscrec.ra;
 						decs[nout] = gscrec.dec;

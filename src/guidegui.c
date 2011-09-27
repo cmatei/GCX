@@ -298,7 +298,6 @@ static gint motion_event_cb (GtkWidget *widget, GdkEventMotion *event, gpointer 
 static void find_guide_star_cb( GtkWidget *widget, gpointer window)
 {
 	struct image_channel *i_ch;
-	double x, y;
 	GSList *sl = NULL;
 	struct guider *guider;
 	struct gui_star *gs = NULL;
@@ -321,8 +320,6 @@ static void find_guide_star_cb( GtkWidget *widget, gpointer window)
 		GUI_STAR(sl->data)->flags = STAR_TYPE_ALIGN;
 		gsl->display_mask |= TYPE_MASK(STAR_TYPE_ALIGN);
 		gsl->select_mask |= TYPE_MASK(STAR_TYPE_ALIGN);
-		x = GUI_STAR(sl->data)->x;
-		y = GUI_STAR(sl->data)->y;
 		d4_printf("Flux: %f\n", s->flux);
 		g_slist_free(sl);
 		found = 1;

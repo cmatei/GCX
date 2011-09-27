@@ -1662,7 +1662,6 @@ static void ccdred_qphotone_cb(GtkAction *action, gpointer dialog)
 {
 	struct ccd_reduce *ccdr;
 	struct image_file_list *imfl;
-	int ret;
 	struct image_file *imf;
 	char *outf;
 	GtkWidget *menubar;
@@ -1697,7 +1696,7 @@ static void ccdred_qphotone_cb(GtkAction *action, gpointer dialog)
 	gtk_widget_set_sensitive(menubar, 0);
 
 	ccdr->ops |= IMG_QUICKPHOT;
-	ret = reduce_frame(imf, ccdr, progress_pr, dialog);
+	reduce_frame(imf, ccdr, progress_pr, dialog);
 	if ((ccdr->ops & IMG_OP_PHOT) == 0) {
 		imf_display_cb(NULL, dialog);
 	}

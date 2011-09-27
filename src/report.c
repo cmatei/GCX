@@ -1,23 +1,23 @@
 /*******************************************************************************
   Copyright(c) 2000 - 2003 Radu Corlan. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: radu@corlan.net
 *******************************************************************************/
 
@@ -56,7 +56,7 @@
 
 /* skip until we get a closing brace */
 
-static void skip_list(GScanner *scan) 
+static void skip_list(GScanner *scan)
 {
 	int nbr = 1;
 	int tok;
@@ -70,11 +70,11 @@ static void skip_list(GScanner *scan)
 }
 
 /* skip one item (or a whole list if that is the case */
-static void skip_one(GScanner *scan) 
+static void skip_one(GScanner *scan)
 {
 	int tok;
 	tok = g_scanner_get_next_token(scan);
-	if (tok == '(') 
+	if (tok == '(')
 		skip_list(scan);
 }
 
@@ -103,9 +103,9 @@ static int try_scan_precision(GScanner *scan, int *w, int *p)
 
 /* scan the format string (that can be multiline), and fill up the cfmt table
  * return the number of fields read, or -1 if an error occured; up to n
- * columns are read; 
+ * columns are read;
  * when present, the data fields are malloced strings
- * we use '#' comments in the format file 
+ * we use '#' comments in the format file
  */
 
 #define TAB_OPTION_TABLEHEAD 0x01
@@ -152,7 +152,7 @@ static int parse_tab_format(char *format, struct col_format *cfmt, int n, int *o
 				err_printf("format error: %s needs a band name string\n",
 					   symname[sym]);
 				continue;
-			} 
+			}
 			tok = g_scanner_get_next_token(scan);
 			cfmt[i].data = strdup(stringval(scan));
 			cfmt[i].type = SYM_SMAG;
@@ -165,7 +165,7 @@ static int parse_tab_format(char *format, struct col_format *cfmt, int n, int *o
 				err_printf("format error: %s needs a band name string\n",
 					   symname[sym]);
 				continue;
-			} 
+			}
 			tok = g_scanner_get_next_token(scan);
 			cfmt[i].data = strdup(stringval(scan));
 			cfmt[i].type = SYM_IMAG;
@@ -178,7 +178,7 @@ static int parse_tab_format(char *format, struct col_format *cfmt, int n, int *o
 				err_printf("format error: %s needs a band name string\n",
 					   symname[sym]);
 				continue;
-			} 
+			}
 			tok = g_scanner_get_next_token(scan);
 			cfmt[i].data = strdup(stringval(scan));
 			cfmt[i].type = sym;
@@ -242,7 +242,7 @@ static int parse_tab_format(char *format, struct col_format *cfmt, int n, int *o
  * filter - the filter name
  */
 
-/* star tokens 
+/* star tokens
  * name - the star designation
  * ra, dec - in dms format
  * dra, ddec - in decimal degrees format
@@ -252,7 +252,7 @@ static int parse_tab_format(char *format, struct col_format *cfmt, int n, int *o
  * flags - extraction/reduction flags (binary)
  */
 
-/* control tokens 
+/* control tokens
  * tablehead - print a table header
  * collist - print a list of columns
  */
@@ -260,12 +260,12 @@ static int parse_tab_format(char *format, struct col_format *cfmt, int n, int *o
 #define TABLE_MAX_FIELDS 128
 #define MAX_TBL_LINE 16384
 
-static int tab_snprint_star(char *line, int len, struct cat_star *cats, 
-			    struct stf *stf, int frno, 
+static int tab_snprint_star(char *line, int len, struct cat_star *cats,
+			    struct stf *stf, int frno,
 			    struct col_format *cfmt, int ncol);
-static int tab_snprint_head(char *line, int len, 
+static int tab_snprint_head(char *line, int len,
 			    struct col_format *cfmt, int ncol);
-static int tab_snprint_coldesc(char *line, int len, 
+static int tab_snprint_coldesc(char *line, int len,
 			       struct col_format *cfmt, int start);
 void stf_to_table(struct stf *stf, FILE *outf, struct col_format *cfmt, int ncol);
 
@@ -287,7 +287,7 @@ void report_to_table(FILE *inf, FILE *outf, char *format)
 
 //	d3_printf("parse format returns %d\n", ncol);
 //	for (i=0; i<ncol; i++) {
-//		d3_printf("%s %d %d \"%s\"\n", symname[cfmt[i].type], cfmt[i].width, 
+//		d3_printf("%s %d %d \"%s\"\n", symname[cfmt[i].type], cfmt[i].width,
 //			  cfmt[i].precision, (char *)(cfmt[i].data));
 //	}
 
@@ -334,7 +334,7 @@ void report_to_table(FILE *inf, FILE *outf, char *format)
 		}
 		if (opt & TAB_OPTION_RESSTATS && nres > 0) {
 			fprintf(outf, "# residuals min:%.3f max:%.3f avg:%.4f sd:%.4f\n",
-				minres, maxres, sumres / nres, 
+				minres, maxres, sumres / nres,
 				sqrt((sumsqres - sqr(sumres) / nres) / nres));
 
 		}
@@ -343,7 +343,7 @@ void report_to_table(FILE *inf, FILE *outf, char *format)
 }
 
 /* fill a width-wide field at buf and place a 0 terminator, without exceeding
- * len characters (including the terminator). Return the numbers of chars added 
+ * len characters (including the terminator). Return the numbers of chars added
  * to the buffer (excluding the term) */
 static int blank_field(char *buf, int len, int width)
 {
@@ -358,8 +358,8 @@ static int blank_field(char *buf, int len, int width)
  * string to fit the field length, and it places a trailing blank */
 static int string_field(char *buf, int len, int width, char *text)
 {
-	int i, k;
-	k=0;
+	int i;
+
 	for (i = 0; (i < width) && (i < (len - 1)); i++) {
 		if (*text == 0 || i == width -1)
 			*buf++ = ' ';
@@ -372,7 +372,7 @@ static int string_field(char *buf, int len, int width, char *text)
 
 
 /* generate a field of exactly width characetrs (but no more than len) containing
- * the bits in flags that have non-zero-length names in names 
+ * the bits in flags that have non-zero-length names in names
  * return the number of chars generated, less the terminating 0; the last
  * char is guaranteed to be ' ' */
 static int flags_field(char *buf, int len, int width, int flags, char **names)
@@ -401,9 +401,9 @@ static int flags_field(char *buf, int len, int width, int flags, char **names)
 }
 
 
-/* print the description for a column, assuming it starts at 
+/* print the description for a column, assuming it starts at
  * column start; return the full width of the column */
-static int tab_snprint_coldesc(char *line, int len, 
+static int tab_snprint_coldesc(char *line, int len,
 			    struct col_format *cfmt, int start)
 {
 	char buf[64];
@@ -425,7 +425,7 @@ static int tab_snprint_coldesc(char *line, int len,
 			k++;
 		}
 	} else {
-		snprintf(line, len, "%-8s %s %s", buf, symname[cfmt->type], 
+		snprintf(line, len, "%-8s %s %s", buf, symname[cfmt->type],
 			 cfmt->data ? (char *)cfmt->data : "");
 	}
 	return cfmt->width + 1;
@@ -433,7 +433,7 @@ static int tab_snprint_coldesc(char *line, int len,
 
 
 /* print a table header */
-static int tab_snprint_head(char *line, int len, 
+static int tab_snprint_head(char *line, int len,
 			    struct col_format *cfmt, int ncol)
 {
 	int i;
@@ -468,10 +468,10 @@ static int tab_snprint_head(char *line, int len,
 			break;
 		default:
 			if (i >= 1)
-				ret = string_field(line + p, len - p, w + 1, 
+				ret = string_field(line + p, len - p, w + 1,
 						   symname[cfmt[i].type]);
-			else 
-				ret = string_field(line + p, len - p, w, 
+			else
+				ret = string_field(line + p, len - p, w,
 						   symname[cfmt[i].type]);
 			break;
 		}
@@ -485,11 +485,11 @@ static int tab_snprint_head(char *line, int len,
 }
 
 
-/* print the one-line report for the star 
- * return the number of char written 
- * cfmt width/precision fields are filled with defaults if 
+/* print the one-line report for the star
+ * return the number of char written
+ * cfmt width/precision fields are filled with defaults if
  * they were -1 */
-static int tab_snprint_star(char *line, int len, struct cat_star *cats, 
+static int tab_snprint_star(char *line, int len, struct cat_star *cats,
 			    struct stf *stf, int f,
 			    struct col_format *cfmt, int ncol)
 {
@@ -514,7 +514,7 @@ static int tab_snprint_star(char *line, int len, struct cat_star *cats,
 			if (get_band_by_name(cats->smags, cfmt[i].data, &m, &e))
 				ret = blank_field(line+p, len - p, cfmt[i].width+1);
 			else
-				ret = snprintf(line+p, len - p, "%*.*f ", 
+				ret = snprintf(line+p, len - p, "%*.*f ",
 					       cfmt[i].width, cfmt[i].precision, m);
 			break;
 		case SYM_IMAG:
@@ -527,7 +527,7 @@ static int tab_snprint_star(char *line, int len, struct cat_star *cats,
 			if (get_band_by_name(cats->imags, cfmt[i].data, &m, &e))
 				ret = blank_field(line+p, len - p, cfmt[i].width+1);
 			else
-				ret = snprintf(line+p, len - p, "%*.*f ", 
+				ret = snprintf(line+p, len - p, "%*.*f ",
 					       cfmt[i].width, cfmt[i].precision, m);
 			break;
 		case SYM_SERR:
@@ -540,7 +540,7 @@ static int tab_snprint_star(char *line, int len, struct cat_star *cats,
 			e = BIG_ERR;
 			if ((!get_band_by_name(cats->smags, cfmt[i].data, &m, &e)) &&
 			    e < BIG_ERR)
-				ret = snprintf(line+p, len - p, "%*.*f ", 
+				ret = snprintf(line+p, len - p, "%*.*f ",
 					       cfmt[i].width, cfmt[i].precision, e);
 			else
 				ret = blank_field(line+p, len - p, cfmt[i].width+1);
@@ -555,7 +555,7 @@ static int tab_snprint_star(char *line, int len, struct cat_star *cats,
 			e = BIG_ERR;
 			if ((!get_band_by_name(cats->imags, cfmt[i].data, &m, &e)) &&
 			    e < BIG_ERR)
-				ret = snprintf(line+p, len - p, "%*.*f ", 
+				ret = snprintf(line+p, len - p, "%*.*f ",
 					       cfmt[i].width, cfmt[i].precision, e);
 			else
 				ret = blank_field(line+p, len - p, cfmt[i].width+1);
@@ -587,7 +587,7 @@ static int tab_snprint_star(char *line, int len, struct cat_star *cats,
 				cfmt[i].width = 4 + cfmt[i].precision;
 			if (cats == NULL)
 				break;
-			ret = snprintf(line+p, len - p, "%*.*f ", 
+			ret = snprintf(line+p, len - p, "%*.*f ",
 				       cfmt[i].width, cfmt[i].precision,
 				       cats->ra);
 			break;
@@ -598,7 +598,7 @@ static int tab_snprint_star(char *line, int len, struct cat_star *cats,
 				cfmt[i].width = 4 + cfmt[i].precision;
 			if (cats == NULL)
 				break;
-			ret = snprintf(line+p, len - p, "%*.*f ", 
+			ret = snprintf(line+p, len - p, "%*.*f ",
 				       cfmt[i].width, cfmt[i].precision,
 				       cats->dec);
 			break;
@@ -612,7 +612,7 @@ static int tab_snprint_star(char *line, int len, struct cat_star *cats,
 			if (!stf_find_double(stf, &v, 1, SYM_OBSERVATION, SYM_MJD)) {
 				ret = blank_field(line+p, len - p, cfmt[i].width+1);
 			} else {
-				ret = snprintf(line+p, len - p, "%-*.*g ", 
+				ret = snprintf(line+p, len - p, "%-*.*g ",
 					       cfmt[i].width, cfmt[i].precision,
 					       v);
 			}
@@ -627,7 +627,7 @@ static int tab_snprint_star(char *line, int len, struct cat_star *cats,
 			if (CATS_TYPE(cats) != CAT_STAR_TYPE_APSTD) {
 				ret = blank_field(line+p, len - p, cfmt[i].width+1);
 			} else {
-				ret = snprintf(line+p, len - p, "%*.*f ", 
+				ret = snprintf(line+p, len - p, "%*.*f ",
 					       cfmt[i].width, cfmt[i].precision,
 					       cats->residual);
 			}
@@ -642,7 +642,7 @@ static int tab_snprint_star(char *line, int len, struct cat_star *cats,
 			if (CATS_TYPE(cats) != CAT_STAR_TYPE_APSTD) {
 				ret = blank_field(line+p, len - p, cfmt[i].width+1);
 			} else {
-				ret = snprintf(line+p, len - p, "%*.*f ", 
+				ret = snprintf(line+p, len - p, "%*.*f ",
 					       cfmt[i].width, cfmt[i].precision,
 					       cats->std_err);
 			}
@@ -655,16 +655,16 @@ static int tab_snprint_star(char *line, int len, struct cat_star *cats,
 			if (cats == NULL)
 				break;
 			if (stf_find_double(stf, &v, 1, SYM_OBSERVATION, SYM_MJD)) {
-				ret = snprintf(line+p, len - p, "%-*.*g ", 
+				ret = snprintf(line+p, len - p, "%-*.*g ",
 					       cfmt[i].width, cfmt[i].precision,
 					       mjd_to_jd(v));
 			} else if (stf_find_double(stf, &v, 1, SYM_OBSERVATION, SYM_JDATE)) {
-				ret = snprintf(line+p, len - p, "%-*.*g ", 
+				ret = snprintf(line+p, len - p, "%-*.*g ",
 					       cfmt[i].width, cfmt[i].precision,
 					       v);
 			} else {
 				ret = blank_field(line+p, len - p, cfmt[i].width+1);
-			} 
+			}
 			break;
 		case SYM_AIRMASS:
 			if (cfmt[i].precision < 0)
@@ -674,7 +674,7 @@ static int tab_snprint_star(char *line, int len, struct cat_star *cats,
 			if (cats == NULL)
 				break;
 			if (stf_find_double(stf, &v, 1, SYM_OBSERVATION, SYM_AIRMASS)) {
-				ret = snprintf(line+p, len - p, "%*.*f ", 
+				ret = snprintf(line+p, len - p, "%*.*f ",
 					       cfmt[i].width, cfmt[i].precision,
 					       v);
 			} else {
@@ -691,11 +691,11 @@ static int tab_snprint_star(char *line, int len, struct cat_star *cats,
 			t = stf_find_string(stf, 1, SYM_OBSERVATION, SYM_OBJECT);
 			if (t != NULL) {
 				snprintf(dms, 63, "%s%d ", t, f);
-				ret = string_field(line + p, len - p, cfmt[i].width + 1, 
+				ret = string_field(line + p, len - p, cfmt[i].width + 1,
 						   dms);
 			} else {
 				snprintf(dms, 63, "%d ", f);
-				ret = string_field(line + p, len - p, cfmt[i].width + 1, 
+				ret = string_field(line + p, len - p, cfmt[i].width + 1,
 						   dms);
 			}
 			break;
@@ -708,11 +708,11 @@ static int tab_snprint_star(char *line, int len, struct cat_star *cats,
 				break;
 			t = stf_find_string(stf, 1, SYM_OBSERVATION, SYM_FILTER);
 			if (t != NULL) {
-				ret = string_field(line + p, len - p, cfmt[i].width + 1, 
+				ret = string_field(line + p, len - p, cfmt[i].width + 1,
 						   t);
 			} else {
 				ret = blank_field(line+p, len - p, cfmt[i].width+1);
-			} 
+			}
 			break;
 		case SYM_NAME:
 			if (cfmt[i].precision < 0)
@@ -721,7 +721,7 @@ static int tab_snprint_star(char *line, int len, struct cat_star *cats,
 				cfmt[i].width = 14;
 			if (cats == NULL)
 				break;
-			ret = string_field(line + p, len - p, cfmt[i].width + 1, 
+			ret = string_field(line + p, len - p, cfmt[i].width + 1,
 					   cats->name);
 			break;
 		case SYM_X:
@@ -732,8 +732,8 @@ static int tab_snprint_star(char *line, int len, struct cat_star *cats,
 			if (cats == NULL)
 				break;
 			if (cats->flags & INFO_POS)
-				ret = snprintf(line+p, len - p, "%*.*f ", 
-					       cfmt[i].width, cfmt[i].precision, 
+				ret = snprintf(line+p, len - p, "%*.*f ",
+					       cfmt[i].width, cfmt[i].precision,
 					       cats->pos[POS_X]);
 			else
 				ret = blank_field(line+p, len - p, cfmt[i].width+1);
@@ -746,8 +746,8 @@ static int tab_snprint_star(char *line, int len, struct cat_star *cats,
 			if (cats == NULL)
 				break;
 			if (cats->flags & INFO_POS)
-				ret = snprintf(line+p, len - p, "%*.*f ", 
-					       cfmt[i].width, cfmt[i].precision, 
+				ret = snprintf(line+p, len - p, "%*.*f ",
+					       cfmt[i].width, cfmt[i].precision,
 					       cats->pos[POS_Y]);
 			else
 				ret = blank_field(line+p, len - p, cfmt[i].width+1);
@@ -760,8 +760,8 @@ static int tab_snprint_star(char *line, int len, struct cat_star *cats,
 			if (cats == NULL)
 				break;
 			if (cats->flags & INFO_POS)
-				ret = snprintf(line+p, len - p, "%*.*f ", 
-					       cfmt[i].width, cfmt[i].precision, 
+				ret = snprintf(line+p, len - p, "%*.*f ",
+					       cfmt[i].width, cfmt[i].precision,
 					       cats->pos[POS_DX]);
 			else
 				ret = blank_field(line+p, len - p, cfmt[i].width+1);
@@ -774,8 +774,8 @@ static int tab_snprint_star(char *line, int len, struct cat_star *cats,
 			if (cats == NULL)
 				break;
 			if (cats->flags & INFO_POS)
-				ret = snprintf(line+p, len - p, "%*.*f ", 
-					       cfmt[i].width, cfmt[i].precision, 
+				ret = snprintf(line+p, len - p, "%*.*f ",
+					       cfmt[i].width, cfmt[i].precision,
 					       cats->pos[POS_DY]);
 			else
 				ret = blank_field(line+p, len - p, cfmt[i].width+1);
@@ -788,8 +788,8 @@ static int tab_snprint_star(char *line, int len, struct cat_star *cats,
 			if (cats == NULL)
 				break;
 			if (cats->flags & INFO_DIFFAM)
-				ret = snprintf(line+p, len - p, "%*.*f ", 
-					       cfmt[i].width, cfmt[i].precision, 
+				ret = snprintf(line+p, len - p, "%*.*f ",
+					       cfmt[i].width, cfmt[i].precision,
 					       cats->diffam);
 			else
 				ret = blank_field(line+p, len - p, cfmt[i].width+1);
@@ -802,8 +802,8 @@ static int tab_snprint_star(char *line, int len, struct cat_star *cats,
 			if (cats == NULL)
 				break;
 			if (cats->flags & INFO_SKY)
-				ret = snprintf(line+p, len - p, "%*.*f ", 
-					       cfmt[i].width, cfmt[i].precision, 
+				ret = snprintf(line+p, len - p, "%*.*f ",
+					       cfmt[i].width, cfmt[i].precision,
 					       cats->sky);
 			else
 				ret = blank_field(line+p, len - p, cfmt[i].width+1);
@@ -835,7 +835,7 @@ static int tab_snprint_star(char *line, int len, struct cat_star *cats,
 				*(line+p+1) = 0;
 				p++;
 			}
-			ret = flags_field(line + p, len - p, cfmt[i].width, cats->flags, 
+			ret = flags_field(line + p, len - p, cfmt[i].width, cats->flags,
 					  cat_flag_names);
 			break;
 		}
@@ -849,7 +849,7 @@ static int tab_snprint_star(char *line, int len, struct cat_star *cats,
 
 #define DB_FIELD 256
 
-/* extract the data portion of a <token>=<data> field from text into out 
+/* extract the data portion of a <token>=<data> field from text into out
  * (max n-1 characters) */
 static void extract_field(char *text, char *out, int n, char *token)
 {
@@ -899,7 +899,7 @@ int recipe_to_aavso_db(FILE *inf, FILE *outf)
 	char n[DB_FIELD];
 	char w[DB_FIELD];
 	char p[DB_FIELD];
-	char f[DB_FIELD];
+//	char f[DB_FIELD];
 	char sp[DB_FIELD];
 	char sc[DB_FIELD];
 	char sn[DB_FIELD];
@@ -909,7 +909,7 @@ int recipe_to_aavso_db(FILE *inf, FILE *outf)
 	char coord[64];
 
 
-	d[0] = 0; s[0] = 0; t[0] = 0; n[0] = 0; w[0] = 0; p[0] = 0; f[0] = 0;
+	d[0] = 0; s[0] = 0; t[0] = 0; n[0] = 0; w[0] = 0; p[0] = 0; //f[0] = 0;
 
 	do {
 		stf = stf_read_frame(inf);
@@ -934,7 +934,7 @@ int recipe_to_aavso_db(FILE *inf, FILE *outf)
 		for (sl = stars; sl != NULL; sl = sl->next) {
 			cats = CAT_STAR(sl->data);
 			ret ++;
-			sp[0] = 0; sn[0] = 0; si[0] = 0; 
+			sp[0] = 0; sn[0] = 0; si[0] = 0;
 			extract_field(cats->comments, sp, DB_FIELD, "p=");
 			extract_field(cats->comments, sn, DB_FIELD, "n=");
 			extract_field(cats->comments, si, DB_FIELD, "i=");

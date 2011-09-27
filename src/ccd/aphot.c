@@ -487,8 +487,8 @@ int aperture_photometry(struct ccd_frame *fr, struct star *s,
 {
 	double rm;
 	int ret, i;
-	double skn, rdn;
 	double cx, cy, cxerr=0.0, cyerr=0.0;
+//	double skn, rdn;
 
 	rm = ceil(p->r3) + 1;
 
@@ -559,8 +559,8 @@ int aperture_photometry(struct ccd_frame *fr, struct star *s,
 	s->aph.absmag = flux_to_absmag(s->aph.star);
 
 // compute limiting magnitude as the magnitude at which the SNR = 1
-	skn = sqr(s->aph.star_all * s->aph.sky_err);
-	rdn = s->aph.star_all * sqr(fr->exp.rdnoise);
+//	skn = sqr(s->aph.star_all * s->aph.sky_err);
+//	rdn = s->aph.star_all * sqr(fr->exp.rdnoise);
 //	d3_printf("mag: %.4g; star error before log: %.3f\n", s->aph.star,
 //		  s->aph.star_err / s->aph.star);
 // temporary magerr that doesn't include scintillation

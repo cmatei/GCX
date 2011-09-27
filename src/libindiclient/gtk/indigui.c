@@ -120,7 +120,6 @@ static int indigui_get_switch_type(struct indi_prop_t *iprop)
 void indigui_update_widget(struct indi_prop_t *iprop)
 {
 	void *value;
-	GtkWidget *entry;
 	GtkWidget *state_label;
 	indi_list *isl;
 	char val[80];
@@ -135,11 +134,9 @@ void indigui_update_widget(struct indi_prop_t *iprop)
 		value = (GtkWidget *)g_object_get_data(G_OBJECT (iprop->widget), elem->name);
 		switch (iprop->type) {
 		case INDI_PROP_TEXT:
-			entry = (GtkWidget *)g_object_get_data(G_OBJECT (value), "entry");
 			gtk_label_set_text(GTK_LABEL (value), elem->value.str);
 			break;
 		case INDI_PROP_NUMBER:
-			entry = (GtkWidget *)g_object_get_data(G_OBJECT (value), "entry");
 			sprintf(val, "%f", elem->value.num.value);
 			gtk_label_set_text(GTK_LABEL (value), val);
 			break;

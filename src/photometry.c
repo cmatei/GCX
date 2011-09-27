@@ -464,7 +464,7 @@ struct stf * run_phot(gpointer window, struct wcs *wcs, struct gui_star_list *gs
 	int all;
 	struct cat_star *cats;
 	struct gui_star *gs;
-	struct bad_pix_map *bpmap;
+//	struct bad_pix_map *bpmap;
 //	double scint;
 	struct stf *stf;
 	struct ap_params apdef;
@@ -472,7 +472,7 @@ struct stf * run_phot(gpointer window, struct wcs *wcs, struct gui_star_list *gs
 	char *seq;
 
 
-	bpmap = g_object_get_data(G_OBJECT(window), "bad_pix_map");
+//	bpmap = g_object_get_data(G_OBJECT(window), "bad_pix_map");
 
 	apsl = gui_stars_of_type(gsl, TYPE_MASK_PHOT);
 	all = g_slist_length(apsl);
@@ -541,7 +541,6 @@ static void rep_mbds(char *fn, gpointer data, unsigned action)
 	struct mband_dataset *mbds;
 	struct o_frame *ofr;
 	char qu[1024];
-	int ret;
 
 	d3_printf("Report action %x fn:%s\n", action, fn);
 
@@ -576,7 +575,7 @@ static void rep_mbds(char *fn, gpointer data, unsigned action)
 		error_beep();
 		return;
 	}
-	ret = mbds_report_from_ofrs(mbds, repfp, ofrs, action);
+	mbds_report_from_ofrs(mbds, repfp, ofrs, action);
 	g_list_free(ofrs);
 	fclose(repfp);
 }

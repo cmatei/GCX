@@ -618,7 +618,6 @@ int main(int ac, char **av)
 	char tobj[1024] = ""; 	/* object we set as target in the rcp */
 	float tycrcp_box = 0.0;
 	float cat_box = 0.0;
-	int make_gpsf = 1;
 
 	char *rc_fn = NULL;
 	char oc;
@@ -707,7 +706,7 @@ int main(int ac, char **av)
 			sscanf(optarg, "%f", &mag_limit);
 			break;
 		case '<':
-			make_gpsf = 1;
+			//make_gpsf = 1;
 			break;
 		case ')':
 //			test_query();

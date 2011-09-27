@@ -785,12 +785,11 @@ int set_par_by_name(char *line)
 {
 	ParParseStat state = P_START;
 	char *text, *start, *end;
-	int ret = 0, len, token;
+	int ret = 0, token;
 	GcxPar pp; /* tree we're reading in */
 	GcxPar p; /* current item we read in */
 
 	pp = p = PAR_FIRST;
-	len = strlen(line);
 	ret = 0;
 	state = P_NLINE;
 	text = line;

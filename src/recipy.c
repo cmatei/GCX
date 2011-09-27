@@ -1,23 +1,23 @@
 /*******************************************************************************
   Copyright(c) 2000 - 2003 Radu Corlan. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: radu@corlan.net
 *******************************************************************************/
 
@@ -62,8 +62,8 @@ char *symname[SYM_LAST] = SYM_NAMES_INIT;
 
 
 /* do the actual work of creating recipe. sl is the list of gui_stars */
-struct stf * create_recipe(GSList *gsl, struct wcs *wcs, int flags, 
-			   char * comment, char * target, char * seq, 
+struct stf * create_recipe(GSList *gsl, struct wcs *wcs, int flags,
+			   char * comment, char * target, char * seq,
 			   int w, int h)
 
 {
@@ -76,10 +76,10 @@ struct stf * create_recipe(GSList *gsl, struct wcs *wcs, int flags,
 
 	if (target != NULL && target[0] == 0)
 		target = NULL;
-		
+
 	for (sl = gsl; sl != NULL; sl = sl->next) {
 		gs = GUI_STAR(sl->data);
-		if ( ((flags & MKRCP_INCLUDE_OFF_FRAME) == 0) && w > 0 && h > 0 && 
+		if ( ((flags & MKRCP_INCLUDE_OFF_FRAME) == 0) && w > 0 && h > 0 &&
 		    (gs->x < 0 || gs->x > w || gs->y < 0 || gs->y > h) )
 		    continue;
 		if (flags & MKRCP_DET) {
@@ -159,7 +159,7 @@ struct stf * create_recipe(GSList *gsl, struct wcs *wcs, int flags,
 			}
 		}
 	}
-	d3_printf("tsl has %d gsl has %d (flags: %d)\n", g_list_length(tsl), 
+	d3_printf("tsl has %d gsl has %d (flags: %d)\n", g_list_length(tsl),
 		  g_slist_length(gsl), flags);
 	if (g_list_length(tsl) == 0) {
 		err_printf("No stars for recipe\n");
@@ -192,7 +192,7 @@ struct stf * create_recipe(GSList *gsl, struct wcs *wcs, int flags,
 
 
 /* read a recipe an return the number of stars read. Place pointers to newly-allocated
- * cat_stars in cst. Fill in the ra and dec of the field (if possible) 
+ * cat_stars in cst. Fill in the ra and dec of the field (if possible)
  * return -1 for fatal errors, otherwise try to scan as much as possible */
 
 /*static int read_new_rcp(struct cat_star *cst[], FILE *fp, int n, double *ra, double *dec)*/
@@ -202,17 +202,17 @@ struct stf * create_recipe(GSList *gsl, struct wcs *wcs, int flags,
 /* parse a 'constar' line into the cats. Return 0 if successfull */
 static int crack_constar(char *line, struct cat_star *cats)
 {
-	char comment[256];
+//	char comment[256];
 	char name[256], *smags = NULL;
 	float ra, dec, mag = 0.0, vmag=0.0;
 	int ret, i;
 
-	ret = sscanf(line+7, " %255s %f %f PMAG=%f", 
+	ret = sscanf(line+7, " %255s %f %f PMAG=%f",
 		     name, &ra, &dec, &mag);
 	if (ret < 4)
 		return -1;
 
-	comment[0] = 0;
+//	comment[0] = 0;
 	i=0;
 	while (line[i] != 0) {
 		if (!strncasecmp(line + i, "VMAG", 4))
@@ -253,7 +253,7 @@ static int crack_constar(char *line, struct cat_star *cats)
 	strncpy(cats->name, name, CAT_STAR_NAME_SZ);
 //	cats->flags = CAT_PHOTOMET;
 
-//	d3_printf("constar name:%s ra:%.4f dec:%.4f mag:%.4f smags:%s\n", 
+//	d3_printf("constar name:%s ra:%.4f dec:%.4f mag:%.4f smags:%s\n",
 //		  cats->name, cats->ra, cats->dec, cats->mag, cats->smags);
 	return 0;
 }
@@ -266,7 +266,7 @@ static int crack_varstar(char *line, char *line2, struct cat_star *cats)
 	float ra, dec, mag = 0.0;
 	int ret, i, k = 0;
 
-	ret = sscanf(line+7, " %255s %f %f %*cMAG=(%f", 
+	ret = sscanf(line+7, " %255s %f %f %*cMAG=(%f",
 		     name, &ra, &dec, &mag);
 	if (ret < 3)
 		return -1;
@@ -278,7 +278,7 @@ static int crack_varstar(char *line, char *line2, struct cat_star *cats)
 			break;
 		i++;
 	}
-	if (line[i] == 0) 
+	if (line[i] == 0)
 		goto end;
 	if (i > 1)
 		i--;
@@ -294,7 +294,7 @@ static int crack_varstar(char *line, char *line2, struct cat_star *cats)
 				break;
 			i++;
 		}
-		if (line2[i] == 0) 
+		if (line2[i] == 0)
 			goto end;
 		while (isprint(line2[i]) && line2[i] != ' ' && k < 255) {
 			comment[k++] = line2[i++];
@@ -311,13 +311,13 @@ end:
 	cats->comments = lstrndup(comment, k);
 	cats->flags = CAT_STAR_TYPE_APSTAR | CAT_VARIABLE;
 
-//	d3_printf("varstar name:%s ra:%.4f dec:%.4f mag:%.4f k=%d\ncomment:%s\n", 
+//	d3_printf("varstar name:%s ra:%.4f dec:%.4f mag:%.4f k=%d\ncomment:%s\n",
 //		  cats->name, cats->ra, cats->dec, cats->mag, k, cats->comments);
 	return 0;
 }
 
-/* read a avsomat-style rcp file and return it as 
- * at most n cat_stars 
+/* read a avsomat-style rcp file and return it as
+ * at most n cat_stars
  * in the supplied table. Return the number of stars found
  * or a negative error. name is the file name */
 int read_avsomat_rcp(struct cat_star *cst[], FILE *fp, int n)
@@ -358,7 +358,7 @@ int read_avsomat_rcp(struct cat_star *cst[], FILE *fp, int n)
 				cst[sn] = cats;
 				sn ++;
 				cats = NULL;
-			} 
+			}
 			free(line);
 			if (line2)
 				free(line2);
@@ -369,7 +369,7 @@ int read_avsomat_rcp(struct cat_star *cst[], FILE *fp, int n)
 				cst[sn] = cats;
 				sn ++;
 				cats = NULL;
-			} 
+			}
 			continue;
 		}
 	}
@@ -381,14 +381,14 @@ int read_avsomat_rcp(struct cat_star *cst[], FILE *fp, int n)
 /* convert an old style recipe to new. Return the number of stars written */
 /* TODO: convert to stf style */
 #define MAX_STARS_CONV 100000
-int convert_recipe(FILE *inf, FILE *outf) 
+int convert_recipe(FILE *inf, FILE *outf)
 {
 	return -1;
 /*
 	struct cat_star *csl[MAX_STARS_CONV];
 	int ret = 0, n, i;
 	double ra, dec;
-	struct wcs wcs; 
+	struct wcs wcs;
 
 	n = read_rcp(csl, inf, MAX_STARS_CONV, &ra, &dec);
 	if (n <= 0)
@@ -403,17 +403,17 @@ int convert_recipe(FILE *inf, FILE *outf)
 
 	for (i=0; i<n; i++) {
 		if (CATS_TYPE(csl[i]) == CAT_STAR_TYPE_APSTD)
-			ret += recipe_report_cat_star(outf, csl[i], 2, MKRCP_STD, 
+			ret += recipe_report_cat_star(outf, csl[i], 2, MKRCP_STD,
 						      1.0 * wcs.equinox);
 	}
 	for (i=0; i<n; i++) {
 		if (CATS_TYPE(csl[i]) == CAT_STAR_TYPE_APSTAR)
-			ret += recipe_report_cat_star(outf, csl[i], 2, MKRCP_TGT, 
+			ret += recipe_report_cat_star(outf, csl[i], 2, MKRCP_TGT,
 						      1.0 * wcs.equinox);
 	}
 	for (i=0; i<n; i++) {
 		if (CATS_TYPE(csl[i]) == CAT_STAR_TYPE_SREF)
-			ret += recipe_report_cat_star(outf, csl[i], 2, MKRCP_FIELD, 
+			ret += recipe_report_cat_star(outf, csl[i], 2, MKRCP_FIELD,
 						      1.0 * wcs.equinox);
 	}
 	for (i=0; i<n; i++) {
@@ -424,17 +424,17 @@ int convert_recipe(FILE *inf, FILE *outf)
 	fflush(outf);
 	return ret;
 */
-} 
+}
 
 static int mag_comp_fn (const void *a, const void *b)
 {
-	struct cat_star **ca = (struct cat_star **) a; 
-	struct cat_star **cb = (struct cat_star **) b; 
+	struct cat_star **ca = (struct cat_star **) a;
+	struct cat_star **cb = (struct cat_star **) b;
 	return ((*ca)->mag > (*cb)->mag) - ((*ca)->mag < (*cb)->mag);
 }
 
 #define MAX_STARS_READ 100000
-/* load stars from a donwloaded gsc2 text file; return the number of stars read 
+/* load stars from a donwloaded gsc2 text file; return the number of stars read
  * or -1 for an error; */
 int read_gsc2(struct cat_star *csl[], FILE *fp, int n, double *cra, double *cdec)
 {
@@ -459,9 +459,9 @@ int read_gsc2(struct cat_star *csl[], FILE *fp, int n, double *cra, double *cdec
 			break;
 
 		ret = sscanf(line, "%63s %f %f %*f %*f %f %*f %*f %*f %*f %f %f %f %f %f %f %f %f",
-			     id, &ra, &dec, &epoch, &fmag, &fmagerr, &jmag, &jmagerr, 
+			     id, &ra, &dec, &epoch, &fmag, &fmagerr, &jmag, &jmagerr,
 			     &vmag, &vmagerr, &nmag, &nmagerr);
-		if (ret != 12) 
+		if (ret != 12)
 			continue;
 
 		cats = cat_star_new();
@@ -503,7 +503,7 @@ int read_gsc2(struct cat_star *csl[], FILE *fp, int n, double *cra, double *cdec
 	}
 	for (i=0; i<n && i<sn; i++)
 		csl[i] = cst[i];
-	for (; i<sn; i++) 
+	for (; i<sn; i++)
 		cat_star_release(cst[i]);
 	return n < sn ? n : sn;
 }
@@ -545,9 +545,9 @@ int read_landolt_table(struct cat_star *csl[], FILE *fp, int n, double *cra, dou
 		ret = sscanf(line, "%s %s %s", id, ras, decs);
 		if (ret != 3)
 			continue;
-		ret = sscanf(line+46, "%f %*f %f %*f %f %*f %f %*f %f %*f %[^\n]",  
+		ret = sscanf(line+46, "%f %*f %f %*f %f %*f %f %*f %f %*f %[^\n]",
 			     &vmag, &bmag, &umag, &rmag, &imag, nam);
-		if (ret != 6) 
+		if (ret != 6)
 			continue;
 
 		if (dms_to_degrees(ras, &ra))
@@ -578,7 +578,7 @@ int read_landolt_table(struct cat_star *csl[], FILE *fp, int n, double *cra, dou
 	}
 	for (i=0; i<n && i<sn; i++)
 		csl[i] = cst[i];
-	for (; i<sn; i++) 
+	for (; i<sn; i++)
 		cat_star_release(cst[i]);
 	return n < sn ? n : sn;
 }
@@ -663,13 +663,13 @@ int read_varlist_table(struct cat_star *csl[], FILE *fp, int n, double *cra, dou
 		cats->equinox = 2000.0;
 		cats->flags = CAT_STAR_TYPE_CAT;
 		if (field[4] != 0)
-			ret = asprintf(&cats->comments, "p=%s i=%s %s", 
+			ret = asprintf(&cats->comments, "p=%s i=%s %s",
 				 line+field[2], line+field[3], line+field[4]);
 		else if (field[3] != 0)
-			ret = asprintf(&cats->comments, "p=%s i=%s", 
+			ret = asprintf(&cats->comments, "p=%s i=%s",
 				 line+field[2], line+field[3]);
 		else if (field[2] != 0)
-			ret = asprintf(&cats->comments, "p=%s", 
+			ret = asprintf(&cats->comments, "p=%s",
 				 line+field[2]);
 		if (ret == -1)
 			cats->comments = NULL;
@@ -678,7 +678,7 @@ int read_varlist_table(struct cat_star *csl[], FILE *fp, int n, double *cra, dou
 	}
 	for (i=0; i<n && i<sn; i++)
 		csl[i] = cst[i];
-	for (; i<sn; i++) 
+	for (; i<sn; i++)
 		cat_star_release(cst[i]);
 	return n < sn ? n : sn;
 }
@@ -717,10 +717,10 @@ int read_henden_table(struct cat_star *csl[], FILE *fp, int n, double *cra, doub
 		ret = sscanf(line, "%s %f %f %f %f", id, &ra, &raerr, &dec, &decerr);
 		if (ret != 5)
 			continue;
-		ret = sscanf(line+46, "%*f %f %f %f %f %f %f %f %f %f %f",  
+		ret = sscanf(line+46, "%*f %f %f %f %f %f %f %f %f %f %f",
 			     &vmag, &bvmag, &ubmag, &vrmag, &rimag,
 			     &verr, &bverr, &uberr, &vrerr, &rierr);
-		if (ret != 10) 
+		if (ret != 10)
 			continue;
 
 		verr = fabs(verr);
@@ -749,44 +749,44 @@ int read_henden_table(struct cat_star *csl[], FILE *fp, int n, double *cra, doub
 		i = 0;
 		nc = 255;
 		if (vmag < 90.0 && verr < 9 && i < nc) {
-			i += snprintf(cats->smags + i, nc-i, 
+			i += snprintf(cats->smags + i, nc-i,
 				      "v=%.3f/%.3f",
 				      vmag, verr);
 		}
 		if (bvmag < 90.0 && bverr < 9 && i < nc) {
-			i += snprintf(cats->smags + i, nc-i, 
+			i += snprintf(cats->smags + i, nc-i,
 				      " b-v=%.3f/%.3f",
 				      bvmag, bverr);
 			if (vmag < 90.0 && verr < 9 && i < nc) {
-				i += snprintf(cats->smags + i, nc-i, 
+				i += snprintf(cats->smags + i, nc-i,
 					      " b=%.3f/%.3f",
 					      vmag + bvmag, sqrt(sqr(verr)+sqr(bverr)));
 			}
-			
+
 		}
 		if (ubmag < 90.0 && uberr < 9 && i < nc) {
-			i += snprintf(cats->smags + i, nc-i, 
+			i += snprintf(cats->smags + i, nc-i,
 				      " u-b=%.3f/%.3f",
 				      ubmag, uberr);
 		}
 		if (vrmag < 90.0 && vrerr < 9 && i < nc) {
-			i += snprintf(cats->smags + i, nc-i, 
+			i += snprintf(cats->smags + i, nc-i,
 				      " v-r=%.3f/%.3f",
 				      vrmag, vrerr);
 			if (vmag < 90.0 && verr < 9 && i < nc) {
-				i += snprintf(cats->smags + i, nc-i, 
+				i += snprintf(cats->smags + i, nc-i,
 					      " r=%.3f/%.3f",
 					      vmag - vrmag, sqrt(sqr(verr)+sqr(vrerr)));
 			}
 		}
 		if (rimag < 90.0 && rierr < 9 && i < nc) {
-			i += snprintf(cats->smags + i, nc-i, 
+			i += snprintf(cats->smags + i, nc-i,
 				      " r-i=%.3f/%.3f",
 				      rimag, rierr);
 			if (vmag < 90.0 && verr < 9 && vrmag < 90.0 && vrerr < 9.0 && i < nc) {
-				i += snprintf(cats->smags + i, nc-i, 
+				i += snprintf(cats->smags + i, nc-i,
 					      " i=%.3f/%.3f",
-					      vmag - vrmag - rimag, 
+					      vmag - vrmag - rimag,
 					      sqrt(sqr(verr)+sqr(vrerr)+sqr(rierr)));
 			}
 		}
@@ -796,7 +796,7 @@ int read_henden_table(struct cat_star *csl[], FILE *fp, int n, double *cra, doub
 	}
 	for (i=0; i<n && i<sn; i++)
 		csl[i] = cst[i];
-	for (; i<sn; i++) 
+	for (; i<sn; i++)
 		cat_star_release(cst[i]);
 	return n < sn ? n : sn;
 }
@@ -887,7 +887,7 @@ int read_sumner_table(struct cat_star *csl[], FILE *fp, int n, double *cra, doub
 
 		/* look for a star line */
 		ret = sscanf(line, "%f %f %f %f %f %f %f %f %f %f %f %f %f %f",
-			     &c1, &c2, &c3, &c4, &c5, &c6, &c7, &c8, 
+			     &c1, &c2, &c3, &c4, &c5, &c6, &c7, &c8,
 			     &c9, &c10, &c11, &c12, &c13, &c14);
 		if (ret < 14)
 			continue;
@@ -897,9 +897,9 @@ int read_sumner_table(struct cat_star *csl[], FILE *fp, int n, double *cra, doub
 		                   c11, c12, c11+c13, sqrt(sqr(c12)+ sqr(c14))))
 			cats->smags = NULL;
 		cats->ra = 15 * c2 + 15 * c3 / 60 + 15 * c4 / 3600;
-		if (c5 < 0) 
+		if (c5 < 0)
 			cats->dec = -(c6 / 60 + c7 / 3600 - c5);
-		else 
+		else
 			cats->dec = (c6 / 60 + c7 / 3600 + c5);
 		cats->mag = c11;
 		cats->equinox = 2000.0;
@@ -923,7 +923,7 @@ int read_sumner_table(struct cat_star *csl[], FILE *fp, int n, double *cra, doub
 
 		/* look for a star line */
 		ret = sscanf(line, "%f %f %f %f %f %f %f %f %f %f %f %f %f",
-			     &c2, &c3, &c4, &c5, &c6, &c7, &c8, 
+			     &c2, &c3, &c4, &c5, &c6, &c7, &c8,
 			     &c9, &c10, &c11, &c12, &c13, &c14);
 		if (ret < 13)
 			continue;
@@ -933,9 +933,9 @@ int read_sumner_table(struct cat_star *csl[], FILE *fp, int n, double *cra, doub
 		                   c11, c12, c11+c13, sqrt(sqr(c12)+ sqr(c14))))
 			cats->smags = NULL;
 		cats->ra = 15 * c2 + 15 * c3 / 60 + 15 * c4 / 3600;
-		if (c5 < 0) 
+		if (c5 < 0)
 			cats->dec = -(c6 / 60 + c7 / 3600 - c5);
-		else 
+		else
 			cats->dec = (c6 / 60 + c7 / 3600 + c5);
 		cats->mag = c11;
 		cats->equinox = 2000.0;
@@ -945,7 +945,7 @@ int read_sumner_table(struct cat_star *csl[], FILE *fp, int n, double *cra, doub
 	}
 	for (i=0; i<n && i<sn; i++)
 		csl[i] = cst[i];
-	for (; i<sn; i++) 
+	for (; i<sn; i++)
 		cat_star_release(cst[i]);
 	return n < sn ? n : sn;
 }
@@ -964,7 +964,7 @@ static double demungle_coord(double coord)
 		sign = -1.0;
 		coord = -coord;
 	}
-	
+
 	d = coord / 10000;
 	m = (coord - 10000 * d) / 100;
 	s = coord - 10000 * d - 100 * m;
@@ -983,7 +983,7 @@ static int read_gcvs_table(struct cat_star *csl[], FILE *fp, int n, double *cra,
 	char *line = NULL;
 	double ra, dec, mmax, mmin;
 	char phot[4];
-	double period;
+//	double period;
 	char spec[24];
 	char type[24];
 	char id[64];
@@ -1028,7 +1028,7 @@ static int read_gcvs_table(struct cat_star *csl[], FILE *fp, int n, double *cra,
 			d4_printf("bad gcvs ra/dec\n");
 			continue;
 		}
-	
+
 		if (line[75] == '(')
 			amp = 1;
 		else
@@ -1053,7 +1053,7 @@ static int read_gcvs_table(struct cat_star *csl[], FILE *fp, int n, double *cra,
 		}
 		type[k] = 0;
 
-		period = strtod(line+110, NULL);
+//		period = strtod(line+110, NULL);
 
 		k=0;
 		for (i = 137; i < 154; i++) {
@@ -1092,14 +1092,14 @@ static int read_gcvs_table(struct cat_star *csl[], FILE *fp, int n, double *cra,
 		}
 		if (ret == -1)
 			cats->comments = NULL;
-		
+
 		cst[sn]=cats;
 		sn ++;
 		d4_printf("got %s [%s]\n", cats->name, cats->comments);
 	}
 	for (i=0; i<n && i<sn; i++)
 		csl[i] = cst[i];
-	for (; i<sn; i++) 
+	for (; i<sn; i++)
 		cat_star_release(cst[i]);
 	return n < sn ? n : sn;
 }
@@ -1130,7 +1130,7 @@ static int read_gcvs_pos_table(struct cat_star *csl[], FILE *fp, int n, double *
 		for (i = 0; line[i] != 0; i++)
 			if (line[i] == '\t')
 				break;
-		
+
 		if (line[i++] == 0)
 			continue;
 
@@ -1222,15 +1222,15 @@ static int read_gcvs_pos_table(struct cat_star *csl[], FILE *fp, int n, double *
 	}
 	for (i=0; i<n && i<sn; i++)
 		csl[i] = cst[i];
-	for (; i<sn; i++) 
+	for (; i<sn; i++)
 		cat_star_release(cst[i]);
 	return n < sn ? n : sn;
 }
 
 
-/* convert a catalog table file to recipe. Return the number of stars written 
+/* convert a catalog table file to recipe. Return the number of stars written
  * this function works with a particular file format only */
-int convert_catalog(FILE *inf, FILE *outf, char *catname, double mag_limit) 
+int convert_catalog(FILE *inf, FILE *outf, char *catname, double mag_limit)
 {
 	struct cat_star *csl[MAX_STARS_CONV];
 	int ret = 0, n = -1, i;
@@ -1270,29 +1270,29 @@ int convert_catalog(FILE *inf, FILE *outf, char *catname, double mag_limit)
 		ret ++;
 	}
 
-	snprintf(comment, 63, "converted from %s, mag_limit=%.1f", 
+	snprintf(comment, 63, "converted from %s, mag_limit=%.1f",
 		 catname, mag_limit);
 	st = stf_append_string(NULL, SYM_COMMENTS, comment);
 	stf = stf_append_list(NULL, SYM_CATALOG, st);
-	if (seq != NULL) 
+	if (seq != NULL)
 		stf_append_string(stf, SYM_SEQUENCE, seq);
 	stf_append_glist(stf, SYM_STARS, sl);
 	stf_fprint(outf, stf, 0, 0);
 	stf_free_all(stf);
 	fflush(outf);
 	return ret;
-} 
+}
 
 
 /* output the internal catalog in gcx format. Return the number of stars written */
 /* mag_limit is ignored here */
-int output_internal_catalog(FILE *outf, double mag_limit) 
+int output_internal_catalog(FILE *outf, double mag_limit)
 {
 	int ret = 0;
 	struct catalog *loc;
 	GList *lcat = NULL;
 	struct stf *stf, *st;
-	
+
 
 	loc = open_catalog("local");
 	g_return_val_if_fail(loc != NULL, -1);
@@ -1302,14 +1302,14 @@ int output_internal_catalog(FILE *outf, double mag_limit)
 	st = stf_append_string(NULL, SYM_COMMENTS, "gcx internal catalog output");
 	stf = stf_append_list(NULL, SYM_CATALOG, st);
 	st = stf_append_glist(stf, SYM_STARS, lcat);
-	
+
 	stf_fprint(outf, stf, 0, 0);
 	STF_SET_NIL(st->next);
 	stf_free(stf);
 
 	fflush(outf);
 	return ret;
-} 
+}
 
 
 /*
@@ -1381,7 +1381,7 @@ static GList * merge_star(GList *csl, struct cat_star *new)
 					cat_star_ref(new);
 					sl->data = new;
 				}
-			} else if (CATS_TYPE(cats) == CAT_STAR_TYPE_APSTD 
+			} else if (CATS_TYPE(cats) == CAT_STAR_TYPE_APSTD
 				   || CATS_TYPE(cats) == CAT_STAR_TYPE_APSTAR) {
 				if (CATS_TYPE(new) == CAT_STAR_TYPE_APSTD
 				    || CATS_TYPE(new) == CAT_STAR_TYPE_APSTAR) {
@@ -1391,7 +1391,7 @@ static GList * merge_star(GList *csl, struct cat_star *new)
 				}
 			}
 			break;
-		} 
+		}
 	}
 	if (sl == NULL) {
 		cat_star_ref(new);
@@ -1490,7 +1490,7 @@ int rcp_set_target(FILE *old, char *obj, FILE *outf, double mag_limit)
 	stf_append_double(sto, SYM_EQUINOX, cats->equinox);
 
 	st = stf_find(stfa, 0, SYM_RECIPE);
-	if (st == NULL) 
+	if (st == NULL)
 		st = stf_find(stfa, 0, SYM_CATALOG);
 	if (st == NULL)
 		st = stf_find(stfa, 0, SYM_OBSERVATION);
@@ -1519,7 +1519,7 @@ int rcp_set_target(FILE *old, char *obj, FILE *outf, double mag_limit)
 }
 
 /* create a rcp using tycho field star from a tycrcp_box sized box around obj */
-struct stf *make_tyc_stf(char *obj, double box, double mag_limit) 
+struct stf *make_tyc_stf(char *obj, double box, double mag_limit)
 {
  	struct cat_star *csl[MAX_STARS_CONV];
 	GList *tsl = NULL;
@@ -1528,7 +1528,7 @@ struct stf *make_tyc_stf(char *obj, double box, double mag_limit)
 	struct cat_star *cats;
 	struct stf *st, *stf;
 	char ras[64], decs[64];
-		
+
 	cats = get_object_by_name(obj);
 	if (cats == NULL) {
 		err_printf("make_tyc_rcp: cannot find object %s\n", obj);
@@ -1544,10 +1544,10 @@ struct stf *make_tyc_stf(char *obj, double box, double mag_limit)
 	}
 	d3_printf("tycho2 opened\n");
 
-	n = (* cat->cat_search)(csl, cat, cats->ra, cats->dec, box, 
+	n = (* cat->cat_search)(csl, cat, cats->ra, cats->dec, box,
 				MAX_STARS_CONV);
 
-	d3_printf ("got %d from cat_search\n", n); 
+	d3_printf ("got %d from cat_search\n", n);
 	for (i = 0; i < n; i++) {
 		csl[i]->flags = (csl[i]->flags & ~CAT_STAR_TYPE_MASK) | CAT_STAR_TYPE_APSTD;
 		tsl = g_list_append(tsl, csl[i]);
@@ -1577,12 +1577,12 @@ struct stf *make_tyc_stf(char *obj, double box, double mag_limit)
 }
 
 /* create a rcp using tycho field star from a tycrcp_box sized box around obj */
-int make_tyc_rcp(char *obj, double box, FILE *outf, double mag_limit) 
+int make_tyc_rcp(char *obj, double box, FILE *outf, double mag_limit)
 {
 	struct stf *stf;
 
 	stf = make_tyc_stf(obj, box, mag_limit);
-	if (stf == NULL) 
+	if (stf == NULL)
 		return -1;
 	stf_fprint(outf, stf, 0, 0);
 	fflush(outf);

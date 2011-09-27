@@ -69,6 +69,7 @@ static void on_cell_toggled (GtkCellRendererToggle *cell,
 	GtkTreeIter iter;
 	GtkTreePath *path;
 	GtkTreeModel *model;
+	int value;
 
 	path = gtk_tree_path_new_from_string (path_str);
 
@@ -78,12 +79,9 @@ static void on_cell_toggled (GtkCellRendererToggle *cell,
 	/* get toggled iter */
 	gtk_tree_model_get_iter (model, &iter, path);
 
-	if (&iter != NULL) {
-		int value;
-		gtk_tree_model_get(model, &iter, 0, &value, -1);
-		value ^= 1;
-		gtk_tree_store_set(GTK_TREE_STORE (model), &iter, 0, value, -1);
-	}
+	gtk_tree_model_get(model, &iter, 0, &value, -1);
+	value ^= 1;
+	gtk_tree_store_set(GTK_TREE_STORE (model), &iter, 0, value, -1);
 
 	/* clean up */
 	gtk_tree_path_free (path);

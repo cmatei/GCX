@@ -305,11 +305,7 @@ static int wcs_dialog_to_wcs(GtkWidget *dialog, struct wcs *wcs)
 
 static void wcs_ok_cb(GtkWidget *wid, gpointer dialog)
 {
-	int ret;
-
-	ret = wcsentry_cb(NULL, dialog);
-//	if (ret == 0)
-//		close_wcs_dialog(NULL, dialog);
+	wcsentry_cb(NULL, dialog);
 }
 
 /* called on entry activate */

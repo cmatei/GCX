@@ -1153,11 +1153,11 @@ void plot_profile(GtkWidget *window, GSList *found)
  */
 static void star_popup_cb(guint action, GtkWidget *window)
 {
-	GSList *found, *sl;
+	GSList *found;// *sl;
 
 	found = g_object_get_data (G_OBJECT(window), "popup_star_list");
 
-	sl = found;
+//	sl = found;
 	switch(action) {
 	case STARP_EDIT_AP:
 		star_edit_dialog(window, found);
@@ -1299,7 +1299,7 @@ static void do_sources_popup(GtkWidget *window, GtkWidget *star_popup,
 	struct gui_star *gs;
 	struct wcs *wcs;
 
-	int delp = 0, pairp = 0, unmarkp = 0, editp = 0, mkstdp = 0;
+	int delp = 0, pairp = 0, unmarkp = 0, editp = 0;//, mkstdp = 0;
 
 	push = g_object_get_data (G_OBJECT(window), "popup_star_list");
 	g_slist_free (push);
@@ -1335,14 +1335,16 @@ static void do_sources_popup(GtkWidget *window, GtkWidget *star_popup,
 			delp = 1;
 		}
 		if ((wcs != NULL) && (wcs->wcsset & WCS_VALID)) {
-			mkstdp = 1;
+			//mkstdp = 1;
 			editp = 1;
 		}
 		if (TYPE_MASK_GSTAR(gs) & TYPE_MASK_CATREF) {
 			editp = 1;
+#if 0
 			mkstdp = 1;
 			if (TYPE_MASK_GSTAR(gs) & TYPE_MASK(STAR_TYPE_APSTD))
 				mkstdp = 0;
+#endif
 
 			/* see if we have a possible pair in the selection */
 			pair = filter_selection(selection, TYPE_MASK_FRSTAR, 0, 0);
@@ -1515,7 +1517,6 @@ void detect_add_star(GtkWidget *window, double x, double y)
 /* print a short info line about the star */
 static void sprint_star(char *buf, int len, struct gui_star *gs, struct wcs *wcs)
 {
-	int pos = 0;
 	char ras[32];
 	char decs[32];
 	double xpos, ypos;
@@ -1533,16 +1534,16 @@ static void sprint_star(char *buf, int len, struct gui_star *gs, struct wcs *wcs
 		return;
 	}
 	if (wcs == NULL || wcs->wcsset == WCS_INVALID) {
-		pos = snprintf(buf, len, "Field Star at x:%.1f y:%.1f size:%.1f",
-			      gs->x, gs->y, gs->size);
+		snprintf(buf, len, "Field Star at x:%.1f y:%.1f size:%.1f",
+			 gs->x, gs->y, gs->size);
 	} else {
 		w_worldpos(wcs, gs->x, gs->y, &xpos, &ypos);
 		degrees_to_dms_pr(ras, xpos / 15.0, 2);
 		degrees_to_dms_pr(decs, ypos, 1);
-		pos = snprintf(buf, len, "Field Star [%.1f,%.1f] Ra:%s Dec:%s %s size:%.1f",
-			      gs->x, gs->y, ras, decs,
-			      (wcs->wcsset & WCS_VALID) ? "" : "(uncertain)",
-			      gs->size);
+		snprintf(buf, len, "Field Star [%.1f,%.1f] Ra:%s Dec:%s %s size:%.1f",
+			 gs->x, gs->y, ras, decs,
+			 (wcs->wcsset & WCS_VALID) ? "" : "(uncertain)",
+			 gs->size);
 	}
 	return;
 }

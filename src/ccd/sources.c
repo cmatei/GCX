@@ -67,7 +67,6 @@ static int thin_ring_stats(struct ccd_frame *fr, int x, int y,
 	double sum, sumsq, r;
 	int dy2, rsq1, rsq2;
 	double ring[RING_MAX];
-	int all;
 
 // round the coords off to make sure we use the same number of pixels for the
 // flux measurement
@@ -91,8 +90,6 @@ static int thin_ring_stats(struct ccd_frame *fr, int x, int y,
 		xe = w - 1;
 	if (ye >= fr->h)
 		ye = fr->h - 1;
-
-	all = fr->h * fr->w;
 
 // walk the ring and collect statistics
 	sum=0.0;

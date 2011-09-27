@@ -1,23 +1,23 @@
 /*******************************************************************************
   Copyright(c) 2000 - 2003 Radu Corlan. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: radu@corlan.net
 *******************************************************************************/
 
@@ -50,15 +50,15 @@ struct gui_star *detect_guide_star(struct ccd_frame *fr, struct region *reg)
 	struct sources *src;
  	double score, max_score = 0;
 	int gsi = 0, i = 0;
-	double xc, yc, rf, ds;
-	double ref_flux = 0.0, ref_fwhm = 0.0;
+	double xc, yc, ds; //rf
+//	double ref_flux = 0.0, ref_fwhm = 0.0;
 
 	src = new_sources(P_INT(SD_MAX_STARS));
 	if (src == NULL) {
 		err_printf("detect_guide_star: cannot create sources\n");
 		return NULL;
 	}
-	rf = (fr->w * fr->w + fr->h * fr->h) / PI / 2;
+//	rf = (fr->w * fr->w + fr->h * fr->h) / PI / 2;
 	xc = fr->w / 2;
 	yc = fr->h / 2;
 	extract_stars(fr, reg, 0, P_DBL(SD_SNR), src);
@@ -67,8 +67,8 @@ struct gui_star *detect_guide_star(struct ccd_frame *fr, struct region *reg)
 	for (i = 0; i < src->ns; i++) {
 		if (src->s[i].peak > P_DBL(AP_SATURATION))
 			continue;
-		ref_flux = src->s[i].flux;
-		ref_fwhm = src->s[i].fwhm;
+//		ref_flux = src->s[i].flux;
+//		ref_fwhm = src->s[i].fwhm;
 		break;
 	}
 	for (i = 0; i < src->ns; i++) {
@@ -78,7 +78,7 @@ struct gui_star *detect_guide_star(struct ccd_frame *fr, struct region *reg)
 		yc = cos((src->s[i].y - fr->h / 2) / fr->h * PI);
 		ds = sqr(xc * yc);
 		score = src->s[i].flux * ds;
-		d3_printf("%5.1f %5.1f ds: %.3f score: %.1f\n", 
+		d3_printf("%5.1f %5.1f ds: %.3f score: %.1f\n",
 			  src->s[i].x, src->s[i].y, ds, score);
 		if (score > max_score) {
 			max_score = score;
@@ -99,7 +99,7 @@ struct gui_star *detect_guide_star(struct ccd_frame *fr, struct region *reg)
 }
 
 /* compute first moments of disk of radius r */
-static int star_first_moments(struct ccd_frame *fr, double x, double y, 
+static int star_first_moments(struct ccd_frame *fr, double x, double y,
 		double r, double *mxp, double *myp, double *fluxp, int *npixp)
 {
 	int ix, iy;
@@ -119,12 +119,12 @@ static int star_first_moments(struct ccd_frame *fr, double x, double y,
 // flux measurement
 
 	xc = (int)floor(x+0.5);
-	yc = (int)floor(y+0.5); 
+	yc = (int)floor(y+0.5);
 
-	xs = (int)(xc-r); 
-	xe = (int)(xc+r+1); 
-	ys = (int)(yc-r); 
-	ye = (int)(yc+r+1); 
+	xs = (int)(xc-r);
+	xe = (int)(xc+r+1);
+	ys = (int)(yc-r);
+	ye = (int)(yc+r+1);
 	w = fr->w;
 
 	if (xs < 0)
@@ -172,7 +172,7 @@ static int star_first_moments(struct ccd_frame *fr, double x, double y,
  * within the centroid area, 1 if it was found elsewhere in the guiding box and -1
  * if it couldn't been found anymore. */
 
-int guide_star_position_centroid(struct ccd_frame *fr, double x, double y, 
+int guide_star_position_centroid(struct ccd_frame *fr, double x, double y,
 				 double *dx, double *dy, double *derr)
 {
 	struct star s;
@@ -188,20 +188,20 @@ int guide_star_position_centroid(struct ccd_frame *fr, double x, double y,
 	}
 	d = sqrt(sqr(x - s.x) + sqr(y - s.y));
 	if (d > 0.7 * P_INT(GUIDE_CENTROID_AREA)) {
-		/* we just use the position from get_star, as 
+		/* we just use the position from get_star, as
 		 * it's not possible to use the same area for
 		 * centroiding */
 		*dx = s.x - x;
 		*dy = s.y - y;
-		snr = fabs(s.flux) / 
-			sqrt((fabs(s.flux)) / (fr->exp.scale) + 
+		snr = fabs(s.flux) /
+			sqrt((fabs(s.flux)) / (fr->exp.scale) +
 			     s.npix * sqr(fr->exp.rdnoise));
 		*derr = 4 * 0.42 * s.fwhm / snr;
 		/* we quadruple the error to account for the fact that the star
 		 * does not use the same centroid area as the ref position */
 		return 1;
 	} else {
-		/* we recalculate the centroid using a fixed area around the 
+		/* we recalculate the centroid using a fixed area around the
 		 * target */
 		double cx, cy, flux;
 		int npix;
@@ -209,8 +209,8 @@ int guide_star_position_centroid(struct ccd_frame *fr, double x, double y,
 				   &cx, &cy, &flux, &npix);
 		*dx = cx - x;
 		*dy = cy - y;
-		snr = fabs(flux - s.sky * npix) / 
-			sqrt((fabs(s.flux - s.sky * npix)) / (fr->exp.scale) + 
+		snr = fabs(flux - s.sky * npix) /
+			sqrt((fabs(s.flux - s.sky * npix)) / (fr->exp.scale) +
 			     npix * sqr(fr->exp.rdnoise));
 		*derr = 0.42 * s.fwhm / snr;
 		return 0;
@@ -222,12 +222,12 @@ int guide_star_position_centroid(struct ccd_frame *fr, double x, double y,
  * 0 for success, negative codes for errors */
 int guider_get_errpoint(struct guider *guider, struct ccd_frame *fr)
 {
-	return 0;	
+	return 0;
 }
 
 
 /* tell the guider to use the star at x,y as a guide target */
-void guider_set_target(struct guider *guider, struct ccd_frame *fr, 
+void guider_set_target(struct guider *guider, struct ccd_frame *fr,
 		       struct gui_star *gs)
 {
 	double dx, dy, derr;

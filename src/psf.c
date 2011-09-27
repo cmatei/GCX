@@ -489,7 +489,7 @@ int radial_profile(struct ccd_frame *fr, double x, double y, double r,
 	int ret, ns = 0;
 	float d;
 	int ri, i;
-	int ix, iy, xs, ys, xe, ye;
+	int ix, iy, xs, ys;// xe, ye;
 	double max = 1.0;
 
 	ap_params_from_par(&apdef);
@@ -511,8 +511,8 @@ int radial_profile(struct ccd_frame *fr, double x, double y, double r,
 	ri = 2 * ceil(r);
 	xs = floor(x - r);
 	ys = floor(y - r);
-	xe = xs + ri;
-	ye = ys + ri;
+//	xe = xs + ri;
+//	ye = ys + ri;
 	g_return_val_if_fail(ri < fr->w, 0);
 	for (iy = 0; iy < ri && ys + iy < fr->w; iy++) {
 		for (ix = 0; ix < ri && xs + ix < fr->h; ix++) {
@@ -945,14 +945,15 @@ void do_fit_psf(gpointer window, GSList *found)
 	struct gui_star *gs;
 	struct image_channel *i_ch;
 	struct stats stats;
-	float sky, flux;
+	float sky;// flux;
 	struct ap_params apdef;
 	struct rmodel rmodel;
 	double **p;
 	double *y;
 	int i, np;
-	int ret, iter;
-	double psfvol;
+	int iter;
+//	int ret;
+//	double psfvol;
 
 
 	i_ch = g_object_get_data(G_OBJECT(window), "i_channel");
@@ -968,7 +969,7 @@ void do_fit_psf(gpointer window, GSList *found)
 
 	ap_params_from_par(&apdef);
 	sky = get_sky(i_ch->fr, gs->x, gs->y, &apdef, NULL, &stats, NULL, NULL);
-	flux = get_star(i_ch->fr, gs->x, gs->y, &apdef, &stats, NULL);
+//	flux = get_star(i_ch->fr, gs->x, gs->y, &apdef, &stats, NULL);
 
 	patch = psf_new(30, 30);
 	extract_patch(i_ch->fr, patch, gs->x, gs->y);
@@ -976,7 +977,7 @@ void do_fit_psf(gpointer window, GSList *found)
 
 	psf = psf_new(100, 100);
 //	psfvol = moffat_psf(psf, 8, 1.5, 4);
-	psfvol = gaussian_psf(psf, 8, P_DBL(SYNTH_FWHM) / FWHMSIG);
+//	psfvol = gaussian_psf(psf, 8, P_DBL(SYNTH_FWHM) / FWHMSIG);
 
 	rmodel.psf = psf;
 	rmodel.patch = patch;
@@ -1017,7 +1018,8 @@ void do_fit_psf(gpointer window, GSList *found)
 		d4_printf("y[%d] = %.2f\n", i, y[i]);
 	}
 
-	ret = amoeba(p, y, np, 0.01, multistar_funk, &iter, &rmodel);
+	//ret = amoeba(p, y, np, 0.01, multistar_funk, &iter, &rmodel);
+	amoeba(p, y, np, 0.01, multistar_funk, &iter, &rmodel);
 
 	d1_printf("%d iterations, fitted to %.2f %.2f %.1f\n", iter,
 		    p[1][1]-patch->cx+floor(gs->x + 0.5),

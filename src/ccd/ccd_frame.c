@@ -307,7 +307,7 @@ int alloc_frame_rgb_data(struct ccd_frame *fr)
 int frame_stats(struct ccd_frame *hd)
 {
 	double sum, sumsq, min, max;
-	int i, is = 0, ie;
+	int i, is = 0;
 	int x, y;
 	unsigned all, s, e;
 	float v;
@@ -316,7 +316,6 @@ int frame_stats(struct ccd_frame *hd)
 	unsigned binmax;
 	unsigned *hdata;
 	int b, n;
-	double cs;
 	double median = 0.0, c, bv;
 	int ret;
 
@@ -422,7 +421,6 @@ int frame_stats(struct ccd_frame *hd)
 			continue;
 		}
 		if (b > e) {
-			ie = i;
 			break;
 		}
 		if (b - hdata[i] < c && b >= c) { // we are at the median point
@@ -439,7 +437,6 @@ int frame_stats(struct ccd_frame *hd)
 	}
 	i = is;
 	hd->stats.hist.cst = i;
-	cs = hmin + hstep * i - HIST_OFFSET;
 
 //	info_printf("new cavg %.3f csigm %.3f median %.3f, sigma, %.3f ", sum / n,
 //		    sqrt(sumsq / n - sqr(sum / n)), median, hd->stats.sigma);

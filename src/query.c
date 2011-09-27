@@ -272,7 +272,6 @@ static struct cat_star * parse_cat_line_ucac3(char *line)
 	double u, v, w, x;
 	double uc, m, j, k;
 	char *endp;
-	int ret = 0;
 
 	nc = detabify(line, cols, 32);
 
@@ -331,9 +330,9 @@ static struct cat_star * parse_cat_line_ucac3(char *line)
 
 	if (j > 0.0 && k > 0.0) {
 		if (uc == 0)
-			ret = asprintf(&cats->smags, "j=%.3f k=%.3f", j, k);
+			asprintf(&cats->smags, "j=%.3f k=%.3f", j, k);
 		else
-			ret = asprintf(&cats->smags, "uc=%.3f j=%.3f k=%.3f", uc, j, k);
+			asprintf(&cats->smags, "uc=%.3f j=%.3f k=%.3f", uc, j, k);
 	}
 
 	w = strtod(line+cols[7], &endp);

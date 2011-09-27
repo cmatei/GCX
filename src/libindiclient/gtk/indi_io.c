@@ -14,8 +14,8 @@
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-  
-  
+
+
   Contact Information: gcx@phracturedblue.com <Geoffrey Hausheer>
 *******************************************************************************/
 
@@ -33,22 +33,22 @@ int io_indi_sock_read(void *_fh, void *data, int len)
 {
 	GIOChannel *fh = (GIOChannel *)_fh;
 	size_t actual_len;
-	int status;
+	GIOStatus status;
 
 	status = g_io_channel_read_chars(fh, (char *)data, len, &actual_len, NULL);
-	//if (status != G_OK)
+	//if (status != G_IO_STATUS_NORMAL)
 	//	return -1;
 	return actual_len;
 }
-	
+
 int io_indi_sock_write(void *_fh, void *data, int len)
 {
 	GIOChannel *fh = (GIOChannel *)_fh;
 	size_t actual_len;
-	int status;
+	GIOStatus status;
 
 	status = g_io_channel_write_chars(fh, (char *)data, len, &actual_len, NULL);
-	//if (status != G_OK)
+	//if (status != G_IO_STATUS_NORMAL)
 	//	return -1;
 	g_io_channel_flush(fh, NULL);
 	return actual_len;

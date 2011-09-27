@@ -394,7 +394,7 @@ int batch_reduce_frames(struct image_file_list *imfl, struct ccd_reduce *ccdr,
 
 struct ccd_frame *reduce_frames_load(struct image_file_list *imfl, struct ccd_reduce *ccdr)
 {
-	int ret, nframes;
+	int ret;
 	struct image_file *imf;
 	struct ccd_frame *fr = NULL;
 	GList *gl;
@@ -402,7 +402,6 @@ struct ccd_frame *reduce_frames_load(struct image_file_list *imfl, struct ccd_re
 	g_return_val_if_fail(imfl != NULL, NULL);
 	g_return_val_if_fail(ccdr != NULL, NULL);
 
-	nframes = g_list_length(imfl->imlist);
 	if (!(ccdr->ops & IMG_OP_STACK)) {
 		gl = imfl->imlist;
 		while (gl != NULL) {
