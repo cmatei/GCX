@@ -35,6 +35,6 @@ gcx_SOURCES = \
 	libindiclient/gtk/indisave.h libindiclient/gtk/indisave.c \
 	libindiclient/gtk/gtkled.h libindiclient/gtk/gtkled.c
 
-gcx_LDADD = @GTK_LIBS@ ccd/libccd.a gsc/libgsc.a -lz
+gcx_LDADD = @GTK_LIBS@ ccd/libccd.a gsc/libgsc.a
 
 CLEANFILES = *~
