@@ -514,8 +514,8 @@ int radial_profile(struct ccd_frame *fr, double x, double y, double r,
 //	xe = xs + ri;
 //	ye = ys + ri;
 	g_return_val_if_fail(ri < fr->w, 0);
-	for (iy = 0; iy < ri && ys + iy < fr->w; iy++) {
-		for (ix = 0; ix < ri && xs + ix < fr->h; ix++) {
+	for (iy = 0; iy < ri && ys + iy < fr->h; iy++) {
+		for (ix = 0; ix < ri && xs + ix < fr->w; ix++) {
 			double dist;
 			dist = sqrt(sqr(ix + xs - x) + sqr(iy + ys - y));
 			if (ns < n && dist <= r) {
