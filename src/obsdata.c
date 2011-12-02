@@ -1,23 +1,23 @@
 /*******************************************************************************
   Copyright(c) 2000 - 2003 Radu Corlan. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: radu@corlan.net
 *******************************************************************************/
 
@@ -41,7 +41,7 @@
 
 #include "sidereal_time.h"
 
-/* extract the catalog name (the part before ":") from the name and return 
+/* extract the catalog name (the part before ":") from the name and return
  * a pointer to it (a terminating 0 is added). Also update name
  * to point to the object name proper */
 char *extract_catname(char *text, char **oname)
@@ -86,8 +86,8 @@ void replace_strval(char **str, char *val)
 	*str = val;
 }
 
-/* get a catalog object cats. the object is specified by 
- * a "catalog:name" string. If the catalog part is not present, 
+/* get a catalog object cats. the object is specified by
+ * a "catalog:name" string. If the catalog part is not present,
  * edb is searched.
  * return cats if successfull, NULL if some error occured.
  */
@@ -138,8 +138,8 @@ struct cat_star *get_object_by_name(char *name)
 }
 
 
-/* get a catalog object into the obs. the object is specified by 
- * a "catalog:name" string. If the catalog part is not present, 
+/* get a catalog object into the obs. the object is specified by
+ * a "catalog:name" string. If the catalog part is not present,
  * edb is searched.
  * return 0 if successfull, -1 if some error occured.
  */
@@ -183,12 +183,10 @@ void obs_data_release(struct obs_data *obs)
 	if (obs->ref_count < 1)
 		err_printf("obs_data_release: obs_data has ref_count of %d\n", obs->ref_count);
 	if (obs->ref_count <= 1) {
-		if (obs->objname)
-			free(obs->objname);
-		if (obs->filter)
-			free(obs->filter);
-		if (obs->comment)
-			free(obs->filter);
+		free(obs->objname);
+		free(obs->filter);
+		free(obs->comment);
+
 		free(obs);
 	} else {
 		obs->ref_count --;
@@ -432,10 +430,10 @@ void rescan_fits_wcs(struct ccd_frame *fr, struct wcs *fim)
 		fim->wcsset = WCS_INVALID;
 	if (fits_get_double(fr, P_STR(FN_CRVAL2), &fim->yref) <= 0)
 		fim->wcsset = WCS_INVALID;
-	if (fits_get_double(fr, P_STR(FN_EQUINOX), &fim->equinox) <= 0) 
+	if (fits_get_double(fr, P_STR(FN_EQUINOX), &fim->equinox) <= 0)
 		fim->equinox = 2000;
 	if (!scan_for_CD(fr, fim))
-		if (!scan_for_PC(fr, fim)) 
+		if (!scan_for_PC(fr, fim))
 			fim->wcsset = WCS_INVALID;
 
 	d3_printf("wcs status is: %d\n", fim->wcsset);
@@ -536,7 +534,7 @@ double frame_jdate(struct ccd_frame *fr)
 			err_printf("no date/time found in %s, %s or %s\n",
 				   P_STR(FN_DATE_OBS), P_STR(FN_MJD), P_STR(FN_JDATE));
 			return 0.0;
-		}		
+		}
 	} else {
 		d1_printf("using %s='%s' for date/time\n", P_STR(FN_DATE_OBS), date);
 		if ((sscanf(date, "%d-%d-%d", &y, &m, &d) != 3) &&
@@ -583,10 +581,10 @@ void date_time_from_jdate(double jd, char *date, int n)
 	jdate_to_timeval(jd, &tv);
 	t = gmtime((time_t *)&((tv.tv_sec)));
 
-	snprintf(date, n, "'%d-%02d-%02dT%02d:%02d:%05.2f'", 1900 + t->tm_year, t->tm_mon + 1, 
+	snprintf(date, n, "'%d-%02d-%02dT%02d:%02d:%05.2f'", 1900 + t->tm_year, t->tm_mon + 1,
 		t->tm_mday, t->tm_hour, t->tm_min, 1.0 * t->tm_sec +
 		1.0 * tv.tv_usec / 1000000);
-	
+
 }
 
 
@@ -601,14 +599,14 @@ double calculate_airmass(double ra, double dec, double jd, double lat, double ln
 	airm = airmass(alt);
 	airm = 0.001 * floor(airm * 1000);
 
-//	d3_printf("alt=%.4f az=%.4f sidereal=%.4f airmass=%.4f\n", alt, az, 
+//	d3_printf("alt=%.4f az=%.4f sidereal=%.4f airmass=%.4f\n", alt, az,
 //		  get_apparent_sidereal_time(jd) - lng/15, airm);
 	return airm;
-} 
+}
 
-/* try to compute airmass from the frame header information 
+/* try to compute airmass from the frame header information
  * return 0.0 if airmass couldn't be calculated */
-double frame_airmass(struct ccd_frame *fr, double ra, double dec) 
+double frame_airmass(struct ccd_frame *fr, double ra, double dec)
 {
 	double v;
 	double lat, lng, jd;
@@ -618,12 +616,12 @@ double frame_airmass(struct ccd_frame *fr, double ra, double dec)
 		return v;
 	}
 
-	if (fits_get_string(fr, P_STR(FN_LATITUDE), dms, 63) <= 0) 
+	if (fits_get_string(fr, P_STR(FN_LATITUDE), dms, 63) <= 0)
 		return 0.0;
 	if (dms_to_degrees(dms, &lat))
 		return 0.0;
 
-	if (fits_get_string(fr, P_STR(FN_LONGITUDE), dms, 63) <= 0) 
+	if (fits_get_string(fr, P_STR(FN_LONGITUDE), dms, 63) <= 0)
 		return 0.0;
 	if (dms_to_degrees(dms, &lng))
 		return 0.0;
@@ -647,9 +645,9 @@ double timeval_to_jdate(struct timeval *tv)
 
 	t = gmtime((time_t *)&(tv->tv_sec));
 // do the julian date (per hsaa p107)
-	jd = make_jdate(1900 + t->tm_year, t->tm_mon + 1, t->tm_mday, 
-			t->tm_hour + t->tm_min / (60.0) 
-			+ t->tm_sec / (3600.0) + tv->tv_usec / 
+	jd = make_jdate(1900 + t->tm_year, t->tm_mon + 1, t->tm_mday,
+			t->tm_hour + t->tm_min / (60.0)
+			+ t->tm_sec / (3600.0) + tv->tv_usec /
 			(1000000.0 * 3600.0));
 	return jd;
 }
@@ -678,7 +676,7 @@ void jdate_to_timeval(double jd, struct timeval *tv)
 
 
 
-/* return the hour angle for the given obs coordinates, 
+/* return the hour angle for the given obs coordinates,
  * uses the parameter geo location values and current time */
 double obs_current_hour_angle(struct obs_data *obs)
 {
@@ -695,7 +693,7 @@ double obs_current_hour_angle(struct obs_data *obs)
 	return ha;
 }
 
-/* return the airmass for the given obs coordinates, 
+/* return the airmass for the given obs coordinates,
  * uses the parameter geo location values and current time */
 double obs_current_airmass(struct obs_data *obs)
 {
@@ -706,7 +704,7 @@ double obs_current_airmass(struct obs_data *obs)
 	gettimeofday(&tv, NULL);
 	jd = timeval_to_jdate(&tv);
 
-	get_hrz_from_equ_sidereal_time (obs->ra, obs->dec, P_DBL(OBS_LONGITUDE), 
+	get_hrz_from_equ_sidereal_time (obs->ra, obs->dec, P_DBL(OBS_LONGITUDE),
 					P_DBL(OBS_LATITUDE),
 					get_apparent_sidereal_time(jd),
 					&alt, &az);
@@ -719,7 +717,7 @@ void wcs_to_fits_header(struct ccd_frame *fr)
 {
 	char lb[80];
 	char deg[80];
-	if (fr->fim.wcsset <= WCS_INITIAL) 
+	if (fr->fim.wcsset <= WCS_INITIAL)
 		return;
 
 	fits_add_keyword(fr, "CTYPE1", "'RA---TAN'");
@@ -757,7 +755,7 @@ void wcs_to_fits_header(struct ccd_frame *fr)
 	sprintf(lb, "'%s'", deg);
 	fits_add_keyword(fr, P_STR(FN_DEC), lb);
 
-	sprintf(lb, "%20.8f / IMAGE SCALE IN SECONDS PER PIXEL", 
+	sprintf(lb, "%20.8f / IMAGE SCALE IN SECONDS PER PIXEL",
 		3600.0 * fabs(fr->fim.xinc));
 	fits_add_keyword(fr, P_STR(FN_SECPIX), lb);
 
