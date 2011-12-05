@@ -1,11 +1,12 @@
 ## Process this file with automake to produce Makefile.in
 
-SUBDIRS = src docs
+SUBDIRS = src 
 
 EXTRA_DIST = \
 	README.vizquery \
 	autogen.sh \
-	gcx.glade
+	gcx.glade \
+	docs/*
 
 CLEANFILES = *~ docs/*~
 DISTCLEANFILES = docs/Makefile

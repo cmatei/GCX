@@ -904,6 +904,9 @@ int file_is_zipped(char *fn)
 	if ((len > 5) && (strcasecmp(fn + len - 4, ".zip") == 0)) {
 		return 1;
 	}
+	if ((len > 5) && (strcasecmp(fn + len - 4, ".bz2") == 0)) {
+		return 1;
+	}
 	return 0;
 }
 

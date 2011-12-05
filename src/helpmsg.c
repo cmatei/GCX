@@ -94,6 +94,7 @@ char help_usage_page[] =
 "                                     an initial wcs\n"
 "    --mag-limit                    Set a magnitude limit for the output of\n"
 "                                     import and merge commands.\n"
+"-w  --wcs-fit                      Fit wcs of frame and update the fits header\n"
 "\n"
 "                    CCD Reduction Options\n"
 "-e, --sextract <star_file>         Extract sources\n"

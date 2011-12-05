@@ -1,12 +1,75 @@
+2011-12-03  radu corlan  <rcorlan@visionresearch.com>
+
+	* version 1.5
+
+	* fix reading of crota1
+
+	* add -w command line option (for annotating wcs into frames)
+
+	* add support for bz2 files
+
+2011-09-28 matei conovici <mconovici@gmail.com>
+
+	* gtk_notebook workaround for gtk 2.20
+	* add command line option to extract stars
+	* allow more FITS header blocks (for those HST images :-)
+	* fix some FITS issues
+	* fix bad memory allocations for color images
+	* add image download from NASA SkyView
+	* use per-color averages when flat-fielding CFA images instead of cavg
+	* fix callback argument to INDI_callback
+	* fix some copy/paste errors
+	* allow negative temperature setpoints for the camera
+	* fix multiple exposures in camera control
+	* release captured frames, eventually
+	* allow sub-second exposure times (for bias frames)
+	* fix buffer overrun in tycho2
+	* fix buffer overflow/memory corruption in ring_stats
+
+2011-03-20 matei conovici <mconovici@gmail.com>
+
+	* fixed frame selection/star list in mbandgui
+	* added UCAC3 CDS query; UCAC3 has full-sky coverage (unlike
+	  UCAC2) but has some annoying issues like fake double stars (less
+	  than 1 arcsec apart) and about 1 million stars in UCAC2 are
+	  missing. Seems to produce good astrometry, though.
+
+2011-03-20 matei conovici <mconovici@gmail.com>
+
+	* the big change is I've turned -DGDK_DISABLED_DEPRECATED -DGTK_DISABLE_DEPRECATED
+          on by default. Hey, at least it compiles :-)
+	* this changeset can be viewed in color at https://github.com/cmatei/GCX
+	* summary of individual commits in the git tree
+		d31b35e Convert action functions to this naming scheme: act_<descriptive name>(GtkAction *dummy, gpointer window)
+		ae6c0ca gui.h cleanup. action codes moved to implementation source file
+		0df5dcd Restore forgotten invert display option
+		e9ac2ec Finished adding back the main menus
+		b99f9ac Moved this into source, not needed any more
+		17ffc6c Not there yet. Main app menubar needs Processing and Catalogs back (gui.c).
+		4223dcd Show correct r magnitude for USNO-B stars
+		8bf7a2c Update sourcesdraw.c to use cairo instead of low level gdk functions
+		1488ad2 Quick fix so I can use online catalogs
+		79f2330 Redo menus in libindiclient. Don't forget to send it to Geoffrey as well
+		4e20e54 Redone menus in mbandgui.c.
+		bca58fd Add a metric ton of action functions and replace menus in guidegui
+		188618d Replace GtkOptionMenu with GtkComboBox in the CCD Reduction window
+		5a4ab4c gtk_widget_set_uposition "not useful for a widget that is inside a container"
+		4cd6f1f Fix debian #609079
+		5841485 toggle/radio_button_new_with_mnemonic instead of gtk_label_parse_uline
+		77fc793 Convert obslist to GtkTreeView/GtkListStore
+		c96bbc1 Replace GtkOptionMenu for (unused yet) channel selection in imadjust
+		c14a558 Fix 0 size request, should be -1 because 0 is actually granted
+		372a0e3 use the GtkUIManager for reducegui menubar
+
 2011-03-07 matei conovici <mconovici@gmail.com>
 
 	* removed deprecated GtkList usage for the image_processing dialog
 	  and restored image navigation functionality which was broken
-	* changed from gtk_object_* to g_object_* 
+	* changed from gtk_object_* to g_object_*
 	* remaining deprecated stuff: GtkCombo, GtkList, GtkItemFactory
 
 2009-11-15  riccardo <unriccio@email.it>
-	
+
 	* typos in source code
 
 2009-10-08  radu  <rcorlan@visionresearch.com>
@@ -21,7 +84,7 @@
 	* INDI client code has moved (for the last time) to the 'libidiclient' sub-directory
 	* INDI client code was reworked to support multiple toolkits and projects
 	* INDI client code has several new features (parameter storing, logging)
-	* INDI client got a slight facelift in how features are displayed 
+	* INDI client got a slight facelift in how features are displayed
 
 2009-08-02  geoffrey hausheer <gcx@phracturedblue.com>
 

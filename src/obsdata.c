@@ -359,6 +359,7 @@ static int scan_for_PC(struct ccd_frame *fr, struct wcs *fim)
 	int ret = 0;
 	double D;
 
+	d3_printf("scan_for_pc\n");
 	if (fits_get_double(fr, P_STR(FN_CROTA1), &fim->rot) <= 0)
 		fim->rot = 0;
 
@@ -388,6 +389,7 @@ static int scan_for_PC(struct ccd_frame *fr, struct wcs *fim)
 		pc[1][1] = 1;
 	}
 
+	
 
 	D = pc[0][0] * pc[1][1] - pc[1][0] * pc[0][1];
 	d4_printf("PC D=%8g\n", D);
@@ -404,7 +406,8 @@ static int scan_for_PC(struct ccd_frame *fr, struct wcs *fim)
 	fim->pc[1][0] = pc[1][0];
 	fim->pc[0][1] = pc[0][1];
 	fim->pc[1][1] = pc[1][1];
-	fim->rot = raddeg(atan2(pc[0][1], pc[0][0]));
+	if (ret)
+		fim->rot = raddeg(atan2(pc[0][1], pc[0][0]));
 
 	return 1;
 }

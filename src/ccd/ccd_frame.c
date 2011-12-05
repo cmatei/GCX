@@ -22,8 +22,8 @@
 *******************************************************************************/
 
 /*  ccd_frame.c: frame operation functions */
-/*  $Revision: 1.47 $ */
-/*  $Date: 2009/10/13 06:42:44 $ */
+/*  $Revision: 1.49 $ */
+/*  $Date: 2011/12/03 21:48:07 $ */
 
 /* Many functions here assume we have float frames - this must be fixed */
 
@@ -478,6 +478,8 @@ static int fits_filename(char *fn, int fnl)
 		return -1;
 	}
 	if (strcasecmp(fn + len - 2, ".z") == 0)
+		return -1;
+	if (strcasecmp(fn + len - 4, ".bz2") == 0)
 		return -1;
 	if (strcasecmp(fn + len - 4, ".zip") == 0)
 		return -1;
@@ -956,7 +958,7 @@ int write_fits_frame(struct ccd_frame *fr, char *filename)
 
 	strncpy(lb, filename, MAX_FILENAME);
 
-	fits_filename(lb, MAX_FILENAME);
+//	fits_filename(lb, MAX_FILENAME);
 
 	fp = fopen(lb, "w");
 	if (fp == NULL) {
@@ -1095,7 +1097,7 @@ int write_gz_fits_frame(struct ccd_frame *fr, char *fn, char *gzcmd)
 		return write_fits_frame(fr, fn);
 
 	strncpy(lb, fn, MAX_FILENAME);
-	fits_filename(lb, MAX_FILENAME);
+//	fits_filename(lb, MAX_FILENAME);
 
 	ret = write_fits_frame(fr, lb);
 	if (!ret) {

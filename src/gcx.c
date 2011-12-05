@@ -22,8 +22,8 @@
 *******************************************************************************/
 
 // gcx.c: main file for camera control program
-// $Revision: 1.34 $
-// $Date: 2009/09/27 15:29:51 $
+// $Revision: 1.38 $
+// $Date: 2011/12/03 21:48:07 $
 
 #define _GNU_SOURCE
 
@@ -601,6 +601,7 @@ int main(int ac, char **av)
 	char badpixf[1024] = ""; /* dark for badpix extraction */
 	char starf[1024] = ""; /* star list */
 	int to_pnm = 0;
+	int fit_wcs = 0;
 	int run_phot = 0;
 	int convert_recipe = 0;
 	int rcp_to_aavso = 0;
@@ -630,7 +631,7 @@ int main(int ac, char **av)
 
 	GtkWidget *window;
 
-	char *shortopts = "D:p:hP:V:vo:id:b:f:B:M:A:O:usa:T:S:nG:Nj:FcX:e:";
+	char *shortopts = "D:p:hP:V:vo:id:b:f:B:M:A:O:usa:T:S:nG:Nj:FcX:e:w";
 	struct option longopts[] = {
 		{"debug", required_argument, NULL, 'D'},
 		{"dark", required_argument, NULL, 'd'},
@@ -668,6 +669,7 @@ int main(int ac, char **av)
 		{"set-target", required_argument, NULL, '_'},
 		{"make-tycho-rcp", required_argument, NULL, ']'},
 		{"make-cat-rcp", required_argument, NULL, '>'},
+		{"wcs-fit", no_argument, NULL, 'w'},
 
 		{"rep-to-table", required_argument, NULL, 'T'},
 		{"phot-run", required_argument, NULL, 'P'},
@@ -768,6 +770,10 @@ int main(int ac, char **av)
 			break;
 		case 'n':
 			to_pnm = 1;
+			batch = 1;
+			break;
+		case 'w':
+			fit_wcs = 1;
 			batch = 1;
 			break;
 		case 'O':
@@ -1130,6 +1136,45 @@ int main(int ac, char **av)
 			}
 			if (batch && !interactive)
 				exit(0);
+		}
+		if (fit_wcs) {
+			struct image_channel *channel;
+			char *fn;
+			int rtn;
+			channel = g_object_get_data(G_OBJECT(window), "i_channel");
+			if (channel == NULL) {
+				err_printf("oops - no channel\n");
+				if (batch && !interactive)
+					exit(1);
+			}
+			if (match_field_in_window_quiet(window))
+				exit(2);
+			wcs_to_fits_header(channel->fr);
+			fn = channel->fr->name;
+			if (file_is_zipped(fn)) {
+				for (i = strlen(fn); i > 0; i--)
+					if (fn[i] == '.') {
+						fn[i] = 0;
+						break;
+					}
+				rtn = write_gz_fits_frame(channel->fr, fn, P_STR(FILE_COMPRESS));
+			} else {
+				rtn = write_fits_frame(channel->fr, fn);
+			}
+
+/*
+			if (outf[0] != 0) {
+				ret = channel_to_pnm_file(channel, NULL, outf, 0);
+			} else {
+				ret = channel_to_pnm_file(channel, NULL, NULL, 0);
+			}
+*/
+			if (batch && !interactive) {
+				if (rtn == 0)
+					exit(0);
+				else
+					exit(3);
+			}
 		}
 		if (rf[0] != 0) {
 			FILE *output_file = NULL;

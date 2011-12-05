@@ -1,5 +1,5 @@
 
-AC_INIT([gcx], [1.4])
+AC_INIT([gcx], [1.5])
 AM_INIT_AUTOMAKE([foreign -Wall -Werror])
 
 AC_CONFIG_SRCDIR([src/gcx.c])
@@ -28,7 +28,6 @@ AC_CONFIG_FILES([
 	src/Makefile
 	src/ccd/Makefile
 	src/gsc/Makefile
-	docs/Makefile
 ])
 AC_OUTPUT
 
