@@ -953,6 +953,7 @@ int write_fits_frame(struct ccd_frame *fr, char *filename)
 //	double jd;
 	double bscale, bzero;
 	int naxis;
+	unsigned long cnt;
 
 	lb[80] = 0;
 
@@ -1060,6 +1061,8 @@ int write_fits_frame(struct ccd_frame *fr, char *filename)
 		dat_ptr[0] = (float *)fr->dat;
 		dat_ptr[1] = NULL;
 	}
+
+	cnt = 0;
 	while (*datp) {
 		dp = (float *)(*datp);
 		datp++;
@@ -1074,11 +1077,13 @@ int write_fits_frame(struct ccd_frame *fr, char *filename)
 				v = 32767;
 			putc((v >> 8) & 0xff, fp);
 			putc((v) & 0xff, fp);
+
+			cnt += 2;
 		}
 	}
 
         /* pad the end of record */
-	for (i = 0;  i < 2880 - (all * 2 * naxis) % 2880; i++)
+	for (i = 0;  i < 2880 - cnt % 2880; i++)
 		putc(' ', fp);
 
 	fflush(fp);
