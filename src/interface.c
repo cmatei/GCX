@@ -2379,6 +2379,14 @@ create_image_processing (void)
   GtkWidget *phot_en_checkb;
   GtkWidget *label80;
 
+  GtkWidget *frame12;
+  GtkWidget *hbox30;
+  GtkWidget *label107;
+  GtkWidget *overscan_checkb;
+  GtkObject *overscan_spin_adj;
+  GtkWidget *overscan_spin;
+
+
   image_processing = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   g_object_set_data (G_OBJECT (image_processing), "image_processing", image_processing);
   gtk_window_set_title (GTK_WINDOW (image_processing), "CCD Reduction");
@@ -2515,7 +2523,7 @@ create_image_processing (void)
   gtk_widget_show (label79);
   gtk_notebook_set_tab_label (GTK_NOTEBOOK (notebook3), gtk_notebook_get_nth_page (GTK_NOTEBOOK (notebook3), 0), label79);
 
-  table25 = gtk_table_new (8, 2, TRUE);
+  table25 = gtk_table_new (9, 2, TRUE);
   g_object_ref (table25);
   g_object_set_data_full (G_OBJECT (image_processing), "table25", table25,
                             (GDestroyNotify) g_object_unref);
@@ -2528,7 +2536,7 @@ create_image_processing (void)
   g_object_set_data_full (G_OBJECT (image_processing), "frame3", frame3,
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (frame3);
-  gtk_table_attach (GTK_TABLE (table25), frame3, 0, 1, 1, 2,
+  gtk_table_attach (GTK_TABLE (table25), frame3, 0, 1, 2, 3,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame3), 3);
@@ -2570,7 +2578,7 @@ create_image_processing (void)
   g_object_set_data_full (G_OBJECT (image_processing), "frame4", frame4,
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (frame4);
-  gtk_table_attach (GTK_TABLE (table25), frame4, 0, 1, 2, 3,
+  gtk_table_attach (GTK_TABLE (table25), frame4, 0, 1, 3, 4,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame4), 3);
@@ -2612,7 +2620,7 @@ create_image_processing (void)
   g_object_set_data_full (G_OBJECT (image_processing), "frame5", frame5,
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (frame5);
-  gtk_table_attach (GTK_TABLE (table25), frame5, 0, 1, 3, 4,
+  gtk_table_attach (GTK_TABLE (table25), frame5, 0, 1, 4, 5,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame5), 3);
@@ -2654,7 +2662,7 @@ create_image_processing (void)
   g_object_set_data_full (G_OBJECT (image_processing), "frame7", frame7,
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (frame7);
-  gtk_table_attach (GTK_TABLE (table25), frame7, 0, 1, 4, 5,
+  gtk_table_attach (GTK_TABLE (table25), frame7, 0, 1, 5, 6,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame7), 3);
@@ -2999,12 +3007,55 @@ create_image_processing (void)
   gtk_misc_set_alignment (GTK_MISC (label106), 0, 1);
   gtk_misc_set_padding (GTK_MISC (label106), 3, 0);
 
+  frame12 = gtk_frame_new ("Overscan Correction");
+  g_object_ref (frame12);
+  g_object_set_data_full (G_OBJECT (image_processing), "frame12", frame12,
+			  (GDestroyNotify) g_object_unref);
+  gtk_widget_show (frame12);
+  gtk_table_attach (GTK_TABLE (table25), frame12, 0, 1, 0, 1,
+		    (GtkAttachOptions) (GTK_FILL),
+		    (GtkAttachOptions) (0), 0, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame12), 3);
+
+  hbox30 = gtk_hbox_new (FALSE, 0);
+  g_object_ref (hbox30);
+  g_object_set_data_full (G_OBJECT (image_processing), "hbox30", hbox30,
+                            (GDestroyNotify) g_object_unref);
+  gtk_widget_show (hbox30);
+  gtk_container_add (GTK_CONTAINER (frame12), hbox30);
+
+  overscan_spin_adj = gtk_adjustment_new (1000, 0, 65535, 1, 10, 0);
+  overscan_spin = gtk_spin_button_new (GTK_ADJUSTMENT (overscan_spin_adj), 1, 1);
+  g_object_ref (blur_spin);
+  g_object_set_data_full (G_OBJECT (image_processing), "overscan_spin", overscan_spin,
+                            (GDestroyNotify) g_object_unref);
+  gtk_widget_show (overscan_spin);
+  gtk_box_pack_start (GTK_BOX (hbox30), overscan_spin, TRUE, TRUE, 0);
+  gtk_widget_set_tooltip_text (overscan_spin, "Overscan pedestal");
+
+  label107 = gtk_label_new ("Pedestal     ");
+  g_object_ref (label107);
+  g_object_set_data_full (G_OBJECT (image_processing), "label107", label107,
+                            (GDestroyNotify) g_object_unref);
+  gtk_widget_show (label107);
+  gtk_box_pack_start (GTK_BOX (hbox30), label107, FALSE, FALSE, 0);
+  gtk_misc_set_padding (GTK_MISC (label107), 3, 0);
+
+  overscan_checkb = gtk_check_button_new_with_label ("Enable");
+  g_object_ref (overscan_checkb);
+  g_object_set_data_full (G_OBJECT (image_processing), "overscan_checkb", overscan_checkb,
+                            (GDestroyNotify) g_object_unref);
+  gtk_widget_show (overscan_checkb);
+  gtk_box_pack_start (GTK_BOX (hbox30), overscan_checkb, FALSE, FALSE, 0);
+  gtk_widget_set_tooltip_text (overscan_checkb, "Enable overscan correction step");
+
+
   frame2 = gtk_frame_new ("Bias frame");
   g_object_ref (frame2);
   g_object_set_data_full (G_OBJECT (image_processing), "frame2", frame2,
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (frame2);
-  gtk_table_attach (GTK_TABLE (table25), frame2, 0, 1, 0, 1,
+  gtk_table_attach (GTK_TABLE (table25), frame2, 0, 1, 1, 2,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame2), 3);
@@ -3046,7 +3097,7 @@ create_image_processing (void)
   g_object_set_data_full (G_OBJECT (image_processing), "gggg", gggg,
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (gggg);
-  gtk_table_attach (GTK_TABLE (table25), gggg, 0, 1, 6, 7,
+  gtk_table_attach (GTK_TABLE (table25), gggg, 0, 1, 7, 8,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 0, 0);
   gtk_container_set_border_width (GTK_CONTAINER (gggg), 3);
@@ -3071,7 +3122,7 @@ create_image_processing (void)
   g_object_set_data_full (G_OBJECT (image_processing), "frame17", frame17,
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (frame17);
-  gtk_table_attach (GTK_TABLE (table25), frame17, 0, 1, 5, 6,
+  gtk_table_attach (GTK_TABLE (table25), frame17, 0, 1, 6, 7,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (GTK_FILL), 0, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame17), 3);

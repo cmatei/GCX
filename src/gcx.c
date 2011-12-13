@@ -638,6 +638,7 @@ int main(int ac, char **av)
 		{"bias", required_argument, NULL, 'b'},
 		{"flat", required_argument, NULL, 'f'},
 
+		{"overscan", no_argument, NULL, '[' },
 		{"badpix", required_argument, NULL, 'B'},
 		{"extract-badpix", required_argument, NULL, 'X'},
 
@@ -860,6 +861,14 @@ int main(int ac, char **av)
 				ccdr = ccd_reduce_new();
 			ccdr->ops |= IMG_OP_STACK;
 			ccdr->ops |= IMG_OP_BG_ALIGN_MUL;
+			batch = 1;
+			break;
+
+		case '[':
+			if (ccdr == NULL)
+				ccdr = ccd_reduce_new();
+			ccdr->ops |= IMG_OP_OVERSCAN;
+			ccdr->pedestal = P_DBL(CCDRED_OVERSCAN_PEDESTAL);
 			batch = 1;
 			break;
 		case 'a':

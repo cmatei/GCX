@@ -1289,6 +1289,35 @@ int add_frames (struct ccd_frame *fr, struct ccd_frame *fr1)
 	return 0;
 }
 
+int overscan_correction(struct ccd_frame *fr, double pedestal, int x, int y, int w, int h)
+{
+	double sum, avg;
+	int npixels;
+	int i, j, all;
+	float *dat;
+
+	dat = fr->dat;
+
+	sum = 0.0;
+	npixels = 0;
+	for (i = y; i < y + h; i++) {
+		for (j = x; j < x + w; j++) {
+			sum += dat[i * fr->w + j];
+			npixels++;
+		}
+	}
+	avg = sum / npixels;
+
+	all = fr->w * fr->h;
+	for (i = 0; i < all; i++) {
+		*dat++ += pedestal - avg;
+	}
+
+	fr->stats.statsok = 0;
+
+	return 0;
+}
+
 // sub_frames substracts fr1 from fr; the two frames are aligned according to their skips
 // the size of fr is not changed; fr1 is assumed to be a dark frame
 

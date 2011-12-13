@@ -360,6 +360,7 @@ static void set_processing_dialog_ccdr(GtkWidget *dialog, struct ccd_reduce *ccd
 			  G_CALLBACK(stack_method_activate), dialog);
 
 
+	named_spin_set(dialog, "overscan_spin", P_DBL(CCDRED_OVERSCAN_PEDESTAL));
 	named_spin_set(dialog, "stack_sigmas_spin", P_DBL(CCDRED_SIGMAS));
 	named_spin_set(dialog, "stack_iter_spin", 1.0 * P_INT(CCDRED_ITER));
 
@@ -388,6 +389,10 @@ static void set_processing_dialog_ccdr(GtkWidget *dialog, struct ccd_reduce *ccd
 
 	if (ccdr == NULL)
 		return;
+
+	if (ccdr->ops & IMG_OP_OVERSCAN) {
+		set_named_checkb_val(dialog, "overscan_checkb", 1);
+	}
 
 	if ((ccdr->bias) && (ccdr->ops & IMG_OP_BIAS)) {
 		named_entry_set(dialog, "bias_entry", ccdr->bias->filename);
@@ -1151,6 +1156,14 @@ static void dialog_to_ccdr(GtkWidget *dialog, struct ccd_reduce *ccdr)
 	char *text;
 
 	g_return_if_fail (ccdr != NULL);
+
+	if (get_named_checkb_val(dialog, "overscan_checkb")) {
+		ccdr->pedestal = named_spin_get_value(dialog, "overscan_spin");
+		ccdr->ops |= IMG_OP_OVERSCAN;
+	} else {
+		ccdr->ops &= ~IMG_OP_OVERSCAN;
+	}
+
 	if (get_named_checkb_val(dialog, "bias_checkb")) {
 		text = named_entry_text(dialog, "bias_entry");
 		if ((ccdr->ops & IMG_OP_BIAS) && ccdr->bias &&

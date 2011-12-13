@@ -1117,6 +1117,9 @@ void init_ptable(void)
 		);
 
         /* ccdred */
+	add_par_double(CCDRED_OVERSCAN_PEDESTAL, PAR_CCDRED, PREC_1, "overscan_pedestal",
+		       "Pedestal used for overscan correction", 1000);
+
 	add_par_int(CCDRED_DEMOSAIC_METHOD, PAR_CCDRED, 0, "demosaic_method",
 		    "Method used for demosaic", PAR_DEMOSAIC_METHOD_BILINEAR);
 	set_par_choices(CCDRED_DEMOSAIC_METHOD, demosaic_methods);
@@ -1135,6 +1138,17 @@ void init_ptable(void)
 	add_par_int(CCDRED_STACK_METHOD, PAR_CCDRED, 0, "stack_method",
 		    "Method used for stacking frames", PAR_STACK_METHOD_KAPPA_SIGMA);
 	set_par_choices(CCDRED_STACK_METHOD, stack_methods);
+
+	add_par_int(CCDRED_STACK_FRAMING, PAR_CCDRED, 0, "stack_framing",
+		    "Framing of the stacked result", PAR_STACK_FRAMING_MOSAIC);
+	set_par_choices(CCDRED_STACK_FRAMING, stack_framing_options);
+	set_par_description(CCDRED_STACK_FRAMING,
+			    "Choice of frame size for the result of stacking and alignment "
+			    "operations. With mosaic, a frame large enough to include all "
+			    "subframes will be used, align will clip the stack to the size of "
+			    "the alignment frame and intersect will only keep the rectangle "
+			    "covered by all subframes.");
+
 	add_par_int(CCDRED_ITER, PAR_CCDRED, 0, "iterations",
 		    "Iteration limit for stacking operations", 4);
 	add_par_double(CCDRED_SIGMAS, PAR_CCDRED, PREC_1, "sigmas",
@@ -1147,6 +1161,7 @@ void init_ptable(void)
 	set_par_description(CCDRED_BADPIX_SIGMAS,
 			    "Number of frame sigmas a pixel must deviate from the "
 			    "median of its neighbours to be considered defect.");
+
 	/* INDI setup */
 	add_par_string(INDI_HOST_NAME, PAR_INDI, 0, "indi_host_name",
 		       "INDI server host", "localhost");

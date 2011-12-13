@@ -328,12 +328,99 @@ int save_image_file(struct image_file *imf, char *outf, int inplace, int *seq,
 	return 0;
 }
 
+/* ensures files required for the ccdr are loaded, alignment stars are
+ * present, etc.
+ * calls progress with a short message. If progress returns a non-zero value,
+ * abort remaining operations and return an error (non-zero) */
+
+int ensure_ccdr(struct ccd_reduce *ccdr,
+		int (* progress)(char *msg, void *data), void *data)
+
+{
+	char msg[255];
+
+	if (ccdr->ops & IMG_OP_BIAS) {
+		if (ccdr->bias == NULL) {
+			err_printf("no bias image file\n");
+			return 1;
+		}
+		if (!(ccdr->bias->flags & IMG_LOADED)) {
+			snprintf(msg, 255, "bias frame: %s\n", ccdr->bias->filename);
+			if (progress && (*progress)(msg, data))
+				return -1;
+		}
+		if (load_image_file(ccdr->bias))
+			return 2;
+	}
+
+	if (ccdr->ops & IMG_OP_DARK) {
+		if (ccdr->dark == NULL) {
+			err_printf("no dark image file\n");
+			return 1;
+		}
+		if (!(ccdr->dark->flags & IMG_LOADED)) {
+			snprintf(msg, 255, "dark frame: %s\n", ccdr->dark->filename);
+			if (progress && (*progress)(msg, data))
+				return -1;
+		}
+		if (load_image_file(ccdr->dark))
+			return 2;
+	}
+
+	if (ccdr->ops & IMG_OP_FLAT) {
+		if (ccdr->flat == NULL) {
+			err_printf("no flat image file\n");
+			return 1;
+		}
+		if (!(ccdr->flat->flags & IMG_LOADED)) {
+			snprintf(msg, 255, "flat frame: %s\n", ccdr->flat->filename);
+			if (progress && (*progress)(msg, data))
+				return -1;
+		}
+		if (load_image_file(ccdr->flat))
+			return 2;
+	}
+
+	if (ccdr->ops & IMG_OP_BADPIX) {
+		if (ccdr->bad_pix_map == NULL) {
+			err_printf("no bad pixel file\n");
+			return 1;
+		}
+		if (!ccdr->bad_pix_map->pix) {
+			snprintf(msg, 255, "bad pixels: %s\n", ccdr->bad_pix_map->filename);
+			if (progress && (*progress)(msg, data))
+				return -1;
+		}
+		if (load_bad_pix(ccdr->bad_pix_map))
+			return 2;
+	}
+
+	if (ccdr->ops & IMG_OP_ALIGN) {
+		if (ccdr->alignref == NULL) {
+			err_printf("no alignment reference file\n");
+			return 1;
+		}
+		if (!(ccdr->ops & CCDR_ALIGN_STARS)) {
+			snprintf(msg, 255, "alignment reference frame: %s\n",
+				 ccdr->alignref->filename);
+			if (progress) {
+				if ((*progress)(msg, data))
+					return -1;
+			}
+			if (load_alignment_stars(ccdr) < 0)
+				return 2;
+		}
+	}
+
+	return 0;
+}
+
 /* call point from main; reduce the frames acording to ccdr.
  * Print progress messages at level 1. If the inplace flag in ccdr->ops is true,
  * the source files are overwritten, else new files will be created according
  * to outf. if outf is a dir name, files will be saved there. If not,
  * it's used as the beginning of a filename.
- * when stacking is requested, intermediate processing steps
+ * when aligning or stacking is requested, intermediate processing steps
  * are never saved */
 
 int batch_reduce_frames(struct image_file_list *imfl, struct ccd_reduce *ccdr,
@@ -349,7 +436,12 @@ int batch_reduce_frames(struct image_file_list *imfl, struct ccd_reduce *ccdr,
 	g_return_val_if_fail(ccdr != NULL, -1);
 
 	nframes = g_list_length(imfl->imlist);
-	if (!(ccdr->ops & IMG_OP_STACK)) {
+
+#ifdef ALIGN_LAST
+	if (!(ccdr->ops & (IMG_OP_STACK | IMG_OP_ALIGN))) {
+#else
+        if (!(ccdr->ops & IMG_OP_STACK)) {
+#endif
 		gl = imfl->imlist;
 		while (gl != NULL) {
 			imf = gl->data;
@@ -372,16 +464,25 @@ int batch_reduce_frames(struct image_file_list *imfl, struct ccd_reduce *ccdr,
 		}
 		return 0;
 	}
+
 	if (P_INT(CCDRED_STACK_METHOD) == PAR_STACK_METHOD_KAPPA_SIGMA ||
 	    P_INT(CCDRED_STACK_METHOD) == PAR_STACK_METHOD_MEAN_MEDIAN ) {
 		if (!(ccdr->ops & IMG_OP_BG_ALIGN_MUL))
 			ccdr->ops |= IMG_OP_BG_ALIGN_ADD;
 	}
-	if (reduce_frames(imfl, ccdr, progress_print, NULL))
+
+#ifdef ALIGN_LAST
+	if ((ccdr->ops & IMG_OP_ALIGN) &&
+	    reduce_frames(imfl, ccdr, progress_print, NULL))
 		return 1;
-	if ((fr = stack_frames(imfl, ccdr, progress_print, NULL)) == NULL)
-		return 1;
-	write_fits_frame(fr, outf);
+#endif
+
+	if (ccdr->ops & IMG_OP_STACK) {
+		if ((fr = stack_frames(imfl, ccdr, progress_print, NULL)) == NULL)
+			return 1;
+		write_fits_frame(fr, outf);
+	}
+
 	return 0;
 }
 
@@ -402,7 +503,11 @@ struct ccd_frame *reduce_frames_load(struct image_file_list *imfl, struct ccd_re
 	g_return_val_if_fail(imfl != NULL, NULL);
 	g_return_val_if_fail(ccdr != NULL, NULL);
 
-	if (!(ccdr->ops & IMG_OP_STACK)) {
+#ifdef ALIGN_LAST
+	if (!(ccdr->ops & (IMG_OP_STACK | IMG_OP_ALIGN))) {
+#else
+        if (!(ccdr->ops & IMG_OP_STACK)) {
+#endif
 		gl = imfl->imlist;
 		while (gl != NULL) {
 			imf = gl->data;
@@ -436,8 +541,7 @@ struct ccd_frame *reduce_frames_load(struct image_file_list *imfl, struct ccd_re
 	return fr;
 }
 
-
-/* reduce the frame according to ccdr, up to the stacking step.
+/* reduce the frame according to ccdr, up to the alignment step.
  * return 0 for succes or a positive error code
  * call progress with a short progress message from time to time. If progress returns
  * a non-zero value, abort remaining operations and return an error (non-zero) */
@@ -445,108 +549,31 @@ struct ccd_frame *reduce_frames_load(struct image_file_list *imfl, struct ccd_re
 int reduce_frame(struct image_file *imf, struct ccd_reduce *ccdr,
 		 int (* progress)(char *msg, void *data), void *data)
 {
-	char msg[256];
+	int r;
 
-	if (ccdr->ops & IMG_OP_BIAS) {
-		if (ccdr->bias == NULL) {
-			err_printf("no bias image file\n");
-			return 1;
-		}
-		if (!(ccdr->bias->flags & IMG_LOADED)) {
-			snprintf(msg, 255, "bias frame: %s\n", ccdr->bias->filename);
-			if (progress) {
-				if ((*progress)(msg, data))
-					return -1;
-			}
-		}
-		if (load_image_file(ccdr->bias))
-			return 2;
-	}
-	if (ccdr->ops & IMG_OP_DARK) {
-		if (ccdr->dark == NULL) {
-			err_printf("no dark image file\n");
-			return 1;
-		}
-		if (!(ccdr->dark->flags & IMG_LOADED)) {
-			snprintf(msg, 255, "dark frame: %s\n", ccdr->dark->filename);
-			if (progress) {
-				if ((*progress)(msg, data))
-					return -1;
-			}
-		}
-		if (load_image_file(ccdr->dark))
-			return 2;
-	}
-	if (ccdr->ops & IMG_OP_FLAT) {
-		if (ccdr->flat == NULL) {
-			err_printf("no flat image file\n");
-			return 1;
-		}
-		if (!(ccdr->flat->flags & IMG_LOADED)) {
-			snprintf(msg, 255, "flat frame: %s\n", ccdr->flat->filename);
-			if (progress) {
-				if ((*progress)(msg, data))
-					return -1;
-			}
-		}
-		if (load_image_file(ccdr->flat))
-			return 2;
-	}
-	if (ccdr->ops & IMG_OP_BADPIX) {
-		if (ccdr->bad_pix_map == NULL) {
-			err_printf("no bad pixel file\n");
-			return 1;
-		}
-		if (!ccdr->bad_pix_map->pix) {
-			snprintf(msg, 255, "bad pixels: %s\n", ccdr->bad_pix_map->filename);
-			if (progress) {
-				if ((*progress)(msg, data))
-					return -1;
-			}
-		}
-
-		if (load_bad_pix(ccdr->bad_pix_map))
-			return 2;
-	}
-
-	if (ccdr->ops & IMG_OP_ALIGN) {
-		if (ccdr->alignref == NULL) {
-			err_printf("no alignment reference file\n");
-			return 1;
-		}
-		if (!(ccdr->ops & CCDR_ALIGN_STARS)) {
-			snprintf(msg, 255, "alignment reference frame: %s\n",
-				 ccdr->alignref->filename);
-			if (progress) {
-				if ((*progress)(msg, data))
-					return -1;
-			}
-			load_alignment_stars(ccdr);
-		}
-	}
+	if ((r = ensure_ccdr(ccdr, progress, data)) != 0)
+		return r;
 
 	if (imf->flags & IMG_SKIP)
 		return 0;
-	if (progress) {
-		if ((*progress)(imf->filename, data))
-			return -1;
-	}
+
+	if (progress && (*progress)(imf->filename, data))
+		return -1;
+
 	if (load_image_file(imf)) {
 		err_printf("frame will be skipped\n");
 		imf->flags |= IMG_SKIP;
 		return -1;
 	}
 
-	if (progress) {
-		if ((*progress)(" loaded", data))
-			return -1;
-	}
-	ccd_reduce_imf(imf, ccdr, progress, data);
-	return 0;
+	if (progress && (*progress)(" loaded", data))
+		return -1;
+
+	return ccd_reduce_imf(imf, ccdr, progress, data);
 }
 
 
-/* reduce the files in list according to ccdr, up to the stacking step.
+/* reduce the files in list according to ccdr, up to the alignment step.
  * return 0 for succes or a positive error code
  * call progress with a short progress message from time to time. If progress returns
  * a non-zero value, abort remaining operations and return an error (non-zero) */
@@ -556,71 +583,22 @@ int reduce_frames(struct image_file_list *imfl, struct ccd_reduce *ccdr,
 {
 	GList *gl;
 	struct image_file *imf;
-	char msg[256];
 	int ret = 0;
 
-	if (ccdr->ops & IMG_OP_BIAS) {
-		if (ccdr->bias == NULL) {
-			err_printf("no bias image file\n");
-			return 1;
-		}
-		if (load_image_file(ccdr->bias))
-			return 2;
-		snprintf(msg, 255, "bias frame: %s\n", ccdr->bias->filename);
-		if (progress) {
-			if ((*progress)(msg, data))
-				return -1;
-		}
-	}
-	if (ccdr->ops & IMG_OP_DARK) {
-		if (ccdr->dark == NULL) {
-			err_printf("no dark image file\n");
-			return 1;
-		}
-		if (load_image_file(ccdr->dark))
-			return 2;
-		snprintf(msg, 255, "dark frame: %s\n", ccdr->dark->filename);
-		if (progress) {
-			if ((*progress)(msg, data))
-				return -1;
-		}
-	}
-	if (ccdr->ops & IMG_OP_FLAT) {
-		if (ccdr->flat == NULL) {
-			err_printf("no flat image file\n");
-			return 1;
-		}
-		if (load_image_file(ccdr->flat))
-			return 2;
-		snprintf(msg, 255, "flat frame: %s\n", ccdr->flat->filename);
-		if (progress) {
-			if ((*progress)(msg, data))
-				return -1;
-		}
-	}
+	if ((ret = ensure_ccdr(ccdr, progress, data)))
+		return ret;
 
 	gl = imfl->imlist;
-	while (gl != NULL) {
+	while (!ret && gl != NULL) {
 		imf = gl->data;
 		gl = g_list_next(gl);
+
 		if (imf->flags & IMG_SKIP)
 			continue;
-		if (progress) {
-			if ((*progress)(imf->filename, data))
-				return -1;
-		}
-		if (load_image_file(imf)) {
-			err_printf("frame will be skipped\n");
-			imf->flags |= IMG_SKIP;
-			continue;
-		}
 
-		if (progress) {
-			if ((*progress)(" loaded", data))
-				return -1;
-		}
-		ret = ccd_reduce_imf(imf, ccdr, progress, data);
+		ret = reduce_frame(imf, ccdr, progress, data);
 	}
+
 	return ret;
 }
 
@@ -634,6 +612,24 @@ int ccd_reduce_imf(struct image_file *imf, struct ccd_reduce *ccdr,
 	char lb[81];
 	g_return_val_if_fail(imf != NULL, -1);
 	g_return_val_if_fail(imf->fr != NULL, -1);
+
+	if (ccdr->ops & IMG_OP_OVERSCAN) {
+		if (progress && (*progress)(" overscan", data))
+			return -1;
+
+		if (!(imf->flags & IMG_OP_OVERSCAN)) {
+			if (overscan_correction(imf->fr, ccdr->pedestal, 3500, 50, 50, 2400)) {
+				if (progress && (*progress)(" (FAILED)", data))
+					return -1;
+			}
+			fits_add_history(imf->fr, "'OVERSCAN CORRECTED'");
+		} else {
+			if (progress && (*progress)(" (already done)", data))
+				return -1;
+		}
+
+		imf->flags |= IMG_OP_OVERSCAN | IMG_DIRTY;
+	}
 
 	if (ccdr->ops & IMG_OP_BIAS) {
 		g_return_val_if_fail(ccdr->bias->fr != NULL, -1);
@@ -1592,15 +1588,8 @@ int align_imf(struct image_file *imf, struct ccd_reduce *ccdr,
 		sl = g_slist_next(sl);
 	}
 
-/*
-	pairs_cs_diff(pairs, &dx, &dy, &ds, &dt, 1, 1);
 
-	if (progress) {
-		snprintf(msg, 255, " [%.1f, %.1f, %.3f, %.2f]",
-			 dx, dy, ds, dt);
-		(* progress)(msg, data);
-	}
-*/
+#if 1
 	pairs_cs_diff(pairs, &dx, &dy, &ds, &dt, 0, 0);
 
 	if (progress) {
@@ -1608,6 +1597,21 @@ int align_imf(struct image_file *imf, struct ccd_reduce *ccdr,
 		(* progress)(msg, data);
 	}
 	shift_frame(imf->fr, -dx, -dy);
+#else
+
+	pairs_cs_diff(pairs, &dx, &dy, &ds, &dt, 1, 1);
+
+	if (progress) {
+		snprintf(msg, 255, " [%.1f, %.1f, %.3f, %.2f]",
+			 dx, dy, ds, dt);
+		(* progress)(msg, data);
+	}
+
+
+	//printf("dx %g, dy %g, ds %g, dt %g\n", dx, dy, ds, dt);
+
+	shift_scale_rotate_frame(imf->fr, -dx, -dy, 1.0/ds, degrad(-dt));
+#endif
 
 fexit:
 	sl = fsl;

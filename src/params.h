@@ -316,9 +316,11 @@ typedef enum {
 	CCDRED_DEMOSAIC_METHOD,
 	CCDRED_WHITEBAL_METHOD,
 	CCDRED_STACK_METHOD,
+	CCDRED_STACK_FRAMING,
 	CCDRED_SIGMAS,
 	CCDRED_ITER,
 	CCDRED_AUTO,
+	CCDRED_OVERSCAN_PEDESTAL,
 
 	TELE_E_LIMIT,
 	TELE_E_LIMIT_EN,
@@ -437,6 +439,13 @@ enum {
 	PAR_STACK_METHOD_MEAN_MEDIAN,
 };
 
+#define PAR_CHOICE_STACK_FRAMING_OPTIONS { "mosaic", "align", "intersect", NULL }
+enum {
+	PAR_STACK_FRAMING_MOSAIC,
+	PAR_STACK_FRAMING_ALIGN,
+	PAR_STACK_FRAMING_INTERSECT,
+};
+
 #define PAR_CHOICE_COLORS {"red", "orange", "yellow", "green", "cyan", \
 			"blue", "light_blue", "gray", "white", NULL}
 enum {
@@ -510,6 +519,8 @@ extern char * synth_profiles[];
 extern char * ap_shapes[];
 
 extern char * wcsfit_models[];
+
+extern char * stack_framing_options[];
 
 
 /* function prototypes */

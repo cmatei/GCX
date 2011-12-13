@@ -63,6 +63,8 @@ char * ap_shapes[] = PAR_CHOICE_AP_SHAPES;
 
 char * wcsfit_models[] = PAR_CHOICE_WCSFIT_MODELS;
 
+char * stack_framing_options[] = PAR_CHOICE_STACK_FRAMING_OPTIONS;
+
 
 /*
  * return a pointer to a 1-char string describing the current

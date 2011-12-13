@@ -17,7 +17,6 @@ struct image_file {
 #define IMG_OP_BADPIX 0x08 /* image has had bad pixels corrected */
 #define IMG_OP_ADD 0x10 /* image has had a constant bias added */
 #define IMG_OP_MUL 0x20 /* image has been multiplied by a constant factor */
-#define IMG_OP_BLUR 0x2000 /* image has been gaussian-blurred */
 #define IMG_OP_ALIGN 0x40 /* image has been aligned */
 #define IMG_OP_STACK 0x80 /* image was used for stacking */
 #define IMG_OP_INPLACE 0x100 /* save the op's result to the source file */
@@ -25,6 +24,7 @@ struct image_file {
 #define IMG_OP_BG_ALIGN_MUL 0x400 /* align background multiplicatively */
 #define CCDR_BG_VAL_SET 0x800 /* a ccdr flag telling that the bg target value is valid */
 #define CCDR_ALIGN_STARS 0x1000 /* this tells us we should have something in align_stars */
+#define IMG_OP_BLUR 0x2000 /* image has been gaussian-blurred */
 #define IMG_OP_PHOT 0x4000 /* image has been aphotted */
 #define IMG_OP_PHOT_REUSE_WCS 0x8000 /* don't refit wcs when aphotting */
 
@@ -38,6 +38,9 @@ struct image_file {
 /* not using 40_0000 and 80_0000 */
 #define IMG_OP_DEMOSAIC 0x200000
 
+#define IMG_OP_OVERSCAN 0x400000
+#define IMG_OP_TRIM 0x800000
+
 #define IMG_BAYER_MASK 0xf000000
 #define IMG_BAYER_SHIFT 24
 
@@ -49,6 +52,7 @@ void image_file_release(struct image_file *imf);
 struct ccd_reduce {
 	int ref_count;
 	int ops;
+	double pedestal;       /* overscan correction pedestal */
 	double addv; /* a bias we add to the frames */
 	double mulv; /* a value we multiply the frames by */
 	double blurv; /* gaussian blur fwhm */

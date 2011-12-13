@@ -389,8 +389,6 @@ static int scan_for_PC(struct ccd_frame *fr, struct wcs *fim)
 		pc[1][1] = 1;
 	}
 
-	
-
 	D = pc[0][0] * pc[1][1] - pc[1][0] * pc[0][1];
 	d4_printf("PC D=%8g\n", D);
 	if (fabs(D) < 1e-30) {

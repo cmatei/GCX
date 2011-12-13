@@ -329,7 +329,6 @@ int make_roto_translate(struct ctrans *ct, double dx, double dy, double xs, doub
 	return 0;
 }
 
-/*
 // compute the coordinate transform
 static void do_ctrans(struct ctrans *ct, double u, double v, double *x, double *y)
 {
@@ -359,7 +358,7 @@ static void do_ctrans(struct ctrans *ct, double u, double v, double *x, double *
 		}
 	}
 }
-*/
+
 // do linear shear transform in the x direction
 // x = c ( u - a * v )
 // y = v
@@ -663,6 +662,230 @@ int shift_frame(struct ccd_frame *fr, double dx, double dy)
 
 	return 0;
 }
+
+
+/*
+static void coord_transform(double dx, double dy, double ds, double dt, double x, double y, double *xx, double *yy)
+{
+	*xx = dx + (x * ds - dx) * cos(dt) + (y * ds - dy) * sin(dt);
+	*yy = dy - (x * ds - dx) * sin(dt) + (y * ds - dy) * cos(dt);
+}
+*/
+
+#if 0
+	ct->u0 = dx;
+	ct->v0 = dy;
+	sa = sin(-rot);
+	ca = cos(-rot);
+	ct->a[1][0] = 1.0 / xs * ca;
+	ct->a[0][1] = - 1.0 / xs * sa;
+	ct->b[0][1] = 1.0 / ys * ca;
+	ct->b[1][0] = 1.0 / ys * sa;
+	return 0;
+#endif
+
+struct cmatrix {
+	double d[3][3];
+	double i[3][3];
+};
+
+void make_cmatrix(struct cmatrix *mat, double dx, double dy, double ds, double dt)
+{
+	int i, j;
+	double st, ct;
+	double det;
+
+	st = sin(dt);
+	ct = cos(dt);
+
+	for (i = 0; i < 3; i++)
+		for (j = 0; j < 3; j++)
+			mat->d[i][j] = (i == j) ? 1.0 : 0.0;
+
+	mat->d[0][2] = dx;
+	mat->d[1][2] = dy;
+
+	mat->d[0][0] = ct * ds;
+	mat->d[0][1] = - st * ds;
+	mat->d[1][0] = st * ds;
+	mat->d[1][1] = ct * ds;
+
+	det = mat->d[0][0] * mat->d[1][1] - mat->d[0][1] * mat->d[1][0];
+	if (fabs(det) < 10e-30) {
+		err_printf("singular matrix\n");
+		return;
+	}
+
+	mat->i[0][0] = 1.0 / det * mat->d[1][1];
+	mat->i[0][1] = - 1.0 / det * mat->d[0][1];
+	mat->i[0][2] = 1.0 / det * (mat->d[0][1] * mat->d[1][2] - mat->d[0][2] * mat->d[1][1]);
+
+	mat->i[1][0] = - 1.0 / det * mat->d[1][0];
+	mat->i[1][1] = 1.0 / det * mat->d[0][0];
+	mat->i[1][2] = 1.0 / det * (mat->d[0][2] * mat->d[1][0] - mat->d[0][0] * mat->d[1][2]);
+
+	mat->i[2][0] = 0.0;
+	mat->i[2][1] = 0.0;
+	mat->i[2][2] = 1.0 / det * (mat->d[0][0] * mat->d[1][1] - mat->d[0][1] * mat->d[1][0]);
+
+}
+
+void do_cmatrix_d(struct cmatrix *mat, double u, double v, double *x, double *y)
+{
+	*x = mat->d[0][0] * u + mat->d[0][1] * v + mat->d[0][2];
+	*y = mat->d[1][0] * u + mat->d[1][1] * v + mat->d[1][2];
+}
+
+static inline void do_cmatrix_i(struct cmatrix *mat, double u, double v, double *x, double *y)
+{
+	*x = mat->i[0][0] * u + mat->i[0][1] * v + mat->i[0][2];
+	*y = mat->i[1][0] * u + mat->i[1][1] * v + mat->i[1][2];
+}
+
+int shift_scale_rotate_frame(struct ccd_frame *fr, double dx, double dy, double ds, double dt)
+{
+	struct cmatrix cm;
+	double bbox[2][4];
+	double minx = HUGE, maxx = -HUGE, miny = HUGE, maxy = -HUGE;
+	int i, j, w, h;
+	double x, y;
+	int xx, yy;
+	double a,b,c,d;
+
+	make_cmatrix(&cm, dx, dy, ds, dt);
+
+	do_cmatrix_d(&cm,     0,     0, &bbox[0][0], &bbox[1][0]);
+	do_cmatrix_d(&cm, fr->w,     0, &bbox[0][1], &bbox[1][1]);
+	do_cmatrix_d(&cm, fr->w, fr->h, &bbox[0][2], &bbox[1][2]);
+	do_cmatrix_d(&cm,     0, fr->h, &bbox[0][3], &bbox[1][3]);
+
+	for (i = 0; i < 4; i++) {
+		if (minx > bbox[0][i])
+			minx = bbox[0][i];
+		if (maxx < bbox[0][i])
+			maxx = bbox[0][i];
+
+		if (miny > bbox[1][i])
+			miny = bbox[1][i];
+		if (maxy < bbox[1][i])
+			maxy = bbox[1][i];
+	}
+
+
+	w = floor (maxx - minx + 1.0);
+	h = floor (maxy - miny + 1.0);
+
+	struct ccd_frame *nfr = new_frame(w, h);
+	float *ddat = nfr->dat;
+	float *sdat = fr->dat;
+	float *ssdat;
+
+	for (i = 0; i < nfr->h; i++) {
+		for (j = 0; j < nfr->w; j++) {
+
+			do_cmatrix_i(&cm, j + minx, i + miny, &x, &y);
+
+			if (x < 1 || x >= fr->w - 1 || y < 1 || y >= fr->h -1) {
+				//printf("bad xy %g, %g\n", x, y);
+				continue;
+			}
+
+			a = x - floor(x);
+			b = 1 - a;
+			c = y - floor(y);
+			d = 1 - c;
+
+			xx = (int) floor(x);
+			yy = (int) floor(y);
+
+			ssdat = &sdat[yy * fr->w + xx];
+
+			ddat[i * nfr->w + j] = b * d * ssdat[0] + a * d * ssdat[1] + b * c * ssdat[fr->w] + a * c * ssdat[fr->w + 1];
+		}
+	}
+
+	fr->w = nfr->w;
+	fr->h = nfr->h;
+
+	fr->stats.statsok = 0;
+
+	free(fr->dat);
+	fr->dat = nfr->dat;
+	nfr->dat = NULL;
+
+	release_frame(nfr);
+
+	return 0;
+}
+
+
+#if 0
+int shift_scale_rotate_frame(struct ccd_frame *fr, double dx, double dy, double ds, double dt)
+{
+	struct ctrans ct;
+	double bbox[2][4];
+	double minx = HUGE, maxx = -HUGE, miny = HUGE, maxy = -HUGE;
+	int i, j, w, h;
+	double x, y;
+
+	make_roto_translate(&ct, dx, dy, ds, ds, dt);
+
+	do_ctrans(&ct,     0,     0, &bbox[0][0], &bbox[1][0]);
+	do_ctrans(&ct, fr->w,     0, &bbox[0][1], &bbox[1][1]);
+	do_ctrans(&ct, fr->w, fr->h, &bbox[0][2], &bbox[1][2]);
+	do_ctrans(&ct,     0, fr->h, &bbox[0][3], &bbox[1][3]);
+
+	for (i = 0; i < 4; i++) {
+		if (minx > bbox[0][i])
+			minx = bbox[0][i];
+		if (maxx < bbox[0][i])
+			maxx = bbox[0][i];
+
+		if (miny > bbox[1][i])
+			miny = bbox[1][i];
+		if (maxy < bbox[1][i])
+			maxy = bbox[1][i];
+	}
+
+	w = floor (maxx - minx + 1.0);
+	h = floor (maxy - miny + 1.0);
+
+	struct ccd_frame *nfr = new_frame(w, h);
+	float *ddat = nfr->dat;
+	float *sdat = fr->dat;
+
+	for (i = 0; i < fr->h; i++) {
+		for (j = 0; j < fr->w; j++) {
+			do_ctrans(&ct, j, i, &x, &y);
+
+			x -= minx;
+			y -= miny;
+
+			if (x < 0 || x >= nfr->w || y < 0 || y >= nfr->h) {
+				//printf("bad xy %g, %g\n", x, y);
+				continue;
+			}
+
+			ddat[((int)floor(y)) * nfr->w + (int)floor(x)] = sdat[i * fr->w + j];
+		}
+	}
+
+	fr->w = nfr->w;
+	fr->h = nfr->h;
+
+	fr->stats.statsok = 0;
+
+	free(fr->dat);
+	fr->dat = nfr->dat;
+	nfr->dat = NULL;
+
+	release_frame(nfr);
+
+	det_ctrans(&ct);
+
+	return 0;
+}
+#endif
 
 // create a gaussian filter kernel of given sigma
 // requires a prealloced table of floats of suitable size (size*size)

@@ -576,6 +576,8 @@ int fits_get_double(struct ccd_frame *fr, char *kwd, double *v);
 int fits_get_int(struct ccd_frame *fr, char *kwd, int *v);
 int sub_frames (struct ccd_frame *fr, struct ccd_frame *fr1);
 
+int overscan_correction(struct ccd_frame *fr, double pedestal, int x, int y, int w, int h);
+
 
 struct ccd_frame *read_image_file(char *filename, char *ungz, int force_unsigned,
 				  char *default_cfa);
@@ -678,6 +680,7 @@ void report_event(FILE *fp, struct vs_recipy *vs, struct ccd_frame *fr, int what
 extern int make_shift_ctrans(struct ctrans *ct, double dx, double dy);
 extern int make_roto_translate(struct ctrans *ct, double dx, double dy, double xs, double ys, double rot);
 extern int shift_frame(struct ccd_frame *fr, double dx, double dy);
+extern int shift_scale_rotate_frame(struct ccd_frame *fr, double dx, double dy, double ds, double dt);
 extern int linear_x_shear(struct ccd_frame *in, struct ccd_frame *out, double a, double c);
 extern int linear_y_shear(struct ccd_frame *in, struct ccd_frame *out, double b, double c,
 			  double u0, double v0);
