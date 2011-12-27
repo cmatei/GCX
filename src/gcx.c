@@ -868,7 +868,7 @@ int main(int ac, char **av)
 			if (ccdr == NULL)
 				ccdr = ccd_reduce_new();
 			ccdr->ops |= IMG_OP_OVERSCAN;
-			ccdr->pedestal = P_DBL(CCDRED_OVERSCAN_PEDESTAL);
+			ccdr->overscan = P_DBL(CCDRED_OVERSCAN_PEDESTAL);
 			batch = 1;
 			break;
 		case 'a':

@@ -465,7 +465,8 @@ static int expose_cb(GtkWidget *window)
 			obs = (struct obs_data *)g_object_get_data(G_OBJECT(window), "obs_data");
 			ccd_frame_add_obs_info(fr, obs);
 		}
-		frame_stats(fr);
+		if (!fr->stats.statsok)
+			frame_stats(fr);
 		frame_to_channel(fr, main_window, "i_channel");
 		r = maybe_save_frame(fr, window);
 		release_frame(fr);

@@ -618,7 +618,7 @@ int ccd_reduce_imf(struct image_file *imf, struct ccd_reduce *ccdr,
 			return -1;
 
 		if (!(imf->flags & IMG_OP_OVERSCAN)) {
-			if (overscan_correction(imf->fr, ccdr->pedestal, 3500, 50, 50, 2400)) {
+			if (overscan_correction(imf->fr, ccdr->overscan, 3500, 50, 50, 2400)) {
 				if (progress && (*progress)(" (FAILED)", data))
 					return -1;
 			}

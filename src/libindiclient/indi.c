@@ -14,8 +14,8 @@
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-  
-  
+
+
   Contact Information: gcx@phracturedblue.com <Geoffrey Hausheer>
 *******************************************************************************/
 
@@ -121,7 +121,7 @@ static struct indi_device_t *indi_new_device(struct indi_t *indi, const char *de
 	idev->indi = indi;
 
 	while ((cb = indi_find_dev_cb(indi, devname)) && cb != first_cb) {
-		if (!first_cb) 
+		if (!first_cb)
 			first_cb = cb;
 		idev->new_prop_cb = il_append(idev->new_prop_cb, indi_create_cb(cb->cb.func, cb->cb.data));
 
@@ -333,7 +333,7 @@ void indi_send(struct indi_prop_t *iprop, struct indi_elem_t *ielem )
 			valstr = val;
 			break;
 
-		}			
+		}
 		ptr += sprintf(ptr, "  <one%s name=\"%s\">%s</one%s>\n", type, elem->name, valstr, type);
 	}
 	ptr += sprintf(ptr, "</new%sVector>\n", type);
@@ -364,7 +364,7 @@ static int indi_blob_decode(void *data)
 	int src_len;
 	int pos = ielem->value.blob.ptr - ielem->value.blob.data;
 
-	printf("Decoding from %d - %p\n", pos, ielem->iprop->root);
+	//printf("Decoding from %d - %p\n", pos, ielem->iprop->root);
 	if (ielem->value.blob.compressed) {
 		if(! ielem->value.blob.zstrm)
 			ielem->value.blob.zstrm = (z_stream *)calloc(1, sizeof(z_stream));
@@ -420,7 +420,7 @@ static int indi_blob_decode(void *data)
 		return FALSE;
 	}
 	return TRUE;
-		
+
 }
 
 static int indi_convert_data(struct indi_elem_t *ielem, int type, const char *data, unsigned int data_size)
@@ -543,7 +543,7 @@ static struct indi_prop_t *indi_new_prop(XMLEle *root, struct indi_device_t *ide
 			ielem->value.num.max  = strtod(findXMLAttValu(ep, "max"), NULL);
 			ielem->value.num.step = strtod(findXMLAttValu(ep, "step"), NULL);
 		}
-			
+
 		iprop->elems = il_append(iprop->elems, ielem);
 	}
 	if (iprop->type == INDI_PROP_SWITCH) {
@@ -687,7 +687,7 @@ struct indi_t *indi_init(const char *hostname, int port, const char *config)
 		return NULL;
 	}
 	sprintf(msg, "<getProperties version='%g'/>\n", INDIV);
-	
+
 	io_indi_sock_write(indi->fh, msg, strlen(msg));
 	return indi;
 }

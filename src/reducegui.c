@@ -1158,7 +1158,7 @@ static void dialog_to_ccdr(GtkWidget *dialog, struct ccd_reduce *ccdr)
 	g_return_if_fail (ccdr != NULL);
 
 	if (get_named_checkb_val(dialog, "overscan_checkb")) {
-		ccdr->pedestal = named_spin_get_value(dialog, "overscan_spin");
+		ccdr->overscan = named_spin_get_value(dialog, "overscan_spin");
 		ccdr->ops |= IMG_OP_OVERSCAN;
 	} else {
 		ccdr->ops &= ~IMG_OP_OVERSCAN;

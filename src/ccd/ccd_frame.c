@@ -339,8 +339,9 @@ int frame_stats(struct ccd_frame *hd)
 	}
 
 	hdata = hd->stats.hist.hdat;
-
 	hsize = hd->stats.hist.hsize;
+	memset(hd->stats.hist.hdat, 0, hsize * sizeof(unsigned));
+
 	hmin = H_MIN;
 	hstep = (H_MAX - H_MIN) / hsize;
 	binmax = 0;
@@ -1295,22 +1296,29 @@ int overscan_correction(struct ccd_frame *fr, double pedestal, int x, int y, int
 	int npixels;
 	int i, j, all;
 	float *dat;
+	int plane_iter = 0;
 
-	dat = fr->dat;
+	while ((plane_iter = color_plane_iter(fr, plane_iter))) {
+		dat = get_color_plane(fr, plane_iter);
 
-	sum = 0.0;
-	npixels = 0;
-	for (i = y; i < y + h; i++) {
-		for (j = x; j < x + w; j++) {
-			sum += dat[i * fr->w + j];
-			npixels++;
+		sum = 0.0;
+		npixels = 0;
+
+		for (i = y; i < y + h; i++) {
+			for (j = x; j < x + w; j++) {
+				sum += dat[i * fr->w + j];
+				npixels++;
+			}
 		}
-	}
-	avg = sum / npixels;
 
-	all = fr->w * fr->h;
-	for (i = 0; i < all; i++) {
-		*dat++ += pedestal - avg;
+		avg = sum / npixels;
+		all = fr->w * fr->h;
+
+		for (i = 0; i < all; i++) {
+			*dat = *dat + pedestal - avg;
+			dat++;
+		}
+
 	}
 
 	fr->stats.statsok = 0;

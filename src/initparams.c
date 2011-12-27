@@ -1118,7 +1118,7 @@ void init_ptable(void)
 
         /* ccdred */
 	add_par_double(CCDRED_OVERSCAN_PEDESTAL, PAR_CCDRED, PREC_1, "overscan_pedestal",
-		       "Pedestal used for overscan correction", 1000);
+		       "Overscan correction pedestal", 1000);
 
 	add_par_int(CCDRED_DEMOSAIC_METHOD, PAR_CCDRED, 0, "demosaic_method",
 		    "Method used for demosaic", PAR_DEMOSAIC_METHOD_BILINEAR);

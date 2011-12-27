@@ -1,3 +1,4 @@
+
 /*******************************************************************************
   Copyright(c) 2009 Geoffrey Hausheer. All rights reserved.
 
@@ -194,7 +195,7 @@ void camera_set_temperature(struct camera_t *camera, float x)
 		err_printf("Camera doesn't support temperature control\n");
 		return;
 	}
-	if (INDI_update_elem_if_changed(camera->temp_prop, "CCD_TEMPERATURE_VALUE", x)) {
+	if (INDI_update_elem_if_changed(camera->temp_prop, "CCD_TEMPERATURE_VALUEXX", x)) {
 		indi_send(camera->temp_prop, NULL);
 	}
 }

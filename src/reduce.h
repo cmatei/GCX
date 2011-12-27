@@ -35,7 +35,6 @@ struct image_file {
 #define IMG_QUICKPHOT 0x100000			/* request only "quick" photometry,
 						   rather than going to the mbds */
 
-/* not using 40_0000 and 80_0000 */
 #define IMG_OP_DEMOSAIC 0x200000
 
 #define IMG_OP_OVERSCAN 0x400000
@@ -52,7 +51,7 @@ void image_file_release(struct image_file *imf);
 struct ccd_reduce {
 	int ref_count;
 	int ops;
-	double pedestal;       /* overscan correction pedestal */
+	double overscan;       /* overscan correction pedestal */
 	double addv; /* a bias we add to the frames */
 	double mulv; /* a value we multiply the frames by */
 	double blurv; /* gaussian blur fwhm */
