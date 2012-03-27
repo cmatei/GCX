@@ -953,6 +953,7 @@ int write_fits_frame(struct ccd_frame *fr, char *filename)
 //	int jdi;
 //	double jd;
 	double bscale, bzero;
+	int bitpix;
 	int naxis;
 	unsigned long cnt;
 
@@ -960,7 +961,7 @@ int write_fits_frame(struct ccd_frame *fr, char *filename)
 
 	strncpy(lb, filename, MAX_FILENAME);
 
-//	fits_filename(lb, MAX_FILENAME);
+	fits_filename(lb, MAX_FILENAME);
 
 	fp = fopen(lb, "w");
 	if (fp == NULL) {
@@ -968,37 +969,32 @@ int write_fits_frame(struct ccd_frame *fr, char *filename)
 			filename);
 		return (ERR_FILE);
 	}
-/*
-	t = gmtime(&(fr->exp.exp_start.tv_sec));
-	sprintf(lb, "'%d-%02d-%02dT%02d:%02d:%02d.%02d'", 1900 + t->tm_year, t->tm_mon + 1,
-		t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec,
-		(int)(fr->exp.exp_start.tv_usec / 10000));
-// do the julian date (per hsaa p107)
-	i = 1900 + t->tm_year;
-	j = t->tm_mon + 1;
-	k = t->tm_mday;
-
-	jdi = k - 32075 + 1461 * (i + 4800 + (j - 14) / 12) / 4
-		+ 367 * (j - 2 - (j - 14) / 12 * 12) / 12
-		- 3 * (( i + 4900 + (j - 14) / 12) / 100) / 4;
-
-	jd = jdi - 0.5 + t->tm_hour / 24.0 + t->tm_min / (24.0 * 60.0)
-		+ t->tm_sec / (24.0 * 3600.0) + fr->exp.exp_start.tv_usec /
-		(1000000.0 * 24.0 * 3600.0);
-*/
 
 	if (fr->stats.statsok == 0)
 		frame_stats(fr);
+
+	if ( ((fr->stats.max - fr->stats.min) < 32767.0)
+	     && (fr->stats.max < 32767)) {// we use positive, scaled by 1 format
+		bscale = 1.0;
+		bzero = 0.0;
+		bitpix = 16;
+	} else {
+		// we use floats
+		bscale = 1.0;
+		bzero = 0.0;
+		bitpix = -32;
+	}
 
 	if (fr->magic & FRAME_VALID_RGB) {
 		naxis = 3;
 	} else {
 		naxis = 2;
 	}
+
 	i = 0;
 	i++; fprintf(fp, "%-8s= %20s / %-40s       ", "SIMPLE", "T",
 		"Standard FITS format");
-	i++; fprintf(fp, "%-8s= %20d / %-40s       ", "BITPIX", 16,
+	i++; fprintf(fp, "%-8s= %20d / %-40s       ", "BITPIX", bitpix,
 		"Bits per pixel");
 	i++; fprintf(fp, "%-8s= %20d   %-40s       ", "NAXIS", naxis, "");
 	i++; fprintf(fp, "%-8s= %20d   %-40s       ", "NAXIS1", fr->w, "");
@@ -1015,17 +1011,10 @@ int write_fits_frame(struct ccd_frame *fr, char *filename)
 //	}
 
 
-	if ( ((fr->stats.max - fr->stats.min) < 32767.0)
-	     && (fr->stats.max < 32767)) {// we use positive, scaled by 1 format
-		bscale = 1.0;
-		bzero = 0.0;
-	} else {
-		bscale = 1.0;
-		bzero = 32768.0;
+	if (bitpix == 16) {
+		i++; fprintf(fp, "%-8s= %20.3f   %-40s       ", "BSCALE", bscale, "");
+		i++; fprintf(fp, "%-8s= %20.3f   %-40s       ", "BZERO", bzero, "");
 	}
-
-	i++; fprintf(fp, "%-8s= %20.3f   %-40s       ", "BSCALE", bscale, "");
-	i++; fprintf(fp, "%-8s= %20.3f   %-40s       ", "BZERO", bzero, "");
 
 // fill in /replace the noise pars
 
@@ -1068,18 +1057,34 @@ int write_fits_frame(struct ccd_frame *fr, char *filename)
 		dp = (float *)(*datp);
 		datp++;
 
-		//real value = bzero + bscale * <array_value>
+		switch (bitpix) {
+		case 16:
+			//real value = bzero + bscale * <array_value>
+			for (i = 0; i < all; i ++) {
+				v = floor( (dp[i] - bzero) / bscale + 0.5 );
+				if (v < -32768)
+					v = -32768;
+				if (v > 32767)
+					v = 32767;
+				putc((v >> 8) & 0xff, fp);
+				putc((v) & 0xff, fp);
 
-		for (i = 0; i < all; i ++) {
-			v = floor( (dp[i] - bzero) / bscale + 0.5 );
-			if (v < -32768)
-				v = -32768;
-			if (v > 32767)
-				v = 32767;
-			putc((v >> 8) & 0xff, fp);
-			putc((v) & 0xff, fp);
+				cnt += 2;
+			}
+			break;
 
-			cnt += 2;
+		case -32:
+			for (i = 0; i < all; i++) {
+				unsigned int v = htonl(*(unsigned int *) &dp[i]);
+
+				fwrite(&v, sizeof(unsigned int), 1, fp);
+				cnt += sizeof(int);
+			}
+			break;
+
+		default:
+			err_printf("write_fits_frame: unsupported bitpix!\n");
+			return ERR_FATAL;
 		}
 	}
 
@@ -1103,7 +1108,7 @@ int write_gz_fits_frame(struct ccd_frame *fr, char *fn, char *gzcmd)
 		return write_fits_frame(fr, fn);
 
 	strncpy(lb, fn, MAX_FILENAME);
-//	fits_filename(lb, MAX_FILENAME);
+	fits_filename(lb, MAX_FILENAME);
 
 	ret = write_fits_frame(fr, lb);
 	if (!ret) {
