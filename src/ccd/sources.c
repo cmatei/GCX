@@ -646,9 +646,9 @@ int extract_stars(struct ccd_frame *fr, struct region *reg, double min_flux, dou
 				continue;
 			}
 // check that we have a few connected pixels above the cut
-			ring_stats(fr, 1.0*x, 1.0*y, 0, 2,
-				   QUAD1|QUAD2|QUAD3|QUAD4, rsn, skycut, HUGE);
-			if (rsn->used < NCONN) {
+			ret = ring_stats(fr, 1.0*x, 1.0*y, 0, 2,
+					 QUAD1|QUAD2|QUAD3|QUAD4, rsn, skycut, HUGE);
+			if (ret < 0 || rsn->used < NCONN) {
 //				d3_printf("only %d connected pixels found\n", rsn->used);
 				continue;
 			}

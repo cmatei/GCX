@@ -687,12 +687,12 @@ GList *query_catalog(char *catalog, double ra, double dec, double w, double h,
 	snprintf(cmd, 1023, "%s -mime=tsv <<====\n"
 		 "-source=%s\n"
 		 "-c=%.4f %+.4f\n"
-		 "-c.bm=%.1fx%.1f\n"
+		 "-c.rm=%.1f\n"
 		 "-out=*\n"
 		 "-out.max=%d\n"
 		 "====\n",
 		 P_STR(QUERY_VIZQUERY), catalog,
-		 ra, dec, w, h, P_INT(QUERY_MAX_STARS));
+		 ra, dec, P_DBL(QUERY_MAX_RADIUS), P_INT(QUERY_MAX_STARS));
 
 	d3_printf("vizquery: %s", cmd);
 
