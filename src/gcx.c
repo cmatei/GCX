@@ -503,6 +503,12 @@ out_err:
 	exit(0);
 }
 
+#include "psf.h"
+
+extern int radial_profile(struct ccd_frame *fr, double x, double y, double r,
+			  struct rp_point rpp[], int n, double *peak, double *flux,
+			  double *sky, double *err);
+
 int extract_sources(char *starf, char *outf)
 {
 	FILE *of = NULL;
@@ -525,18 +531,43 @@ int extract_sources(char *starf, char *outf)
 	if (of == NULL)
 		of = stdout;
 
-	fprintf(of, "# X Y Flux FWHM AR Sky Peak EC PA\n");
+
+	double *fwhms = calloc(src->ns, sizeof (double));
+	int nstars = 0;
+
+	struct rp_point *rpp = NULL;
+	int nrp;
+	double peak, sky, flux, err;
+
+	nrp = sqr(4 * ceil(P_DBL(AP_R1)));
+	rpp = malloc(nrp * sizeof(struct rp_point));
+
+
+	fprintf(of, "# X Y FWHM Flux Sky Peak AR\n");
 	for (i = 0; i < src->ns; i++) {
-		if (src->s[i].peak > P_DBL(AP_SATURATION))
+		if (radial_profile(imf->fr, src->s[i].x, src->s[i].y, 2 * P_DBL(AP_R1), rpp, nrp,
+				   &peak, &flux, &sky, &err) <= 0) {
+//			err_printf_sb2(window, "Bad star (too close to edge?)\n");
+//			error_beep();
+//			return;
+			continue;
+		}
+
+		if (peak >= P_DBL(AP_SATURATION))
 			continue;
 
-		fprintf(of, "%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\n",
+		double A, s;
+		A = P_DBL(AP_R1) / FWHMSIG / 2; s = 1.0;
+		fit_1d_profile(rpp, &A, NULL, &s, NULL);
+
+		fprintf(of, "%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\n",
 			src->s[i].x, src->s[i].y,
-			src->s[i].flux,	src->s[i].fwhm,
-			src->s[i].starr,
-			src->s[i].sky, src->s[i].peak,
-			src->s[i].fwhm_ec, src->s[i].fwhm_pa);
+			flux, FWHMSIG * s, sky, peak, src->s[i].starr);
+
+		fwhms[nstars++] = FWHMSIG * s;
 	}
+
+	fprintf(of, "# Median FWHM: %.2f\n", dmedian(fwhms, nstars));
 
 	fclose(of);
 

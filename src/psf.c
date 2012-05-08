@@ -265,9 +265,13 @@ void aperture_stats(struct ccd_frame *fr, struct psf *psf, double x, double y,
 	if (rs->all != 0.0) {
 		rs->avg = rs->sum/rs->all;
 		rs->sigma = sqrt(rs->sumsq / rs->all - sqr(rs->sum / rs->all));
+
+		if (isnan(rs->sigma))
+			rs->sigma = 0.0;
 	} else {
 		rs->avg = rs->sigma = 0.0;
 	}
+	free(vals);
 }
 
 
@@ -518,7 +522,7 @@ int radial_profile(struct ccd_frame *fr, double x, double y, double r,
 		for (ix = 0; ix < ri && xs + ix < fr->w; ix++) {
 			double dist;
 			dist = sqrt(sqr(ix + xs - x) + sqr(iy + ys - y));
-			if (ns < n && dist <= r) {
+			if (ns < n && dist <= r && xs + ix >= 0 && xs + ix < fr->w && ys + iy >= 0 && ys + iy < fr->h) {
 				d = get_pixel_luminence(fr, xs + ix, ys + iy);
 //				d4_printf("dist %8.1f v:%.1f\n", dist, d);
 				rpp[ns].r = dist;
