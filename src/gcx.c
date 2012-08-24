@@ -543,7 +543,7 @@ int extract_sources(char *starf, char *outf)
 	rpp = malloc(nrp * sizeof(struct rp_point));
 
 
-	fprintf(of, "# X Y FWHM Flux Sky Peak AR\n");
+	fprintf(of, "# X Y Flux FWHM Sky Peak AR\n");
 	for (i = 0; i < src->ns; i++) {
 		if (radial_profile(imf->fr, src->s[i].x, src->s[i].y, 2 * P_DBL(AP_R1), rpp, nrp,
 				   &peak, &flux, &sky, &err) <= 0) {
