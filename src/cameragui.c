@@ -212,7 +212,10 @@ static void dither_move(gpointer dialog, double amount)
 	snprintf(msg, 127, "Dither move: %.1f %.1f", 3600 * dr, 3600 * dd);
 	status_message(dialog, msg);
 
-	err_printf("dither move TODO\n");
+//	err_printf("dither move TODO\n");
+
+	/* FIXME: this crude hack allows me to dither for now. */
+//	system("/home/cmatei/dither-script");
 
 }
 
@@ -241,9 +244,6 @@ static int maybe_save_frame(struct ccd_frame *fr, GtkWidget *dialog)
 
 		save_frame_auto_name(fr, dialog);
                 /* restart exposure if needed */
-		if (P_INT(TELE_DITHER_ENABLE)) {
-			dither_move(dialog, P_DBL(TELE_DITHER_AMOUNT));
-		}
 		text = named_entry_text(dialog, "current_frame_entry");
 		seq = strtol(text, NULL, 10);
 		g_free(text);
@@ -252,6 +252,10 @@ static int maybe_save_frame(struct ccd_frame *fr, GtkWidget *dialog)
 		if (seq > 0) {
 			seq --;
 			if (seq > 0) {
+				if (P_INT(TELE_DITHER_ENABLE)) {
+					dither_move(dialog, P_DBL(TELE_DITHER_AMOUNT));
+				}
+
 				if (capture_image(dialog)) {
 					seq = 0;
 					d4_printf("aborting sequence\n");

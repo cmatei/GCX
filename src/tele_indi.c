@@ -1,23 +1,23 @@
 /*******************************************************************************
   Copyright(c) 2009 Geoffrey Hausheer. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: gcx@phracturedblue.com <Geoffrey Hausheer>
 *******************************************************************************/
 
@@ -34,6 +34,9 @@
 
 static void tele_check_state(struct tele_t *tele)
 {
+	if (tele->ready)
+		return;
+
 	if (tele->is_connected &&
 		((tele->move_ns_prop && tele->move_ew_prop) ||
 		(tele->timed_guide_ns_prop && tele->timed_guide_ew_prop)))
@@ -298,15 +301,16 @@ int tele_set_coords(struct tele_t *tele, int type, double ra, double dec, double
 	}
 	if (tele->coord_set_type_prop) {
 		switch (type) {
-		case TELE_COORDS_SYNC: 
+		case TELE_COORDS_SYNC:
 			elem = indi_prop_set_switch(tele->coord_set_type_prop, "SYNC", 1);
 			break;
-		case TELE_COORDS_SLEW: 
+		case TELE_COORDS_SLEW:
 			elem = indi_prop_set_switch(tele->coord_set_type_prop, "SLEW", 1);
 			break;
 		}
 		if (elem) {
-			indi_send(tele->abort_prop, elem);
+			if (tele->abort_prop)
+				indi_send(tele->abort_prop, elem);
 		} else {
 			err_printf("Telescope failed to change mode\n");
 			return -1;

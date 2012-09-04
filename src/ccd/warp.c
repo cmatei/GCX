@@ -742,70 +742,88 @@ static inline void do_cmatrix_i(struct cmatrix *mat, double u, double v, double 
 	*y = mat->i[1][0] * u + mat->i[1][1] * v + mat->i[1][2];
 }
 
+
+static inline double cubic_weight(double x, double a, double b)
+{
+	double v = fabs(x);
+	double q = 0.0;
+
+	if (v < 1) {
+		q = (-6*a - 9*b + 12) * v * v *v +
+		    (6*a + 12*b - 18) * v * v -
+		    2*b + 6;
+	} else if (v < 2) {
+		q = (-6*a - b) * v * v * v +
+		    (30*a + 6*b) * v * v +
+		    (-48*a - 12*b) * v +
+		    24*a + 8*b;
+	}
+
+	return 1.0 / 6.0 * q;
+}
+
+static inline double interpolate_pixel_cubic(struct ccd_frame *fr, double x, double y, double a, double b)
+{
+	int x0, y0;
+	double p, q;
+	int i, j, u, v;
+
+	if (x < 3 || x >= fr->w - 3 || y < 3 || y >= fr->h - 3)
+		return 0.0;
+
+	x0 = (int) floor(x);
+	y0 = (int) floor(y);
+
+	// n = extent of kernel
+	// q = 0
+	// for j = 0 ... 2n-1 do // iterate over 2n line
+	//     let v <- vj = |y0| + j - n + 1
+	//     let p <- 0
+	//     for i = 0 ... 2n-1 do // iterate over 2n cols
+	//         let u <- ui = |x0| + i - n +1
+	//         let p <- p + I(u,v) * w(x0-u)
+	//     done
+	//     let q = q + p * w(y0-v)
+	// done
+
+	q = 0.0;
+	for (j = 0; j < 4; j++) {
+		p = 0.0;
+		v = y0 + j - 1;
+		for (i = 0; i < 4; i++) {
+			u = x0 + i - 1;
+			p += ((float *) fr->dat)[v * fr->w + u] * cubic_weight(x - (double) u, a, b);
+		}
+
+		q += p * cubic_weight(y - (double) v, a, b);
+	}
+
+
+	return q;
+}
+
 int shift_scale_rotate_frame(struct ccd_frame *fr, double dx, double dy, double ds, double dt)
 {
 	struct cmatrix cm;
-	double bbox[2][4];
-	double minx = HUGE, maxx = -HUGE, miny = HUGE, maxy = -HUGE;
-	int i, j, w, h;
+	int i, j;
 	double x, y;
-	int xx, yy;
-	double a,b,c,d;
 
 	make_cmatrix(&cm, dx, dy, ds, dt);
 
-	do_cmatrix_d(&cm,     0,     0, &bbox[0][0], &bbox[1][0]);
-	do_cmatrix_d(&cm, fr->w,     0, &bbox[0][1], &bbox[1][1]);
-	do_cmatrix_d(&cm, fr->w, fr->h, &bbox[0][2], &bbox[1][2]);
-	do_cmatrix_d(&cm,     0, fr->h, &bbox[0][3], &bbox[1][3]);
-
-	for (i = 0; i < 4; i++) {
-		if (minx > bbox[0][i])
-			minx = bbox[0][i];
-		if (maxx < bbox[0][i])
-			maxx = bbox[0][i];
-
-		if (miny > bbox[1][i])
-			miny = bbox[1][i];
-		if (maxy < bbox[1][i])
-			maxy = bbox[1][i];
-	}
-
-
-	w = floor (maxx - minx + 1.0);
-	h = floor (maxy - miny + 1.0);
-
-	struct ccd_frame *nfr = new_frame(w, h);
+	struct ccd_frame *nfr = new_frame(fr->w, fr->h);
 	float *ddat = nfr->dat;
-	float *sdat = fr->dat;
-	float *ssdat;
 
 	for (i = 0; i < nfr->h; i++) {
 		for (j = 0; j < nfr->w; j++) {
+			do_cmatrix_i(&cm, j, i, &x, &y);
 
-			do_cmatrix_i(&cm, j + minx, i + miny, &x, &y);
-
-			if (x < 1 || x >= fr->w - 1 || y < 1 || y >= fr->h -1) {
-				//printf("bad xy %g, %g\n", x, y);
-				continue;
-			}
-
-			a = x - floor(x);
-			b = 1 - a;
-			c = y - floor(y);
-			d = 1 - c;
-
-			xx = (int) floor(x);
-			yy = (int) floor(y);
-
-			ssdat = &sdat[yy * fr->w + xx];
-
-			ddat[i * nfr->w + j] = b * d * ssdat[0] + a * d * ssdat[1] + b * c * ssdat[fr->w] + a * c * ssdat[fr->w + 1];
+			/* a = 1.0, b = 0.0     -> Cubic B-spline
+			   a = 0.0, b = 0.5     -> Catmull-Rom
+			   a = 1/3.0, b = 1/3.0 -> Mitchell-Netravali
+			*/
+			*ddat++ = interpolate_pixel_cubic(fr, x, y, 1/3.0, 1/3.0);
 		}
 	}
-
-	fr->w = nfr->w;
-	fr->h = nfr->h;
 
 	fr->stats.statsok = 0;
 
@@ -816,76 +834,9 @@ int shift_scale_rotate_frame(struct ccd_frame *fr, double dx, double dy, double 
 	release_frame(nfr);
 
 	return 0;
+
 }
 
-
-#if 0
-int shift_scale_rotate_frame(struct ccd_frame *fr, double dx, double dy, double ds, double dt)
-{
-	struct ctrans ct;
-	double bbox[2][4];
-	double minx = HUGE, maxx = -HUGE, miny = HUGE, maxy = -HUGE;
-	int i, j, w, h;
-	double x, y;
-
-	make_roto_translate(&ct, dx, dy, ds, ds, dt);
-
-	do_ctrans(&ct,     0,     0, &bbox[0][0], &bbox[1][0]);
-	do_ctrans(&ct, fr->w,     0, &bbox[0][1], &bbox[1][1]);
-	do_ctrans(&ct, fr->w, fr->h, &bbox[0][2], &bbox[1][2]);
-	do_ctrans(&ct,     0, fr->h, &bbox[0][3], &bbox[1][3]);
-
-	for (i = 0; i < 4; i++) {
-		if (minx > bbox[0][i])
-			minx = bbox[0][i];
-		if (maxx < bbox[0][i])
-			maxx = bbox[0][i];
-
-		if (miny > bbox[1][i])
-			miny = bbox[1][i];
-		if (maxy < bbox[1][i])
-			maxy = bbox[1][i];
-	}
-
-	w = floor (maxx - minx + 1.0);
-	h = floor (maxy - miny + 1.0);
-
-	struct ccd_frame *nfr = new_frame(w, h);
-	float *ddat = nfr->dat;
-	float *sdat = fr->dat;
-
-	for (i = 0; i < fr->h; i++) {
-		for (j = 0; j < fr->w; j++) {
-			do_ctrans(&ct, j, i, &x, &y);
-
-			x -= minx;
-			y -= miny;
-
-			if (x < 0 || x >= nfr->w || y < 0 || y >= nfr->h) {
-				//printf("bad xy %g, %g\n", x, y);
-				continue;
-			}
-
-			ddat[((int)floor(y)) * nfr->w + (int)floor(x)] = sdat[i * fr->w + j];
-		}
-	}
-
-	fr->w = nfr->w;
-	fr->h = nfr->h;
-
-	fr->stats.statsok = 0;
-
-	free(fr->dat);
-	fr->dat = nfr->dat;
-	nfr->dat = NULL;
-
-	release_frame(nfr);
-
-	det_ctrans(&ct);
-
-	return 0;
-}
-#endif
 
 // create a gaussian filter kernel of given sigma
 // requires a prealloced table of floats of suitable size (size*size)

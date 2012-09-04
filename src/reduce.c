@@ -1589,7 +1589,7 @@ int align_imf(struct image_file *imf, struct ccd_reduce *ccdr,
 	}
 
 
-#if 1
+#if 0
 	pairs_cs_diff(pairs, &dx, &dy, &ds, &dt, 0, 0);
 
 	if (progress) {
