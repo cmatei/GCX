@@ -1,23 +1,23 @@
 /*******************************************************************************
   Copyright(c) 2000 - 2003 Radu Corlan. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: radu@corlan.net
 *******************************************************************************/
 
@@ -49,42 +49,32 @@
 #include "symbols.h"
 #include "recipy.h"
 
-/* the chunk we alloc stf atoms in */
-static GMemChunk *stf_chunk = NULL;
-
 /* alloc one stf atom */
 struct stf *stf_new(void)
 {
-	if (stf_chunk == NULL) {
-		stf_chunk = g_mem_chunk_new("stf chunk", sizeof(struct stf),
-					      16384 * sizeof(struct stf),
-					      G_ALLOC_AND_FREE);
-	}
-	return g_chunk_new0(struct stf, stf_chunk);
+	return g_slice_new0(struct stf);
 }
 
 /* free one stf atom */
 void stf_free_one(struct stf *stf)
 {
-	g_assert(stf_chunk != NULL);
 	switch(stf->type) {
 	case STFT_IDENT:
 	case STFT_STRING:
 		free(STF_STRING(stf));
 		break;
-	case STFT_GLIST: 
+	case STFT_GLIST:
 		g_list_free(STF_GLIST(stf));
 		break;
 	}
-	g_mem_chunk_free(stf_chunk, stf);
+	g_slice_free(struct stf, stf);
 }
 
 /* free a complete stf tree (but not the data it may point to) */
 void stf_free(struct stf *stf)
 {
 	struct stf *st;
-	g_assert(stf_chunk != NULL);
-	
+
 	for (st = stf; st != NULL; st = st->next) {
 		if (STF_IS_LIST(st))
 			stf_free(STF_LIST(st));
@@ -104,7 +94,7 @@ static GList *read_star_list(GScanner *scan)
 	struct cat_star *cats;
 
 	tok = g_scanner_peek_next_token(scan);
-	if (tok != '(') 
+	if (tok != '(')
 		return NULL;
 	tok = g_scanner_get_next_token(scan);
 	do {
@@ -121,7 +111,7 @@ static GList *read_star_list(GScanner *scan)
 			sl = g_list_reverse(sl);
 			return sl;
 		}
-		
+
 	} while (tok != G_TOKEN_EOF);
 	sl = g_list_reverse(sl);
 	return sl;
@@ -158,20 +148,20 @@ void print_token(GScanner * scan, GTokenType tok)
 		d3_printf("tok: %c\n", tok);
 	else {
 		if (tok == G_TOKEN_STRING)
-			d3_printf("tok: string val: %s\n",  
+			d3_printf("tok: string val: %s\n",
 				  g_scanner_cur_value(scan).v_string);
 		else if (tok == G_TOKEN_IDENTIFIER)
-			d3_printf("tok: ident val: %s\n",  
+			d3_printf("tok: ident val: %s\n",
 				  g_scanner_cur_value(scan).v_string);
 		else if (tok == G_TOKEN_SYMBOL)
-			d3_printf("tok: symbol [%s] val: %d\n", 
+			d3_printf("tok: symbol [%s] val: %d\n",
 				  symname[g_scanner_cur_value(scan).v_int],
 				  (int)g_scanner_cur_value(scan).v_int);
 		else if (tok == G_TOKEN_INT)
-			d3_printf("tok: int val: %d\n", 
+			d3_printf("tok: int val: %d\n",
 				  (int)g_scanner_cur_value(scan).v_int);
 		else if (tok == G_TOKEN_FLOAT)
-			d3_printf("tok: float val: %f\n", 
+			d3_printf("tok: float val: %f\n",
 				  g_scanner_cur_value(scan).v_float);
 		else
 			d3_printf("tok: %d\n", tok);
@@ -205,7 +195,7 @@ void test_parse_rcp(void)
 
 /* skip until we get a closing brace */
 
-static void skip_list(GScanner *scan) 
+static void skip_list(GScanner *scan)
 {
 	int nbr = 1;
 	int tok;
@@ -221,18 +211,18 @@ static void skip_list(GScanner *scan)
 }
 
 /* skip one item (or a whole list if that is the case */
-static void skip_one(GScanner *scan) 
+static void skip_one(GScanner *scan)
 {
 	int tok;
 	tok = g_scanner_get_next_token(scan);
 //	d3_printf("skipping ");
 //	print_token(scan, tok);
-	if (tok == '(') 
+	if (tok == '(')
 		skip_list(scan);
 }
 
 
-/* read the flags from the list (open brace has already been read) 
+/* read the flags from the list (open brace has already been read)
  * stop when the closing brace is found, or on eof */
 static int get_flags_from_list(GScanner *scan)
 {
@@ -291,7 +281,7 @@ static int get_flags_from_list(GScanner *scan)
 	return flags;
 }
 
-/* read the noise pars from the list (open brace has already been read) 
+/* read the noise pars from the list (open brace has already been read)
  * stop when the closing brace is found, or on eof */
 static int get_noise_from_rcp(GScanner *scan, struct cat_star *cats)
 {
@@ -335,7 +325,7 @@ static int get_noise_from_rcp(GScanner *scan, struct cat_star *cats)
 	return 0;
 }
 
-/* read the position from the list (open brace has already been read) 
+/* read the position from the list (open brace has already been read)
  * stop when the closing brace is found, or on eof */
 static int get_centroid_from_rcp(GScanner *scan, struct cat_star *cats)
 {
@@ -409,7 +399,7 @@ int parse_star(GScanner *scan, struct cat_star *cats)
 //			d3_printf("skip non-symbol\n");
 			if (tok == '(')
 				skip_list(scan);
-			else 
+			else
 				skip_one(scan);
 			continue;
 		}
@@ -752,7 +742,7 @@ int parse_star(GScanner *scan, struct cat_star *cats)
 
 
 #define STF_MAX_DEPTH 128
-/* read a star file frame (one s-expression) from the given file pointer, 
+/* read a star file frame (one s-expression) from the given file pointer,
    and return the stf of the root node */
 struct stf *stf_read_frame(FILE *fp)
 {
@@ -794,7 +784,7 @@ struct stf *stf_read_frame(FILE *fp)
 				stf = nstf;
 			}
 			level ++;
-			break; 
+			break;
 		case ')':
 			stf = lstf[level-1];
 			level --;
@@ -859,7 +849,7 @@ static int stf_linebreak(FILE *fp, int level)
 	int i;
 	level ++;
 	fprintf(fp, "\n");
-	for (i = 0; i < level * STF_PRINT_TAB; i++)	
+	for (i = 0; i < level * STF_PRINT_TAB; i++)
 		fprintf(fp, " ");
 	return STF_PRINT_TAB * level;
 }
@@ -935,7 +925,7 @@ static int fprint_cat_star(FILE *repfp, struct cat_star *cats, int level)
 		degrees_to_dms_pr(decs, cats->dec, 1);
 	}
 	fprintf(repfp, "(%s \"%s\" %s %s ",
-		symname[SYM_NAME], cats->name, 
+		symname[SYM_NAME], cats->name,
 		symname[SYM_TYPE], typestr);
 	if (cats->mag != 0.0)
 		fprintf(repfp, "%s %.3g ", symname[SYM_MAG], cats->mag);
@@ -944,8 +934,8 @@ static int fprint_cat_star(FILE *repfp, struct cat_star *cats, int level)
 
 	stf_linebreak(repfp, level);
 
-	fprintf(repfp, "%s \"%s\" %s \"%s\" ", 
-		symname[SYM_RA], ras, 
+	fprintf(repfp, "%s \"%s\" %s \"%s\" ",
+		symname[SYM_RA], ras,
 		symname[SYM_DEC], decs);
 	if (cats->perr < BIG_ERR) {
 		fprintf(repfp, "%s %.2g",
@@ -1031,7 +1021,7 @@ int fprint_star_list (FILE *fp, GList *rsl, int level)
 	return col;
 }
 
-/* print a stf to the output stream. level is the indent level we're at, 
+/* print a stf to the output stream. level is the indent level we're at,
    col is the column at which we start. returns the ending column */
 int stf_fprint(FILE *fp, struct stf *stf, int level, int col)
 {
@@ -1106,7 +1096,7 @@ int test_starfile(void)
 	return 0;
 }
 
-/* append an assoc to the end of the given stf list. a symbol plus a 
+/* append an assoc to the end of the given stf list. a symbol plus a
    nil stf are appended. the nil stf is returned (or NULL if an error was found) */
 struct stf * stf_append_assoc(struct stf *stf, int symbol)
 {
@@ -1172,7 +1162,7 @@ struct stf * stf_find(struct stf *stf, int level, ...)
 	return stf;
 }
 
-/* find a string in the alist hierarchy. return a pointer to the string 
+/* find a string in the alist hierarchy. return a pointer to the string
    in the stf, which only lasts until the stf is destroyed */
 char * stf_find_string(struct stf *stf, int level, ...)
 {
@@ -1224,7 +1214,7 @@ GList * stf_find_glist(struct stf *stf, int level, ...)
 }
 
 
-/* find a double in the alist hierarchy. update v to it's value 
+/* find a double in the alist hierarchy. update v to it's value
    and return 1 if found, 0 if not found */
 int stf_find_double(struct stf *stf, double *v, int level, ...)
 {
