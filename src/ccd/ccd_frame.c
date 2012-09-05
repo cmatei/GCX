@@ -50,7 +50,7 @@
 
 #include "dslr.h"
 
-#define MAX_FLAT_GAIN 1.5	// max gain accepted when flatfielding
+#define MAX_FLAT_GAIN 2.0	// max gain accepted when flatfielding
 #define FITS_HROWS 36	// number of fits header lines in a block
 
 // new frame creates a frame of the specified size

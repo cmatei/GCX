@@ -53,6 +53,10 @@ char * demosaic_methods[] = PAR_CHOICE_DEMOSAIC_METHODS;
 
 char * whitebal_methods[] = PAR_CHOICE_WHITEBAL_METHODS;
 
+char * align_methods[] = PAR_CHOICE_ALIGN_METHODS;
+
+char * resample_methods[] = PAR_CHOICE_RESAMPLE_METHODS;
+
 char * default_cfa[] = PAR_CHOICE_DEFAULT_CFA;
 
 char * guide_algorithms[] = PAR_CHOICE_GUIDE_ALGORITHMS;

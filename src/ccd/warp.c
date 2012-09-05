@@ -802,26 +802,92 @@ static inline double interpolate_pixel_cubic(struct ccd_frame *fr, double x, dou
 	return q;
 }
 
-int shift_scale_rotate_frame(struct ccd_frame *fr, double dx, double dy, double ds, double dt)
+int shift_scale_rotate_frame(struct ccd_frame *fr, double dx, double dy, double ds, double dt, int resampling)
 {
 	struct cmatrix cm;
 	int i, j;
+	int xx, yy;
 	double x, y;
+	double a = 0.0, b = 0.0, c, d;
+	int cubic = 1;
 
 	make_cmatrix(&cm, dx, dy, ds, dt);
 
 	struct ccd_frame *nfr = new_frame(fr->w, fr->h);
 	float *ddat = nfr->dat;
 
-	for (i = 0; i < nfr->h; i++) {
-		for (j = 0; j < nfr->w; j++) {
-			do_cmatrix_i(&cm, j, i, &x, &y);
+	switch (resampling) {
 
-			/* a = 1.0, b = 0.0     -> Cubic B-spline
-			   a = 0.0, b = 0.5     -> Catmull-Rom
-			   a = 1/3.0, b = 1/3.0 -> Mitchell-Netravali
-			*/
-			*ddat++ = interpolate_pixel_cubic(fr, x, y, 1/3.0, 1/3.0);
+	case PAR_RESAMPLE_NEAREST:
+		for (i = 0; i < nfr->h; i++) {
+			for (j = 0; j < nfr->w; j++) {
+				do_cmatrix_i(&cm, j, i, &x, &y);
+
+				yy = (int) floor(y + 0.5);
+				xx = (int) floor(x + 0.5);
+
+				if (yy >= 0 && yy < fr->h && xx >= 0 && xx < fr->w)
+					*ddat++ = ((float *) fr->dat)[yy * fr->w + xx];
+				else
+					ddat++;
+			}
+		}
+		cubic = 0;
+		break;
+
+	case PAR_RESAMPLE_BILINEAR:
+		for (i = 0; i < nfr->h; i++) {
+			for (j = 0; j < nfr->w; j++) {
+				do_cmatrix_i(&cm, j, i, &x, &y);
+
+				if (x < 1 || x > fr->w - 1 || y < 1 || y > fr->h - 1)
+					ddat++;
+				else {
+					a = x - floor(x);
+					b = 1 - a;
+					c = y - floor(y);
+					d = 1 - c;
+
+					int xx = (int) floor(x);
+					int yy = (int) floor(y);
+
+					*ddat++ = b * d * ((float *) fr->dat)[yy * fr->w + xx] +
+						  a * d * ((float *) fr->dat)[yy * fr->w + xx + 1] +
+						  b * c * ((float *) fr->dat)[(yy + 1) * fr->w + xx] +
+						  a * c * ((float *) fr->dat)[(yy + 1) * fr->w + xx + 1];
+				}
+			}
+		}
+		cubic = 0;
+		break;
+
+	case PAR_RESAMPLE_BSPLINE:	     /* Cubic B-spline */
+		a = 1.0; b = 0.0;
+		break;
+
+	case PAR_RESAMPLE_CATMULL:	     /* Catmull-Rom */
+		a = 0.0; b = 0.5;
+		break;
+
+	case PAR_RESAMPLE_MITCHELL:	     /* Mitchell-Netravali */
+		a = 1/3.0; b = 1/3.0;
+		break;
+
+	default:
+		return -1;
+	}
+
+	if (cubic) {
+		for (i = 0; i < nfr->h; i++) {
+			for (j = 0; j < nfr->w; j++) {
+				do_cmatrix_i(&cm, j, i, &x, &y);
+
+				/* a = 1.0, b = 0.0     -> Cubic B-spline
+				   a = 0.0, b = 0.5     -> Catmull-Rom
+				   a = 1/3.0, b = 1/3.0 -> Mitchell-Netravali
+				*/
+				*ddat++ = interpolate_pixel_cubic(fr, x, y, a, b);
+			}
 		}
 	}
 

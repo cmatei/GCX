@@ -315,6 +315,8 @@ typedef enum {
 	CCDRED_BADPIX_SIGMAS,
 	CCDRED_DEMOSAIC_METHOD,
 	CCDRED_WHITEBAL_METHOD,
+	CCDRED_ALIGN_METHOD,
+	CCDRED_RESAMPLE_METHOD,
 	CCDRED_STACK_METHOD,
 	CCDRED_STACK_FRAMING,
 	CCDRED_SIGMAS,
@@ -421,6 +423,16 @@ enum {
 	PAR_WHITEBAL_METHOD_USER,
 };
 
+#define PAR_CHOICE_ALIGN_METHODS { "shift", "full", NULL }
+enum {
+	PAR_ALIGN_SHIFT_ONLY,
+	PAR_ALIGN_FULL
+};
+
+#define PAR_CHOICE_RESAMPLE_METHODS { "nearest", "bilinear", "bspline", "catmull", "mitchell", NULL }
+/* the enum is in ccd.h */
+
+
 #define PAR_CHOICE_DEFAULT_CFA { "none", "RGGB", "BGGR", "GRBG", "GBRG", NULL}
 enum {
 	PAR_DEFAULT_CFA_NONE,
@@ -509,6 +521,10 @@ extern char * tele_types[];
 extern char * stack_methods[];
 
 extern char * demosaic_methods[];
+
+extern char * align_methods[];
+
+extern char * resample_methods[];
 
 extern char * whitebal_methods[];
 

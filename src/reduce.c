@@ -1589,29 +1589,26 @@ int align_imf(struct image_file *imf, struct ccd_reduce *ccdr,
 	}
 
 
-#if 0
-	pairs_cs_diff(pairs, &dx, &dy, &ds, &dt, 0, 0);
+	if (P_INT(CCDRED_ALIGN_METHOD) == PAR_ALIGN_SHIFT_ONLY) {
+		pairs_cs_diff(pairs, &dx, &dy, &ds, &dt, 0, 0);
 
-	if (progress) {
-		snprintf(msg, 255, " [%.1f, %.1f]", dx, dy);
-		(* progress)(msg, data);
+		if (progress) {
+			snprintf(msg, 255, " [%.1f, %.1f]", dx, dy);
+			(* progress)(msg, data);
+		}
+		shift_frame(imf->fr, -dx, -dy);
+
+	} else {
+		pairs_cs_diff(pairs, &dx, &dy, &ds, &dt, 1, 1);
+
+		if (progress) {
+			snprintf(msg, 255, " [%.1f, %.1f, %.3f, %.2f]",
+				 dx, dy, ds, dt);
+			(* progress)(msg, data);
+		}
+		shift_scale_rotate_frame(imf->fr, -dx, -dy, 1.0/ds, degrad(-dt),
+					 P_INT(CCDRED_RESAMPLE_METHOD));
 	}
-	shift_frame(imf->fr, -dx, -dy);
-#else
-
-	pairs_cs_diff(pairs, &dx, &dy, &ds, &dt, 1, 1);
-
-	if (progress) {
-		snprintf(msg, 255, " [%.1f, %.1f, %.3f, %.2f]",
-			 dx, dy, ds, dt);
-		(* progress)(msg, data);
-	}
-
-
-	//printf("dx %g, dy %g, ds %g, dt %g\n", dx, dy, ds, dt);
-
-	shift_scale_rotate_frame(imf->fr, -dx, -dy, 1.0/ds, degrad(-dt));
-#endif
 
 fexit:
 	sl = fsl;

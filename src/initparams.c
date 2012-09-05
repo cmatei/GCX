@@ -1128,6 +1128,19 @@ void init_ptable(void)
 		    "Method used for white-balance correction", PAR_WHITEBAL_METHOD_NONE);
 	set_par_choices(CCDRED_WHITEBAL_METHOD, whitebal_methods);
 
+	add_par_int(CCDRED_ALIGN_METHOD, PAR_CCDRED, 0, "align_method",
+		    "Method used for image alignment", PAR_ALIGN_SHIFT_ONLY);
+	set_par_choices(CCDRED_ALIGN_METHOD, align_methods);
+	set_par_description(CCDRED_ALIGN_METHOD,
+			    "Method used for aligning images. Shift will only perform "
+			    "translations whereas full will also account for scale and "
+			    "rotations.");
+	add_par_int(CCDRED_RESAMPLE_METHOD, PAR_CCDRED, 0, "resample_method",
+		    "Resampling algorithm", PAR_RESAMPLE_MITCHELL);
+	set_par_choices(CCDRED_RESAMPLE_METHOD, resample_methods);
+	set_par_description(CCDRED_RESAMPLE_METHOD,
+			    "Resampling algorithm used for full image alignment.");
+
 	add_par_double(MIN_BG_SIGMAS, PAR_CCDRED, PREC_1, "min_bg_sigmas",
 		       "Minimum backgound sigmas", 3.0);
 	set_par_description(MIN_BG_SIGMAS,

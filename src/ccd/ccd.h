@@ -681,10 +681,18 @@ void report_event(FILE *fp, struct vs_recipy *vs, struct ccd_frame *fr, int what
 
 // from warp.c
 
+enum {
+	PAR_RESAMPLE_NEAREST,
+	PAR_RESAMPLE_BILINEAR,
+	PAR_RESAMPLE_BSPLINE,
+	PAR_RESAMPLE_CATMULL,
+	PAR_RESAMPLE_MITCHELL
+};
+
 extern int make_shift_ctrans(struct ctrans *ct, double dx, double dy);
 extern int make_roto_translate(struct ctrans *ct, double dx, double dy, double xs, double ys, double rot);
 extern int shift_frame(struct ccd_frame *fr, double dx, double dy);
-extern int shift_scale_rotate_frame(struct ccd_frame *fr, double dx, double dy, double ds, double dt);
+extern int shift_scale_rotate_frame(struct ccd_frame *fr, double dx, double dy, double ds, double dt, int resampling);
 extern int linear_x_shear(struct ccd_frame *in, struct ccd_frame *out, double a, double c);
 extern int linear_y_shear(struct ccd_frame *in, struct ccd_frame *out, double b, double c,
 			  double u0, double v0);
