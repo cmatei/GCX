@@ -762,13 +762,13 @@ static inline double cubic_weight(double x, double a, double b)
 	return 1.0 / 6.0 * q;
 }
 
-static inline double interpolate_pixel_cubic(struct ccd_frame *fr, double x, double y, double a, double b)
+static inline double interpolate_pixel_cubic(float *data, int w, int h, double x, double y, double a, double b)
 {
 	int x0, y0;
 	double p, q;
 	int i, j, u, v;
 
-	if (x < 3 || x >= fr->w - 3 || y < 3 || y >= fr->h - 3)
+	if (x < 3 || x >= w - 3 || y < 3 || y >= h - 3)
 		return 0.0;
 
 	x0 = (int) floor(x);
@@ -792,7 +792,7 @@ static inline double interpolate_pixel_cubic(struct ccd_frame *fr, double x, dou
 		v = y0 + j - 1;
 		for (i = 0; i < 4; i++) {
 			u = x0 + i - 1;
-			p += ((float *) fr->dat)[v * fr->w + u] * cubic_weight(x - (double) u, a, b);
+			p += data[v * w + u] * cubic_weight(x - (double) u, a, b);
 		}
 
 		q += p * cubic_weight(y - (double) v, a, b);
@@ -810,11 +810,13 @@ int shift_scale_rotate_frame(struct ccd_frame *fr, double dx, double dy, double 
 	double x, y;
 	double a = 0.0, b = 0.0, c, d;
 	int cubic = 1;
+	int index = 0;
+	float *ddat = NULL, *sdat = NULL;
+	int plane_iter;
 
 	make_cmatrix(&cm, dx, dy, ds, dt);
 
-	struct ccd_frame *nfr = new_frame(fr->w, fr->h);
-	float *ddat = nfr->dat;
+	struct ccd_frame *nfr = new_frame_fr(fr, fr->w, fr->h);
 
 	switch (resampling) {
 
@@ -826,10 +828,19 @@ int shift_scale_rotate_frame(struct ccd_frame *fr, double dx, double dy, double 
 				yy = (int) floor(y + 0.5);
 				xx = (int) floor(x + 0.5);
 
-				if (yy >= 0 && yy < fr->h && xx >= 0 && xx < fr->w)
-					*ddat++ = ((float *) fr->dat)[yy * fr->w + xx];
-				else
-					ddat++;
+				if (yy >= 0 && yy < fr->h && xx >= 0 && xx < fr->w) {
+					plane_iter = 0;
+					while ((plane_iter = color_plane_iter(fr, plane_iter))) {
+						sdat = get_color_plane(fr, plane_iter);
+						ddat = get_color_plane(nfr, plane_iter);
+
+						ddat[index] = sdat[yy*fr->w + xx];
+					}
+					index++;
+
+				} else {
+					index++;
+				}
 			}
 		}
 		cubic = 0;
@@ -841,7 +852,7 @@ int shift_scale_rotate_frame(struct ccd_frame *fr, double dx, double dy, double 
 				do_cmatrix_i(&cm, j, i, &x, &y);
 
 				if (x < 1 || x > fr->w - 1 || y < 1 || y > fr->h - 1)
-					ddat++;
+					index++;
 				else {
 					a = x - floor(x);
 					b = 1 - a;
@@ -851,10 +862,18 @@ int shift_scale_rotate_frame(struct ccd_frame *fr, double dx, double dy, double 
 					int xx = (int) floor(x);
 					int yy = (int) floor(y);
 
-					*ddat++ = b * d * ((float *) fr->dat)[yy * fr->w + xx] +
-						  a * d * ((float *) fr->dat)[yy * fr->w + xx + 1] +
-						  b * c * ((float *) fr->dat)[(yy + 1) * fr->w + xx] +
-						  a * c * ((float *) fr->dat)[(yy + 1) * fr->w + xx + 1];
+					plane_iter = 0;
+					while ((plane_iter = color_plane_iter(fr, plane_iter))) {
+						sdat = get_color_plane(fr, plane_iter);
+						ddat = get_color_plane(nfr, plane_iter);
+
+
+						ddat[index] = b * d * sdat[yy * fr->w + xx] +
+							      a * d * sdat[yy * fr->w + xx + 1] +
+							      b * c * sdat[(yy + 1) * fr->w + xx] +
+							      a * c * sdat[(yy + 1) * fr->w + xx + 1];
+					}
+					index++;
 				}
 			}
 		}
@@ -886,16 +905,24 @@ int shift_scale_rotate_frame(struct ccd_frame *fr, double dx, double dy, double 
 				   a = 0.0, b = 0.5     -> Catmull-Rom
 				   a = 1/3.0, b = 1/3.0 -> Mitchell-Netravali
 				*/
-				*ddat++ = interpolate_pixel_cubic(fr, x, y, a, b);
+				plane_iter = 0;
+				while ((plane_iter = color_plane_iter(fr, plane_iter))) {
+					sdat = get_color_plane(fr, plane_iter);
+					ddat = get_color_plane(nfr, plane_iter);
+
+					ddat[index] = interpolate_pixel_cubic(sdat, fr->w, fr->h, x, y, a, b);
+				}
+				index++;
 			}
 		}
 	}
 
 	fr->stats.statsok = 0;
 
-	free(fr->dat);
-	fr->dat = nfr->dat;
-	nfr->dat = NULL;
+	free(fr->dat);  fr->dat  = nfr->dat;  nfr->dat = NULL;
+	free(fr->rdat); fr->rdat = nfr->rdat; nfr->rdat = NULL;
+	free(fr->gdat); fr->gdat = nfr->gdat; nfr->gdat = NULL;
+	free(fr->bdat); fr->bdat = nfr->bdat; nfr->bdat = NULL;
 
 	release_frame(nfr);
 
