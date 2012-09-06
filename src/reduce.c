@@ -390,9 +390,10 @@ int ensure_ccdr(struct ccd_reduce *ccdr,
 			snprintf(msg, 255, "bad pixels: %s\n", ccdr->bad_pix_map->filename);
 			if (progress && (*progress)(msg, data))
 				return -1;
+
+			if (load_bad_pix(ccdr->bad_pix_map))
+				return 2;
 		}
-		if (load_bad_pix(ccdr->bad_pix_map))
-			return 2;
 	}
 
 	if (ccdr->ops & IMG_OP_ALIGN) {
@@ -437,11 +438,7 @@ int batch_reduce_frames(struct image_file_list *imfl, struct ccd_reduce *ccdr,
 
 	nframes = g_list_length(imfl->imlist);
 
-#ifdef ALIGN_LAST
-	if (!(ccdr->ops & (IMG_OP_STACK | IMG_OP_ALIGN))) {
-#else
         if (!(ccdr->ops & IMG_OP_STACK)) {
-#endif
 		gl = imfl->imlist;
 		while (gl != NULL) {
 			imf = gl->data;
@@ -471,11 +468,9 @@ int batch_reduce_frames(struct image_file_list *imfl, struct ccd_reduce *ccdr,
 			ccdr->ops |= IMG_OP_BG_ALIGN_ADD;
 	}
 
-#ifdef ALIGN_LAST
 	if ((ccdr->ops & IMG_OP_ALIGN) &&
 	    reduce_frames(imfl, ccdr, progress_print, NULL))
 		return 1;
-#endif
 
 	if (ccdr->ops & IMG_OP_STACK) {
 		if ((fr = stack_frames(imfl, ccdr, progress_print, NULL)) == NULL)
