@@ -468,7 +468,7 @@ int batch_reduce_frames(struct image_file_list *imfl, struct ccd_reduce *ccdr,
 			ccdr->ops |= IMG_OP_BG_ALIGN_ADD;
 	}
 
-	if ((ccdr->ops & IMG_OP_ALIGN) &&
+	if ((ccdr->ops & IMG_OP_ALIGN|IMG_OP_STACK) &&
 	    reduce_frames(imfl, ccdr, progress_print, NULL))
 		return 1;
 
@@ -915,7 +915,7 @@ static int do_stack_avg(struct image_file_list *imfl, struct ccd_frame *ofr,
 		if (i >= COMB_MAX)
 			break;
 	}
-	n = i - 1;
+
 	if (i == 0) {
 		err_printf("no frames to stack\n");
 		return -1;
@@ -923,8 +923,9 @@ static int do_stack_avg(struct image_file_list *imfl, struct ccd_frame *ofr,
 	snprintf(lb, 80, "'AVERAGE STACK %d FRAMES'", i);
 	fits_add_history(ofr, lb);
 
+	n = i;
 	while ((plane_iter = color_plane_iter(frames[0], plane_iter))) {
-		for (i = 0; i <= n; i++) {
+		for (i = 0; i < n; i++) {
 			dp[i] = get_color_plane(frames[i], plane_iter);
 		}
 		odp = get_color_plane(ofr, plane_iter);
