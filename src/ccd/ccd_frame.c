@@ -1027,8 +1027,7 @@ int write_fits_frame(struct ccd_frame *fr, char *filename)
 // finally, print the rest of the header lines
 
 	for (j=0; j < fr->nvar; j++) {
-		for (k=0; k<FITS_HCOLS; k++)
-			fputc(fr->var[j][k], fp);
+		fwrite(fr->var[j], FITS_HCOLS, 1, fp);
 		i++;
 	}
 
@@ -1503,7 +1502,7 @@ int fits_delete_keyword(struct ccd_frame *fr, char *kwd)
 	v1 = fits_keyword_lookup(fr, kwd);
 	if (v1 != NULL) { // replace current value
 		if ((fr->nvar + fr->var - v1) > 0)
-			memcpy(v1, v1 + 1, FITS_HCOLS * (fr->nvar + fr->var - v1));
+			memmove(v1, v1 + 1, FITS_HCOLS * (fr->nvar + fr->var - v1));
 		fr->nvar --;
 		v1 = realloc(fr->var, fr->nvar * FITS_HCOLS);
 		if (v1 == NULL) {
