@@ -1579,8 +1579,8 @@ int crop_frame(struct ccd_frame *fr, int x, int y, int w, int h)
  		*dpp = ret;
 	}
 // adjust the frame info
-	fr->x_skip += x;
-	fr->y_skip += y;
+//	fr->x_skip += x;
+//	fr->y_skip += y;
 	fr->w = w;
 	fr->h = h;
 	fr->stats.statsok = 0;

@@ -468,7 +468,7 @@ int batch_reduce_frames(struct image_file_list *imfl, struct ccd_reduce *ccdr,
 			ccdr->ops |= IMG_OP_BG_ALIGN_ADD;
 	}
 
-	if ((ccdr->ops & IMG_OP_ALIGN|IMG_OP_STACK) &&
+	if ((ccdr->ops & (IMG_OP_ALIGN|IMG_OP_STACK)) &&
 	    reduce_frames(imfl, ccdr, progress_print, NULL))
 		return 1;
 
@@ -604,6 +604,8 @@ int reduce_frames(struct image_file_list *imfl, struct ccd_reduce *ccdr,
 int ccd_reduce_imf(struct image_file *imf, struct ccd_reduce *ccdr,
 		   int (* progress)(char *msg, void *data), void *data)
 {
+	int ovsx, ovsw, ovsy, ovsh;
+	int efpx, efpw, efpy, efph;
 	char lb[81];
 	g_return_val_if_fail(imf != NULL, -1);
 	g_return_val_if_fail(imf->fr != NULL, -1);
@@ -613,10 +615,39 @@ int ccd_reduce_imf(struct image_file *imf, struct ccd_reduce *ccdr,
 			return -1;
 
 		if (!(imf->flags & IMG_OP_OVERSCAN)) {
-			if (overscan_correction(imf->fr, ccdr->overscan, 3500, 50, 50, 2400)) {
+
+			/* get overscan region from prefs, then fits */
+			ovsx = P_INT(CCDRED_OVSMIN1);
+			ovsw = P_INT(CCDRED_OVSRNG1);
+			ovsy = P_INT(CCDRED_OVSMIN2);
+			ovsh = P_INT(CCDRED_OVSRNG2);
+
+			fits_get_int(imf->fr, "OVS-MIN1", &ovsx);
+			fits_get_int(imf->fr, "OVS-RNG1", &ovsw);
+			fits_get_int(imf->fr, "OVS-MIN2", &ovsy);
+			fits_get_int(imf->fr, "OVS-RNG2", &ovsh);
+
+			if (overscan_correction(imf->fr, ccdr->overscan, ovsx, ovsy, ovsw, ovsh)) {
 				if (progress && (*progress)(" (FAILED)", data))
 					return -1;
 			}
+
+			/* now crop */
+			efpx = P_INT(CCDRED_EFPMIN1);
+			efpw = P_INT(CCDRED_EFPRNG1);
+			efpy = P_INT(CCDRED_EFPMIN2);
+			efph = P_INT(CCDRED_EFPRNG2);
+
+			fits_get_int(imf->fr, "EFP-MIN1", &efpx);
+			fits_get_int(imf->fr, "EFP-RNG1", &efpw);
+			fits_get_int(imf->fr, "EFP-MIN2", &efpy);
+			fits_get_int(imf->fr, "EFP-RNG2", &efph);
+
+			if (crop_frame(imf->fr, efpx, efpy, efpw, efph)) {
+				if (progress && (*progress)(" (FAILED)", data))
+					return -1;
+			}
+
 			fits_add_history(imf->fr, "'OVERSCAN CORRECTED'");
 		} else {
 			if (progress && (*progress)(" (already done)", data))

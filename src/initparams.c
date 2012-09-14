@@ -1120,6 +1120,24 @@ void init_ptable(void)
 	add_par_double(CCDRED_OVERSCAN_PEDESTAL, PAR_CCDRED, PREC_1, "overscan_pedestal",
 		       "Overscan correction pedestal", 1000);
 
+	add_par_int(CCDRED_OVSMIN1, PAR_CCDRED, PREC_1, "overscan_min1",
+		    "Overscan area first pixel on X", 3500);
+	add_par_int(CCDRED_OVSRNG1, PAR_CCDRED, PREC_1, "overscan_rng1",
+		    "Overscan area range on X", 50);
+	add_par_int(CCDRED_OVSMIN2, PAR_CCDRED, PREC_1, "overscan_min2",
+		    "Overscan area first pixel on Y", 50);
+	add_par_int(CCDRED_OVSRNG2, PAR_CCDRED, PREC_1, "overscan_rng2",
+		    "Overscan area range on Y", 2400);
+
+	add_par_int(CCDRED_EFPMIN1, PAR_CCDRED, PREC_1, "effective_min1",
+		    "Effective area first pixel on X", 34);
+	add_par_int(CCDRED_EFPRNG1, PAR_CCDRED, PREC_1, "effective_rng1",
+		    "Effective area range on X", 3364);
+	add_par_int(CCDRED_EFPMIN2, PAR_CCDRED, PREC_1, "effective_min2",
+		    "Effective area first pixel on Y", 28);
+	add_par_int(CCDRED_EFPRNG2, PAR_CCDRED, PREC_1, "effective_rng2",
+		    "Effective area range on Y", 2542);
+
 	add_par_int(CCDRED_DEMOSAIC_METHOD, PAR_CCDRED, 0, "demosaic_method",
 		    "Method used for demosaic", PAR_DEMOSAIC_METHOD_BILINEAR);
 	set_par_choices(CCDRED_DEMOSAIC_METHOD, demosaic_methods);

@@ -669,7 +669,7 @@ int main(int ac, char **av)
 		{"bias", required_argument, NULL, 'b'},
 		{"flat", required_argument, NULL, 'f'},
 
-		{"overscan", no_argument, NULL, '[' },
+		{"overscan", required_argument, NULL, '[' },
 		{"badpix", required_argument, NULL, 'B'},
 		{"extract-badpix", required_argument, NULL, 'X'},
 
@@ -900,6 +900,13 @@ int main(int ac, char **av)
 				ccdr = ccd_reduce_new();
 			ccdr->ops |= IMG_OP_OVERSCAN;
 			ccdr->overscan = P_DBL(CCDRED_OVERSCAN_PEDESTAL);
+
+			v = strtod(optarg, &endp);
+			if (endp != optarg) {
+				ccdr->overscan = v;
+			} else {
+				ccdr->overscan = P_DBL(CCDRED_OVERSCAN_PEDESTAL);
+			}
 			batch = 1;
 			break;
 		case 'a':
