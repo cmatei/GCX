@@ -57,11 +57,12 @@ enum {
 	QTABLE_USNOB,
 	QTABLE_GSC_ACT,
 	QTABLE_UCAC3,
+	QTABLE_UCAC4,
 	QTABLES,
 };
 
 char *table_names[] = {"I_289_out", "I_294_ucac2bss", "I_271_out", "I_284_out",
-		       "I_255_out", "I_315_out"};
+		       "I_255_out", "I_315_out", "I_322_out"};
 
 static int detabify(char *line, int cols[], int n)
 {
@@ -358,6 +359,116 @@ static struct cat_star * parse_cat_line_ucac3(char *line)
 	return cats;
 }
 
+static struct cat_star * parse_cat_line_ucac4(char *line)
+{
+	struct cat_star * cats;
+	int cols[32];
+	int nc;
+	double u, v, w, x;
+	double fmag = 0.0, jmag = 0.0, kmag = 0.0, bmag = 0.0, vmag = 0.0, rmag = 0.0;
+	char *endp;
+	char mags[64];
+	int maglen;
+
+	if ((nc = detabify(line, cols, 32)) < 15)
+		return NULL;
+
+	u = strtod(line+cols[1], &endp);
+	if (line+cols[1] == endp)
+		return NULL;
+	v = strtod(line+cols[2], &endp);
+	if (line+cols[2] == endp)
+		return NULL;
+
+	cats = cat_star_new();
+	snprintf(cats->name, CAT_STAR_NAME_SZ, "ucac4%s", line+cols[0]);
+	cats->ra = u;
+	cats->dec = v;
+	cats->equinox = 2000.0;
+	cats->flags = CAT_STAR_TYPE_SREF;
+
+
+/*
+#Column UCAC4   (a10)   UCAC4 recommended identifier (ZZZ-NNNNNN) (1)   [ucd=meta.id;meta.main]
+#Column RAJ2000 (F11.7) Mean right ascension (ICRS), Ep=J2000 (2)       [ucd=pos.eq.ra;meta.main]
+#Column DEJ2000 (F11.7) Mean declination (ICRS), Ep=J2000 (2)   [ucd=pos.eq.dec;meta.main]
+#Column ePos    (I4)    Total mean error on position at Ep=J2000 (3)    [ucd=stat.error;pos]
+#Column f.mag   (F6.3)  ? UCAC fit model magnitude (579-642nm) (4)      [ucd=phot.mag;em.opt]
+#Column of      (I1)    [0/9] UCAC4 object classification flag (6)      [ucd=meta.code]
+#Column db      (I2)    [0/36] UCAC4 double star flag (7)       [ucd=meta.code]
+#Column pmRA    (F8.1)  ? Proper motion in RA(*cos(Dec)) (9)    [ucd=pos.pm;pos.eq.ra]
+#Column pmDE    (F8.1)  ? Proper motion in Dec (9)      [ucd=pos.pm;pos.eq.dec]
+#Column Jmag    (F6.3)  ? 2MASS J magnitude \ifnum\Vphase>3{\fg{gray40}(in gray if upper limit)}\fi (1.2um)     [ucd=phot.mag;em.IR.J]
+#Column Kmag    (F6.3)  ? 2MASS Ks magnitude \ifnum\Vphase>3{\fg{gray40}(in gray if upper limit)}\fi (2.2um)    [ucd=phot.mag;em.IR.K]
+#Column Bmag    (F6.3)  ? B magnitude from APASS (12)   [ucd=phot.mag;em.opt.B]
+#Column Vmag    (F6.3)  ? V magnitude from APASS (12)   [ucd=phot.mag;em.opt.V]
+#Column rmag    (F6.3)  ? r magnitude from APASS (12)   [ucd=phot.mag;em.opt.R]
+#Column H       (I1)    [0/9] Hipparcos/Tycho flag (15) [ucd=meta.code]
+*/
+
+	u = strtod(line+cols[3], &endp);
+	if (u > 0) {
+		cats->perr = u / 1000.0; // is epos in mas ?
+	} else {
+		cats->perr = BIG_ERR;
+	}
+
+	fmag = strtod(line+cols[4], &endp);
+	cats->mag = fmag;
+
+	/* what is "p=..." ? */
+	u = strtod(line+cols[5], &endp);
+	asprintf(&cats->comments, "ucac4_class=%.0f", u);
+
+	jmag = strtod(line+cols[9], &endp);
+	kmag = strtod(line+cols[10], &endp);
+	bmag = strtod(line+cols[11], &endp);
+	vmag = strtod(line+cols[12], &endp);
+	rmag = strtod(line+cols[13], &endp);
+
+	cats->smags = NULL;
+
+	mags[0] = 0;
+	maglen = 0;
+	if (fmag != 0.0)
+		maglen += snprintf(&mags[maglen], 64 - maglen, "uc=%.3f ", fmag);
+
+	if (jmag != 0.0)
+		maglen += snprintf(&mags[maglen], 64 - maglen, "j=%.3f ", jmag);
+	if (kmag != 0.0)
+		maglen += snprintf(&mags[maglen], 64 - maglen, "k=%.3f ", kmag);
+	if (bmag != 0.0)
+		maglen += snprintf(&mags[maglen], 64 - maglen, "b=%.3f ", bmag);
+	if (vmag != 0.0)
+		maglen += snprintf(&mags[maglen], 64 - maglen, "v=%.3f ", vmag);
+	if (rmag != 0.0)
+		maglen += snprintf(&mags[maglen], 64 - maglen, "r=%.3f ", rmag);
+
+	cats->smags = strdup(mags);
+
+	w = strtod(line+cols[7], &endp);
+	if (line+cols[7] == endp)
+		return cats;
+	x = strtod(line+cols[8], &endp);
+	if (line+cols[8] == endp)
+		return cats;
+
+	cats->flags |= CAT_ASTROMET;
+
+	cats->astro = calloc(1, sizeof(struct cats_astro));
+	g_return_val_if_fail(cats->astro != NULL, cats);
+
+	cats->astro->epoch = 2000.0;
+	cats->astro->ra_err = 0; // cats->perr instead ?!
+	cats->astro->dec_err = 0;
+	cats->astro->ra_pm = w;
+	cats->astro->dec_pm = x;
+	cats->astro->flags = ASTRO_HAS_PM;
+
+	cats->astro->catalog = strdup("ucac4");
+	return cats;
+}
+
 static struct cat_star * parse_cat_line_gsc2(char *line)
 {
 	struct cat_star * cats;
@@ -613,6 +724,8 @@ static struct cat_star * parse_cat_line_usnob(char *line)
 static struct cat_star * parse_cat_line(char *line, int tnum)
 {
 	switch(tnum) {
+	case QTABLE_UCAC4:
+		return parse_cat_line_ucac4(line);
 	case QTABLE_UCAC3:
 		return parse_cat_line_ucac3(line);
 	case QTABLE_UCAC2:
@@ -953,6 +1066,11 @@ void act_stars_add_cds_ucac2 (GtkAction *action, gpointer window)
 void act_stars_add_cds_ucac3 (GtkAction *action, gpointer window)
 {
 	cds_query (window, QUERY_UCAC3);
+}
+
+void act_stars_add_cds_ucac4 (GtkAction *action, gpointer window)
+{
+	cds_query (window, QUERY_UCAC4);
 }
 
 void act_stars_add_cds_gsc2 (GtkAction *action, gpointer window)

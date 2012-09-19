@@ -506,6 +506,7 @@ static GtkActionEntry image_actions[] = {
 	{ "catalogs-add-gsc-act",  NULL, "Download GSC-_ACT stars from CDS",      NULL,         NULL, G_CALLBACK (act_stars_add_cds_gsc_act) },
 	{ "catalogs-add-ucac2",    NULL, "Download _UCAC-2 stars from CDS",       NULL,         NULL, G_CALLBACK (act_stars_add_cds_ucac2) },
 	{ "catalogs-add-ucac3",    NULL, "Download UCAC-_3 stars from CDS",       NULL,         NULL, G_CALLBACK (act_stars_add_cds_ucac3) },
+	{ "catalogs-add-ucac4",    NULL, "Download UCAC-_4 stars from CDS",       NULL,         NULL, G_CALLBACK (act_stars_add_cds_ucac4) },
 	{ "catalogs-add-gsc2",     NULL, "Download G_SC-2 stars from CDS",        NULL,         NULL, G_CALLBACK (act_stars_add_cds_gsc2) },
 	{ "catalogs-add-usnob",    NULL, "Download USNO-_B stars from CDS",       NULL,         NULL, G_CALLBACK (act_stars_add_cds_usnob) },
 
@@ -648,6 +649,7 @@ static char *image_common_ui =
 	"  <menuitem name='catalogs-add-gsc-act' action='catalogs-add-gsc-act'/>"
 	"  <menuitem name='catalogs-add-ucac2' action='catalogs-add-ucac2'/>"
 	"  <menuitem name='catalogs-add-ucac3' action='catalogs-add-ucac3'/>"
+	"  <menuitem name='catalogs-add-ucac4' action='catalogs-add-ucac4'/>"
 	"  <menuitem name='catalogs-add-gsc2' action='catalogs-add-gsc2'/>"
 	"  <menuitem name='catalogs-add-usnob' action='catalogs-add-usnob'/>"
 	"</menu>"

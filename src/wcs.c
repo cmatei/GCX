@@ -581,8 +581,8 @@ int pairs_cs_diff(GSList *pairs, double *dxo, double *dyo,
 		ct = atan2(ncgs->y - cgs->y, ncgs->x - cgs->x);
 		st_weights += sqr(cs);
 		dtheta += sqr(cs) * angular_diff(t, ct);
-//		d4_printf("t=%.5f, ct = %.5f, dtheta: %.3f, stw: %.3f\n",
-//			  t, ct, dtheta/st_weights, st_weights);
+		d4_printf("t=%.5f, ct = %.5f, dtheta: %.3f, stw: %.3f\n",
+			  t, ct, dtheta/st_weights, st_weights);
 		ds += sqr(cs) * (s / cs);
 	}
 	if (st_weights == 0) {
