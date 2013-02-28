@@ -973,7 +973,6 @@ int write_fits_frame(struct ccd_frame *fr, char *filename)
 	if (fr->stats.statsok == 0)
 		frame_stats(fr);
 
-#if 1
 	if ( ((fr->stats.max - fr->stats.min) < 32767.0)
 	     && (fr->stats.max < 32767)) {// we use positive, scaled by 1 format
 		bscale = 1.0;
@@ -985,12 +984,6 @@ int write_fits_frame(struct ccd_frame *fr, char *filename)
 		bzero = 0.0;
 		bitpix = -32;
 	}
-#else
-
-	bscale = 1.0;
-	bzero = 0.0;
-	bitpix = -32;
-#endif
 
 	if (fr->magic & FRAME_VALID_RGB) {
 		naxis = 3;
