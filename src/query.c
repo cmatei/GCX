@@ -62,7 +62,7 @@ enum {
 };
 
 char *table_names[] = {"I_289_out", "I_294_ucac2bss", "I_271_out", "I_284_out",
-		       "I_255_out", "I_315_out", "I_322_out"};
+		       "I_255_out", "I_315_out", "I_322A_out"};
 
 static int detabify(char *line, int cols[], int n)
 {

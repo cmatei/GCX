@@ -49,7 +49,7 @@
 #define BURN		60000		// burnout limit for locate_star
 
 #define RING_MAX 3000
-#define MAX_STAR_CANDIDATES 16384	/* max number of candidates before we find the first star
+#define MAX_STAR_CANDIDATES 65536	/* max number of candidates before we find the first star
 					 */
 
 // compute ring statistics of pixels in the r1-radius ring that has the center at x, y;
@@ -101,10 +101,11 @@ static int thin_ring_stats(struct ccd_frame *fr, int x, int y,
 	for (iy = ys; iy < ye; iy++) {
 		dy2 = (iy - yc) * (iy - yc);
 		for (ix = xs; ix < xe; ix++) {
-			v = get_pixel_luminence(fr, ix, iy);
 			if (((r = (ix - xc) * (ix - xc) + dy2))
 			    < rsq1 || r > rsq2)
 				continue;
+
+			v = get_pixel_luminence(fr, ix, iy);
 			if (v < min || v > max) {
 				nskipped ++;
 				continue;
