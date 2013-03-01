@@ -325,7 +325,6 @@ static int ucac4_cat_search(struct cat_star *cst[], struct catalog *cat,
 	int sz, ret, i;
 	double f;
 	struct cat_star **st;
-	double rm;
 	static char magbuf[256];
 	int l;
 
