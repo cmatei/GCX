@@ -381,7 +381,7 @@ static struct cat_star * parse_cat_line_ucac4(char *line)
 		return NULL;
 
 	cats = cat_star_new();
-	snprintf(cats->name, CAT_STAR_NAME_SZ, "ucac4%s", line+cols[0]);
+	snprintf(cats->name, CAT_STAR_NAME_SZ, "%s", line+cols[0]);
 	cats->ra = u;
 	cats->dec = v;
 	cats->equinox = 2000.0;
@@ -430,19 +430,16 @@ static struct cat_star * parse_cat_line_ucac4(char *line)
 
 	mags[0] = 0;
 	maglen = 0;
-	if (fmag != 0.0)
-		maglen += snprintf(&mags[maglen], 64 - maglen, "uc=%.3f ", fmag);
-
-	if (jmag != 0.0)
-		maglen += snprintf(&mags[maglen], 64 - maglen, "j=%.3f ", jmag);
-	if (kmag != 0.0)
-		maglen += snprintf(&mags[maglen], 64 - maglen, "k=%.3f ", kmag);
 	if (bmag != 0.0)
 		maglen += snprintf(&mags[maglen], 64 - maglen, "b=%.3f ", bmag);
 	if (vmag != 0.0)
 		maglen += snprintf(&mags[maglen], 64 - maglen, "v=%.3f ", vmag);
 	if (rmag != 0.0)
 		maglen += snprintf(&mags[maglen], 64 - maglen, "r=%.3f ", rmag);
+	if (jmag != 0.0)
+		maglen += snprintf(&mags[maglen], 64 - maglen, "j=%.3f ", jmag);
+	if (kmag != 0.0)
+		maglen += snprintf(&mags[maglen], 64 - maglen, "k=%.3f ", kmag);
 
 	cats->smags = strdup(mags);
 

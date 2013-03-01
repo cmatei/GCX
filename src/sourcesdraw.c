@@ -68,6 +68,7 @@
 #define ADD_STARS_OBJECT 3
 #define ADD_STARS_TYCHO2 4
 #define ADD_FROM_CATALOG 5
+#define ADD_STARS_UCAC4 6
 
 
 /* star display */
@@ -565,6 +566,44 @@ void find_stars_cb(gpointer window, guint action)
 		gsl->display_mask |= TYPE_MASK_CATREF;
 		gsl->select_mask |= TYPE_MASK_CATREF;
 		break;
+	case ADD_STARS_UCAC4:
+		if (i_ch == NULL || i_ch->fr == NULL)
+			return;
+		wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
+		if (wcs == NULL || wcs->wcsset == WCS_INVALID) {
+			err_printf_sb2(window, "Need an initial WCS to load UCAC4 stars");
+			error_beep();
+			return;
+		}
+		gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
+		if (gsl == NULL) {
+			gsl = gui_star_list_new();
+			attach_star_list(gsl, window);
+		}
+		radius = 60.0*fabs(i_ch->fr->w * wcs->xinc);
+		clamp_double(&radius, 1.0, P_DBL(SD_GSC_MAX_RADIUS));
+
+		cat = open_catalog("ucac4");
+		if (cat == NULL || cat->cat_search == NULL)
+			return;
+
+		csl = calloc(P_INT(SD_GSC_MAX_STARS), sizeof(struct cat_star *));
+		if (csl == NULL)
+			return;
+
+		n = (* cat->cat_search)(csl, cat, wcs->xref, wcs->yref, radius,
+					P_INT(SD_GSC_MAX_STARS));
+
+		d3_printf ("got %d from cat_search\n", n);
+
+		merge_cat_stars(csl, n, gsl, wcs);
+
+		free(csl);
+
+		gsl->display_mask |= TYPE_MASK_CATREF;
+		gsl->select_mask |= TYPE_MASK_CATREF;
+		break;
+
 	case ADD_STARS_DETECT:
 		if (i_ch == NULL || i_ch->fr == NULL)
 			return;
@@ -667,6 +706,11 @@ void act_stars_add_gsc(GtkAction *action, gpointer window)
 void act_stars_add_tycho2(GtkAction *action, gpointer window)
 {
 	find_stars_cb (window, ADD_STARS_TYCHO2);
+}
+
+void act_stars_add_ucac4(GtkAction *action, gpointer window)
+{
+	find_stars_cb (window, ADD_STARS_UCAC4);
 }
 
 /*

@@ -772,6 +772,11 @@ void init_ptable(void)
 	set_par_description(FILE_TYCHO2_PATH,
 			    "Full pathname of the tycho2 catalog file.");
 
+	add_par_string(FILE_UCAC4_PATH, PAR_FILES, 0, "ucac4_path",
+		       "UCAC4 location", "/usr/share/gcx/catalogs/ucac4/u4b/");
+	set_par_description(FILE_UCAC4_PATH,
+			    "Full pathname of the UCAC4 catalog files.");
+
 	add_par_string(FILE_CATALOG_PATH, PAR_FILES, 0, "catalog_path",
 		       "Catalog files", "/usr/share/gcx/catalogs/*.gcx");
 	set_par_description(FILE_CATALOG_PATH,

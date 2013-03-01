@@ -114,6 +114,7 @@ extern void act_stars_add_detected (GtkAction *action, gpointer window);
 extern void act_stars_add_catalog (GtkAction *action, gpointer window);
 extern void act_stars_add_gsc (GtkAction *action, gpointer window);
 extern void act_stars_add_tycho2 (GtkAction *action, gpointer window);
+extern void act_stars_add_ucac4 (GtkAction *action, gpointer window);
 extern void act_stars_edit(GtkAction *action, gpointer window);
 extern void act_stars_brighter(GtkAction *action, gpointer window);
 extern void act_stars_fainter(GtkAction *action, gpointer window);

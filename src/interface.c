@@ -1487,7 +1487,7 @@ create_camera_control (void)
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (statuslabel);
   gtk_box_pack_start (GTK_BOX (vbox3), statuslabel, FALSE, FALSE, 0);
-  gtk_misc_set_alignment (GTK_MISC (statuslabel), 7.45058e-09, 0.5);
+  gtk_misc_set_alignment (GTK_MISC (statuslabel), 0, 0.5);
   gtk_misc_set_padding (GTK_MISC (statuslabel), 3, 3);
 
   return camera_control;
@@ -3778,4 +3778,3 @@ create_query_log_window (void)
 
   return query_log_window;
 }
-

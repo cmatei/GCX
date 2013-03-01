@@ -841,4 +841,3 @@ char * phot_to_fd(gpointer window, FILE *fd, int format)
 	mband_dataset_release(mbds);
 	return ret;
 }
-

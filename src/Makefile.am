@@ -15,7 +15,7 @@ gcx_SOURCES = \
 	showimage.c sourcesdraw.c sourcesdraw.h staredit.c \
 	textgui.c wcs.c wcs.h \
 	helpmsg.c helpmsg.h wcsedit.c recipy.c recipy.h recipygui.c symbols.h\
-	tycho2.c tycho2.h report.c sidereal_time.c nutation.c nutation.h\
+	tycho2.c tycho2.h ucac4.c ucac4.h report.c sidereal_time.c nutation.c nutation.h\
 	sidereal_time.h	reduce.c reduce.h misc.c misc.h reducegui.c\
 	initparams.c starlist.c	guidegui.c \
 	guide.c guide.h multiband.c multiband.h mbandgui.c plots.c plots.h \

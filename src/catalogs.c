@@ -43,6 +43,7 @@
 #include "params.h"
 #include "wcs.h"
 #include "tycho2.h"
+#include "ucac4.h"
 #include "symbols.h"
 #include "recipy.h"
 #include "misc.h"
@@ -51,9 +52,10 @@
 #define LOCAL_NAME 1
 #define EDB_NAME 2
 #define TYCHO2_NAME 3
+#define UCAC4_NAME 4
 
 struct catalog cat_table[MAX_CATALOGS];
-char *catalogs[] = {"gsc", "local", "edb", "tycho2"};
+char *catalogs[] = {"gsc", "local", "edb", "tycho2", "ucac4", NULL};
 
 char *cat_flag_names[]=FLAG_NAMES_INIT;
 
@@ -309,6 +311,178 @@ static struct catalog *cat_open_tycho2(struct catalog *cat)
 	cat->cat_add = NULL;
 	cat->cat_sync = NULL;
 	cat->flags = CAT_STAR_TYPE_CAT | CAT_ASTROMET;
+	return cat;
+}
+
+
+/* UCAC4 search method */
+static int ucac4_cat_search(struct cat_star *cst[], struct catalog *cat,
+	       double ra, double dec, double radius, int n)
+{
+	struct cat_star *cats;
+	struct ucac4_star *star;
+	char *buf;
+	int sz, ret, i;
+	double f;
+	struct cat_star **st;
+	double rm;
+	static char magbuf[256];
+	int l;
+
+	st = calloc(CAT_GET_SIZE, sizeof(struct cat_star *));
+
+	sz = CAT_GET_SIZE * sizeof(struct ucac4_star);
+	buf = calloc(sz, 1);
+
+	radius = fabs(radius);
+	f = cos(degrad(dec));
+	if (f < 0.1)
+		f = 0.1;
+
+	d2_printf("running ucac4 search w:%.3f h:%.3f [%d] f=%.3f\n",
+		  radius*2/60 / f, radius*2/60, n, f);
+
+	ret = ucac4_search(ra, dec, radius*2/60 / f, radius*2/60, buf, sz, P_STR(FILE_UCAC4_PATH));
+	d2_printf("ucac4 returns %d\n", ret);
+	if (ret <= 0) {
+		free(buf);
+		free(st);
+		return ret;
+	}
+
+	star = (struct ucac4_star *) buf;
+	for (i = 0; i < ret; i++) {
+		cats = cat_star_new();
+
+		cats->ra = star->cat.ra / 1000.0 / 3600.0;
+		cats->dec = -90.0 + star->cat.spd / 1000.0 / 3600.0;
+
+		cats->perr = 0.001 * sqrt(sqr(star->cat.ra_sigma) + sqr(star->cat.dec_sigma));
+		cats->equinox = 2000.0;
+		sprintf(cats->name, "%03d-%06d", star->zone, star->number);
+
+		cats->flags = CAT_ASTROMET | CAT_STAR_TYPE_SREF;
+
+		/* prefer aperture vs fit */
+		cats->mag = (star->cat.mag2 < 20000) ? star->cat.mag1 : star->cat.mag2;
+		cats->mag /= 1000.0;
+
+		/* For bright stars the apasm(1) = B mag and apasm(2) = V mag columns contain
+		   the Hipparcos/Tycho Bt and Vt mags respectively, whenever there is no
+		   APASS B or V available and valid Bt or Vt mags were found.  For the bright
+		   supplement stars the same was done.  All thses cases are identified
+		   by apasm(1) < 20000 and apase(1) = 0 for B mags, and similarly for apasm(2) <
+		   20000 and apase(2) = 0 for V mags.
+		*/
+		l = 0;
+		if (star->cat.apass_mag[0] < 20000) {
+			if (star->cat.apass_mag_sigma[0] == 0)
+				l += snprintf(&magbuf[l], 255, "bt=%.3f ", star->cat.apass_mag[0] / 1000.0);
+			else
+				l += snprintf(&magbuf[l], 255, "b=%.3f/%.3f ",
+					      star->cat.apass_mag[0] / 1000.0,
+					      star->cat.apass_mag_sigma[0] / 1000.0);
+		}
+
+		if (star->cat.apass_mag[1] < 20000) {
+			if (star->cat.apass_mag_sigma[0] == 0)
+				l += snprintf(&magbuf[l], 255, "vt=%.3f ", star->cat.apass_mag[1] / 1000.0);
+			else
+				l += snprintf(&magbuf[l], 255, "v=%.3f/%.3f ",
+					      star->cat.apass_mag[1] / 1000.0,
+					      star->cat.apass_mag_sigma[1] / 1000.0);
+		}
+
+		if (star->cat.apass_mag[2] < 20000) {
+			if (star->cat.apass_mag_sigma[0] > 0)
+				l += snprintf(&magbuf[l], 255, "g=%.3f/%.3f ",
+					      star->cat.apass_mag[2] / 1000.0,
+					      star->cat.apass_mag_sigma[2] / 1000.0);
+			else
+				l += snprintf(&magbuf[l], 255, "g=%.3f ",
+					      star->cat.apass_mag[2] / 1000.0);
+		}
+
+		if (star->cat.apass_mag[3] < 20000) {
+			if (star->cat.apass_mag_sigma[0] > 0)
+				l += snprintf(&magbuf[l], 255, "r=%.3f/%.3f ",
+					      star->cat.apass_mag[3] / 1000.0,
+					      star->cat.apass_mag_sigma[3] / 1000.0);
+			else
+				l += snprintf(&magbuf[l], 255, "r=%.3f ",
+					      star->cat.apass_mag[3] / 1000.0);
+		}
+
+		if (star->cat.apass_mag[4] < 20000) {
+			if (star->cat.apass_mag_sigma[0] > 0)
+				l += snprintf(&magbuf[l], 255, "i=%.3f/%.3f ",
+					      star->cat.apass_mag[4] / 1000.0,
+					      star->cat.apass_mag_sigma[4] / 1000.0);
+			else
+				l += snprintf(&magbuf[l], 255, "i=%.3f ",
+					      star->cat.apass_mag[4] / 1000.0);
+		}
+
+
+		if (star->cat.mag_j < 20000) {
+			if (star->cat.e2mpho[0] > 0)
+				l += snprintf(&magbuf[l], 255, "j=%.3f/%.2f ", star->cat.mag_j / 1000.0, star->cat.e2mpho[0] / 100.0);
+			else
+				l += snprintf(&magbuf[l], 255, "j=%.3f ", star->cat.mag_j / 1000.0);
+		}
+
+		if (star->cat.mag_h < 20000) {
+			if (star->cat.e2mpho[1] > 0)
+				l += snprintf(&magbuf[l], 255, "h=%.3f/%.2f ", star->cat.mag_h / 1000.0, star->cat.e2mpho[1] / 100.0);
+			else
+				l += snprintf(&magbuf[l], 255, "h=%.3f ", star->cat.mag_h / 1000.0);
+		}
+
+		if (star->cat.mag_k < 20000) {
+			if (star->cat.e2mpho[2] > 0)
+				l += snprintf(&magbuf[l], 255, "k=%.3f/%.2f ", star->cat.mag_k / 1000.0, star->cat.e2mpho[2] / 100.0);
+			else
+				l += snprintf(&magbuf[l], 255, "k=%.3f ", star->cat.mag_k / 1000.0);
+		}
+
+
+		if (l > 0)
+			cats->smags = strdup(magbuf);
+
+		st[i] = cats;
+		star++;
+	}
+
+	free(buf);
+	qsort(st, ret, sizeof(struct cat_star *), cats_mag_comp_fn);
+	for (i=0 ; i < n && i < ret; i++) {
+		cst[i] = st[i];
+	}
+	n = i;
+	for (; i < ret; i++) {
+		cat_star_release(st[i]);
+	}
+	free(st);
+
+	return n;
+}
+
+
+static struct catalog *cat_open_ucac4(struct catalog *cat)
+{
+	if (cat->name == NULL) {
+		cat->name = catalogs[UCAC4_NAME];
+		cat->ref_count = 0;
+		cat->data = NULL;
+	}
+	cat->ref_count ++;
+
+	cat->cat_search = ucac4_cat_search;
+	cat->cat_get = NULL;
+	cat->cat_add = NULL;
+	cat->cat_sync = NULL;
+	cat->flags = CAT_STAR_TYPE_CAT | CAT_ASTROMET;
+
 	return cat;
 }
 
@@ -625,6 +799,10 @@ struct catalog * open_catalog(char *catname)
 	if (!strcasecmp(catname, catalogs[TYCHO2_NAME])) {
 		return cat_open_tycho2(cat);
 	}
+	if (!strcasecmp(catname, catalogs[UCAC4_NAME])) {
+		return cat_open_ucac4(cat);
+	}
+
 	err_printf("open_catalog: unknown catalog: %s\n", catname);
 	return NULL;
 }
