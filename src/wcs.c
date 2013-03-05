@@ -206,13 +206,6 @@ void wcs_release(struct wcs *wcs)
 	}
 }
 
-/* call xypix and worldpos with wcs data from a struct wcs */
-int w_xypix(struct wcs *wcs, double xpos, double ypos, double *xpix, double *ypix)
-{
-	return xypix(xpos, ypos, wcs->xref, wcs->yref, wcs->xrefpix,
-		     wcs->yrefpix, wcs->xinc, wcs->yinc, wcs->rot,
-		     "-TAN", xpix, ypix);
-}
 
 /* refract coordinates in-place */
 void refracted_from_true(double *ra, double *dec, double jd, double lat, double lng)
@@ -412,7 +405,6 @@ static void pairs_change_wcs(GSList *pairs, struct wcs *wcs)
 			return;
 		}
 		pairs = g_slist_next(pairs);
-//		w_xypix(wcs, cats->ra, cats->dec, &(gs->x), &(gs->y));
 		cats_xypix(wcs, cats, &(gs->x), &(gs->y));
 	}
 }
@@ -426,7 +418,6 @@ void cat_change_wcs(GSList *sl, struct wcs *wcs)
 		gs = GUI_STAR(sl->data);
 		if ((TYPE_MASK_GSTAR(gs) & TYPE_MASK_CATREF) && gs->s != NULL) {
 			cats = CAT_STAR(gs->s);
-//			w_xypix(wcs, cats->ra, cats->dec, &(gs->x), &(gs->y));
 			cats_xypix(wcs, cats, &(gs->x), &(gs->y));
 		}
 		sl = g_slist_next(sl);
@@ -1167,7 +1158,3 @@ int fastmatch(GSList *field, GSList *cat)
 	}
 	return ret;
 }
-
-
-
-

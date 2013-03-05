@@ -168,7 +168,6 @@ int add_cat_stars(struct cat_star **catsl, int n,
 
 	for (i=0; i<n; i++) {
 		gs = gui_star_new();
-//		w_xypix(wcs, catsl[i]->ra, catsl[i]->dec, &(gs->x), &(gs->y));
 		cats_xypix(wcs, (catsl[i]), &(gs->x), &(gs->y));
 		gs->size = cat_star_size(catsl[i]);
 		if (CATS_TYPE(catsl[i]) == CAT_STAR_TYPE_APSTAR) {
@@ -244,7 +243,6 @@ int merge_cat_stars(struct cat_star **catsl, int n,
 	for (sl = newsl; sl != NULL; sl = sl->next) {
 		cats = CAT_STAR(sl->data);
 		gs = gui_star_new();
-//		w_xypix(wcs, cats->ra, cats->dec, &(gs->x), &(gs->y));
 		cats_xypix(wcs, cats, &(gs->x), &(gs->y));
 		gs->size = cat_star_size(cats);
 		if (CATS_TYPE(cats) == CAT_STAR_TYPE_APSTAR) {
@@ -310,7 +308,6 @@ int merge_cat_star_list(GList *addsl,
 	for (sl = newsl; sl != NULL; sl = sl->next) {
 		cats = CAT_STAR(sl->data);
 		gs = gui_star_new();
-//		w_xypix(wcs, cats->ra, cats->dec, &(gs->x), &(gs->y));
 		cats_xypix(wcs, cats, &(gs->x), &(gs->y));
 		gs->size = cat_star_size(cats);
 		if (CATS_TYPE(cats) == CAT_STAR_TYPE_APSTAR) {
@@ -401,7 +398,6 @@ int add_star_from_frame_header(struct ccd_frame *fr,
 	cats->flags = CAT_STAR_TYPE_CAT;
 
 	gs = gui_star_new();
-//	w_xypix(wcs, cats->ra, cats->dec, &(gs->x), &(gs->y));
 	cats_xypix(wcs, cats, &(gs->x), &(gs->y));
 	gs->size = 1.0 * P_INT(DO_DEFAULT_STAR_SZ);
 	gs->flags = STAR_TYPE_CAT;
@@ -532,7 +528,6 @@ int update_gs_from_cats(GtkWidget *window, struct cat_star *cats)
 		if ((TYPE_MASK_GSTAR(gs) & TYPE_MASK_CATREF) && gs->s == cats) {
 			found = 1;
 			gs->size = cat_star_size(CAT_STAR(gs->s));
-//			w_xypix(wcs, cats->ra, cats->dec, &(gs->x), &(gs->y));
 			cats_xypix(wcs, cats, &(gs->x), &(gs->y));
 			if (CATS_TYPE(CAT_STAR(gs->s)) == CAT_STAR_TYPE_APSTAR) {
 				gs->flags = (gs->flags & ~STAR_TYPE_M) | STAR_TYPE_APSTAR;
@@ -840,4 +835,3 @@ void gui_star_list_release(struct gui_star_list *gsl)
 		gsl->ref_count --;
 	}
 }
-

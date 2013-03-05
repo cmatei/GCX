@@ -219,7 +219,6 @@ static int stf_aphot(struct stf *stf, struct ccd_frame *fr,
 	}
 	for (sl = asl; sl != NULL; sl = g_list_next(sl)) {
 		cats = CAT_STAR(sl->data);
-//		w_xypix(wcs, cats->ra, cats->dec, &x, &y);
 		cats_xypix(wcs, cats, &x, &y);
 		if (!star_in_frame(fr, x, y, rm)) {
 			cats->flags |= CPHOT_INVALID;
@@ -592,7 +591,6 @@ int stf_centering_stats(struct stf *stf, struct wcs *wcs, double *rms, double *m
 
 	for (; asl != NULL; asl = asl->next) {
 		cats = CAT_STAR(asl->data);
-//		w_xypix(wcs, cats->ra, cats->dec, &x, &y);
 		cats_xypix(wcs, cats, &x, &y);
 		if (cats->flags & INFO_POS) {
 			n++;
