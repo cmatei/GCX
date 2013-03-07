@@ -25,8 +25,6 @@
 /*  $Revision: 1.49 $ */
 /*  $Date: 2011/12/03 21:48:07 $ */
 
-/* Many functions here assume we have float frames - this must be fixed */
-
 #define _GNU_SOURCE
 
 #include <math.h>
@@ -46,8 +44,6 @@
 #include <errno.h>
 
 #include "ccd.h"
-//#include "cpxcon_regs.h"
-
 #include "dslr.h"
 
 #define MAX_FLAT_GAIN 2.0	// max gain accepted when flatfielding
@@ -141,7 +137,7 @@ struct ccd_frame *new_frame_fr(struct ccd_frame* fr, unsigned size_x, unsigned s
 // new_frame_head_fr is the same as new_frame_fr, only it does not allocate space for the
 // data array, only for the header
 // if the fr parameter is NULL, the function creates a frame header with only
-// the magic and geometry fields set. It assumes 16bits/pix.
+// the magic and geometry fields set.
 struct ccd_frame *new_frame_head_fr(struct ccd_frame* fr, unsigned size_x, unsigned size_y)
 {
 	struct ccd_frame *hd;
@@ -212,33 +208,18 @@ struct ccd_frame *new_frame_head_fr(struct ccd_frame* fr, unsigned size_x, unsig
 // free_frame frees a frame completely (data array and header)
 void free_frame(struct ccd_frame *fr)
 {
-/*  	d3_printf("Freeing frame at %08x\n", fr); */
+  	d3_printf("Freeing frame at %p\n", fr);
 	if (fr) {
 		free(fr->var);
 		free(fr->stats.hist.hdat);
 		free(fr->dat);
-		if (fr->magic & FRAME_HAS_CFA) {
-			if (fr->rdat)
-				free(fr->rdat);
-			if (fr->gdat)
-				free(fr->gdat);
-			if (fr->bdat)
-				free(fr->bdat);
-		}
+		free(fr->rdat);
+		free(fr->gdat);
+		free(fr->bdat);
 		free(fr);
 	}
 }
 
-// free_frame_data frees the data array of a frame
-/*
-static void free_frame_data(struct ccd_frame *fr)
-{
-	free(fr->dat);
-	free(fr->stats.hist.hdat);
-	fr->stats.hist.hdat = NULL;
-	fr->dat = NULL;
-	fr->data_valid = 0;
-}*/
 
 
 // functions should call get_frame to show
@@ -268,7 +249,7 @@ void release_frame(struct ccd_frame *fr)
 int alloc_frame_data(struct ccd_frame *fr)
 {
 	if (!fr->dat) {
-		if ((fr->dat = malloc(fr->w * fr->h * sizeof(float))) == NULL)
+		if ((fr->dat = malloc(fr->w * fr->h * PIXEL_SIZE)) == NULL)
 			return ERR_ALLOC;
 	}
 
@@ -279,17 +260,17 @@ int alloc_frame_data(struct ccd_frame *fr)
 int alloc_frame_rgb_data(struct ccd_frame *fr)
 {
 	if (!fr->rdat) {
-		if ((fr->rdat = malloc(fr->w * fr->h * sizeof(float))) == NULL)
+		if ((fr->rdat = malloc(fr->w * fr->h * PIXEL_SIZE)) == NULL)
 			return ERR_ALLOC;
 	}
 
 	if (!fr->gdat) {
-		if ((fr->gdat = malloc(fr->w * fr->h * sizeof(float))) == NULL)
+		if ((fr->gdat = malloc(fr->w * fr->h * PIXEL_SIZE)) == NULL)
 			return ERR_ALLOC;
 	}
 
 	if (!fr->bdat) {
-		if ((fr->bdat = malloc(fr->w * fr->h * sizeof(float))) == NULL)
+		if ((fr->bdat = malloc(fr->w * fr->h * PIXEL_SIZE)) == NULL)
 			return ERR_ALLOC;
 	}
 
@@ -476,59 +457,6 @@ static int fits_filename(char *fn, int fnl)
 	return 1;
 }
 
-
-/* read the wcs fields from the fits header lines
-static void parse_fits_wcs(struct ccd_frame *fr, struct wcs *fim)
-{
-	fim->wcsset = WCS_INITIAL;
-
-	if (fits_get_double(fr, "CRPIX1", &fim->xrefpix) <= 0)
-		fim->wcsset = WCS_INVALID;
-	if (fits_get_double(fr, "CRPIX2", &fim->yrefpix) <= 0)
-		fim->wcsset = WCS_INVALID;
-	if (fits_get_double(fr, "CRVAL1", &fim->xref) <= 0)
-		fim->wcsset = WCS_INVALID;
-	if (fits_get_double(fr, "CRVAL2", &fim->yref) <= 0)
-		fim->wcsset = WCS_INVALID;
-	if (fits_get_double(fr, "CDELT1", &fim->xinc) <= 0)
-		fim->wcsset = WCS_INVALID;
-	if (fits_get_double(fr, "CDELT2", &fim->yinc) <= 0)
-		fim->wcsset = WCS_INVALID;
-	if (fits_get_double(fr, "CROTA1", &fim->rot) <= 0)
-		fim->rot = 0;
-	if (fits_get_int(fr, "EQUINOX", &fim->equinox) <= 0) {
-		fim->equinox = 2000;
-	}
-}
- */
-
-/* read the wcs fields from the fits header lines
-
-static void parse_fits_exp(struct ccd_frame *fr, struct exp_data *exp)
-{
-
-	if (fits_get_int(fr, "CCDBIN1", &exp->bin_x) > 0)
-		exp->datavalid = 1;
-	if (fits_get_int(fr, "CCDBIN2", &exp->bin_y) > 0)
-		exp->datavalid = 1;
-	if (fits_get_double(fr, "ELADU", &exp->scale) <= 0) {
-		exp->scale = 1.0;
-//		err_printf("No ELADU, assuming 1\n");
-	}
-	if (fits_get_double(fr, "RDNOISE", &exp->rdnoise) <= 0) {
-		exp->rdnoise = 7.0;
-//		err_printf("No RDNOISE, assuming 7\n");
-	}
-	if (fits_get_double(fr, "FLNOISE", &exp->flat_noise) <= 0) {
-		exp->flat_noise = 0.0;
-//		err_printf("No FLNOISE, assuming 0\n");
-	}
-	if (fits_get_double(fr, "DCBIAS", &exp->bias) <= 0) {
-		exp->bias = 0.0;
-//		err_printf("No DCBIAS, assuming 0\n");
-	}
-}
- */
 
 struct memptr {
 	unsigned char *ptr;
@@ -991,22 +919,12 @@ int write_fits_frame(struct ccd_frame *fr, char *filename)
 		i++; fprintf(fp, "%-8s= %20d   %-40s       ", "NAXIS3", 3, "");
 	}
 
-//	if (fr->exp.datavalid) {
-//		i++; fprintf(fp, "%-8s= %-20s   %-40s       ", "TIMESYS", "'TT'", "");
-//		i++; fprintf(fp, "%-8s= %-25s   %-35s       ", "DATE-OBS", lb,
-//			     "UTC OF INTEGRATION START");
-//	}
-
-
 	if (bitpix == 16) {
 		i++; fprintf(fp, "%-8s= %20.3f   %-40s       ", "BSCALE", bscale, "");
 		i++; fprintf(fp, "%-8s= %20.3f   %-40s       ", "BZERO", bzero, "");
 	}
 
-// fill in /replace the noise pars
-
-// finally, print the rest of the header lines
-
+	// print the rest of the header lines
 	for (j=0; j < fr->nvar; j++) {
 		fwrite(fr->var[j], FITS_HCOLS, 1, fp);
 		i++;
@@ -1020,22 +938,21 @@ int write_fits_frame(struct ccd_frame *fr, char *filename)
 
 	for (j = 0; j < k; j++)
 		fprintf(fp, "%80s", "");
-//	d3_printf("i=%d j=%d", i, j);
 
 	all = fr->w * fr->h;
 	if (naxis == 3) {
-		dat_ptr[0] = (float *)fr->rdat;
-		dat_ptr[1] = (float *)fr->gdat;
-		dat_ptr[2] = (float *)fr->bdat;
+		dat_ptr[0] = fr->rdat;
+		dat_ptr[1] = fr->gdat;
+		dat_ptr[2] = fr->bdat;
 		dat_ptr[3] = NULL;
 	} else {
-		dat_ptr[0] = (float *)fr->dat;
+		dat_ptr[0] = fr->dat;
 		dat_ptr[1] = NULL;
 	}
 
 	cnt = 0;
 	while (*datp) {
-		dp = (float *)(*datp);
+		dp = (*datp);
 		datp++;
 
 		switch (bitpix) {
