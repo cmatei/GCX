@@ -663,29 +663,21 @@ void show_region_stats(GtkWidget *window, double x, double y)
 	xi = x;
 	yi = y;
 
-	if (i_channel->fr->pix_format == PIX_FLOAT) {
-		val = get_pixel_luminence(i_channel->fr, xi, yi);
-		ring_stats(i_channel->fr, x, y, 0, 10, 0xf, &rs, -HUGE, HUGE);
+	val = get_pixel_luminence(i_channel->fr, xi, yi);
+	ring_stats(i_channel->fr, x, y, 0, 10, 0xf, &rs, -HUGE, HUGE);
 
-		if (i_channel->fr->magic & FRAME_VALID_RGB) {
-			sprintf(buf, "[%d,%d]=%.1f (%.1f, %.1f, %.1f)  Region: Avg:%.0f  Sigma:%.1f  Min:%.0f  Max:%.0f",
-				xi, yi, val,
-				*(((float *) i_channel->fr->rdat) + xi + yi * i_channel->fr->w),
-				*(((float *) i_channel->fr->gdat) + xi + yi * i_channel->fr->w),
-				*(((float *) i_channel->fr->bdat) + xi + yi * i_channel->fr->w),
-				rs.avg, rs.sigma, rs.min, rs.max );
-		} else {
-			sprintf(buf, "[%d,%d]=%.1f  Region: Avg:%.0f  Sigma:%.1f  Min:%.0f  Max:%.0f",
-				xi, yi, val, rs.avg, rs.sigma, rs.min, rs.max );
-		}
-	} else if (i_channel->fr->pix_format == PIX_BYTE) {
-		/* FIXME: This won't work with RGB */
-		val = 1.0 * *((unsigned char *)(i_channel->fr->dat) + xi + yi * i_channel->fr->w);
-		sprintf(buf, "Pixel [%d,%d]=%.1f",
-		xi, yi, val);
+	if (i_channel->fr->magic & FRAME_VALID_RGB) {
+		sprintf(buf, "[%d,%d]=%.1f (%.1f, %.1f, %.1f)  Region: Avg:%.0f  Sigma:%.1f  Min:%.0f  Max:%.0f",
+			xi, yi, val,
+			*(((float *) i_channel->fr->rdat) + xi + yi * i_channel->fr->w),
+			*(((float *) i_channel->fr->gdat) + xi + yi * i_channel->fr->w),
+			*(((float *) i_channel->fr->bdat) + xi + yi * i_channel->fr->w),
+			rs.avg, rs.sigma, rs.min, rs.max );
 	} else {
-		sprintf(buf, "Pixel [%d,%d] unknown format", xi, yi);
+		sprintf(buf, "[%d,%d]=%.1f  Region: Avg:%.0f  Sigma:%.1f  Min:%.0f  Max:%.0f",
+			xi, yi, val, rs.avg, rs.sigma, rs.min, rs.max );
 	}
+
 	info_printf_sb2(window, "%s\n", buf);
 }
 

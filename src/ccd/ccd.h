@@ -197,13 +197,6 @@ struct bad_pix_map {
 
 #define DEFAULT_PIX_SIZE sizeof(float)
 
-// pixel formats
-#define PIX_FLOAT 1
-#define PIX_BYTE 2
-#define PIX_SHORT 3 	// 16-bit using out native endianess
-#define PIX_16LE 4	// 16-bit little endian
-#define PIX_16BE 5	// 16-bit big endian
-
 #ifndef LITTLE_ENDIAN
 #ifndef BIG_ENDIAN
 #define LITTLE_ENDIAN
@@ -258,7 +251,6 @@ struct ccd_frame {
 			 * normally, it's the amount of data (in bytes)
 			 * in the array */
 	int pix_size;	// bytes/pixel
-	int pix_format;	// format pixels are stored in
 	void *dat;	// the data array
 	FITS_row *var;	/* malloced array of all unrecognized header lines */
 	int nvar;	/* number of var[] */
@@ -707,9 +699,3 @@ int try_dcraw(char *filename);
 struct ccd_frame *read_file_from_dcraw(char *filename);
 
 #endif
-
-
-
-
-
-

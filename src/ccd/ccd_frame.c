@@ -197,7 +197,6 @@ struct ccd_frame *new_frame_head_fr(struct ccd_frame* fr, unsigned size_x, unsig
 		hd->exp.flat_noise = 0.0;
 	}
 	hd->ref_count = 1;
-	hd->pix_format = PIX_FLOAT;
 
 	if (fr == NULL) {
 		hd->rmeta.wbr  = 1.0;
@@ -317,16 +316,6 @@ int frame_stats(struct ccd_frame *hd)
 	unsigned *hdata;
 	int b, n;
 	double median = 0.0, c, bv;
-	int ret;
-
-	if (hd->pix_format != PIX_FLOAT) {
-		d3_printf("frame_stats: converting frame to float format!\n");
-		ret = frame_to_float(hd);
-		if (ret < 0) {
-			err_printf("error converting \n");
-			return ret;
-		}
-	}
 
 	if (hd->stats.hist.hdat == NULL) { // we need to allocate the histogram data
 		if (hd->stats.hist.hsize == 0)
@@ -1035,11 +1024,6 @@ int write_fits_frame(struct ccd_frame *fr, char *filename)
 		fprintf(fp, "%80s", "");
 //	d3_printf("i=%d j=%d", i, j);
 
-	if (fr->pix_size != 4 || fr->pix_format != PIX_FLOAT) {
-		err_printf("\nwrite_fits_frame: I can only write float frames\n");
-		return ERR_FATAL;
-	}
-
 	all = fr->w * fr->h;
 	if (naxis == 3) {
 		dat_ptr[0] = (float *)fr->rdat;
@@ -1585,73 +1569,6 @@ int crop_frame(struct ccd_frame *fr, int x, int y, int w, int h)
 	return 0;
 }
 
-// convert a frame to float format; may need to add more pixel formats here
-int frame_to_float(struct ccd_frame *fr)
-{
-	int all, i;
-	void *ip;
-	float *op;
-
-	d3_printf("format is %d\n", fr->pix_format);
-
-	if (fr->pix_format == PIX_FLOAT)
-		return 0;
-
-	all = fr->w * fr->h;
-
-	switch(fr->pix_format) {
-	case PIX_BYTE:
-		op = (float *)fr->dat + all - 1;
-		ip = fr->dat + all - 1;
-		for (i=0; i< all; i++) {
-			*op-- = 1.0 * (* (unsigned char *) ip);
-			ip --;
-		}
-		fr->pix_format = PIX_FLOAT;
-		return 0;
-#ifdef LITTLE_ENDIAN
-	case PIX_16LE:
-#else
-	case PIX_16BE:
-#endif
-	case PIX_SHORT:
-		op = (float *)fr->dat + all - 1;
-		ip = (unsigned short *)fr->dat + all - 1;
-		for (i=0; i< all; i++) {
-			*op-- = 1.0 * (* (unsigned short *) ip);
-			ip -= sizeof (unsigned short);
-		}
-		fr->pix_format = PIX_FLOAT;
-		return 0;
-#ifdef LITTLE_ENDIAN
-	case PIX_16BE:
-		op = (float *)fr->dat + all - 1;
-		ip = fr->dat + all * 2 - 2;
-		for (i=0; i< all; i++) {
-			*op-- = (256.0 * (* (unsigned char *) ip)
-				 + 1.0 * (* (unsigned char *) (ip+1)) );
-			ip -= 2;
-		}
-		fr->pix_format = PIX_FLOAT;
-		return 0;
-#else
-	case PIX_16LE:
-		op = (float *)fr->dat + all - 1;
-		ip = fr->dat + all * 2 - 2;
-		for (i=0; i< all; i++) {
-			*op-- = (256.0 * (* (unsigned char *) (ip+1))
-				 + 1.0 * (* (unsigned char *) (ip)));
-			ip -= 2;
-		}
-		fr->pix_format = PIX_FLOAT;
-		return 0;
-#endif /* LITTLE_ENDIAN */
-		default:
-		err_printf("cannot convert unknown format %d to float\n");
-		return -1;
-	}
-
-}
 
 /* get a double field
  * return 1 if parsed ok, 0 if the field was not found,

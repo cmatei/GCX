@@ -798,7 +798,7 @@ int frame_to_channel(struct ccd_frame *fr, GtkWidget *window, char *chname)
 		channel->fr = fr;
 		if (fr->magic & FRAME_VALID_RGB)
 			channel->color = 1;
-		if (fr->stats.statsok && fr->pix_format != PIX_BYTE) {
+		if (fr->stats.statsok) {
 			set_default_channel_cuts(channel);
 //			set_channel_from_stats(channel);
 		}
@@ -810,7 +810,7 @@ int frame_to_channel(struct ccd_frame *fr, GtkWidget *window, char *chname)
 			channel->color = 1;
 		if (!fr->stats.statsok)
 			frame_stats(fr);
-		if (fr->stats.statsok && fr->pix_format != PIX_BYTE) {
+		if (fr->stats.statsok) {
 			d3_printf("updating cuts by %f\n", (fr->stats.cavg - channel->davg));
 			channel->lcut += (fr->stats.cavg - channel->davg);
 			channel->hcut += (fr->stats.cavg - channel->davg);

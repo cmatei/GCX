@@ -395,7 +395,6 @@ int bayer_interpolate(struct ccd_frame *fr)
 	if (! (fr->rmeta.color_matrix)) {
 		return 0;
 	}
-	frame_to_float(fr);
 	ret = alloc_frame_rgb_data(fr);
 	if (ret)
 		return ret;
@@ -413,4 +412,3 @@ int bayer_interpolate(struct ccd_frame *fr)
 		return -1;
 	}
 }
-

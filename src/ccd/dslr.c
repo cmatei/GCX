@@ -980,7 +980,6 @@ static struct ccd_frame *read_mrw_file(struct raw_file *raw)
 	frame->h = endian_to_host_16(byteorder, mrw->prd->ccd_size_y);
 
 	frame->pix_size = 4;
-	frame->pix_format = PIX_FLOAT;
 
 	if (alloc_frame_data(frame)) {
 		err_printf("read_mrw_file: cannot allocate data for frame\n");
@@ -1437,7 +1436,6 @@ static struct ccd_frame *read_cr2_file(struct raw_file *raw)
 #endif
 
 	frame->pix_size = 4;
-	frame->pix_format = PIX_FLOAT;
 
 	/* save color coefficients */
 	frame->rmeta.wbr  = cr2->wb_gain_r;
