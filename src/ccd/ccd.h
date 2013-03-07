@@ -61,12 +61,6 @@ struct point {		// a point in a frame or window
 	double sigma;
 };
 
-// values describing the geometry of a frame from a ccd chip
-struct ccd_geometry {
-	unsigned w; /* total size of the frame */
-	unsigned h;
-};
-
 // structure describing a ccd exposure
 struct exp_data {
 	int datavalid;
@@ -180,11 +174,6 @@ struct bad_pix_map {
 
 #define FRAME_NAME_SIZE 256
 
-/*  the big one: struct ccd_frame is the internal representation of a frame or  */
-/*  fits file in cx. Every function that operates on images uses a struct ccd_frame */
-
-/*  the frames' data areas are allocated to hold floats, at 4 bytes/pixel  */
-
 #define PIXEL_SIZE sizeof(float)
 
 struct raw_metadata {
@@ -211,19 +200,21 @@ struct raw_metadata {
 	((pattern) >> (((((y) << 1) & 14) + ((x) & 1)) << 1) & 3)
 
 
+/*  the big one: struct ccd_frame is the internal representation of a frame or  */
+/*  fits file in gcx. Every function that operates on images uses a struct ccd_frame */
+
+/*  the frames' data areas are allocated to hold floats  */
 struct ccd_frame {
-	int ref_count;
-	unsigned loaded; /* how much of the frame's data is loaded (for incremental
-			  * loads and readout - in bytes */
-/*   how many need this frame. When ref_count is 1, a release_frame */
-/*   deallocates the frame. The frame is created with ref_count=1 */
+	int ref_count; //   how many need this frame. When ref_count is 1, a release_frame
+	               //   deallocates the frame. The frame is created with ref_count=1
+
 	int w;		// width of frame in pixels
 	int h;		// height of frame in pixels
 
 	unsigned magic; // an unique number identifying the frame (science, dark, flatfield etc)
 
-	struct region trimsec;  /* actual image area, defaults to all image */
-	struct region biassec;  /* overscan area, if available */
+	struct region trimsec;  // actual image area, defaults to all image
+	struct region biassec;  // overscan area, if available
 
 	struct exp_data exp;
 	struct im_stats stats;
@@ -250,18 +241,7 @@ struct ccd_frame {
 #define FLAT_FRAME	0x0000004
 #define FILE_FRAME	0x0000008
 
-// bits describing the operations on the frame
-
-#define FRAME_MATH	0x0000010	// frame resulting from computation between frames
-#define FRAME_BADPIX	0x0000020	// frame had had the bad pixels replaced
-#define FRAME_BIASC	0x0000040	// bias was substracted from the frame
-#define FRAME_FLATC	0x0000080	// frame was flatfield corrected
-#define FRAME_STACK	0x0000100	// frame results from a stak op
-
-#define FRAME_UNCERTAIN 0x1000000	// frame containins uncertain data
-
 /* frame image structure */
-
 #define FRAME_HAS_CFA     0x0100000 /* frame contains CFA data */
 #define FRAME_VALID_RGB   0x0200000 /* rgb data was generated from bayer */
 
@@ -274,7 +254,6 @@ struct ccd_frame {
 #define BAD_COLD_COLUMN ('C')
 
 // bad pixel fixing methods
-
 #define BADPIX_MEDIAN 1
 #define BADCOLUMN_AVG 0
 #define BADCOLUMN_MEDIAN 0x10
