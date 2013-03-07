@@ -21,13 +21,15 @@
   Contact Information: radu@corlan.net
 *******************************************************************************/
 
-/*  Functions that repaint multi-channel images to a gtx drawing area */
+/*  Functions that repaint multi-channel images to a gtk drawing area */
 
 
 /* General strategy for displaying image frames
  *
  * Frames to be displayed in a certain drawing area are
  * attached to the respective drawing area using g_object_set_data_full
+ *
+ * Not implemented:
  *
  * Several frames can be attached to the same drawing area; they represent
  * the different channels of the image. Various possible channels are:
@@ -42,9 +44,6 @@
  * a grayscale or rgb image is produced. The following channel combinations are tried
  * in order: IRGB, ICrCb, RGB, I
  *
- * Channels are aligned according to their skips. When they don't overlap, only the
- * intersection of the various channels is drawn. (still TBD)
- *
  * Apart from the frames to be displayed, the follwing data items are used to
  * determine how to display the data:
  *
@@ -52,9 +51,6 @@
  * "markers"     : a g_list of markers that should be drawn on the frame;
  * "sources"     : a g_list of sources (stars) that should be drawn on the frame;
  *
- * channel, markers and sources structures are defined in showimage.h
- *
- * channels are grouped into layers : but more about that later
  */
 
 #include <stdio.h>
@@ -919,7 +915,6 @@ int channel_to_pnm_file(struct image_channel *channel, GtkWidget *window, char *
 	}
 
 	fprintf(pnmf, "P5 %d %d %d\n", channel->fr->w, channel->fr->h, is_16bit ? 65535 : 255);
-
 
 	float_chan_to_pnm(channel, pnmf, is_16bit);
 
