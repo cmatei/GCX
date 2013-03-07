@@ -188,20 +188,9 @@ struct bad_pix_map {
 /*  the big one: struct ccd_frame is the internal representation of a frame or  */
 /*  fits file in cx. Every function that operates on images uses a struct ccd_frame */
 
-/*  the frames' data areas are allocated to hold DEFAULT_PIX_SIZE bytes/pixel  */
-/*  (usually 4). Functions that process frames in ccd_frame.c and x11ops */
-/*  expect the frames to be float. frame_to_float can be used for the trasnsformation */
+/*  the frames' data areas are allocated to hold floats, at 4 bytes/pixel  */
 
-/*  pix_size shows the amount of space allocated for the pixels; if smaller
- *  pixels are used (e.g. byte/short), pix_size is not affected */
-
-#define DEFAULT_PIX_SIZE sizeof(float)
-
-#ifndef LITTLE_ENDIAN
-#ifndef BIG_ENDIAN
-#define LITTLE_ENDIAN
-#endif
-#endif
+#define PIXEL_SIZE sizeof(float)
 
 struct raw_metadata {
 	double wbr;		/* white balance gains */
@@ -250,14 +239,13 @@ struct ccd_frame {
 	int data_valid;	/* non-zero shows the data in the array is valid
 			 * normally, it's the amount of data (in bytes)
 			 * in the array */
-	int pix_size;	// bytes/pixel
-	void *dat;	// the data array
+	float *dat;	// the data array
 	FITS_row *var;	/* malloced array of all unrecognized header lines */
 	int nvar;	/* number of var[] */
 	char name[256];	// name of frame
-	void *rdat;     // rgb image planes
-	void *gdat;
-	void *bdat;
+	float *rdat;     // rgb image planes
+	float *gdat;
+	float *bdat;
 };
 
 // magic numbers for ccd frame

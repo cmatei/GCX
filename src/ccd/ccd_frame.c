@@ -76,7 +76,7 @@ struct ccd_frame *clone_frame(struct ccd_frame *fr)
 	while ((plane_iter = color_plane_iter(fr, plane_iter))) {
 		dpi = get_color_plane(fr, plane_iter);
 		dpo = get_color_plane(new, plane_iter);
-		memcpy(dpo, dpi, all * fr->pix_size);
+		memcpy(dpo, dpi, all * PIXEL_SIZE);
 	}
 
 	new->ref_count = 1;
@@ -97,7 +97,7 @@ struct ccd_frame *new_frame_fr(struct ccd_frame* fr, unsigned size_x, unsigned s
 		return NULL;
 	d3_printf("nfrhfr\n");
 
-	data = malloc(new->w * new->h * new->pix_size);
+	data = malloc(new->w * new->h * PIXEL_SIZE);
 	if (data == NULL) {
 		free(new);
 		return NULL;
@@ -108,14 +108,14 @@ struct ccd_frame *new_frame_fr(struct ccd_frame* fr, unsigned size_x, unsigned s
 		new->magic |= (fr->magic & (FRAME_HAS_CFA|FRAME_VALID_RGB));
 
 		if (new->magic & FRAME_VALID_RGB) {
-			data = malloc(new->w * new->h * new->pix_size);
+			data = malloc(new->w * new->h * PIXEL_SIZE);
 			if (data == NULL) {
 				free(new->dat);
 				free(new);
 				return NULL;
 			}
 			new->rdat = data;
-			data = malloc(new->w * new->h * new->pix_size);
+			data = malloc(new->w * new->h * PIXEL_SIZE);
 			if (data == NULL) {
 				free(new->dat);
 				free(new->rdat);
@@ -123,7 +123,7 @@ struct ccd_frame *new_frame_fr(struct ccd_frame* fr, unsigned size_x, unsigned s
 				return NULL;
 			}
 			new->gdat = data;
-			data = malloc(new->w * new->h * new->pix_size);
+			data = malloc(new->w * new->h * PIXEL_SIZE);
 			if (data == NULL) {
 				free(new->dat);
 				free(new->rdat);
@@ -154,7 +154,6 @@ struct ccd_frame *new_frame_head_fr(struct ccd_frame* fr, unsigned size_x, unsig
 	if (fr != NULL) {
 		memcpy(hd, fr, sizeof(struct ccd_frame) );
 	}
-	hd->pix_size = DEFAULT_PIX_SIZE;
 
 	if (hd->nvar) { //we need to alloc space for variables
 		var = calloc(hd->nvar * sizeof(FITS_row), 1);
@@ -621,7 +620,7 @@ static struct ccd_frame *read_fits_file_generic(void *fp, char *fn, int force_un
 	double bz, bs;
 	float bscale = 0.0, bzero = 0.0;
 	int bsset = 0;
-	int bytes_per_pixel;
+	int pix_size, bytes_per_pixel;
 	float d;
 
 	ef = 0;
@@ -649,7 +648,7 @@ static struct ccd_frame *read_fits_file_generic(void *fp, char *fn, int force_un
 				;
 			else if (sscanf(lb, "NAXIS3 = %d", &naxis3) )
 				;
-			else if (sscanf(lb, "BITPIX = %d", &hd->pix_size) )
+			else if (sscanf(lb, "BITPIX = %d", &pix_size) )
 				;
 			else if (sscanf(lb, "BSCALE = %f", &d) ) {
 				bsset = 1;
@@ -693,10 +692,10 @@ static struct ccd_frame *read_fits_file_generic(void *fp, char *fn, int force_un
 		err_printf("bad NAXIS = %d (should be 2 or 3)\n", naxis);
 		goto err_exit;
 	}
-	if (hd->pix_size ==  8 || hd->pix_size == 16 || hd->pix_size == -32 || hd->pix_size == 32) {
+	if (pix_size ==  8 || pix_size == 16 || pix_size == -32 || pix_size == 32) {
 //		hd->pix_size = 4;
 	} else {
-		err_printf("bad BITPIX = %d (must be 16)\n", hd->pix_size);
+		err_printf("bad BITPIX = %d\n", pix_size);
 		goto err_exit;
 	}
 	if (hd->w <= 0) {
@@ -722,7 +721,7 @@ static struct ccd_frame *read_fits_file_generic(void *fp, char *fn, int force_un
 	}
 
 	d1_printf("Reading FITS file: %s %d x %d x %d\n",
-		  fn, hd->w, hd->h, hd->pix_size);
+		  fn, hd->w, hd->h, pix_size);
 
 // check for any required scaling/shifting
 	if (bsset) {
@@ -744,7 +743,7 @@ static struct ccd_frame *read_fits_file_generic(void *fp, char *fn, int force_un
 	r_data = (float *)(hd->rdat);
 	g_data = (float *)(hd->gdat);
 	b_data = (float *)(hd->bdat);
-	bytes_per_pixel = abs(hd->pix_size) / 16;
+	bytes_per_pixel = abs(pix_size) / 16;
 	j=0;
 
 	while(j < all) {
@@ -754,7 +753,7 @@ static struct ccd_frame *read_fits_file_generic(void *fp, char *fn, int force_un
 			break;
 		}
 		for(i = 0; i < ((FITS_HCOLS * FITS_HROWS) >> bytes_per_pixel) && j < all; i++) {
-			switch(hd->pix_size) {
+			switch(pix_size) {
 			case 8:
 				if (bz == 0 ){
 					d = ((unsigned char *)v)[i] * bs;
@@ -779,7 +778,7 @@ static struct ccd_frame *read_fits_file_generic(void *fp, char *fn, int force_un
 					union {float f32; unsigned int u32; } cnvt;
 
 					cnvt.u32 = ntohl(fv[i]);
-					if (hd->pix_size == -32) {
+					if (pix_size == -32) {
 						fds = cnvt.f32;
 					} else {
 						fds = cnvt.u32 * 1.0;
@@ -827,7 +826,6 @@ static struct ccd_frame *read_fits_file_generic(void *fp, char *fn, int force_un
 	}
 
 
-	hd->pix_size = 4;
 	hd->data_valid = 1;
 
 	frame_stats(hd);

@@ -611,7 +611,6 @@ int extract_stars(struct ccd_frame *fr, struct region *reg, double min_flux, dou
 		frame_stats(fr);
 
 //	d3_printf("extract_stars: frame size is %dx%d\n", fr->w, fr->h);
-//	d3_printf("extract_stars: frame pixel format is %d [%d]\n", fr->pix_format, fr->pix_size);
 
 	minpk = fr->stats.cavg + 2 * sigmas * fr->stats.csigma;
 

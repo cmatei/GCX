@@ -273,7 +273,7 @@ int filter_frame_inplace(struct ccd_frame *fr, float *kern, int size)
 	while ((plane_iter = color_plane_iter(fr, plane_iter))) {
 		dpi = get_color_plane(fr, plane_iter);
 		dpo = get_color_plane(new, plane_iter);
-		memcpy(dpo, dpi, all * fr->pix_size);
+		memcpy(dpo, dpi, all * PIXEL_SIZE);
 	}
 	fr->stats.statsok = 0;
 	release_frame(new);
@@ -976,4 +976,3 @@ int make_gaussian(float sigma, int size, float *kern)
 		kern[y] /= sum;
 	return 0;
 }
-
