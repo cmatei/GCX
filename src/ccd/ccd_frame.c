@@ -1152,14 +1152,15 @@ int overscan_correction(struct ccd_frame *fr, double pedestal, int x, int y, int
 			}
 		}
 
-		avg = sum / npixels;
-		all = fr->w * fr->h;
+		avg = 0;
+		if (npixels != 0)
+			avg = sum / npixels;
 
+		all = fr->w * fr->h;
 		for (i = 0; i < all; i++) {
 			*dat = *dat + pedestal - avg;
 			dat++;
 		}
-
 	}
 
 	fr->stats.statsok = 0;
