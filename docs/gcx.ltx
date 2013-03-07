@@ -5,7 +5,7 @@
 %\pagestyle{plain}
 \title{GCX User's Manual}
 \author{Radu Corlan}
-\date{Version 1.1\qquad 2008}
+\date{Version 1.6\qquad 2013}
 \newcommand{\cmdline}[1]{\begin{quote}{\tt #1}\end{quote}}
 \newcommand{\menu}[1]{{\em #1}}
 \newcommand{\op}[1]{{\em #1}}
@@ -56,9 +56,8 @@ with relative ease.
 
 \paragraph{Image handling}
 \begin{itemize}
-\item Open/save 16-bit FITS image files;
-
-\gcx uses floating-point images internally, so other FITS formats are easy to add;
+\item Open/save FITS, TIFF and JPEG image files; \gcx uses
+  floating-point images internally, so several bit depths are supported
 \item Zoom/Pan images, adjust brightness/contrast/gamma in an intuitive way, 
   appropiate for astronomical images;
 \item Convert FITS files to 8-bit PNM after intensity mapping;
@@ -70,7 +69,7 @@ with relative ease.
 \end{itemize}
 \paragraph{Catalogs and WCS}
 \begin{itemize}
-\item Read field star information from GSC1/2 and Tycho2;
+\item Read field star information from local or online catalogues (GSC1/2, Tycho2 or UCAC4);
 \item Read object information from {\tt edb} and native files;
 \item Read recipe files;
 \item Detect sources (stars) from images;
@@ -81,11 +80,7 @@ with relative ease.
 \end{itemize}
 \paragraph{Camera Control}
 \begin{itemize}
-\item Control cameras over a TCP socket using a simple protocol;
-
-The control proces ({\tt cpxcntrl}) presently supports the cpx3m camera. It can be 
-easily modified to support other cameras.
-
+\item Control cameras over a TCP socket using the INDI protocol;
 \item Acquire images under script control;
 \item Set binning/windowing/integration times/temperature;
 \item Dark frames;
@@ -94,7 +89,7 @@ easily modified to support other cameras.
 \end{itemize}
 \paragraph{Telescope control}
 \begin{itemize}
-\item Support LX200 protocol over serial;
+\item Support INDI telescopes
 \item Point telescope under script control;
 \item Point telescope by object name (if edb catalogs are installed);
 \item Refine pointing by comparing image star positions with catalogs;
@@ -105,7 +100,7 @@ easily modified to support other cameras.
 apertures for sky estimation;
 \item Aperture sizes fully programmable;
 \item Multiple sky estimation methods;
-\item Uses a complex error model thorughout, that takes into account
+\item Uses a complex error model throughout, that takes into account
 photon shot noise, read noise, noise of the callibration frames and scintillation;
 \item Report noise estimates for every result;
 \item Take photometric targets (program and standard stars) from recipe files, 
@@ -128,12 +123,13 @@ or directly from the image;
 \item Most functions available in batch mode, so the program can be made part of a script.
 \end{itemize}
 \section{Free Software}
-Gcx is free software, distributed under the GNU General Public License. Users can modify 
-it to add features, reduction algoritms, support for other cameras/telescopes, file formats.
- It is written
-in C. The GUI uses the Gtk+ 1.2 toolkit. Some GNU-specific libc functions are used, but 
-nothing fancy. It should compile and run on any system that has GNU
-tools, glibc and Gtk+ 1.2. \gcx is maintained on a GNU/Linux system.
+Gcx is free software, distributed under the GNU General Public
+License. Users can modify it to add features, reduction algoritms,
+support for other cameras/telescopes, file formats.  It is written in
+C. The GUI uses the Gtk+ 2.0 toolkit. Some GNU-specific libc functions
+are used, but nothing fancy. It should compile and run on any system
+that has GNU tools, glibc and Gtk+ 2.0. \gcx is maintained on a
+GNU/Linux system.
 
 
 \section{Contributing}
@@ -141,14 +137,10 @@ The most important contribution you can make to \gcx is to try it out, and don't
 immediately if something goes wrong. Complain to the author about
 it---he will try to help you.
 
-
-The next most important contribution is to extend the hardware support of the program.
-When interface library are available for cameras (many manufacturers do have such libraries), 
-it is relatively straightforward to add support for a camera, as \gcx has cleanly defined 
-camera interface. Likewise, many mount/telescope manufacturers use the LX200 protocol, so 
-essentially what is needed for other telescopes/mounts is testing and maybe a little 
-tweaking. The program only uses a few LX200 functions, so interfacing to even a custom mount 
-should be easy.
+The next most important contribution is to extend the hardware support
+of the program. Although INDI (Instrument Neutral Distributed
+Interface) is fairly standardized, it is possible that certain devices
+don't work properly with \gcx.
 
 Third, there's the bane of free software: documentation. Any help in documenting or checking
 the documentation of the program is greatly appreciated, and will go a long way towards 
@@ -178,8 +170,6 @@ The manual is maintained in \LaTeX.
 \section{Related Projects}
 
 \begin{description}
-\item[{\tt cpxctrl}] the camera server used by \gcx. Currently it supports the cpx3m camera, 
-but should be easy to modify to control different ones;
 \item[{\tt cpx3m}] a free CCD camera design;
 \item[{\tt avsomat}] a batch variable star reduction program; more
   portable than {\sc gcx}, it 
@@ -206,8 +196,8 @@ It should best be read while playing with the program.
 
 \section{Building and Running gcx}
 
-If you're lucky (meaning that you have an i386 GNU/Linux system with compatible libc 
-and {\tt gtk+-1.2} is installed on your system), the precompiled binary supplied with the 
+If you're lucky (meaning that you have an i386/amd64 GNU/Linux system with compatible libc 
+and {\tt gtk+-2.0} is installed on your system), the precompiled binary supplied with the 
 distribution will just work.
 To test, cd to the toplevel distribution directory (gcx-x.x.x) and run:
 \cmdline{src/gcx}
@@ -217,7 +207,7 @@ in {\tt /usr/local/bin} for example.
 
 If the above doesn't work,\footnote{
 Or even if it does.} you have to recompile the program. Make 
-sure {\tt gtk+-1.2} is installed on the system (if you have Gnome, you also have gtk), then in 
+sure {\tt gtk+-2.0} is installed on the system (if you have Gnome, you also have gtk), then in 
 the toplevel directory type:
 \cmdline{./configure ; make clean ; make}
 Configure takes some options. See the INSTALL file supplied with the distribution for more 

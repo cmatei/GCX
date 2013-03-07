@@ -32,6 +32,7 @@ AC_CHECK_LIB(jpeg, jpeg_CreateDecompress,,AC_MSG_ERROR(Cannot find libjpeg))
 
 AC_CONFIG_FILES([
 	Makefile
+	docs/Makefile
 	src/Makefile
 	src/ccd/Makefile
 	src/gsc/Makefile
