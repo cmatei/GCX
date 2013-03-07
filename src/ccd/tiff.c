@@ -226,8 +226,11 @@ struct ccd_frame *read_tiff_file(char *filename)
 		goto out;
 
 	fr = new_frame(w, h);
-	if (nsamples != 1)
+	if (nsamples != 1) {
+		free(fr->dat);
 		alloc_frame_rgb_data(fr);
+		fr->magic |= FRAME_VALID_RGB;
+	}
 
 	buf = _TIFFmalloc(TIFFScanlineSize(tif));
 	if (config == PLANARCONFIG_CONTIG) {
