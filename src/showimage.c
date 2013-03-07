@@ -794,25 +794,20 @@ int frame_to_channel(struct ccd_frame *fr, GtkWidget *window, char *chname)
 		channel->fr = fr;
 		if (fr->magic & FRAME_VALID_RGB)
 			channel->color = 1;
-		if (fr->stats.statsok) {
-			set_default_channel_cuts(channel);
-//			set_channel_from_stats(channel);
-		}
 	} else { /* replace the frame in the current channel */
 		release_frame(channel->fr);
 		get_frame(fr);
 		channel->fr = fr;
 		if (fr->magic & FRAME_VALID_RGB)
 			channel->color = 1;
-		if (!fr->stats.statsok)
-			frame_stats(fr);
-		if (fr->stats.statsok) {
-			d3_printf("updating cuts by %f\n", (fr->stats.cavg - channel->davg));
-			channel->lcut += (fr->stats.cavg - channel->davg);
-			channel->hcut += (fr->stats.cavg - channel->davg);
-			channel->davg = fr->stats.cavg;
-		}
 	}
+
+	/* set default cuts */
+	if (!fr->stats.statsok)
+		frame_stats(fr);
+	if (fr->stats.statsok)
+		set_default_channel_cuts(channel);
+
 	if (wcs == NULL) {
 		wcs = wcs_new();
 		g_object_set_data_full(G_OBJECT(window), "wcs_of_window",
