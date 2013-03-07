@@ -9,12 +9,6 @@
 #define LUT_SIZE 4096
 #define LUT_IDX_MASK 0x0fff
 
-/* LUT modes */
-#define LUT_MODE_DIRECT 1 /* for 8-bit frames, and
-			     16-bit frames we know have values < LUT_SIZE
-			     output = lut[input], cuts ignored */
-#define LUT_MODE_FULL 0   /* output = lut[(input - lcut)/(hcut - lcut) * LUT_SIZE] */
-
 /* this structure describes a channel (a frame and it's associated intesity mapping) */
 struct image_channel {
 	int ref_count; /* reference count for map */
@@ -26,7 +20,6 @@ struct image_channel {
 	double toe; /* toe setting for image */
 	double offset; /* toe setting for image */
 	unsigned short lut[LUT_SIZE];
-	int lut_mode; /* the way the lut is set up */
 	double dsigma; /* sigma used for cut calculation */
 	double davg; /* image average used for display calculations */
 	int flip_h; /* flag for horisontal flip */

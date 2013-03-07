@@ -198,7 +198,6 @@ struct image_channel *new_image_channel(void)
 	channel->gamma = 1.0;
 	channel->toe = 0.0;
 	channel->offset = 0.0;
-	channel->lut_mode = LUT_MODE_FULL;
 	for (i=0; i<LUT_SIZE; i++) {
 		channel->lut[i] = i * 65535 / LUT_SIZE;
 	}
@@ -287,89 +286,45 @@ static void cache_render_rgb_float_zi(struct map_cache *cache, struct image_chan
 	fdat_g = (float *)fr->gdat + fx + fy * fr->w;
 	fdat_b = (float *)fr->bdat + fx + fy * fr->w;
 
-	if (channel->lut_mode == LUT_MODE_DIRECT) {
-		for (y = 0; y < fh; y++) {
-			for (x = 0; x < fw; x++) {
-				lndx = (*fdat_r);
-				if (lndx < 0)
-					lndx = 0;
-				if (lndx > LUT_SIZE - 1)
-					lndx = LUT_SIZE - 1;
-				pix_r = channel->lut[lndx] >> 8;
-				fdat_r ++;
+	for (y = 0; y < fh; y++) {
+		for (x = 0; x < fw; x++) {
+			lndx = (gain_r * (*fdat_r - flr_r));
+			if (lndx < 0)
+				lndx = 0;
+			if (lndx > LUT_SIZE - 1)
+				lndx = LUT_SIZE - 1;
+			pix_r = channel->lut[lndx] >> 8;
+			fdat_r ++;
 
-				lndx = (*fdat_g);
-				if (lndx < 0)
-					lndx = 0;
-				if (lndx > LUT_SIZE - 1)
-					lndx = LUT_SIZE - 1;
-				pix_g = channel->lut[lndx] >> 8;
-				fdat_g ++;
+			lndx = (gain_g * (*fdat_g - flr_g));
+			if (lndx < 0)
+				lndx = 0;
+			if (lndx > LUT_SIZE - 1)
+				lndx = LUT_SIZE - 1;
+			pix_g = channel->lut[lndx] >> 8;
+			fdat_g ++;
 
-				lndx = (*fdat_b);
-				if (lndx < 0)
-					lndx = 0;
-				if (lndx > LUT_SIZE - 1)
-					lndx = LUT_SIZE - 1;
-				pix_b = channel->lut[lndx] >> 8;
-				fdat_b ++;
+			lndx = (gain_b * (*fdat_b - flr_b));
+			if (lndx < 0)
+				lndx = 0;
+			if (lndx > LUT_SIZE - 1)
+				lndx = LUT_SIZE - 1;
+			pix_b = channel->lut[lndx] >> 8;
+			fdat_b ++;
 
-				for (z = 0; z < zoom; z++) {
-					*cdat++ = pix_r;
-					*cdat++ = pix_g;
-					*cdat++ = pix_b;
-				}
-			}
-			fdat_r += fjump;
-			fdat_g += fjump;
-			fdat_b += fjump;
-			cdat += cjump;
-			for (z = 0; z < zoom - 1; z++) {
-				memcpy(cdat, cdat - cache->w*3, cache->w*3);
-				cdat += cache->w*3;
+			for (z = 0; z < zoom; z++) {
+				*cdat++ = pix_r;
+				*cdat++ = pix_g;
+				*cdat++ = pix_b;
 			}
 		}
-	} else {
-		for (y = 0; y < fh; y++) {
-			for (x = 0; x < fw; x++) {
-				lndx = (gain_r * (*fdat_r - flr_r));
-				if (lndx < 0)
-					lndx = 0;
-				if (lndx > LUT_SIZE - 1)
-					lndx = LUT_SIZE - 1;
-				pix_r = channel->lut[lndx] >> 8;
-				fdat_r ++;
-
-				lndx = (gain_g * (*fdat_g - flr_g));
-				if (lndx < 0)
-					lndx = 0;
-				if (lndx > LUT_SIZE - 1)
-					lndx = LUT_SIZE - 1;
-				pix_g = channel->lut[lndx] >> 8;
-				fdat_g ++;
-
-				lndx = (gain_b * (*fdat_b - flr_b));
-				if (lndx < 0)
-					lndx = 0;
-				if (lndx > LUT_SIZE - 1)
-					lndx = LUT_SIZE - 1;
-				pix_b = channel->lut[lndx] >> 8;
-				fdat_b ++;
-
-				for (z = 0; z < zoom; z++) {
-					*cdat++ = pix_r;
-					*cdat++ = pix_g;
-					*cdat++ = pix_b;
-				}
-			}
-			fdat_r += fjump;
-			fdat_g += fjump;
-			fdat_b += fjump;
-			cdat += cjump;
-			for (z = 0; z < zoom - 1; z++) {
-				memcpy(cdat, cdat - cache->w*3, cache->w*3);
-				cdat += cache->w*3;
-			}
+		fdat_r += fjump;
+		fdat_g += fjump;
+		fdat_b += fjump;
+		cdat += cjump;
+		for (z = 0; z < zoom - 1; z++) {
+			memcpy(cdat, cdat - cache->w*3, cache->w*3);
+			cdat += cache->w*3;
 		}
 	}
 	cache->cache_valid = 1;
@@ -413,97 +368,51 @@ static void cache_render_rgb_float_zo(struct map_cache *cache, struct image_chan
 	fjump = fr->w - fw + (zoom - 1) * fr->w;
 	fj2 = fr->w - zoom; /* jump from last pixel in zoom row to first one in the next row */
 
-	if (channel->lut_mode == LUT_MODE_DIRECT) {
-		for (y = 0; y < cache->h; y++) {
-			for (x = 0; x < cache->w; x++) {
-				pixf_r = pixf_g = pixf_b = 0.0;
+	for (y = 0; y < cache->h; y++) {
+		for (x = 0; x < cache->w; x++) {
+			pixf_r = pixf_g = pixf_b = 0.0;
 
-				fd0_r = fdat_r;
-				fd0_g = fdat_g;
-				fd0_b = fdat_b;
+			fd0_r = fdat_r;
+			fd0_g = fdat_g;
+			fd0_b = fdat_b;
 
-				for (yy = 0; yy < zoom; yy++) {
-					for (xx = 0; xx < zoom; xx++) {
-						pixf_r += *fdat_r++;
-						pixf_g += *fdat_g++;
-						pixf_b += *fdat_b++;
-					}
-
-					fdat_r += fj2;
-					fdat_g += fj2;
-					fdat_b += fj2;
+			for (yy = 0; yy < zoom; yy++) {
+				for (xx = 0; xx < zoom; xx++) {
+					pixf_r += *fdat_r++;
+					pixf_g += *fdat_g++;
+					pixf_b += *fdat_b++;
 				}
 
-				fdat_r = fd0_r + zoom;
-				fdat_g = fd0_g + zoom;
-				fdat_b = fd0_b + zoom;
-
-				lndx = floor(pixf_r * avgf);
-				clamp_int(&lndx, 0, LUT_SIZE - 1);
-				pix = channel->lut[lndx] >> 8;
-				*cdat++ = pix;
-
-				lndx = floor(pixf_g * avgf);
-				clamp_int(&lndx, 0, LUT_SIZE - 1);
-				pix = channel->lut[lndx] >> 8;
-				*cdat++ = pix;
-
-				lndx = floor(pixf_b * avgf);
-				clamp_int(&lndx, 0, LUT_SIZE - 1);
-				pix = channel->lut[lndx] >> 8;
-				*cdat++ = pix;
+				fdat_r += fj2;
+				fdat_g += fj2;
+				fdat_b += fj2;
 			}
 
-			fdat_r += fjump;
-			fdat_g += fjump;
-			fdat_b += fjump;
+			fdat_r = fd0_r + zoom;
+			fdat_g = fd0_g + zoom;
+			fdat_b = fd0_b + zoom;
+
+			lndx = floor(gain_r * (pixf_r * avgf - flr_r));
+			clamp_int(&lndx, 0, LUT_SIZE - 1);
+			pix = channel->lut[lndx] >> 8;
+			*cdat++ = pix;
+
+			lndx = floor(gain_g * (pixf_g * avgf - flr_g));
+			clamp_int(&lndx, 0, LUT_SIZE - 1);
+			pix = channel->lut[lndx] >> 8;
+			*cdat++ = pix;
+
+			lndx = floor(gain_b * (pixf_b * avgf - flr_b));
+			clamp_int(&lndx, 0, LUT_SIZE - 1);
+			pix = channel->lut[lndx] >> 8;
+			*cdat++ = pix;
+
 		}
-	} else {
-		for (y = 0; y < cache->h; y++) {
-			for (x = 0; x < cache->w; x++) {
-				pixf_r = pixf_g = pixf_b = 0.0;
-
-				fd0_r = fdat_r;
-				fd0_g = fdat_g;
-				fd0_b = fdat_b;
-
-				for (yy = 0; yy < zoom; yy++) {
-					for (xx = 0; xx < zoom; xx++) {
-						pixf_r += *fdat_r++;
-						pixf_g += *fdat_g++;
-						pixf_b += *fdat_b++;
-					}
-
-					fdat_r += fj2;
-					fdat_g += fj2;
-					fdat_b += fj2;
-				}
-
-				fdat_r = fd0_r + zoom;
-				fdat_g = fd0_g + zoom;
-				fdat_b = fd0_b + zoom;
-
-				lndx = floor(gain_r * (pixf_r * avgf - flr_r));
-				clamp_int(&lndx, 0, LUT_SIZE - 1);
-				pix = channel->lut[lndx] >> 8;
-				*cdat++ = pix;
-
-				lndx = floor(gain_g * (pixf_g * avgf - flr_g));
-				clamp_int(&lndx, 0, LUT_SIZE - 1);
-				pix = channel->lut[lndx] >> 8;
-				*cdat++ = pix;
-
-				lndx = floor(gain_b * (pixf_b * avgf - flr_b));
-				clamp_int(&lndx, 0, LUT_SIZE - 1);
-				pix = channel->lut[lndx] >> 8;
-				*cdat++ = pix;
-
-			}
-			fdat_r += fjump;
-			fdat_g += fjump;
-			fdat_b += fjump;
-		}
+		fdat_r += fjump;
+		fdat_g += fjump;
+		fdat_b += fjump;
 	}
+
 	cache->cache_valid = 1;
 }
 
@@ -538,47 +447,26 @@ static void cache_render_float_zi(struct map_cache *cache, struct image_channel 
 
 	fdat = (float *)fr->dat + fx + fy * fr->w;
 
-	if (channel->lut_mode == LUT_MODE_DIRECT) {
-		for (y = 0; y < fh; y++) {
-			for (x = 0; x < fw; x++) {
-				lndx = (*fdat);
-				if (lndx < 0)
-					lndx = 0;
-				if (lndx > LUT_SIZE - 1)
-					lndx = LUT_SIZE - 1;
-				pix = channel->lut[lndx] >> 8;
-				fdat ++;
-				for (z = 0; z < zoom; z++)
-					*cdat++ = pix;
-			}
-			fdat += fjump;
-			cdat += cjump;
-			for (z = 0; z < zoom - 1; z++) {
-				memcpy(cdat, cdat - cache->w, cache->w);
-				cdat += cache->w;
-			}
+	for (y = 0; y < fh; y++) {
+		for (x = 0; x < fw; x++) {
+			lndx = (gain * (*fdat-flr));
+			if (lndx < 0)
+				lndx = 0;
+			if (lndx > LUT_SIZE - 1)
+				lndx = LUT_SIZE - 1;
+			pix = channel->lut[lndx] >> 8;
+			fdat ++;
+			for (z = 0; z < zoom; z++)
+				*cdat++ = pix;
 		}
-	} else {
-		for (y = 0; y < fh; y++) {
-			for (x = 0; x < fw; x++) {
-				lndx = (gain * (*fdat-flr));
-				if (lndx < 0)
-					lndx = 0;
-				if (lndx > LUT_SIZE - 1)
-					lndx = LUT_SIZE - 1;
-				pix = channel->lut[lndx] >> 8;
-				fdat ++;
-				for (z = 0; z < zoom; z++)
-					*cdat++ = pix;
-			}
-			fdat += fjump;
-			cdat += cjump;
-			for (z = 0; z < zoom - 1; z++) {
-				memcpy(cdat, cdat - cache->w, cache->w);
-				cdat += cache->w;
-			}
+		fdat += fjump;
+		cdat += cjump;
+		for (z = 0; z < zoom - 1; z++) {
+			memcpy(cdat, cdat - cache->w, cache->w);
+			cdat += cache->w;
 		}
 	}
+
 	cache->cache_valid = 1;
 //	d3_printf("end of render\n");
 }
@@ -622,122 +510,29 @@ static void cache_render_float_zo(struct map_cache *cache, struct image_channel 
 //	d3_printf("zoom %d, fjump:%d, fj2:%d, fj3:%d\n", zoom, fjump, fj2, fj3);
 
 
-	if (channel->lut_mode == LUT_MODE_DIRECT) {
-		for (y = 0; y < cache->h; y++) {
-			for (x = 0; x < cache->w; x++) {
-				pixf = 0;
-				fd0 = fdat;
-				for (yy = 0; yy < zoom; yy++) {
-					for (xx = 0; xx < zoom; xx++)
-						pixf += *fdat++;
-					fdat += fj2;
-				}
-				fdat = fd0 + zoom;
-				lndx = floor(pixf * avgf);
-				if (lndx < 0)
-					lndx = 0;
-				if (lndx > LUT_SIZE - 1)
-					lndx = LUT_SIZE - 1;
-				pix = channel->lut[lndx] >> 8;
-				*cdat++ = pix;
+	for (y = 0; y < cache->h; y++) {
+		for (x = 0; x < cache->w; x++) {
+			pixf = 0;
+			fd0 = fdat;
+			for (yy = 0; yy < zoom; yy++) {
+				for (xx = 0; xx < zoom; xx++)
+					pixf += *fdat++;
+				fdat += fj2;
 			}
-			fdat += fjump;
+			fdat = fd0 + zoom;
+			lndx = floor(gain * (pixf * avgf - flr));
+			if (lndx < 0)
+				lndx = 0;
+			if (lndx > LUT_SIZE - 1)
+				lndx = LUT_SIZE - 1;
+			pix = channel->lut[lndx] >> 8;
+			*cdat++ = pix;
 		}
-	} else {
-		for (y = 0; y < cache->h; y++) {
-			for (x = 0; x < cache->w; x++) {
-				pixf = 0;
-				fd0 = fdat;
-				for (yy = 0; yy < zoom; yy++) {
-					for (xx = 0; xx < zoom; xx++)
-						pixf += *fdat++;
-					fdat += fj2;
-				}
-				fdat = fd0 + zoom;
-				lndx = floor(gain * (pixf * avgf - flr));
-				if (lndx < 0)
-					lndx = 0;
-				if (lndx > LUT_SIZE - 1)
-					lndx = LUT_SIZE - 1;
-				pix = channel->lut[lndx] >> 8;
-				*cdat++ = pix;
-			}
- 			fdat += fjump;
-		}
+		fdat += fjump;
 	}
 	cache->cache_valid = 1;
 }
 
-/* render a byte frame to the cache at zoom >= 1*/
-static void cache_render_byte_zi(struct map_cache *cache, struct image_channel *channel,
-			  int zoom, int fx, int fy, int fw, int fh)
-{
-	struct ccd_frame *fr = channel->fr;
-	int fjump = fr->w - fw;
-	int cjump;
-	int x, y, z;
-	unsigned char *fdat;
-	int lndx;
-	int div = floor((channel->hcut - channel->lcut));
-	int flr = floor(channel->lcut);
-	unsigned char *cdat = cache->dat;
-	unsigned char pix;
-
-
-	cache->x = fx * zoom;
-	cache->y = fy * zoom;
-
-	cache->w = fw * zoom;
-	cache->h = fh * zoom;
-
-	cjump = cache->w - fw*zoom;
-
-	fdat = (unsigned char *)fr->dat + fx + fy * fr->w;
-
-	if (channel->lut_mode == LUT_MODE_DIRECT) {
-		for (y = 0; y < fh; y++) {
-			for (x = 0; x < fw; x++) {
-				pix = channel->lut[*fdat] >> 8;
-				fdat ++;
-				for (z = 0; z < zoom; z++)
-					*cdat++ = pix;
-			}
-			fdat += fjump;
-			cdat += cjump;
-			for (z = 0; z < zoom - 1; z++) {
-				memcpy(cdat, cdat - cache->w, cache->w);
-				cdat += cache->w;
-			}
-		}
-	} else {
-		for (y = 0; y < fh; y++) {
-			for (x = 0; x < fw; x++) {
-				lndx = LUT_SIZE * (*fdat-flr) / div;
-				if (lndx < 0)
-					lndx = 0;
-				if (lndx > LUT_SIZE - 1)
-					lndx = LUT_SIZE - 1;
-				pix = channel->lut[lndx] >> 8;
-				fdat ++;
-				for (z = 0; z < zoom; z++)
-					*cdat++ = pix;
-			}
-			fdat += fjump;
-			cdat += cjump;
-			for (z = 0; z < zoom - 1; z++) {
-				memcpy(cdat, cdat - cache->w, cache->w);
-				cdat += cache->w;
-			}
-		}
-	}
-	cache->cache_valid = 1;
-}
-
-static void cache_render_byte_zo(struct map_cache *cache, struct image_channel *channel,
-			  int zoom, int fx, int fy, int fw, int fh)
-{
-	err_printf("byte zo:not yet\n");
-}
 
 /*
  * compute the size a cache needs to be so that the give area can fit
@@ -809,33 +604,10 @@ static void update_cache(struct map_cache *cache,
 //	d3_printf("frame region: %d by %d at %d, %d\n", fw, fh, fx, fy);
 /* and now to the actual cache rendering. We call different
    functions for each frame format / zoom mode combination */
-	switch (fr->pix_format) {
-	case PIX_FLOAT :
-		if (zoom_out > 1)
-			cache_render_float_zo(cache, channel, zoom_out, fx, fy, fw, fh);
-		else
-			cache_render_float_zi(cache, channel, zoom_in, fx, fy, fw, fh);
-		break;
-	case PIX_BYTE :
-		if (zoom_out > 1)
-			cache_render_byte_zo(cache, channel, zoom_out, fx, fy, fw, fh);
-		else
-			cache_render_byte_zi(cache, channel, zoom_in, fx, fy, fw, fh);
-		break;
-#ifdef LITTLE_ENDIAN
-	case PIX_16LE :
-#else
-	case PIX_16BE :
-#endif
-	case PIX_SHORT :
-#ifndef LITTLE_ENDIAN
-	case PIX_16LE :
-#else
-	case PIX_16BE :
-#endif
-	default:
-		err_printf("update cache: unsupported frame format %d\n", fr->pix_format);
-	}
+	if (zoom_out > 1)
+		cache_render_float_zo(cache, channel, zoom_out, fx, fy, fw, fh);
+	else
+		cache_render_float_zi(cache, channel, zoom_in, fx, fy, fw, fh);
 //	d3_printf("cache area is %d by %d starting at %d, %d\n",
 //		  cache->w, cache->h, cache->x, cache->y);
 }
@@ -1083,7 +855,6 @@ int frame_to_channel(struct ccd_frame *fr, GtkWidget *window, char *chname)
 	}
 	gtk_window_set_title (GTK_WINDOW (window), fr->name);
 	remove_stars(window, TYPE_MASK_FRSTAR, 0);
-//	redraw_cat_stars(window);
 
 	stats_cb(window, 0);
 	show_zoom_cuts(window);
@@ -1105,75 +876,17 @@ static void float_chan_to_pnm(struct image_channel *channel, FILE *pnmf, int is_
 	fdat = (float *)fr->dat;
 	all = fr->w * fr->h;
 
-	if (channel->lut_mode == LUT_MODE_DIRECT) {
-		for (i=0; i<all; i++) {
-			lndx = (*fdat);
-			if (lndx < 0)
-				lndx = 0;
-			if (lndx > LUT_SIZE - 1)
-				lndx = LUT_SIZE - 1;
-			pix = channel->lut[lndx];
-			putc(pix >> 8, pnmf);
-			if (is_16bit)
-				putc(pix & 0xff, pnmf);
-			fdat ++;
-		}
-	} else {
-		for (i=0; i<all; i++) {
-			lndx = (gain * (*fdat-flr));
-			if (lndx < 0)
-				lndx = 0;
-			if (lndx > LUT_SIZE - 1)
-				lndx = LUT_SIZE - 1;
-			pix = channel->lut[lndx];
-			fdat ++;
-			putc(pix >> 8, pnmf);
-			if (is_16bit)
-				putc(pix & 0xff, pnmf);
-		}
-	}
-}
-
-/* write the (byte) image as a pnm file */
-static void byte_chan_to_pnm(struct image_channel *channel, FILE *pnmf, int is_16bit)
-{
-	struct ccd_frame *fr = channel->fr;
-	int i;
-	unsigned char *fdat;
-	unsigned short pix;
-	int lndx, all;
-	float gain = LUT_SIZE / (channel->hcut - channel->lcut);
-	float flr = channel->lcut;
-
-	fdat = (unsigned char *)fr->dat;
-	all = fr->w * fr->h;
-
-	if (channel->lut_mode == LUT_MODE_DIRECT) {
-		for (i=0; i<all; i++) {
-			lndx = (*fdat);
-			if (lndx < 0)
-				lndx = 0;
-			if (lndx > LUT_SIZE - 1)
-				lndx = LUT_SIZE - 1;
-			pix = channel->lut[lndx];
-			putc(pix >> 8, pnmf);
-			if (is_16bit)
-				putc(pix & 0xff, pnmf);
-			fdat ++;
-		}
-	} else {
-		for (i=0; i<all; i++) {
-			lndx = (gain * (*fdat-flr));
-			if (lndx < 0)
-				lndx = 0;
-			if (lndx > LUT_SIZE - 1)
-				lndx = LUT_SIZE - 1;
-			pix = channel->lut[lndx];
-			fdat ++;
-			putc(pix >> 8, pnmf);
-			if (is_16bit)
-				putc(pix & 0xff, pnmf);
-		}
+	for (i=0; i<all; i++) {
+		lndx = (gain * (*fdat-flr));
+		if (lndx < 0)
+			lndx = 0;
+		if (lndx > LUT_SIZE - 1)
+			lndx = LUT_SIZE - 1;
+		pix = channel->lut[lndx];
+		fdat ++;
+		putc(pix >> 8, pnmf);
+		if (is_16bit)
+			putc(pix & 0xff, pnmf);
 	}
 }
 
@@ -1207,29 +920,9 @@ int channel_to_pnm_file(struct image_channel *channel, GtkWidget *window, char *
 
 	fprintf(pnmf, "P5 %d %d %d\n", channel->fr->w, channel->fr->h, is_16bit ? 65535 : 255);
 
-	switch (channel->fr->pix_format) {
-	case PIX_FLOAT :
-		float_chan_to_pnm(channel, pnmf, is_16bit);
-		break;
-	case PIX_BYTE :
-		byte_chan_to_pnm(channel, pnmf, is_16bit);
-		break;
-#ifdef LITTLE_ENDIAN
-	case PIX_16LE :
-#else
-	case PIX_16BE :
-#endif
-	case PIX_SHORT :
-#ifndef LITTLE_ENDIAN
-	case PIX_16LE :
-#else
-	case PIX_16BE :
-#endif
-	default:
-		err_printf("channel_to_pnm_file: unsupported frame format %d\n",
-			   channel->fr->pix_format);
-		ret = 1;
-	}
+
+	float_chan_to_pnm(channel, pnmf, is_16bit);
+
 	if (pnmf != stdout)
 		fclose(pnmf);
 

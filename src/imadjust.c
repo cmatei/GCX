@@ -724,11 +724,6 @@ void show_zoom_cuts(GtkWidget * window)
 	imadj_dialog_update(dialog);
 }
 
-/* set a channel's lut from cuts, gamma and toe */
-void channel_set_direct_lut(struct image_channel *channel)
-{
-}
-
 #define T_START_GAMMA 0.2
 
 /* set a channel's lut from the gamma and toe */
@@ -736,10 +731,7 @@ void channel_set_lut_from_gamma(struct image_channel *channel)
 {
 	double x, y;
 	int i;
-	if (channel->lut_mode == LUT_MODE_DIRECT) {
-		channel_set_direct_lut(channel);
-		return;
-	}
+
 	d3_printf("set lut from gamma\n");
 	for (i=0; i<LUT_SIZE; i++) {
 		double x0, x1, g;
@@ -1588,4 +1580,3 @@ GtkWidget* create_imadj_dialog (void)
 
   return imadj_dialog;
 }
-
