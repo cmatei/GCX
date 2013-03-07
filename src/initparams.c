@@ -388,10 +388,6 @@ void init_ptable(void)
 		       "Fits field for horisontal binning", "CCDBIN1");
 	add_par_string(FN_BINY, PAR_FITS_FIELDS, 0, "biny",
 		       "Fits field for vertical binning", "CCDBIN2");
-	add_par_string(FN_SKIPX, PAR_FITS_FIELDS, 0, "skipx",
-		       "Fits field for horisontal window origin", "CCDSKIP1");
-	add_par_string(FN_SKIPY, PAR_FITS_FIELDS, 0, "skipy",
-		       "Fits field for vertical window origin", "CCDSKIP2");
 	add_par_string(FN_ELADU, PAR_FITS_FIELDS, 0, "eladu",
 		       "Fits field for electrons per ADU", "ELADU");
 	add_par_string(FN_DCBIAS, PAR_FITS_FIELDS, 0, "dcbias",

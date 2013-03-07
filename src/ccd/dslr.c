@@ -1063,9 +1063,9 @@ static struct ccd_frame *read_mrw_file(struct raw_file *raw)
 
 	strncpy(frame->name, raw->filename, 255);
 
+#if 0
 	if (endian_to_host_16(byteorder, mrw->prd->ccd_size_x) >
 	    endian_to_host_16(byteorder, mrw->prd->img_size_x)) {
-
 		frame->x_skip = (endian_to_host_16(byteorder, mrw->prd->ccd_size_x) -
 				 endian_to_host_16(byteorder, mrw->prd->img_size_x)) / 2;
 
@@ -1082,6 +1082,7 @@ static struct ccd_frame *read_mrw_file(struct raw_file *raw)
 		snprintf(strbuf, 64, "%d", frame->y_skip);
 		fits_add_keyword(frame, "CCDSKIP2", strbuf);
 	}
+#endif
 
 	if (raw->date_obs)
 		fits_add_keyword(frame, "DATE-OBS", raw->date_obs);

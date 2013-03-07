@@ -229,8 +229,6 @@ typedef enum {
 	FN_APERTURE ,
 	FN_BINX ,
 	FN_BINY ,
-	FN_SKIPX ,
-	FN_SKIPY ,
 	FN_ELADU ,
 	FN_DCBIAS ,
 	FN_RDNOISE ,

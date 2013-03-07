@@ -65,9 +65,6 @@ struct point {		// a point in a frame or window
 struct ccd_geometry {
 	unsigned w; /* total size of the frame */
 	unsigned h;
-	int x_skip; /* number of pixels skipped at the beginning of each line
-		     * (ref: first active pixel) */
-	int y_skip; /* number of lines skipped at the beginning of each frame */
 };
 
 // structure describing a ccd exposure
@@ -173,8 +170,6 @@ struct bad_pixel {
 struct bad_pix_map {
 	int ref_count;
 	char *filename;         // filename of this map, if any
-	unsigned int x_skip;	// from frame geometry when the map was created
-	unsigned int y_skip;
 	unsigned int bin_x;
 	unsigned int bin_y;
 	unsigned int pixels;	// number of pixels in structure
@@ -224,9 +219,7 @@ struct ccd_frame {
 /*   deallocates the frame. The frame is created with ref_count=1 */
 	int w;		// width of frame in pixels
 	int h;		// height of frame in pixels
-	int x_skip; 	// number of pixels skipped at the beginning of each line
-			// (ref: first active pixel)
-	int y_skip; 	// number of lines skipped at the beginning of each frame
+
 	unsigned magic; // an unique number identifying the frame (science, dark, flatfield etc)
 
 	struct region trimsec;  /* actual image area, defaults to all image */

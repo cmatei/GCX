@@ -468,10 +468,6 @@ void rescan_fits_exp(struct ccd_frame *fr, struct exp_data *exp)
 		d1_printf("using dcbias=%.1f from %s\n", exp->bias, P_STR(FN_DCBIAS));
 	}
 //	fits_get_double(fr, P_STR(FN_AIRMASS), &exp->airmass);
-	if (fits_get_int(fr, P_STR(FN_SKIPX), &fr->x_skip) <= 0)
-		fr->x_skip = 0;
-	if (fits_get_int(fr, P_STR(FN_SKIPY), &fr->y_skip) <= 0)
-		fr->y_skip = 0;
 	if (np < 2) {
 		info_printf("Warning: using default values for noise model\n");
 	}

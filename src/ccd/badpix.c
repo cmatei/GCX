@@ -121,8 +121,6 @@ int find_bad_pixels(struct bad_pix_map *map, struct ccd_frame *fr, double sig)
 	}
 
 error:
-	map->x_skip = fr->x_skip;
-	map->y_skip = fr->y_skip;
 	map->bin_x = fr->exp.bin_x;
 	map->bin_y = fr->exp.bin_y;
 
@@ -153,8 +151,6 @@ int save_bad_pix(struct bad_pix_map *map)
 	}
 
 	fprintf(fp, "pixels %d\n", map->pixels);
-	fprintf(fp, "x_skip %d\n", map->x_skip);
-	fprintf(fp, "y_skip %d\n", map->y_skip);
 	fprintf(fp, "bin_x %d\n", map->bin_x);
 	fprintf(fp, "bin_y %d\n", map->bin_y);
 	for (i=0; i<map->pixels; i++)
@@ -188,12 +184,6 @@ int load_bad_pix(struct bad_pix_map *map)
 		free(map->pix);
 
 	ret = fscanf(fp, "pixels %d", &pixels);
-	if (ret != 1)
-		goto bad_format;
-	ret = fscanf(fp, " x_skip %d", &map->x_skip);
-	if (ret != 1)
-		goto bad_format;
-	ret = fscanf(fp, " y_skip %d", &map->y_skip);
 	if (ret != 1)
 		goto bad_format;
 	ret = fscanf(fp, " bin_x %d", &map->bin_x);
@@ -520,13 +510,8 @@ int fix_bad_pixels (struct ccd_frame *fr, struct bad_pix_map *map)
 	} else {
 		/* regular BW image */
 		for (i = 0; i < map->pixels; i++) {
-			if (fr->exp.bin_y != 0 && fr->exp.bin_x != 0) {
-				frx = map->pix[i].x - fr->x_skip / fr->exp.bin_x;
-				fry = map->pix[i].y - fr->y_skip / fr->exp.bin_y;
-			} else {
-				frx = map->pix[i].x;
-				fry = map->pix[i].y;
-			}
+			frx = map->pix[i].x;
+			fry = map->pix[i].y;
 
 			if (frx > 1 && frx < fr->w - 2 && fry > 1 && fry < fr->h - 2) {
 				bn = bad_neighbours(map, i,  fr->exp.bin_x, fr->exp.bin_y);
@@ -550,4 +535,3 @@ int free_bad_pix(struct bad_pix_map *map)
 	free(map);
 	return 0;
 }
-

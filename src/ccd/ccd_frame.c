@@ -22,8 +22,6 @@
 *******************************************************************************/
 
 /*  ccd_frame.c: frame operation functions */
-/*  $Revision: 1.49 $ */
-/*  $Date: 2011/12/03 21:48:07 $ */
 
 #define _GNU_SOURCE
 
@@ -66,8 +64,7 @@ struct ccd_frame *clone_frame(struct ccd_frame *fr)
 	new = new_frame_fr(fr, 0, 0);
 	if (new == NULL)
 		return NULL;
-// now copy the data
-//	d3_printf("nffr\n");
+
 	all = new->w * new->h;
 	while ((plane_iter = color_plane_iter(fr, plane_iter))) {
 		dpi = get_color_plane(fr, plane_iter);
@@ -91,7 +88,6 @@ struct ccd_frame *new_frame_fr(struct ccd_frame* fr, unsigned size_x, unsigned s
 	new = new_frame_head_fr(fr, size_x, size_y);
 	if (new == NULL)
 		return NULL;
-	d3_printf("nfrhfr\n");
 
 	data = malloc(new->w * new->h * PIXEL_SIZE);
 	if (data == NULL) {
@@ -443,10 +439,8 @@ static int fits_filename(char *fn, int fnl)
 		return 0;
 	if (strcasecmp(fn + len - 4, ".fts") == 0)
 		return 0;
-	if (strcasecmp(fn + len - 3, ".gz") == 0) {
-//		d3_printf("we are a gzzzzzz\n");
+	if (strcasecmp(fn + len - 3, ".gz") == 0)
 		return -1;
-	}
 	if (strcasecmp(fn + len - 2, ".z") == 0)
 		return -1;
 	if (strcasecmp(fn + len - 4, ".bz2") == 0)
@@ -766,11 +760,6 @@ static struct ccd_frame *read_fits_file_generic(void *fp, char *fn, int force_un
 //	parse_fits_exp(hd, &hd->exp);
 
 
-	if (fits_get_int(hd, "CCDSKIP1", &hd->x_skip) <= 0)
-		hd->x_skip = 0;
-	if (fits_get_int(hd, "CCDSKIP2", &hd->y_skip) <= 0)
-		hd->y_skip = 0;
-
 	rd->fnclose(fp);
 
 //	d3_printf("C");
@@ -1021,21 +1010,23 @@ int write_gz_fits_frame(struct ccd_frame *fr, char *fn, char *gzcmd)
 
 
 
-// flat_frame divides ff by (fr1 / cavg(fr1) ; the two frames are aligned according to their skips
+// flat_frame divides ff by (fr1 / cavg(fr1)
 // the size of fr is not changed
 
 int flat_frame(struct ccd_frame *fr, struct ccd_frame *fr1)
 {
-	int xovlap, yovlap;
-	int xst, yst;
-	int x1st, y1st;
 	float *dp, *dp1;
 	int x, y;
 	double mu, ll;
 	int plane_iter = 0;
 
 	if (color_plane_iter(fr, 0) != color_plane_iter(fr1, 0)) {
-		err_printf("cannot subtract frames with different number of planes\n");
+		err_printf("cannot flat frames with different number of planes\n");
+		return -1;
+	}
+
+	if ((fr->w != fr1->w) || (fr->h != fr1->h)) {
+		err_printf("cannot flat frames of unequal sizes\n");
 		return -1;
 	}
 
@@ -1058,40 +1049,13 @@ int flat_frame(struct ccd_frame *fr, struct ccd_frame *fr1)
 
 	ll = mu / MAX_FLAT_GAIN;
 
-	xst = fr1->x_skip - fr->x_skip;
-	if (fr1->x_skip + fr1->w >= fr->w + fr->x_skip)
-		xovlap = fr->x_skip + fr->w - fr1->x_skip;
-	else
-		xovlap = fr1->x_skip + fr1->w - fr->x_skip;
-	if (xst < 0) {
-		x1st = -xst;
-		xst = 0;
-	} else
-		x1st = 0;
-
-	yst = fr1->y_skip - fr->y_skip;
-	if (fr1->y_skip + fr1->h >= fr->h + fr->y_skip)
-		yovlap = fr->y_skip + fr->h - fr1->y_skip;
-	else
-		yovlap = fr1->y_skip + fr1->h - fr->y_skip;
-	if (yst < 0) {
-		y1st = -yst;
-		yst = 0;
-	} else
-		y1st = 0;
-
-//	d3_printf("xst %d x1st %d yst %d x1st %d xovlap %d yovlap %d",
-//		  xst, x1st, yst, y1st, xovlap, yovlap);
-
 	while ((plane_iter = color_plane_iter(fr, plane_iter))) {
 		dp = get_color_plane(fr, plane_iter);
 		dp1 = get_color_plane(fr1, plane_iter);
-		dp +=  xst + yst * fr->w;
-		dp1 += x1st + y1st * fr1->w;
 
 		if (fr->rmeta.color_matrix) {
-			for (y = 0; y < yovlap; y++) {
-				for (x = 0; x < xovlap; x++) {
+			for (y = 0; y < fr->h; y++) {
+				for (x = 0; x < fr->w; x++) {
 
 					ll = fr1->stats.avgs[y % 2 * 2 + x % 2];
 					ll /= MAX_FLAT_GAIN;
@@ -1104,26 +1068,21 @@ int flat_frame(struct ccd_frame *fr, struct ccd_frame *fr1)
 					dp ++;
 					dp1 ++;
 				}
-				dp += fr->w - xovlap;
-				dp1 += fr1->w - xovlap;
+				dp += fr->w;
+				dp1 += fr->w;
 			}
 		} else {
-			for (y = 0; y < yovlap; y++) {
-				for (x = 0; x < xovlap; x++) {
-#if 1
+			for (y = 0; y < fr->h; y++) {
+				for (x = 0; x < fr->w; x++) {
 					if (*dp1 > ll)
 						*dp = *dp / *dp1 * mu;
 					else
 						*dp = *dp * MAX_FLAT_GAIN;
-#else
-					*dp = *dp / *dp1;
-#endif
-
 					dp ++;
 					dp1 ++;
 				}
-				dp += fr->w - xovlap;
-				dp1 += fr1->w - xovlap;
+				dp += fr->w;
+				dp1 += fr->w;
 			}
 
 		}
@@ -1137,57 +1096,32 @@ int flat_frame(struct ccd_frame *fr, struct ccd_frame *fr1)
 }
 
 
-// add_frames adds fr1 to fr; the two frames are aligned according to their skips
+// add_frames adds fr1 to fr
 // the size of fr is not changed
 
 int add_frames (struct ccd_frame *fr, struct ccd_frame *fr1)
 {
-	int xovlap, yovlap;
-	int xst, yst;
-	int x1st, y1st;
 	float *dp, *dp1;
 	int x, y;
 	int plane_iter = 0;
 
-	xst = fr1->x_skip - fr->x_skip;
-	if (fr1->x_skip + fr1->w >= fr->w + fr->x_skip)
-		xovlap = fr->x_skip + fr->w - fr1->x_skip;
-	else
-		xovlap = fr1->x_skip + fr1->w - fr->x_skip;
-	if (xst < 0) {
-		x1st = -xst;
-		xst = 0;
-	} else
-		x1st = 0;
-
-	yst = fr1->y_skip - fr->y_skip;
-	if (fr1->y_skip + fr1->h >= fr->h + fr->y_skip)
-		yovlap = fr->y_skip + fr->h - fr1->y_skip;
-	else
-		yovlap = fr1->y_skip + fr1->h - fr->y_skip;
-	if (yst < 0) {
-		y1st = -yst;
-		yst = 0;
-	} else
-		y1st = 0;
-
-//	d3_printf("xst %d x1st %d yst %d x1st %d xovlap %d yovlap %d",
-//		  xst, x1st, yst, y1st, xovlap, yovlap);
+	if ((fr->w != fr1->w) || (fr->h != fr1->h)) {
+		err_printf("cannot add frames of unequal sizes\n");
+		return -1;
+	}
 
 	while ((plane_iter = color_plane_iter(fr, plane_iter))) {
 		dp = get_color_plane(fr, plane_iter);
 		dp1 = get_color_plane(fr1, plane_iter);
-	        dp += xst + yst * fr->w;
-        	dp1 += x1st + y1st * fr1->w;
 
-		for (y = 0; y < yovlap; y++) {
-			for (x = 0; x < xovlap; x++) {
+		for (y = 0; y < fr->h; y++) {
+			for (x = 0; x < fr->w; x++) {
 				*dp = *dp + *dp1;
 				dp ++;
 				dp1 ++;
 			}
-			dp += fr->w - xovlap;
-			dp1 += fr1->w - xovlap;
+			dp += fr->w;
+			dp1 += fr->w;
 		}
 	}
 // fit noise data
@@ -1233,14 +1167,11 @@ int overscan_correction(struct ccd_frame *fr, double pedestal, int x, int y, int
 	return 0;
 }
 
-// sub_frames substracts fr1 from fr; the two frames are aligned according to their skips
+// sub_frames substracts fr1 from fr
 // the size of fr is not changed; fr1 is assumed to be a dark frame
 
 int sub_frames (struct ccd_frame *fr, struct ccd_frame *fr1)
 {
-	int xovlap, yovlap;
-	int xst, yst;
-	int x1st, y1st;
 	float *dp, *dp1;
 	int x, y;
 	int plane_iter = 0;
@@ -1250,47 +1181,23 @@ int sub_frames (struct ccd_frame *fr, struct ccd_frame *fr1)
 		return -1;
 	}
 
-//	d3_printf("read noise is: %.1f %.1f\n", fr1->exp.rdnoise, fr->exp.rdnoise);
-
-	xst = fr1->x_skip - fr->x_skip;
-	if (fr1->x_skip + fr1->w >= fr->w + fr->x_skip)
-		xovlap = fr->x_skip + fr->w - fr1->x_skip;
-	else
-		xovlap = fr1->x_skip + fr1->w - fr->x_skip;
-	if (xst < 0) {
-		x1st = -xst;
-		xst = 0;
-	} else
-		x1st = 0;
-
-	yst = fr1->y_skip - fr->y_skip;
-	if (fr1->y_skip + fr1->h >= fr->h + fr->y_skip)
-		yovlap = fr->y_skip + fr->h - fr1->y_skip;
-	else
-		yovlap = fr1->y_skip + fr1->h - fr->y_skip;
-	if (yst < 0) {
-		y1st = -yst;
-		yst = 0;
-	} else
-		y1st = 0;
-
-//	d3_printf("xst %d x1st %d yst %d x1st %d xovlap %d yovlap %d",
-//		  xst, x1st, yst, y1st, xovlap, yovlap);
+	if ((fr->w != fr1->w) || (fr->h != fr1->h)) {
+		err_printf("cannot subtract frames of unequal sizes\n");
+		return -1;
+	}
 
 	while ((plane_iter = color_plane_iter(fr, plane_iter))) {
 		dp = get_color_plane(fr, plane_iter);
 		dp1 = get_color_plane(fr1, plane_iter);
-	        dp += xst + yst * fr->w;
-        	dp1 += x1st + y1st * fr1->w;
 
-		for (y = 0; y < yovlap; y++) {
-			for (x = 0; x < xovlap; x++) {
+		for (y = 0; y < fr->h; y++) {
+			for (x = 0; x < fr->w; x++) {
 				*dp = *dp - *dp1;
 				dp ++;
 				dp1 ++;
 			}
-			dp += fr->w - xovlap;
-			dp1 += fr1->w - xovlap;
+			dp += fr->w;
+			dp1 += fr->w;
 		}
 	}
 
@@ -1301,8 +1208,6 @@ int sub_frames (struct ccd_frame *fr, struct ccd_frame *fr1)
 //	d3_printf("read noise is: %.1f %.1f\n", fr1->exp.rdnoise, fr->exp.rdnoise);
 	return 0;
 }
-
-
 
 
 // make fr <= fr * m + s
@@ -1439,9 +1344,8 @@ int fits_add_history(struct ccd_frame *fr, char *val)
 	return 0;
 }
 
-// crop_frame reduces the size of a frame; the upper-left corner of the frame will
-// added to the current skip. The data area is realloced. Returns non-zero in case of an error.
-
+// crop_frame reduces the size of a frame
+// The data area is realloced. Returns non-zero in case of an error.
 int crop_frame(struct ccd_frame *fr, int x, int y, int w, int h)
 {
 	float *sp, *dp, **dpp;
@@ -1451,7 +1355,7 @@ int crop_frame(struct ccd_frame *fr, int x, int y, int w, int h)
 
 	d4_printf("crop from %d %d size %d %d \n", x, y, w, h);
 
-// check that the subframe is fully contained in the source frame
+	// check that the subframe is fully contained in the source frame
 	if (x < 0 || x + w > fr->w || y < 0 || y + h > fr->h) {
 		err_printf("crop_frame: bad subframe\n");
 		return ERR_FATAL;
@@ -1475,9 +1379,7 @@ int crop_frame(struct ccd_frame *fr, int x, int y, int w, int h)
 		}
  		*dpp = ret;
 	}
-// adjust the frame info
-//	fr->x_skip += x;
-//	fr->y_skip += y;
+	// adjust the frame info
 	fr->w = w;
 	fr->h = h;
 	fr->stats.statsok = 0;
