@@ -23,14 +23,18 @@
 
 /*  tiff.c -- handle TIFF files */
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
 
-#include <tiffio.h>
-
+#include "config.h"
 #include "ccd.h"
+
+#ifdef HAVE_LIBTIFF
+
+#include <tiffio.h>
 
 
 int tiff_filename(char *filename)
@@ -205,11 +209,9 @@ struct ccd_frame *read_tiff_file(char *filename)
 	uint16_t nsamples, config, bpp, fmt, color;
 	tdata_t buf;
 	int ret = 0;
-	int i;
 
 	if ((tif = TIFFOpen(filename, "r")) == NULL)
 		return NULL;
-
 
 	ret += TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &w);
 	ret += TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &h);
@@ -228,6 +230,8 @@ struct ccd_frame *read_tiff_file(char *filename)
 
 	if (nsamples != 1 && nsamples != 3 && nsamples != 4)
 		goto out;
+
+	/* FIXME: should attempt to extract some metadata, like date/time, EXIF data, etc */
 
 	fr = new_frame(w, h);
 	if (nsamples != 1) {
@@ -257,7 +261,6 @@ struct ccd_frame *read_tiff_file(char *filename)
 					goto out_err;
 			}
 		}
-
 	} else
 		goto out_err;
 
@@ -275,3 +278,5 @@ out_err:
 
 	return NULL;
 }
+
+#endif

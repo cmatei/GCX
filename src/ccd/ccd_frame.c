@@ -41,6 +41,7 @@
 #include <netinet/in.h>
 #include <errno.h>
 
+#include "config.h"
 #include "ccd.h"
 #include "dslr.h"
 
@@ -833,11 +834,15 @@ struct ccd_frame *read_image_file(char *filename, char *ungz, int force_unsigned
 	if (raw_filename(filename) <= 0)
 		return read_raw_file(filename);
 
+#ifdef HAVE_LIBTIFF
 	if (tiff_filename(filename) == 0)
 		return read_tiff_file(filename);
+#endif
 
+#ifdef HAVE_LIBJPEG
 	if (jpeg_filename(filename) == 0)
 		return read_jpeg_file(filename);
+#endif
 
 	return read_gz_fits_file(filename, ungz, force_unsigned, default_cfa);
 }
