@@ -214,13 +214,17 @@ struct ccd_frame *read_tiff_file(char *filename)
 	ret += TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &w);
 	ret += TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &h);
 	ret += TIFFGetField(tif, TIFFTAG_SAMPLESPERPIXEL, &nsamples);
-	ret += TIFFGetField(tif, TIFFTAG_SAMPLEFORMAT, &fmt);
 	ret += TIFFGetField(tif, TIFFTAG_PLANARCONFIG, &config);
-	ret += TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE, &bpp);
 
 	/* we understand only the simplest of TIFF files */
-	if (ret != 6)
+	if (ret != 4)
 		goto out;
+
+	fmt = SAMPLEFORMAT_UINT;
+	TIFFGetField(tif, TIFFTAG_SAMPLEFORMAT, &fmt);
+
+	bpp = 16;
+	TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE, &bpp);
 
 	if (nsamples != 1 && nsamples != 3 && nsamples != 4)
 		goto out;
