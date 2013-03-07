@@ -321,85 +321,101 @@ void init_ptable(void)
 
 /* fits fields */
 	add_par_string(FN_CRPIX1, PAR_FITS_FIELDS, 0, "crpix1",
-		       "Fits field for X coordinate of reference pixel", "CRPIX1");
+		       "X coordinate of reference pixel", "CRPIX1");
 	add_par_string(FN_CRPIX2, PAR_FITS_FIELDS, 0, "crpix2",
-		       "Fits field for Y coordinate of reference pixel", "CRPIX2");
+		       "Y coordinate of reference pixel", "CRPIX2");
 	add_par_string(FN_CRVAL1, PAR_FITS_FIELDS, 0, "crval1",
-		       "Fits field for WCS R.A. of reference pixel", "CRVAL1");
+		       "WCS R.A. of reference pixel", "CRVAL1");
 	add_par_string(FN_CRVAL2, PAR_FITS_FIELDS, 0, "crval2",
-		       "Fits field for WCS Dec of reference pixel", "CRVAL2");
+		       "WCS Dec of reference pixel", "CRVAL2");
 	add_par_string(FN_CDELT1, PAR_FITS_FIELDS, 0, "cdelt1",
-		       "Fits field for degrees/pixel in R.A.", "CDELT1");
+		       "Degrees/pixel in R.A.", "CDELT1");
 	add_par_string(FN_CDELT2, PAR_FITS_FIELDS, 0, "cdelt2",
-		       "Fits field for degrees/pixel in dec", "CDELT2");
+		       "Degrees/pixel in Dec", "CDELT2");
 	add_par_string(FN_CROTA1, PAR_FITS_FIELDS, 0, "crota1",
-		       "Fits field for field rotation", "CROTA1");
+		       "Field rotation", "CROTA1");
 	add_par_string(FN_EQUINOX, PAR_FITS_FIELDS, 0, "equinox",
-		       "Fits field for equinox of WCS", "EQUINOX");
+		       "Equinox of WCS", "EQUINOX");
 	add_par_string(FN_EPOCH, PAR_FITS_FIELDS, 0, "epoch",
-		       "Fits field for equinox of WCS", "EPOCH");
+		       "Equinox of WCS", "EPOCH");
 	add_par_string(FN_OBJECT, PAR_FITS_FIELDS, 0, "object",
-		       "Fits field for object name", "OBJECT");
+		       "Object name", "OBJECT");
 	add_par_string(FN_OBJCTRA, PAR_FITS_FIELDS, 0, "objctra",
-		       "Fits field for object R.A.", "OBJCTRA");
+		       "Object R.A.", "OBJCTRA");
 	add_par_string(FN_OBJCTDEC, PAR_FITS_FIELDS, 0, "objctdec",
-		       "Fits field for object dec", "OBJCTDEC");
+		       "Object Dec", "OBJCTDEC");
 	add_par_string(FN_SECPIX, PAR_FITS_FIELDS, 0, "secpix",
-		       "Fits field for image scale", "SECPIX");
+		       "Image scale", "SECPIX");
+	add_par_string(FN_EFP_MIN1, PAR_FITS_FIELDS, 0, "efpmin1",
+		       "First horizontal effective pixel", "EFP-MIN1");
+	add_par_string(FN_EFP_RNG1, PAR_FITS_FIELDS, 0, "efprng1",
+		       "Number of horizontal effective pixels", "EFP-RNG1");
+	add_par_string(FN_EFP_MIN2, PAR_FITS_FIELDS, 0, "efpmin2",
+		       "First vertical effective pixel", "EFP-MIN2");
+	add_par_string(FN_EFP_RNG2, PAR_FITS_FIELDS, 0, "efprng2",
+		       "Number of vertical effective pixels", "EFP-RNG2");
+	add_par_string(FN_OVS_MIN1, PAR_FITS_FIELDS, 0, "ovsmin1",
+		       "First horizontal overscan pixel", "OVS-MIN1");
+	add_par_string(FN_OVS_RNG1, PAR_FITS_FIELDS, 0, "ovsrng1",
+		       "Number of horizontal overscan pixels", "OVS-RNG1");
+	add_par_string(FN_OVS_MIN2, PAR_FITS_FIELDS, 0, "ovsmin2",
+		       "First vertical overscan pixel", "OVS-MIN2");
+	add_par_string(FN_OVS_RNG2, PAR_FITS_FIELDS, 0, "ovsrng2",
+		       "Number of vertical overscan pixels", "OVS-RNG2");
 	add_par_string(FN_RA, PAR_FITS_FIELDS, 0, "ra",
-		       "Fits field for field center", "RA");
+		       "Field center R.A.", "RA");
 	add_par_string(FN_DEC, PAR_FITS_FIELDS, 0, "dec",
-		       "Fits field for field center", "DEC");
+		       "Field center Dec", "DEC");
 	add_par_string(FN_FILTER, PAR_FITS_FIELDS, 0, "filter",
-		       "Fits field for filter name", "FILTER");
+		       "Filter name", "FILTER");
 	add_par_string(FN_EXPTIME, PAR_FITS_FIELDS, 0, "exptime",
-		       "Fits field for exposure time", "EXPTIME");
+		       "Exposure time", "EXPTIME");
 	add_par_string(FN_JDATE, PAR_FITS_FIELDS, 0, "jdate",
-		       "Fits field for julian date of observation", "JDATE");
+		       "Julian date of observation", "JDATE");
 	add_par_string(FN_MJD, PAR_FITS_FIELDS, 0, "mjd",
-		       "Fits field for modified julian date of observation", "MJD");
+		       "Modified julian date of observation", "MJD");
 	add_par_string(FN_DATE_OBS, PAR_FITS_FIELDS, 0, "dateobs",
-		       "Fits field for date/time of observation", "DATE-OBS");
+		       "Date/time of observation", "DATE-OBS");
 	add_par_string(FN_TIME_OBS, PAR_FITS_FIELDS, 0, "timeobs",
-		       "Fits field for time of observation", "TIME-OBS");
+		       "Time of observation", "TIME-OBS");
 	add_par_string(FN_TELESCOP, PAR_FITS_FIELDS, 0, "telescop",
-		       "Fits field for telescope name", "TELESCOP");
+		       "Telescope name", "TELESCOP");
 	add_par_string(FN_FOCUS, PAR_FITS_FIELDS, 0, "focus",
-		       "Fits field for focus designation", "FOCUS");
+		       "Focus designation", "FOCUS");
 	add_par_string(FN_APERTURE, PAR_FITS_FIELDS, 0, "aperture",
-		       "Fits field for telescope aperture", "APERT");
+		       "Telescope aperture", "APERT");
 	add_par_string(FN_FLEN, PAR_FITS_FIELDS, 0, "flen",
-		       "Fits field for focal length", "FLEN");
+		       "Focal length", "FLEN");
 	add_par_string(FN_INSTRUME, PAR_FITS_FIELDS, 0, "instrument",
-		       "Fits field for instrument name", "INSTRUME");
+		       "Instrument name", "INSTRUME");
 	add_par_string(FN_OBSERVER, PAR_FITS_FIELDS, 0, "observer",
-		       "Fits field for observer name", "OBSERVER");
+		       "Observer name", "OBSERVER");
 	add_par_string(FN_LATITUDE, PAR_FITS_FIELDS, 0, "latitude",
-		       "Fits field for latitude of observing site", "LAT-OBS");
+		       "Latitude of observing site", "LAT-OBS");
 	add_par_string(FN_LONGITUDE, PAR_FITS_FIELDS, 0, "longitude",
-		       "Fits field for longitude of observing site", "LONG-OBS");
+		       "Longitude of observing site", "LONG-OBS");
 	add_par_string(FN_ALTITUDE, PAR_FITS_FIELDS, 0, "altitude",
-		       "Fits field for altitude of observing site", "ALT-OBS");
+		       "Altitude of observing site", "ALT-OBS");
 	add_par_string(FN_AIRMASS, PAR_FITS_FIELDS, 0, "airmass",
-		       "Fits field for airmas", "AIRMASS");
+		       "Airmass", "AIRMASS");
 	add_par_string(FN_SNSTEMP, PAR_FITS_FIELDS, 0, "snstemp",
-		       "Fits field for sensor temperature", "SNS_TEMP");
+		       "Sensor temperature", "CCDTEMP");
 	add_par_string(FN_BINX, PAR_FITS_FIELDS, 0, "binx",
-		       "Fits field for horisontal binning", "CCDBIN1");
+		       "Horisontal binning", "CCDBIN1");
 	add_par_string(FN_BINY, PAR_FITS_FIELDS, 0, "biny",
-		       "Fits field for vertical binning", "CCDBIN2");
+		       "Vertical binning", "CCDBIN2");
 	add_par_string(FN_ELADU, PAR_FITS_FIELDS, 0, "eladu",
-		       "Fits field for electrons per ADU", "ELADU");
+		       "Electrons per ADU", "ELADU");
 	add_par_string(FN_DCBIAS, PAR_FITS_FIELDS, 0, "dcbias",
-		       "Fits field for average bias of frame", "DCBIAS");
+		       "Average bias of frame", "DCBIAS");
 	add_par_string(FN_RDNOISE, PAR_FITS_FIELDS, 0, "rdnoise",
-		       "Fits field for readout noise", "RDNOISE");
+		       "Readout noise", "RDNOISE");
 	add_par_string(FN_FLNOISE, PAR_FITS_FIELDS, 0, "flnoise",
-		       "Fits field for multiplicative noise coefficient", "FLNOISE");
+		       "Multiplicative noise coefficient", "FLNOISE");
 	add_par_string(FN_CFA_FMT, PAR_FITS_FIELDS, 0, "cfa_fmt",
-			"Fits field for color-field-array layout", "CFA_FMT");
+		       "Color-field-array layout", "CFA_FMT");
 	add_par_string(FN_WHITEBAL, PAR_FITS_FIELDS, 0, "whitebal",
-			"Fits field for white balance calibration", "WHITEBAL");
+		       "White balance calibration", "WHITEBAL");
 
 
 
@@ -1121,23 +1137,24 @@ void init_ptable(void)
 	add_par_double(CCDRED_OVERSCAN_PEDESTAL, PAR_CCDRED, PREC_1, "overscan_pedestal",
 		       "Overscan correction pedestal", 1000);
 
-	add_par_int(CCDRED_OVSMIN1, PAR_CCDRED, PREC_1, "overscan_min1",
-		    "Overscan area first pixel on X", 3500);
-	add_par_int(CCDRED_OVSRNG1, PAR_CCDRED, PREC_1, "overscan_rng1",
-		    "Overscan area range on X", 50);
-	add_par_int(CCDRED_OVSMIN2, PAR_CCDRED, PREC_1, "overscan_min2",
-		    "Overscan area first pixel on Y", 50);
-	add_par_int(CCDRED_OVSRNG2, PAR_CCDRED, PREC_1, "overscan_rng2",
-		    "Overscan area range on Y", 2400);
-
 	add_par_int(CCDRED_EFPMIN1, PAR_CCDRED, PREC_1, "effective_min1",
-		    "Effective area first pixel on X", 34);
+		    "First horizontal effective pixel", 34);
 	add_par_int(CCDRED_EFPRNG1, PAR_CCDRED, PREC_1, "effective_rng1",
-		    "Effective area range on X", 3364);
+		    "Number of horizontal effective pixels", 3364);
 	add_par_int(CCDRED_EFPMIN2, PAR_CCDRED, PREC_1, "effective_min2",
-		    "Effective area first pixel on Y", 28);
+		    "First vertical effective pixel", 28);
 	add_par_int(CCDRED_EFPRNG2, PAR_CCDRED, PREC_1, "effective_rng2",
-		    "Effective area range on Y", 2542);
+		    "Number of vertical effective pixels", 2542);
+
+	add_par_int(CCDRED_OVSMIN1, PAR_CCDRED, PREC_1, "overscan_min1",
+		    "First horizontal overscan pixel", 3500);
+	add_par_int(CCDRED_OVSRNG1, PAR_CCDRED, PREC_1, "overscan_rng1",
+		    "Number of horizontal overscan pixels", 50);
+	add_par_int(CCDRED_OVSMIN2, PAR_CCDRED, PREC_1, "overscan_min2",
+		    "First vertical overscan pixel", 50);
+	add_par_int(CCDRED_OVSRNG2, PAR_CCDRED, PREC_1, "overscan_rng2",
+		    "Number of vertical overscan pixels", 2400);
+
 
 	add_par_int(CCDRED_DEMOSAIC_METHOD, PAR_CCDRED, 0, "demosaic_method",
 		    "Method used for demosaic", PAR_DEMOSAIC_METHOD_BILINEAR);

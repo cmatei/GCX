@@ -213,9 +213,6 @@ struct ccd_frame {
 
 	unsigned magic; // an unique number identifying the frame (science, dark, flatfield etc)
 
-	struct region trimsec;  // actual image area, defaults to all image
-	struct region biassec;  // overscan area, if available
-
 	struct exp_data exp;
 	struct im_stats stats;
 	struct wcs fim;

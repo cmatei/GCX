@@ -622,10 +622,10 @@ int ccd_reduce_imf(struct image_file *imf, struct ccd_reduce *ccdr,
 			ovsy = P_INT(CCDRED_OVSMIN2);
 			ovsh = P_INT(CCDRED_OVSRNG2);
 
-			fits_get_int(imf->fr, "OVS-MIN1", &ovsx);
-			fits_get_int(imf->fr, "OVS-RNG1", &ovsw);
-			fits_get_int(imf->fr, "OVS-MIN2", &ovsy);
-			fits_get_int(imf->fr, "OVS-RNG2", &ovsh);
+			fits_get_int(imf->fr, P_STR(FN_OVS_MIN1), &ovsx);
+			fits_get_int(imf->fr, P_STR(FN_OVS_RNG1), &ovsw);
+			fits_get_int(imf->fr, P_STR(FN_OVS_MIN2), &ovsy);
+			fits_get_int(imf->fr, P_STR(FN_OVS_RNG2), &ovsh);
 
 			if (overscan_correction(imf->fr, ccdr->overscan, ovsx, ovsy, ovsw, ovsh)) {
 				if (progress && (*progress)(" (FAILED)", data))
@@ -638,10 +638,10 @@ int ccd_reduce_imf(struct image_file *imf, struct ccd_reduce *ccdr,
 			efpy = P_INT(CCDRED_EFPMIN2);
 			efph = P_INT(CCDRED_EFPRNG2);
 
-			fits_get_int(imf->fr, "EFP-MIN1", &efpx);
-			fits_get_int(imf->fr, "EFP-RNG1", &efpw);
-			fits_get_int(imf->fr, "EFP-MIN2", &efpy);
-			fits_get_int(imf->fr, "EFP-RNG2", &efph);
+			fits_get_int(imf->fr, P_STR(FN_EFP_MIN1), &efpx);
+			fits_get_int(imf->fr, P_STR(FN_EFP_RNG1), &efpw);
+			fits_get_int(imf->fr, P_STR(FN_EFP_MIN2), &efpy);
+			fits_get_int(imf->fr, P_STR(FN_EFP_RNG2), &efph);
 
 			if (crop_frame(imf->fr, efpx, efpy, efpw, efph)) {
 				if (progress && (*progress)(" (FAILED)", data))
