@@ -1,5 +1,5 @@
 
-AC_INIT([gcx], [1.5])
+AC_INIT([gcx], [1.6])
 AM_INIT_AUTOMAKE([foreign -Wall -Werror])
 
 AC_CONFIG_SRCDIR([src/gcx.c])
@@ -11,6 +11,7 @@ AM_PROG_CC_STDC
 AC_HEADER_STDC
 AC_PROG_RANLIB
 
+PKG_PROG_PKG_CONFIG()
 
 AC_CHECK_HEADERS(libgen.h)
 AC_REPLACE_FUNCS(basename)
@@ -18,10 +19,16 @@ AC_REPLACE_FUNCS(dirname)
 AC_REPLACE_FUNCS(getline)
 
 
-AM_PATH_GTK_2_0(2.20.0, , AC_MSG_ERROR(Cannot find GTK: is pkg-config in path?))
-AC_CHECK_HEADERS([zlib.h])
-AC_CHECK_LIB(z, inflate)
+AM_PATH_GTK_2_0(2.20.0, , AC_MSG_ERROR(Cannot find GTK >= 2.20.0))
 
+AC_CHECK_HEADERS([zlib.h])
+AC_CHECK_LIB(z, inflate,,AC_MSG_ERROR(Cannot find zlib))
+
+AC_CHECK_HEADERS([tiff.h])
+AC_CHECK_LIB(tiff, TIFFOpen,,AC_MSG_ERROR(Cannot find libtiff))
+
+AC_CHECK_HEADERS([jpeglib.h])
+AC_CHECK_LIB(jpeg, jpeg_CreateDecompress,,AC_MSG_ERROR(Cannot find libjpeg))
 
 AC_CONFIG_FILES([
 	Makefile
@@ -30,4 +37,3 @@ AC_CONFIG_FILES([
 	src/gsc/Makefile
 ])
 AC_OUTPUT
-

@@ -550,6 +550,15 @@ extern struct ccd_frame *read_raw_file(char *filename);
 extern int parse_color_field(struct ccd_frame *fr, char *default_cfa);
 extern int set_color_field(struct ccd_frame *fr);
 
+// from tiff.c
+extern int tiff_filename(char *filename);
+extern struct ccd_frame *read_tiff_file(char *filename);
+
+// from jpeg.c
+extern int jpeg_filename(char *filename);
+extern struct ccd_frame *read_jpeg_file(char *filename);
+
+
 // from badpix.c
 extern int save_bad_pix(struct bad_pix_map *map);
 extern int load_bad_pix(struct bad_pix_map *map);

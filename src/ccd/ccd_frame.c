@@ -833,6 +833,12 @@ struct ccd_frame *read_image_file(char *filename, char *ungz, int force_unsigned
 	if (raw_filename(filename) <= 0)
 		return read_raw_file(filename);
 
+	if (tiff_filename(filename) == 0)
+		return read_tiff_file(filename);
+
+	if (jpeg_filename(filename) == 0)
+		return read_jpeg_file(filename);
+
 	return read_gz_fits_file(filename, ungz, force_unsigned, default_cfa);
 }
 

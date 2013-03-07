@@ -9,6 +9,6 @@ libccd_a_SOURCES = \
 	ccd_frame.c dslr.c median.c badpix.c \
 	edb.c aphot.c worldpos.c sources.c \
 	warp.c recipy.c errlog.c use_dcraw.c \
-	ccd.h dslr.h
+	ccd.h dslr.h tiff.c jpeg.c
 
 CLEANFILES = *~
