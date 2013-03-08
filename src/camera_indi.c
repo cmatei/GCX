@@ -244,8 +244,8 @@ static void camera_connect(struct indi_prop_t *iprop, void *callback_data)
 		camera->has_blob = 1;
 		indi_prop_add_cb(iprop, (IndiPropCB)camera_capture_cb, camera);
 	}
-	else if (strcmp(iprop->name, "CCD_EXPOSURE_REQUEST") == 0) {
-		d4_printf("Found CCD_EXPOSURE_REQUEST for camera %s\n", iprop->idev->name);
+	else if (strcmp(iprop->name, "CCD_EXPOSURE") == 0) {
+		d4_printf("Found CCD_EXPOSURE for camera %s\n", iprop->idev->name);
 		camera->expose_prop = iprop;
 	}
 	else if (strcmp(iprop->name, "CCD_FRAME") == 0) {
