@@ -1079,8 +1079,6 @@ int flat_frame(struct ccd_frame *fr, struct ccd_frame *fr1)
 					dp ++;
 					dp1 ++;
 				}
-				dp += fr->w;
-				dp1 += fr->w;
 			}
 		} else {
 			for (y = 0; y < fr->h; y++) {
@@ -1092,8 +1090,6 @@ int flat_frame(struct ccd_frame *fr, struct ccd_frame *fr1)
 					dp ++;
 					dp1 ++;
 				}
-				dp += fr->w;
-				dp1 += fr->w;
 			}
 
 		}
@@ -1131,8 +1127,6 @@ int add_frames (struct ccd_frame *fr, struct ccd_frame *fr1)
 				dp ++;
 				dp1 ++;
 			}
-			dp += fr->w;
-			dp1 += fr->w;
 		}
 	}
 // fit noise data
@@ -1208,8 +1202,6 @@ int sub_frames (struct ccd_frame *fr, struct ccd_frame *fr1)
 				dp ++;
 				dp1 ++;
 			}
-			dp += fr->w;
-			dp1 += fr->w;
 		}
 	}
 
