@@ -53,7 +53,7 @@ static void tele_new_coords_cb(struct indi_prop_t *iprop, void *data)
 
 	if (iprop->state != INDI_STATE_IDLE && iprop->state != INDI_STATE_OK)
 		return;
-	tele->right_ascension = indi_prop_get_number(iprop, "RA");
+	tele->right_ascension = 15.0 * indi_prop_get_number(iprop, "RA");
 	tele->declination = indi_prop_get_number(iprop, "DEC");
 }
 
@@ -247,7 +247,7 @@ double tele_get_ra(struct tele_t *tele)
 {
 	if (! tele->coord_prop)
 		return 0.0;
-	return indi_prop_get_number(tele->coord_prop, "RA");
+	return 15.0 * indi_prop_get_number(tele->coord_prop, "RA");
 }
 
 double tele_get_dec(struct tele_t *tele)
@@ -279,6 +279,11 @@ void tele_abort(struct tele_t *tele)
 int tele_set_coords(struct tele_t *tele, int type, double ra, double dec, double equinox)
 {
 	struct indi_elem_t *elem = NULL;
+
+	if (ra < 0 || ra >= 360 || dec < -90 || dec > 90) {
+		err_printf("Bad RA/DEC\n");
+		return -1;
+	}
 	if (! tele) {
 		err_printf("No telescope found\n");
 		return -1;
@@ -316,8 +321,8 @@ int tele_set_coords(struct tele_t *tele, int type, double ra, double dec, double
 			return -1;
 		}
 	}
-	indi_prop_set_number(tele->coord_set_prop, "RA", ra);
-	indi_prop_set_number(tele->coord_set_prop, "DEC", ra);
+	indi_prop_set_number(tele->coord_set_prop, "RA", ra / 15.0);
+	indi_prop_set_number(tele->coord_set_prop, "DEC", dec);
 	indi_send(tele->coord_set_prop, NULL);
 	return 0;
 }

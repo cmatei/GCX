@@ -208,11 +208,17 @@ void ccd_frame_add_obs_info(struct ccd_frame *fr, struct obs_data *obs)
 			fr->fim.rot = obs->rot;
 			fr->fim.wcsset = WCS_INITIAL;
 
-			degrees_to_dms_pr(deg, obs->ra / 15.0, 2);
+			if (obs->tele_ra != 0.0)
+				degrees_to_dms_pr(deg, obs->tele_ra / 15.0, 2);
+			else
+				degrees_to_dms_pr(deg, obs->ra / 15.0, 2);
 			sprintf(lb, "'%s'", deg);
 			fits_add_keyword(fr, P_STR(FN_RA), lb);
 
-			degrees_to_dms_pr(deg, obs->dec, 1);
+			if (obs->tele_dec != 0.0)
+				degrees_to_dms_pr(deg, obs->tele_dec, 1);
+			else
+				degrees_to_dms_pr(deg, obs->dec, 1);
 			sprintf(lb, "'%s'", deg);
 			fits_add_keyword(fr, P_STR(FN_DEC), lb);
 		}
@@ -236,6 +242,14 @@ void ccd_frame_add_obs_info(struct ccd_frame *fr, struct obs_data *obs)
 
 		sprintf(lb, "%20.1f / EQUINOX OF COORDINATES", obs->equinox);
 		fits_add_keyword(fr, P_STR(FN_EQUINOX), lb);
+
+		degrees_to_dms_pr(deg, obs->tele_ra / 15.0, 2);
+		sprintf(lb, "'%s'", deg);
+		fits_add_keyword(fr, "TELERA", lb);
+
+		degrees_to_dms_pr(deg, obs->tele_dec, 1);
+		sprintf(lb, "'%s'", deg);
+		fits_add_keyword(fr, "TELEDEC", lb);
 	}
 
 	snprintf(lb, 127, "'%s'", P_STR(OBS_TELESCOP));

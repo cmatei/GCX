@@ -1172,7 +1172,7 @@ create_camera_control (void)
   gtk_misc_set_alignment (GTK_MISC (label30), 0, 0.5);
   gtk_misc_set_padding (GTK_MISC (label30), 2, 0);
 
-  file_seqn_spin_adj = gtk_adjustment_new (1, 0, 100, 1, 10, 0);
+  file_seqn_spin_adj = gtk_adjustment_new (1, 0, 999, 1, 10, 0);
   file_seqn_spin = gtk_spin_button_new (GTK_ADJUSTMENT (file_seqn_spin_adj), 1, 0);
   g_object_ref (file_seqn_spin);
   g_object_set_data_full (G_OBJECT (camera_control), "file_seqn_spin", file_seqn_spin,
@@ -1182,7 +1182,7 @@ create_camera_control (void)
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
-  img_number_spin_adj = gtk_adjustment_new (2, 1, 100, 1, 10, 0);
+  img_number_spin_adj = gtk_adjustment_new (2, 1, 999, 1, 10, 0);
   img_number_spin = gtk_spin_button_new (GTK_ADJUSTMENT (img_number_spin_adj), 1, 0);
   g_object_ref (img_number_spin);
   g_object_set_data_full (G_OBJECT (camera_control), "img_number_spin", img_number_spin,

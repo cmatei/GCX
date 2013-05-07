@@ -893,6 +893,11 @@ int write_fits_frame(struct ccd_frame *fr, char *filename)
 		bscale = 1.0;
 		bzero = 0.0;
 		bitpix = 16;
+	} else if ( ((fr->stats.max - fr->stats.min) <= 65535.0) &&
+		    (fr->stats.max <= 65535)) {
+		bscale = 1.0;
+		bzero = 32768;
+		bitpix = 16;
 	} else {
 		// we use floats
 		bscale = 1.0;
@@ -1079,8 +1084,6 @@ int flat_frame(struct ccd_frame *fr, struct ccd_frame *fr1)
 					dp ++;
 					dp1 ++;
 				}
-				dp += fr->w;
-				dp1 += fr->w;
 			}
 		} else {
 			for (y = 0; y < fr->h; y++) {
@@ -1092,10 +1095,7 @@ int flat_frame(struct ccd_frame *fr, struct ccd_frame *fr1)
 					dp ++;
 					dp1 ++;
 				}
-				dp += fr->w;
-				dp1 += fr->w;
 			}
-
 		}
 	}
 	fr->stats.statsok = 0;
@@ -1208,8 +1208,6 @@ int sub_frames (struct ccd_frame *fr, struct ccd_frame *fr1)
 				dp ++;
 				dp1 ++;
 			}
-			dp += fr->w;
-			dp1 += fr->w;
 		}
 	}
 

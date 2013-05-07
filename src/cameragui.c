@@ -215,7 +215,7 @@ static void dither_move(gpointer dialog, double amount)
 //	err_printf("dither move TODO\n");
 
 	/* FIXME: this crude hack allows me to dither for now. */
-//	system("/home/cmatei/dither-script");
+	system("/home/cmatei/dither-script");
 
 }
 
@@ -442,11 +442,13 @@ static int expose_cb(GtkWidget *window)
 {
 	GtkWidget *main_window;
 	struct camera_t *camera;
+	struct tele_t *tele;
 	struct ccd_frame *fr;
 	struct obs_data *obs;
 	int r = FALSE;
 
 	main_window = g_object_get_data(G_OBJECT(window), "image_window");
+	tele = tele_find(window);
 	camera = camera_find(main_window, CAMERA_MAIN);
 	if(strncmp(camera->image_format, ".fits", 5) == 0) {
 		// The image has already been unzipped if we get here
@@ -467,6 +469,11 @@ static int expose_cb(GtkWidget *window)
 		}
 		if (! get_named_checkb_val(GTK_WIDGET(window), "img_dark_checkb")) {
 			obs = (struct obs_data *)g_object_get_data(G_OBJECT(window), "obs_data");
+			if (tele && obs) {
+				obs->tele_ra = tele_get_ra(tele);
+				obs->tele_dec = tele_get_dec(tele);
+			}
+
 			ccd_frame_add_obs_info(fr, obs);
 		}
 		if (!fr->stats.statsok)
@@ -1059,4 +1066,3 @@ void act_control_camera (GtkAction *action, gpointer window)
 //	cam_dialog_update(dialog);
 //	cam_dialog_edit(dialog);
 }
-

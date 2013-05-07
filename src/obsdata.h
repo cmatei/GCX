@@ -26,6 +26,9 @@ struct obs_data {
 	char *filter; /* malloced filter name */
 	char *sequence ; 	/* source of the sequence used to reduce the frame */
 	char *comment;
+
+	double tele_ra;
+	double tele_dec;
 };
 
 #define OBS_DATA(x) ((struct obs_data *)(x))
