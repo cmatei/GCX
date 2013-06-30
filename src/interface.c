@@ -401,6 +401,7 @@ create_camera_control (void)
   GtkWidget *img_get_img_button;
   GtkWidget *img_get_multiple_button;
   GtkWidget *img_focus_button;
+  GtkWidget *img_abort_button;
   GtkWidget *label9;
   GtkWidget *vbox5;
   GtkWidget *table3;
@@ -738,6 +739,14 @@ create_camera_control (void)
   gtk_widget_show (img_focus_button);
   gtk_box_pack_start (GTK_BOX (hbox2), img_focus_button, TRUE, TRUE, 2);
   gtk_widget_set_tooltip_text (img_focus_button, "Get and display frames continuously, no save");
+
+  img_abort_button = gtk_button_new_with_label ("Abort");
+  g_object_ref (img_abort_button);
+  g_object_set_data_full (G_OBJECT (camera_control), "img_abort_button", img_abort_button,
+			  (GDestroyNotify) g_object_unref);
+  gtk_widget_show (img_abort_button);
+  gtk_box_pack_start (GTK_BOX (hbox2), img_abort_button, TRUE, TRUE, 2);
+  gtk_widget_set_tooltip_text (img_abort_button, "Abort current exposure");
 
   label9 = gtk_label_new ("Frame");
   g_object_ref (label9);

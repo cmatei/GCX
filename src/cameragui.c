@@ -437,6 +437,7 @@ static void img_get_image_cb(GtkWidget *widget, gpointer window)
 	}
 }
 
+
 // This will be called when a new image is ready for processing
 static int expose_cb(GtkWidget *window)
 {
@@ -890,6 +891,13 @@ static void enable_camera_widgets(GtkWidget *dialog, int state)
 	gtk_widget_set_sensitive(
 		GTK_WIDGET(g_object_get_data(G_OBJECT(dialog), "img_get_multiple_button")),
 		state);
+	gtk_widget_set_sensitive(
+		GTK_WIDGET(g_object_get_data(G_OBJECT(dialog), "img_focus_button")),
+		state);
+	gtk_widget_set_sensitive(
+		GTK_WIDGET(g_object_get_data(G_OBJECT(dialog), "img_abort_button")),
+		state);
+
 }
 
 static void enable_telescope_widgets(GtkWidget *dialog, int state)

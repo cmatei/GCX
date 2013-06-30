@@ -30,6 +30,7 @@ struct camera_t {
 	const char *image_format;
 
 	struct indi_prop_t *expose_prop;
+	struct indi_prop_t *abort_prop;
 	struct indi_prop_t *frame_prop;
 	struct indi_prop_t *frame_type_prop;
 	struct indi_prop_t *binning_prop;
@@ -44,6 +45,7 @@ void camera_get_temperature(struct camera_t *camera, float *value, float *min, f
 void camera_set_temperature(struct camera_t *camera, float value);
 void camera_get_exposure_settings(struct camera_t *camera, float *value, float *min, float *max);
 void camera_expose(struct camera_t *camera, double time);
+void camera_abort_exposure(struct camera_t *camera);
 void camera_set_ready_callback(void *window, int type, void *func, void *data);
 struct camera_t *camera_find(void *window, int type);
 #endif

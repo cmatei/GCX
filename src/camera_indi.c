@@ -234,6 +234,22 @@ void camera_expose(struct camera_t *camera, double time)
 	indi_send(camera->expose_prop, NULL);
 }
 
+void camera_abort_exposure(struct camera_t *camera)
+{
+	if (!camera->ready) {
+		err_printf("Camera isn't ready.\n");
+		return;
+	}
+
+	if (!camera->abort_prop) {
+		err_printf("Camera doesn't support exposure abort.\n");
+		return;
+	}
+
+	indi_prop_set_switch(camera->abort_prop, "ABORT", TRUE);
+	indi_send(camera->abort_prop, NULL);
+}
+
 static void camera_connect(struct indi_prop_t *iprop, void *callback_data)
 {
 	struct camera_t *camera = (struct camera_t *)callback_data;
@@ -244,9 +260,13 @@ static void camera_connect(struct indi_prop_t *iprop, void *callback_data)
 		camera->has_blob = 1;
 		indi_prop_add_cb(iprop, (IndiPropCB)camera_capture_cb, camera);
 	}
-	else if (strcmp(iprop->name, "CCD_EXPOSURE_REQUEST") == 0) {
-		d4_printf("Found CCD_EXPOSURE_REQUEST for camera %s\n", iprop->idev->name);
+	else if (strcmp(iprop->name, "CCD_EXPOSURE") == 0) {
+		d4_printf("Found CCD_EXPOSURE for camera %s\n", iprop->idev->name);
 		camera->expose_prop = iprop;
+	}
+	else if (strcmp(iprop->name, "CCD_ABORT_EXPOSURE") == 0) {
+		d4_printf("Found CCD_ABORT_EXPOSURE for camera %s\n", iprop->idev->name);
+		camera->abort_prop = iprop;
 	}
 	else if (strcmp(iprop->name, "CCD_FRAME") == 0) {
 		d4_printf("Found CCD_FRAME for camera %s\n", iprop->idev->name);
