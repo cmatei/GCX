@@ -1131,8 +1131,6 @@ int add_frames (struct ccd_frame *fr, struct ccd_frame *fr1)
 				dp ++;
 				dp1 ++;
 			}
-			dp += fr->w;
-			dp1 += fr->w;
 		}
 	}
 // fit noise data
