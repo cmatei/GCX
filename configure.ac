@@ -1,6 +1,6 @@
 
 AC_INIT([gcx], [1.6])
-AM_INIT_AUTOMAKE([foreign -Wall -Werror])
+AM_INIT_AUTOMAKE([foreign -Wall -Werror subdir-objects])
 
 AC_CONFIG_SRCDIR([src/gcx.c])
 
@@ -10,6 +10,8 @@ AC_PROG_CC
 AM_PROG_CC_STDC
 AC_HEADER_STDC
 AC_PROG_RANLIB
+
+AM_PROG_AR
 
 PKG_PROG_PKG_CONFIG()
 
@@ -29,6 +31,8 @@ AC_CHECK_LIB(tiff, TIFFOpen,,AC_MSG_ERROR(Cannot find libtiff))
 
 AC_CHECK_HEADERS([jpeglib.h])
 AC_CHECK_LIB(jpeg, jpeg_CreateDecompress,,AC_MSG_ERROR(Cannot find libjpeg))
+
+AC_CHECK_LIB(m, floor,,AC_MSG_ERROR(Cannot find libm))
 
 AC_CONFIG_FILES([
 	Makefile
