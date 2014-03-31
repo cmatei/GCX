@@ -33,8 +33,7 @@ struct tele_t {
 	//This must be fist in the structure
 	COMMON_INDI_VARS
 
-	struct indi_prop_t *coord_prop;          // property to use to get coordinates     (number)
-	struct indi_prop_t *coord_set_prop;      // property to use to set coordinates     (number)
+	struct indi_prop_t *coord_prop;          // property to use to get/set coordinates     (number)
 	struct indi_prop_t *coord_set_type_prop; // property to define whether to sync or goto coords (switch)
 	struct indi_prop_t *abort_prop;          // property to use to abort all motion    (switch)
 	struct indi_prop_t *move_ns_prop;        // property for North/South motion        (switch)

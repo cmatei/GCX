@@ -112,17 +112,12 @@ static void tele_connect(struct indi_prop_t *iprop, void *callback_data)
 	struct tele_t *tele = (struct tele_t *)callback_data;
 
 
-	if (strcmp(iprop->name, "EQUATORIAL_EOD_COORD_REQUEST") == 0) {
-		tele->coord_set_prop = iprop;
-	}
-	else if (strcmp(iprop->name, "EQUATORIAL_EOD_COORD") == 0) {
+	if (strcmp(iprop->name, "EQUATORIAL_EOD_COORD") == 0) {
 		tele->coord_prop = iprop;
+		indi_prop_add_cb(iprop, (IndiPropCB)tele_new_coords_cb, tele);
 	}
 	else if (strcmp(iprop->name, "ON_COORD_SET") == 0) {
 		tele->coord_set_type_prop = iprop;
-	}
-	else if (strcmp(iprop->name, "EQUATORIAL_EOD_COORD") == 0) {
-		indi_prop_add_cb(iprop, (IndiPropCB)tele_new_coords_cb, tele);
 	}
 	else if (strcmp(iprop->name, "TELESCOPE_ABORT_MOTION") == 0) {
 		tele->abort_prop = iprop;
@@ -292,7 +287,7 @@ int tele_set_coords(struct tele_t *tele, int type, double ra, double dec, double
 		err_printf("Telescope isn't ready\n");
 		return -1;
 	}
-	if (! tele->coord_set_prop) {
+	if (! tele->coord_prop) {
 		d4_printf("Telescope doesn't support coordinates\n");
 		return -1;
 	}
@@ -321,9 +316,9 @@ int tele_set_coords(struct tele_t *tele, int type, double ra, double dec, double
 			return -1;
 		}
 	}
-	indi_prop_set_number(tele->coord_set_prop, "RA", ra / 15.0);
-	indi_prop_set_number(tele->coord_set_prop, "DEC", dec);
-	indi_send(tele->coord_set_prop, NULL);
+	indi_prop_set_number(tele->coord_prop, "RA", ra / 15.0);
+	indi_prop_set_number(tele->coord_prop, "DEC", dec);
+	indi_send(tele->coord_prop, NULL);
 	return 0;
 }
 
