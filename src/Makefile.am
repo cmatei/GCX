@@ -23,7 +23,8 @@ gcx_SOURCES = \
 	basename.c dirname.c libgen.h query.c query.h plate.c \
 	demosaic.c demosaic.h skyview.c \
 	tele_indi.c tele_indi.h camera_indi.c camera_indi.h \
-	fwheel_indi.c fwheel_indi.h common_indi.c common_indi.h \
+	fwheel_indi.c fwheel_indi.h focus_indi.c focus_indi.h \
+	common_indi.c common_indi.h \
         \
 	libindiclient/lilxml.h libindiclient/lilxml.c \
 	libindiclient/base64.h libindiclient/base64.c \

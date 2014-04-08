@@ -134,22 +134,27 @@ static int INDI_callback(struct INDI_callback_t *cb)
 {
 	int (*func)(void *data) = cb->func;
 	if (func(cb->data) == FALSE) {
-		// If fucntion returns false, remove self from callback list
-		cb->device->callbacks = g_slist_remove(cb->device->callbacks, cb);
+		// free the callback, we're done
 		g_free(cb);
+	} else {
+		// add self to callback list, expecting to be called again
+		cb->device->callbacks = g_slist_prepend(cb->device->callbacks, cb);
 	}
 	return FALSE;
 }
 
 void INDI_exec_callbacks(struct INDI_common_t *device, int type)
 {
-	GSList *gsl;
+	GSList *gsl, *next = NULL;
 	struct INDI_callback_t *cb;
 
-	for(gsl = device->callbacks; gsl; gsl = g_slist_next(gsl)) {
+	for (gsl = device->callbacks; gsl; gsl = next) {
 		cb = gsl->data;
-		if (cb->type == type)
+		next = gsl->next;
+
+		if (cb->type == type) {
 			g_idle_add((GSourceFunc)INDI_callback, cb);
+			device->callbacks = g_slist_remove(device->callbacks, cb);
+		}
 	}
 }
-

@@ -39,6 +39,7 @@
 #include "camera_indi.h"
 #include "tele_indi.h"
 #include "fwheel_indi.h"
+#include "focus_indi.h"
 #include "catalogs.h"
 #include "gui.h"
 #include "obsdata.h"
@@ -968,6 +969,11 @@ static gboolean fwheel_ready_cb(gpointer data)
 	return FALSE;
 }
 
+static gboolean focuser_ready_cb(gpointer data)
+{
+	return FALSE;
+}
+
 void cam_set_callbacks(GtkWidget *dialog)
 {
 	GtkWidget *combo;
@@ -1065,6 +1071,10 @@ void act_control_camera (GtkAction *action, gpointer window)
 				FALSE);
 			fwheel_set_ready_callback(window, fwheel_ready_cb, window);
 		}
+		if (! focuser_find(window)) {
+			focuser_set_ready_callback(window, focuser_ready_cb, window);
+		}
+
 		cam_to_img(dialog);
 		gtk_widget_show_all(dialog);
 	} else {
