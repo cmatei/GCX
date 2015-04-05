@@ -141,14 +141,14 @@ void cam_to_img(GtkWidget *dialog)
 	named_spin_set(dialog, "img_exp_spin", fvalue);
 
 	camera_get_size(camera, "WIDTH", &value, &min, &max);
-	named_spin_set_limits(dialog, "img_width_spin", 0, 1.0 * max / binx);
+	named_spin_set_limits(dialog, "img_width_spin", 0, 1.0 * max);
 	named_spin_set(dialog, "img_width_spin", 1.0 * value);
-	mxsk = max - value * binx;
+	mxsk = max - value;
 
 	camera_get_size(camera, "HEIGHT", &value, &min, &max);
-	named_spin_set_limits(dialog, "img_height_spin", 0, 1.0 * max / biny);
+	named_spin_set_limits(dialog, "img_height_spin", 0, 1.0 * max);
 	named_spin_set(dialog, "img_height_spin", 1.0 * value);
-	mysk = max - value * biny;
+	mysk = max - value;
 
 	named_spin_set_limits(dialog, "img_x_skip_spin", 0, 1.0 * mxsk);
 	camera_get_size(camera, "OFFX", &value, &min, &max);
