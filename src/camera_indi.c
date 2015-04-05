@@ -176,7 +176,7 @@ void camera_get_temperature(struct camera_t *camera, float *value, float *min, f
 		err_printf("Camera doesn't support temperature control\n");
 		return;
 	}
-	elem = indi_find_elem(camera->temp_prop, "CCD_TEMPERATURE_CURRENT_VALUE");
+	elem = indi_find_elem(camera->temp_prop, "CCD_TEMPERATURE_VALUE");
 	if (elem)
 	{
 		*value = elem->value.num.value;
@@ -195,7 +195,7 @@ void camera_set_temperature(struct camera_t *camera, float x)
 		err_printf("Camera doesn't support temperature control\n");
 		return;
 	}
-	if (INDI_update_elem_if_changed(camera->temp_prop, "CCD_TEMPERATURE_VALUEXX", x)) {
+	if (INDI_update_elem_if_changed(camera->temp_prop, "CCD_TEMPERATURE_VALUE", x)) {
 		indi_send(camera->temp_prop, NULL);
 	}
 }
