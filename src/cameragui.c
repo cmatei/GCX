@@ -706,7 +706,7 @@ static void reset_img_window_cb( GtkWidget *widget, gpointer data )
 {
 	GtkWidget *main_window = g_object_get_data(G_OBJECT(data), "image_window");
 	struct camera_t *camera = camera_find(main_window, CAMERA_MAIN);
-	int val, min, max_w, max_h, width, height, binx, biny, skip_x, skip_y;
+	int val, min, max_w, max_h, width, height, skip_x, skip_y;
 
 	if(! camera) {
 		err_printf("no camera connected\n");
@@ -714,10 +714,9 @@ static void reset_img_window_cb( GtkWidget *widget, gpointer data )
 	}
 	camera_get_size(camera, "WIDTH", &val, &min, &max_w);
 	camera_get_size(camera, "HEIGHT", &val, &min, &max_h);
-	camera_get_binning(camera, &binx, &biny);
 
-	width = max_w / binx;
-	height = max_h / biny;
+	width = max_w;
+	height = max_h;
 	if (widget == g_object_get_data(G_OBJECT(data), "img_halfsz")) {
 		width = width * 1000 / 1414;
 		height = height * 1000 / 1414;
@@ -731,8 +730,8 @@ static void reset_img_window_cb( GtkWidget *widget, gpointer data )
 		height = height * 1000 / 4000;
 	}
 
-	skip_x = (max_w - (binx * width)) / 2;
-	skip_y = (max_h - (biny * height)) / 2;
+	skip_x = (max_w - width) / 2;
+	skip_y = (max_h - height) / 2;
 	camera_set_size(camera, width, height, skip_x, skip_y);
 	cam_to_img(data);
 }
