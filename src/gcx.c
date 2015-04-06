@@ -1131,6 +1131,7 @@ int main(int ac, char **av)
 	}
 
 	window = create_image_window();
+
 	if (!batch || interactive) {
 		gtk_widget_show_all(window);
 	}
@@ -1139,7 +1140,7 @@ int main(int ac, char **av)
 	if (imfl == NULL && obj[0] && fr == NULL) {
 		fr = make_blank_obj_fr(obj);
 		if (fr != NULL) {
-			frame_to_channel(fr, window, "i_channel");
+			frame_to_window (fr, window);
 			release_frame(fr);
 		}
 	}
@@ -1161,21 +1162,11 @@ int main(int ac, char **av)
 		if (obj[0] != 0)
 			set_wcs_from_object(fr, obj, -P_DBL(WCS_SEC_PER_PIX));
 
-		frame_to_channel(fr, window, "i_channel");
+		frame_to_window (fr, window);
 		release_frame(fr);
 		if (to_pnm) {
-			struct image_channel *channel;
-			channel = g_object_get_data(G_OBJECT(window), "i_channel");
-			if (channel == NULL) {
-				err_printf("oops - no channel\n");
-				if (batch && !interactive)
-					exit(1);
-			}
-			if (outf[0] != 0) {
-				ret = channel_to_pnm_file(channel, NULL, outf, 0);
-			} else {
-				ret = channel_to_pnm_file(channel, NULL, NULL, 0);
-			}
+			GcxView *view = g_object_get_data (G_OBJECT(window), "image");
+			ret = gcx_view_to_pnm_file (view, *outf ? outf : NULL, 0);
 			if (ret) {
 				err_printf("error writing pnm file\n");
 				if (batch && !interactive)
@@ -1185,37 +1176,27 @@ int main(int ac, char **av)
 				exit(0);
 		}
 		if (fit_wcs) {
-			struct image_channel *channel;
 			char *fn;
 			int rtn;
-			channel = g_object_get_data(G_OBJECT(window), "i_channel");
-			if (channel == NULL) {
-				err_printf("oops - no channel\n");
-				if (batch && !interactive)
-					exit(1);
-			}
+
 			if (match_field_in_window_quiet(window))
 				exit(2);
-			wcs_to_fits_header(channel->fr);
-			fn = channel->fr->name;
+
+			fr = frame_from_window (window);
+			wcs_to_fits_header(fr);
+
+			fn = fr->name;
 			if (file_is_zipped(fn)) {
 				for (i = strlen(fn); i > 0; i--)
 					if (fn[i] == '.') {
 						fn[i] = 0;
 						break;
 					}
-				rtn = write_gz_fits_frame(channel->fr, fn, P_STR(FILE_COMPRESS));
+				rtn = write_gz_fits_frame(fr, fn, P_STR(FILE_COMPRESS));
 			} else {
-				rtn = write_fits_frame(channel->fr, fn);
+				rtn = write_fits_frame(fr, fn);
 			}
 
-/*
-			if (outf[0] != 0) {
-				ret = channel_to_pnm_file(channel, NULL, outf, 0);
-			} else {
-				ret = channel_to_pnm_file(channel, NULL, NULL, 0);
-			}
-*/
 			if (batch && !interactive) {
 				if (rtn == 0)
 					exit(0);

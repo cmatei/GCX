@@ -580,19 +580,20 @@ static int do_phot_cmd (char *args, GtkWidget *dialog)
 static int do_save_cmd (char *args, GtkWidget *dialog)
 {
 	void *imw;
-	struct image_channel *imch;
+	struct ccd_frame *fr;
 
 	imw = g_object_get_data(G_OBJECT(dialog), "image_window");
 	if (imw == NULL) {
 		err_printf("No image window\n");
 		return OBS_CMD_ERROR;
 	}
-	imch = g_object_get_data(G_OBJECT(imw), "i_channel");
-	if ((imch == NULL) || (imch->fr == NULL)) {
+
+	fr = frame_from_window (imw);
+	if (fr == NULL) {
 		err_printf("No frame to save\n");
 		return OBS_CMD_ERROR;
 	}
-	save_frame_auto_name(imch->fr, dialog);
+	save_frame_auto_name(fr, dialog);
 	return OBS_NEXT_COMMAND;
 }
 
@@ -997,4 +998,3 @@ static void obslist_background(gpointer window, int action)
 	gtk_widget_show(GTK_WIDGET(list));
 #endif
 }
-

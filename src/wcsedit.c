@@ -394,16 +394,16 @@ void act_wcs_fit_pairs (GtkAction *action, gpointer window)
 
 void act_wcs_reload (GtkAction *action, gpointer window)
 {
-	struct image_channel *i_chan;
 	struct wcs *wcs;
 	struct gui_star_list *gsl;
+	struct ccd_frame *fr;
 
 	wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
-	i_chan = g_object_get_data(G_OBJECT(window), "i_channel");
-	if (wcs == NULL || i_chan == NULL || i_chan->fr == NULL)
+	fr = frame_from_window (window);
+	if (wcs == NULL || fr == NULL)
 		return;
 
-	wcs_from_frame(i_chan->fr, wcs);
+	wcs_from_frame(fr, wcs);
 
 	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl != NULL)

@@ -239,7 +239,8 @@ static void export_pnm(GtkWidget *chooser, gpointer user_data)
 
 	d3_printf("Saving pnm file: %s\n", fne);
 
-	channel_to_pnm_file(fa->data, fa->window, fne, fa->arg1);
+	gcx_view_to_pnm_file (GCX_VIEW(fa->window), fne, fa->arg1);
+
 	free(fne);
 	g_free(fn);
 }
@@ -252,23 +253,24 @@ static void save_fits(GtkWidget *chooser, gpointer user_data)
 {
 	char *fn;
 	struct file_action *fa = user_data;
-	struct image_channel *ich;
+	struct ccd_frame *fr;
 	int i;
 
 	fn = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(chooser));
 	g_return_if_fail(fn != NULL);
 
 	d3_printf("Saving fits file: %s\n", fn);
-	ich = fa->data;
+
+	fr = frame_from_window (fa->data);
 	if (file_is_zipped(fn)) {
 		for (i = strlen(fn); i > 0; i--)
 			if (fn[i] == '.') {
 				fn[i] = 0;
 				break;
 			}
-		write_gz_fits_frame(ich->fr, fn, P_STR(FILE_COMPRESS));
+		write_gz_fits_frame(fr, fn, P_STR(FILE_COMPRESS));
 	} else {
-		write_fits_frame(ich->fr, fn);
+		write_fits_frame(fr, fn);
 	}
 
 	g_free(fn);
@@ -295,7 +297,9 @@ static void open_fits(GtkWidget *chooser, gpointer user_data)
 	}
 	rescan_fits_wcs(fr, &fr->fim);
 	rescan_fits_exp(fr, &fr->exp);
-	frame_to_channel(fr, fa->window, "i_channel");
+
+	frame_to_window (fr, fa->window);
+
 	release_frame(fr);
 	set_last_open(fa->window, "last_open_fits", fnd = strdup(fn));
 	d3_printf("lastopen_fits set to %s\n", fnd);
@@ -314,7 +318,7 @@ int load_rcp_to_window(gpointer window, char *name, char *object)
 	double v;
 	char obj[81];
 	char objf[81];
-	struct image_channel *channel = NULL;
+	struct ccd_frame *fr;
 
 	if (name == NULL)
 		return -1;
@@ -322,15 +326,16 @@ int load_rcp_to_window(gpointer window, char *name, char *object)
 
 	wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
 
+
 	if (!strcmp(name, "_OBJECT_") || !strcmp(name, "_AUTO_") || !strcmp(name, "_TYCHO_")) {
-		channel = g_object_get_data(G_OBJECT(window), "i_channel");
-		if (channel == NULL || channel->fr == NULL) {
+		fr = frame_from_window (window);
+		if (fr == NULL) {
 			err_printf("no image - cannot load/create dynamic recipe\n");
 			return -1;
 		}
 		if (object && object[0])
 			strncpy(obj, object, 70);
-		else if (fits_get_string(channel->fr, P_STR(FN_OBJECT), obj, 70) <= 0) {
+		else if (fits_get_string(fr, P_STR(FN_OBJECT), obj, 70) <= 0) {
 			err_printf("no object - cannot load/create dynamic recipe\n");
 			return -1;
 		}
@@ -355,9 +360,9 @@ int load_rcp_to_window(gpointer window, char *name, char *object)
 	}
 	if (!strcmp(name, "_TYCHO_")) {
 		if ((wcs == NULL) || (wcs->wcsset < WCS_INITIAL)) {
-			stf = make_tyc_stf(obj, fabs(100.0 * channel->fr->w / 1800), 20);
+			stf = make_tyc_stf(obj, fabs(100.0 * fr->w / 1800), 20);
 		} else {
-			stf = make_tyc_stf(obj, fabs(100.0 * channel->fr->w * wcs->xinc), 20);
+			stf = make_tyc_stf(obj, fabs(100.0 * fr->w * wcs->xinc), 20);
 		}
 	} else {
 		/* just load the specified file */
@@ -715,8 +720,8 @@ void file_select_list(gpointer data, char *title, char *filter,
 static void file_popup_cb(gpointer window, guint action)
 {
 	GtkWidget *chooser;
-	struct image_channel *channel;
 	struct file_action *fa;
+	struct ccd_frame *fr;
 	char *fn;
 	char *lastopen;
 
@@ -773,16 +778,16 @@ static void file_popup_cb(gpointer window, guint action)
 	case FILE_EXPORT_PNM16:
 		fa->action = export_pnm;
 
-		channel = g_object_get_data(G_OBJECT(window), "i_channel");
-		if (channel == NULL || channel->fr == NULL) {
+		fr = frame_from_window (window);
+		if (fr == NULL) {
 			err_printf_sb2(window, "No frame loaded");
 			error_beep();
 			free(fa);
 			return ;
 		}
 
-		fn = force_extension(channel->fr->name, "pnm");
-		fa->data = channel;
+		fn = force_extension(fr->name, "pnm");
+		fa->data = window;
 		fa->arg1 = (action == FILE_EXPORT_PNM16);
 
 		chooser = create_file_chooser("Select pnm file name", F_SAVE, fa);
@@ -794,17 +799,17 @@ static void file_popup_cb(gpointer window, guint action)
 	case FILE_SAVE_AS:
 		fa->action = save_fits;
 
-		channel = g_object_get_data(G_OBJECT(window), "i_channel");
-		if (channel == NULL || channel->fr == NULL) {
-			err_printf_sb2(window, "No frame");
+		fr = frame_from_window (window);
+		if (fr == NULL) {
+			err_printf_sb2(window, "No frame loaded");
 			error_beep();
 			free(fa);
 			return ;
 		}
 
-		fa->data = channel;
-		wcs_to_fits_header(channel->fr);
-		fn = channel->fr->name;
+		fa->data = window;
+		wcs_to_fits_header(fr);
+		fn = fr->name;
 
 		chooser = create_file_chooser("Select output file name", F_SAVE, fa);
 		fa->chooser = chooser;

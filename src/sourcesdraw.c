@@ -46,6 +46,7 @@
 #include "psf.h"
 #include "filegui.h"
 
+
 /* star popup action codes */
 #define STARP_UNMARK_STAR 1
 #define STARP_REMOVE_SEL 2
@@ -357,26 +358,28 @@ double cat_star_size(struct cat_star *cats)
  * draw_star_helper for expose redraws */
 void draw_gui_star(struct gui_star *gs, GtkWidget *window)
 {
+#if 0
 	GtkWidget *darea;
-	struct map_geometry *geom;
 	struct gui_star_list *gsl;
 	cairo_t *cr;
 
 	darea = g_object_get_data(G_OBJECT(window), "image");
 	if (darea == NULL)
 		return;
-	geom = g_object_get_data(G_OBJECT(window), "geometry");
-	if (geom == NULL)
-		return;
+	//geom = g_object_get_data(G_OBJECT(window), "geometry");
+	//if (geom == NULL)
+	//	return;
+
 	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl == NULL)
 		return;
 
 	cr = gdk_cairo_create (darea->window);
 
-	draw_star_helper(gs, cr, gsl, geom->zoom);
+	draw_star_helper(gs, cr, gsl, map->zoom);
 
 	cairo_destroy(cr);
+#endif
 }
 
 /* draw a GSList of gui_stars
@@ -384,19 +387,19 @@ void draw_gui_star(struct gui_star *gs, GtkWidget *window)
  */
 void draw_star_list(GSList *stars, GtkWidget *window)
 {
+#if 0
 	struct gui_star *gs;
 	GSList *sl = NULL;
 	GtkWidget *darea;
-	struct map_geometry *geom;
 	struct gui_star_list *gsl;
 	cairo_t *cr;
 
 	darea = g_object_get_data(G_OBJECT(window), "image");
 	if (darea == NULL)
 		return;
-	geom = g_object_get_data(G_OBJECT(window), "geometry");
-	if (geom == NULL)
-		return;
+	//geom = g_object_get_data(G_OBJECT(window), "geometry");
+	//if (geom == NULL)
+	//	return;
 	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl == NULL)
 		return;
@@ -406,14 +409,16 @@ void draw_star_list(GSList *stars, GtkWidget *window)
 	while(sl != NULL) {
 		gs = GUI_STAR(sl->data);
 		sl = g_slist_next(sl);
-		draw_star_helper(gs, cr, gsl, geom->zoom);
+		draw_star_helper(gs, cr, gsl, map->zoom);
 	}
 	cairo_destroy (cr);
+#endif
 }
 
 /* hook function for sources drawing on expose */
-void draw_sources_hook(GtkWidget *darea, GtkWidget *window, GdkRectangle *area)
+void draw_sources(GtkWidget *darea, GdkRectangle *area)
 {
+#if 0
 	GSList *sl = NULL;
 	cairo_t *cr;
 	struct map_geometry *geom;
@@ -459,6 +464,7 @@ void draw_sources_hook(GtkWidget *darea, GtkWidget *window, GdkRectangle *area)
 	}
 
 	cairo_destroy(cr);
+#endif
 }
 
 
@@ -486,6 +492,7 @@ static double star_size_flux(double flux, double ref_flux, double fwhm)
  */
 void find_stars_cb(gpointer window, guint action)
 {
+#if 0
 	struct sources *src;
 	struct gui_star_list *gsl;
 	struct gui_star *gs;
@@ -622,7 +629,8 @@ void find_stars_cb(gpointer window, guint action)
 		/* give the mainloop a change to redraw under the popup */
 		while (gtk_events_pending ())
 			gtk_main_iteration ();
-		extract_stars(i_ch->fr, NULL, 0, P_DBL(SD_SNR), src);
+
+		extract_stars_annular(i_ch->fr, NULL, 0, P_DBL(SD_SNR), src);
 		remove_stars_of_type(gsl, TYPE_MASK(STAR_TYPE_SIMPLE), 0);
 		/* now add to the list */
 		for (i = 0; i < src->ns; i++) {
@@ -681,6 +689,7 @@ void find_stars_cb(gpointer window, guint action)
 		break;
 	}
 	gtk_widget_queue_draw(window);
+#endif
 }
 
 void act_stars_add_detected(GtkAction *action, gpointer window)
@@ -834,21 +843,22 @@ GSList *get_selection_from_window(GtkWidget *window, int type_mask)
  */
 GSList * stars_under_click(GtkWidget *window, GdkEventButton *event)
 {
-	struct map_geometry *geom;
+#if 0
 	struct gui_star_list *gsl;
 	double x, y;
 	GSList *found=NULL;
 
-	geom = g_object_get_data(G_OBJECT(window), "geometry");
-	if (geom == NULL)
-		return NULL;
+	//geom = g_object_get_data(G_OBJECT(window), "geometry");
+	//if (geom == NULL)
+	//	return NULL;
 	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl == NULL)
 		return NULL;
-	x = event->x / geom->zoom;
-	y = event->y / geom->zoom;
+	x = event->x / map->zoom;
+	y = event->y / map->zoom;
 	found = search_stars_near_point(gsl, x, y, 0);
 	return found;
+#endif
 }
 
 
@@ -857,6 +867,7 @@ GSList * stars_under_click(GtkWidget *window, GdkEventButton *event)
  */
 void select_stars(GtkWidget *window, GdkEventButton *event, int multiple)
 {
+#if 0
 	struct map_geometry *geom;
 	struct gui_star_list *gsl;
 	struct gui_star * gs;
@@ -884,6 +895,7 @@ void select_stars(GtkWidget *window, GdkEventButton *event, int multiple)
 	}
 	draw_star_list(found, window);
 	g_slist_free(found);
+#endif
 }
 
 
@@ -1156,6 +1168,7 @@ static void print_stars(GtkWidget *window, GSList *found)
 
 void plot_profile(GtkWidget *window, GSList *found)
 {
+#if 0
 	struct gui_star_list *gsl;
 	struct image_channel *i_ch;
 	GSList *selection;
@@ -1185,6 +1198,7 @@ void plot_profile(GtkWidget *window, GSList *found)
 		err_printf_sb2(window, "%s", last_err());
 		error_beep();
 	}
+#endif
 }
 
 
@@ -1516,6 +1530,7 @@ void single_selection(GtkWidget *window, GSList *stars)
 /* detect a star under the given position */
 void detect_add_star(GtkWidget *window, double x, double y)
 {
+#if 0
 	struct image_channel *i_ch;
 	struct map_geometry *geom;
 	struct gui_star_list *gsl;
@@ -1556,6 +1571,7 @@ void detect_add_star(GtkWidget *window, double x, double y)
 		gsl->select_mask |= TYPE_MASK(STAR_TYPE_USEL);
 		single_selection_gs(window, gs);
 	}
+#endif
 }
 
 /* print a short info line about the star */

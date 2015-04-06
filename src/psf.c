@@ -945,9 +945,9 @@ void multistar_subtract(double p[], void *rmodel)
 
 void do_fit_psf(gpointer window, GSList *found)
 {
+	struct ccd_frame *fr;
 	struct psf *psf, *patch;
 	struct gui_star *gs;
-	struct image_channel *i_ch;
 	struct stats stats;
 	float sky;// flux;
 	struct ap_params apdef;
@@ -960,8 +960,8 @@ void do_fit_psf(gpointer window, GSList *found)
 //	double psfvol;
 
 
-	i_ch = g_object_get_data(G_OBJECT(window), "i_channel");
-	if (i_ch == NULL || i_ch->fr == NULL) {
+	fr = frame_from_window (window);
+	if (fr == NULL) {
 		err_printf_sb2(window, "No image\n");
 		error_beep();
 		return;
@@ -972,11 +972,11 @@ void do_fit_psf(gpointer window, GSList *found)
 	gs = GUI_STAR(found->data);
 
 	ap_params_from_par(&apdef);
-	sky = get_sky(i_ch->fr, gs->x, gs->y, &apdef, NULL, &stats, NULL, NULL);
-//	flux = get_star(i_ch->fr, gs->x, gs->y, &apdef, &stats, NULL);
+	sky = get_sky(fr, gs->x, gs->y, &apdef, NULL, &stats, NULL, NULL);
+//	flux = get_star(fr, gs->x, gs->y, &apdef, &stats, NULL);
 
 	patch = psf_new(30, 30);
-	extract_patch(i_ch->fr, patch, gs->x, gs->y);
+	extract_patch(fr, patch, gs->x, gs->y);
 	plot_psf(patch);
 
 	psf = psf_new(100, 100);
@@ -1164,18 +1164,18 @@ int do_plot_profile(struct ccd_frame *fr, GSList *selection)
 
 void print_star_measures(gpointer window, GSList *found)
 {
+	struct ccd_frame *fr;
 	struct gui_star *gs;
 	struct rp_point *rpp = NULL;
 	int nrp;
 	char name[256];
 	double peak, sky, flux, err;
-	struct image_channel *i_ch;
 	double A, s;
 
 	g_return_if_fail(window != NULL);
 
-	i_ch = g_object_get_data(G_OBJECT(window), "i_channel");
-	if (i_ch == NULL || i_ch->fr == NULL) {
+	fr = frame_from_window (window);
+	if (fr == NULL) {
 		err_printf_sb2(window, "No image\n");
 		error_beep();
 		return;
@@ -1188,7 +1188,7 @@ void print_star_measures(gpointer window, GSList *found)
 	nrp = sqr(4 * ceil(P_DBL(AP_R1)));
 	rpp = malloc(nrp * sizeof(struct rp_point));
 
-	if (radial_profile(i_ch->fr, gs->x, gs->y, 2 * P_DBL(AP_R1), rpp, nrp,
+	if (radial_profile(fr, gs->x, gs->y, 2 * P_DBL(AP_R1), rpp, nrp,
 			   &peak, &flux, &sky, &err) <= 0) {
 		err_printf_sb2(window, "Bad star (too close to edge?)\n");
 		error_beep();
@@ -1243,15 +1243,14 @@ void plot_psf(struct psf *psf)
 
 void plot_sky_aperture(gpointer window, GSList *found)
 {
+	struct ccd_frame *fr;
 	struct psf *psf;
 	struct gui_star *gs;
-	struct image_channel *i_ch;
 //	struct stats rs;
 //	double sky, err, allp;
 
-
-	i_ch = g_object_get_data(G_OBJECT(window), "i_channel");
-	if (i_ch == NULL || i_ch->fr == NULL) {
+	fr = frame_from_window (window);
+	if (fr == NULL) {
 		err_printf_sb2(window, "No image\n");
 		error_beep();
 		return;
@@ -1270,7 +1269,7 @@ void plot_sky_aperture(gpointer window, GSList *found)
 	psf->dy = gs->y - floor(gs->y + 0.5);
 	make_circular_aperture(psf, P_DBL(AP_R1));
 
-	aperture_multiply(i_ch->fr, psf, gs->x, gs->y);
+	aperture_multiply(fr, psf, gs->x, gs->y);
 
 	plot_psf(psf);
 	psf_release(psf);
@@ -1279,19 +1278,19 @@ void plot_sky_aperture(gpointer window, GSList *found)
 
 void plot_sky_histogram(gpointer window, GSList *found)
 {
+	struct ccd_frame *fr;
 	struct gui_star *gs;
 	struct rp_point *rpp = NULL;
 	int nrp;
 	FILE *dfp;
 	int pop, i;
 	double peak, sky, flux, err;
-	struct image_channel *i_ch;
 	struct rstats *rs;
 
 	g_return_if_fail(window != NULL);
 
-	i_ch = g_object_get_data(G_OBJECT(window), "i_channel");
-	if (i_ch == NULL || i_ch->fr == NULL) {
+	fr = frame_from_window (window);
+	if (fr == NULL) {
 		err_printf_sb2(window, "No image\n");
 		error_beep();
 		return;
@@ -1304,14 +1303,14 @@ void plot_sky_histogram(gpointer window, GSList *found)
 	nrp = sqr(4 * ceil(P_DBL(AP_R1)));
 	rpp = malloc(nrp * sizeof(struct rp_point));
 
-	if (radial_profile(i_ch->fr, gs->x, gs->y, 2 * P_DBL(AP_R1), rpp, nrp,
+	if (radial_profile(fr, gs->x, gs->y, 2 * P_DBL(AP_R1), rpp, nrp,
 			   &peak, &flux, &sky, &err) <= 0) {
 		err_printf_sb2(window, "Bad star (too close to edge?)\n");
 		error_beep();
 		return;
 	}
 	rs = malloc(sizeof(struct rstats));
-	ring_stats(i_ch->fr, gs->x, gs->y,
+	ring_stats(fr, gs->x, gs->y,
 		      P_DBL(AP_R2), P_DBL(AP_R3), ALLQUADS, rs,
 		      -HUGE, HUGE);
 
@@ -1361,4 +1360,3 @@ void plot_sky_histogram(gpointer window, GSList *found)
 	free(rpp);
 	free(rs);
 }
-

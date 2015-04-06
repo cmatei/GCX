@@ -808,7 +808,7 @@ static void imf_display_cb(GtkAction *action, gpointer dialog)
 		if (load_image_file(imf))
 			goto out;
 
-		frame_to_channel(imf->fr, im_window, "i_channel");
+		frame_to_window (imf->fr, im_window);
 	} else {
 		error_beep();
 		log_msg("\nNo Frame selected\n", dialog);
@@ -1459,7 +1459,8 @@ static void ccdred_run_cb(GtkAction *action, gpointer dialog)
 	}
 	im_window = g_object_get_data(G_OBJECT(dialog), "im_window");
 	g_return_if_fail(im_window != NULL);
-	frame_to_channel(fr, im_window, "i_channel");
+
+	frame_to_window (fr, im_window);
 	release_frame(fr);
 end:
 	gtk_widget_set_sensitive(menubar, 1);
@@ -1793,4 +1794,3 @@ void act_control_processing (GtkAction *action, gpointer window)
 		gdk_window_raise(dialog->window);
 	}
 }
-

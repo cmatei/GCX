@@ -3649,6 +3649,210 @@ create_guide_window (void)
 }
 
 GtkWidget*
+create_focus_window (void)
+{
+  GtkWidget *guide_window;
+  GtkWidget *guide_vbox;
+  GtkWidget *hbox24;
+  GtkWidget *scrolled_window;
+  GtkWidget *viewport5;
+  GtkWidget *image_alignment;
+  GtkWidget *image;
+  GtkWidget *vbox32;
+  guint guide_run_key;
+  GtkWidget *guide_run;
+  guint guide_dark_key;
+  GtkWidget *guide_dark;
+  guint guide_find_star_key;
+  GtkWidget *guide_find_star;
+  guint guide_calibrate_key;
+  GtkWidget *guide_calibrate;
+  GtkWidget *hseparator8;
+  GtkWidget *label92;
+  GtkWidget *guide_exp_combo;
+  GtkWidget *guide_exp_combo_entry;
+  GtkWidget *guide_options;
+  GtkWidget *alignment1;
+  GtkWidget *guide_box_darea;
+  GtkWidget *statuslabel2;
+  GtkAccelGroup *accel_group;
+
+  accel_group = gtk_accel_group_new ();
+
+  guide_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  g_object_set_data (G_OBJECT (guide_window), "guide_window", guide_window);
+  gtk_window_set_title (GTK_WINDOW (guide_window), "Guiding");
+  gtk_window_set_default_size (GTK_WINDOW (guide_window), 640, 400);
+
+  guide_vbox = gtk_vbox_new (FALSE, 0);
+  g_object_ref (guide_vbox);
+  g_object_set_data_full (G_OBJECT (guide_window), "guide_vbox", guide_vbox,
+                            (GDestroyNotify) g_object_unref);
+  gtk_widget_show (guide_vbox);
+  gtk_container_add (GTK_CONTAINER (guide_window), guide_vbox);
+
+  hbox24 = gtk_hbox_new (FALSE, 0);
+  g_object_ref (hbox24);
+  g_object_set_data_full (G_OBJECT (guide_window), "hbox24", hbox24,
+                            (GDestroyNotify) g_object_unref);
+  gtk_widget_show (hbox24);
+  gtk_box_pack_start (GTK_BOX (guide_vbox), hbox24, TRUE, TRUE, 0);
+
+  scrolled_window = gtk_scrolled_window_new (NULL, NULL);
+  g_object_ref (scrolled_window);
+  g_object_set_data_full (G_OBJECT (guide_window), "scrolled_window", scrolled_window,
+                            (GDestroyNotify) g_object_unref);
+  gtk_widget_show (scrolled_window);
+  gtk_box_pack_start (GTK_BOX (hbox24), scrolled_window, TRUE, TRUE, 0);
+
+  viewport5 = gtk_viewport_new (NULL, NULL);
+  g_object_ref (viewport5);
+  g_object_set_data_full (G_OBJECT (guide_window), "viewport5", viewport5,
+                            (GDestroyNotify) g_object_unref);
+  gtk_widget_show (viewport5);
+  gtk_container_add (GTK_CONTAINER (scrolled_window), viewport5);
+
+  image_alignment = gtk_alignment_new (0.5, 0.5, 0, 0);
+  g_object_ref (image_alignment);
+  g_object_set_data_full (G_OBJECT (guide_window), "image_alignment", image_alignment,
+                            (GDestroyNotify) g_object_unref);
+  gtk_widget_show (image_alignment);
+  gtk_container_add (GTK_CONTAINER (viewport5), image_alignment);
+
+  image = gtk_drawing_area_new ();
+  g_object_ref (image);
+  g_object_set_data_full (G_OBJECT (guide_window), "image", image,
+                            (GDestroyNotify) g_object_unref);
+  gtk_widget_show (image);
+  gtk_container_add (GTK_CONTAINER (image_alignment), image);
+
+  vbox32 = gtk_vbox_new (FALSE, 3);
+  g_object_ref (vbox32);
+  g_object_set_data_full (G_OBJECT (guide_window), "vbox32", vbox32,
+                            (GDestroyNotify) g_object_unref);
+  gtk_widget_show (vbox32);
+  gtk_box_pack_start (GTK_BOX (hbox24), vbox32, FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (vbox32), 12);
+
+  guide_run = gtk_toggle_button_new_with_mnemonic ("_Run");
+  guide_run_key = gtk_label_get_mnemonic_keyval (GTK_LABEL (GTK_BIN (guide_run)->child));
+
+  gtk_widget_add_accelerator (guide_run, "clicked", accel_group,
+			      guide_run_key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
+  g_object_ref (guide_run);
+  g_object_set_data_full (G_OBJECT (guide_window), "guide_run", guide_run,
+                            (GDestroyNotify) g_object_unref);
+  gtk_widget_show (guide_run);
+  gtk_box_pack_start (GTK_BOX (vbox32), guide_run, FALSE, FALSE, 0);
+
+  guide_dark = gtk_button_new_with_mnemonic ("_Dark Frame");
+  guide_dark_key = gtk_label_get_mnemonic_keyval (GTK_LABEL (GTK_BIN (guide_dark)->child));
+
+  gtk_widget_add_accelerator (guide_dark, "clicked", accel_group,
+                              guide_dark_key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
+  g_object_ref (guide_dark);
+  g_object_set_data_full (G_OBJECT (guide_window), "guide_dark", guide_dark,
+                            (GDestroyNotify) g_object_unref);
+  gtk_widget_show (guide_dark);
+  gtk_box_pack_start (GTK_BOX (vbox32), guide_dark, FALSE, FALSE, 0);
+
+  guide_find_star = gtk_button_new_with_mnemonic ("_Guide Star");
+  guide_find_star_key = gtk_label_get_mnemonic_keyval (GTK_LABEL (GTK_BIN (guide_find_star)->child));
+
+  gtk_widget_add_accelerator (guide_find_star, "clicked", accel_group,
+                              guide_find_star_key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
+  g_object_ref (guide_find_star);
+  g_object_set_data_full (G_OBJECT (guide_window), "guide_find_star", guide_find_star,
+                            (GDestroyNotify) g_object_unref);
+  gtk_widget_show (guide_find_star);
+  gtk_box_pack_start (GTK_BOX (vbox32), guide_find_star, FALSE, FALSE, 0);
+  gtk_widget_set_tooltip_text (guide_find_star, "Set one of the user-selected stars as a guide star; if no user selected stars exist, search for a suitable star");
+
+  guide_calibrate = gtk_toggle_button_new_with_mnemonic ("_Calibrate");
+  guide_calibrate_key = gtk_label_get_mnemonic_keyval (GTK_LABEL (GTK_BIN (guide_calibrate)->child));
+
+  gtk_widget_add_accelerator (guide_calibrate, "clicked", accel_group,
+                              guide_calibrate_key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
+  g_object_ref (guide_calibrate);
+  g_object_set_data_full (G_OBJECT (guide_window), "guide_calibrate", guide_calibrate,
+                            (GDestroyNotify) g_object_unref);
+  gtk_widget_show (guide_calibrate);
+  gtk_box_pack_start (GTK_BOX (vbox32), guide_calibrate, FALSE, FALSE, 0);
+
+  hseparator8 = gtk_hseparator_new ();
+  g_object_ref (hseparator8);
+  g_object_set_data_full (G_OBJECT (guide_window), "hseparator8", hseparator8,
+                            (GDestroyNotify) g_object_unref);
+  gtk_widget_show (hseparator8);
+  gtk_box_pack_start (GTK_BOX (vbox32), hseparator8, FALSE, TRUE, 3);
+
+  label92 = gtk_label_new ("Exposure");
+  g_object_ref (label92);
+  g_object_set_data_full (G_OBJECT (guide_window), "label92", label92,
+                            (GDestroyNotify) g_object_unref);
+  gtk_widget_show (label92);
+  gtk_box_pack_start (GTK_BOX (vbox32), label92, FALSE, FALSE, 0);
+  gtk_misc_set_alignment (GTK_MISC (label92), 7.45058e-09, 1);
+
+  guide_exp_combo = gtk_combo_box_entry_new_text ();
+  g_object_ref (guide_exp_combo);
+  g_object_set_data_full (G_OBJECT (guide_window), "guide_exp_combo", guide_exp_combo,
+                            (GDestroyNotify) g_object_unref);
+  gtk_widget_show (guide_exp_combo);
+  gtk_box_pack_start (GTK_BOX (vbox32), guide_exp_combo, FALSE, FALSE, 0);
+
+  gtk_combo_box_append_text (GTK_COMBO_BOX (guide_exp_combo), "1/8");
+  gtk_combo_box_append_text (GTK_COMBO_BOX (guide_exp_combo), "1/4");
+  gtk_combo_box_append_text (GTK_COMBO_BOX (guide_exp_combo), "1/2");
+  gtk_combo_box_append_text (GTK_COMBO_BOX (guide_exp_combo), "1");
+  gtk_combo_box_append_text (GTK_COMBO_BOX (guide_exp_combo), "2");
+  gtk_combo_box_append_text (GTK_COMBO_BOX (guide_exp_combo), "4");
+
+  guide_exp_combo_entry = GTK_WIDGET (GTK_BIN(guide_exp_combo)->child);
+  g_object_ref (guide_exp_combo_entry);
+  g_object_set_data_full (G_OBJECT (guide_window), "guide_exp_combo_entry", guide_exp_combo_entry,
+                            (GDestroyNotify) g_object_unref);
+  gtk_widget_show (guide_exp_combo_entry);
+  gtk_widget_set_size_request (guide_exp_combo_entry, 64, -1);
+  gtk_entry_set_text (GTK_ENTRY (guide_exp_combo_entry), "2");
+
+  guide_options = gtk_button_new_with_label ("Options");
+  g_object_ref (guide_options);
+  g_object_set_data_full (G_OBJECT (guide_window), "guide_options", guide_options,
+                            (GDestroyNotify) g_object_unref);
+  gtk_widget_show (guide_options);
+  gtk_box_pack_start (GTK_BOX (vbox32), guide_options, FALSE, FALSE, 0);
+
+  alignment1 = gtk_alignment_new (0.5, 0.5, 0, 0);
+  g_object_ref (alignment1);
+  g_object_set_data_full (G_OBJECT (guide_window), "alignment1", alignment1,
+                            (GDestroyNotify) g_object_unref);
+  gtk_widget_show (alignment1);
+  gtk_box_pack_start (GTK_BOX (vbox32), alignment1, TRUE, TRUE, 0);
+
+  guide_box_darea = gtk_drawing_area_new ();
+  g_object_ref (guide_box_darea);
+  g_object_set_data_full (G_OBJECT (guide_window), "guide_box_darea", guide_box_darea,
+                            (GDestroyNotify) g_object_unref);
+  gtk_widget_show (guide_box_darea);
+  gtk_container_add (GTK_CONTAINER (alignment1), guide_box_darea);
+
+  statuslabel2 = gtk_label_new ("");
+  g_object_ref (statuslabel2);
+  g_object_set_data_full (G_OBJECT (guide_window), "statuslabel2", statuslabel2,
+                            (GDestroyNotify) g_object_unref);
+  gtk_widget_show (statuslabel2);
+  gtk_box_pack_start (GTK_BOX (guide_vbox), statuslabel2, FALSE, FALSE, 0);
+  gtk_label_set_justify (GTK_LABEL (statuslabel2), GTK_JUSTIFY_LEFT);
+  gtk_misc_set_alignment (GTK_MISC (statuslabel2), 7.45058e-09, 0.5);
+  gtk_misc_set_padding (GTK_MISC (statuslabel2), 3, 3);
+
+  gtk_window_add_accel_group (GTK_WINDOW (guide_window), accel_group);
+
+  return guide_window;
+}
+
+GtkWidget*
 create_mband_dialog (void)
 {
   GtkWidget *mband_dialog;

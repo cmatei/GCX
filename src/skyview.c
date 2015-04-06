@@ -435,7 +435,7 @@ static int fetch_skyview_image(GtkWidget *window, const char *position, const ch
 
 	rescan_fits_wcs(fr, &fr->fim);
 	rescan_fits_exp(fr, &fr->exp);
-	frame_to_channel(fr, im_window, "i_channel");
+	frame_to_window (fr, im_window);
 	release_frame(fr);
 
 extern void set_last_open(gpointer object, char *file_class, char *path);

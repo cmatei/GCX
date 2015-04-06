@@ -1006,15 +1006,14 @@ static void cds_query(gpointer window, guint action)
 {
 	GtkWidget *logw;
 	struct wcs *wcs;
-	struct image_channel *i_ch;
+	struct ccd_frame *fr;
 	double w, h;
 	GList *tsl = NULL;
 
 	g_return_if_fail(action < QUERY_CATALOGS);
 
-	i_ch = g_object_get_data(G_OBJECT(window), "i_channel");
-
-	if (i_ch == NULL || i_ch->fr == NULL) {
+	fr = frame_from_window (window);
+	if (fr == NULL) {
 		err_printf_sb2(window, "Load a frame or create a new one before loading stars");
 		error_beep();
 		return;
@@ -1025,8 +1024,9 @@ static void cds_query(gpointer window, guint action)
 		error_beep();
 		return;
 	}
-	w = 60.0*fabs(i_ch->fr->w * wcs->xinc);
-	h = 60.0*fabs(i_ch->fr->h * wcs->yinc);
+
+	w = 60.0*fabs(fr->w * wcs->xinc);
+	h = 60.0*fabs(fr->h * wcs->yinc);
 	clamp_double(&w, 1.0, 2 * P_DBL(QUERY_MAX_RADIUS));
 	clamp_double(&h, 1.0, 2 * P_DBL(QUERY_MAX_RADIUS));
 

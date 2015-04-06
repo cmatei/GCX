@@ -663,7 +663,6 @@ void add_star_from_catalog(gpointer window)
 	int ret;
 	struct cat_star *cats;
 	struct ccd_frame *fr;
-	struct image_channel *i_ch;
 	double x, y;
 
 
@@ -680,8 +679,8 @@ void add_star_from_catalog(gpointer window)
 	}
 	d3_printf("found %s (%.3f %.3f)\n", cats->name, cats->ra, cats->dec);
 
-	i_ch = g_object_get_data(G_OBJECT(window), "i_channel");
-	if (i_ch == NULL || i_ch->fr == NULL) {
+	fr = frame_from_window (window);
+	if (fr == NULL) {
 		ret = modal_yes_no("An image frame is needed to load objects.\n"
 				   "Create new frame using the defalult geometry?",
 				   "New Frame?");
@@ -699,11 +698,10 @@ void add_star_from_catalog(gpointer window)
 		fr->fim.rot = 0.0;
 		fr->fim.xinc = P_DBL(FILE_NEW_SECPERPIX) / 3600.0;
 		fr->fim.yinc = P_DBL(FILE_NEW_SECPERPIX) / 3600.0;
-		frame_to_channel(fr, window, "i_channel");
+
+		frame_to_window (fr, window);
 //		add_cat_stars_to_window(window, &cats, 1);
 //		return;
-	} else {
-		fr = i_ch->fr;
 	}
 
 	wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");

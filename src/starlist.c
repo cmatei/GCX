@@ -653,7 +653,7 @@ void remove_pairs(GtkWidget *window, int flag_mask)
 int remove_off_frame_stars(gpointer window)
 {
 	struct gui_star_list *gsl;
-	struct image_channel *i_ch;
+	struct ccd_frame *fr;
 	int w, h, i = 0;
 	struct gui_star *gs;
 	GSList *sl=NULL, *osl=NULL, *head;
@@ -662,13 +662,14 @@ int remove_off_frame_stars(gpointer window)
 	if (gsl == NULL) {
 		return 0;
 	}
-	i_ch = g_object_get_data(G_OBJECT(window), "i_channel");
-	if (i_ch == NULL || i_ch->fr == NULL) {
+
+	fr = frame_from_window (window);
+	if (fr == NULL) {
 		err_printf("No image frame\n");
 		return 0;
 	}
-	w = i_ch->fr->w;
-	h = i_ch->fr->h;
+	w = fr->w;
+	h = fr->h;
 
 	head = gsl->sl;
 

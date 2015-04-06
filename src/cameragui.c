@@ -480,7 +480,7 @@ static int expose_cb(GtkWidget *window)
 		}
 		if (!fr->stats.statsok)
 			frame_stats(fr);
-		frame_to_channel(fr, main_window, "i_channel");
+		frame_to_window (fr, main_window);
 		r = maybe_save_frame(fr, window);
 		release_frame(fr);
 	} else {

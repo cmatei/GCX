@@ -2,75 +2,10 @@
 #define _GUI_H_
 
 #include <gtk/gtk.h>
-
-#define MAX_ZOOM 16
-
-/* definitions of channels and other stuff associated with image displaying */
-#define LUT_SIZE 4096
-#define LUT_IDX_MASK 0x0fff
-
-/* this structure describes a channel (a frame and it's associated intesity mapping) */
-struct image_channel {
-	int ref_count; /* reference count for map */
-	double lcut; /* the low cut */
-	double hcut; /* the high cut */
-	int invert; /* if 1, the image is displayed in reverse video */
-	double avg_at; /* position of average between cuts */
-	double gamma; /* gamma setting for image */
-	double toe; /* toe setting for image */
-	double offset; /* toe setting for image */
-	unsigned short lut[LUT_SIZE];
-	double dsigma; /* sigma used for cut calculation */
-	double davg; /* image average used for display calculations */
-	int flip_h; /* flag for horisontal flip */
-	int flip_v; /* flag for horisontal flip */
-	int zoom_mode; /* zooming algorithm */
-	int channel_changed; /* when anyhting is changed in the map, setting this */
-			 /* flag will ask for the map cache to be redrawn */
-	struct ccd_frame *fr; /* the actual image of the channel */
-	int color;		/* display a color image */
-};
-
-/* we keep a cache of the already trasformed image for quick expose
- * redraws.
- */
-#define MAP_CACHE_GRAY 0
-#define MAP_CACHE_RGB 1
-struct map_cache {
-	int ref_count; /* reference count for cache */
-	int cache_valid; /* the cache is valid */
-	int type; /* type of cache: gray or rgb */
-	double zoom; /* zoom level of the cache */
-	int x; /* coordinate of top-left corner of cache (in display space) */
-	int y;
-	int w; /* width of cache (in display pixels) */
-	int h; /* height of cache (in display pixels) */
-	unsigned size; /* size of cache (in bytes) */
-	unsigned char *dat; /* pointer to cache data area */
-};
-
-/* per-window image display parameters */
-struct map_geometry {
-	int ref_count;
-	double zoom;	/* zoom level for frame mapping */
-	int width;   	/* size of drawing area at zoom=1 */
-	int height;
-};
+#include "gcxview.h"
 
 
-/* function prototypes */
-/* from showimage.c */
-extern gboolean image_expose_cb(GtkWidget *widget, GdkEventExpose *event, gpointer data);
-extern int frame_to_channel(struct ccd_frame *fr, GtkWidget *window, char *chname);
-extern void ref_image_channel(struct image_channel *channel);
-extern void release_image_channel(struct image_channel *channel);
-extern int channel_to_pnm_file(struct image_channel *channel, GtkWidget *window, char *fn, int is_16bit);
 
-extern struct map_cache *new_map_cache(int size, int type);
-extern void release_map_cache(struct map_cache *cache);
-extern void paint_from_gray_cache(GtkWidget *widget, struct map_cache *cache, GdkRectangle *area);
-extern void image_box_to_cache(struct map_cache *cache, struct image_channel *channel,
-			       double zoom, int x, int y, int w, int h);
 
 
 /* from gui.c */
@@ -85,6 +20,9 @@ extern int info_printf_sb2(gpointer window, const char *fmt, ...);
 
 extern GtkWidget * create_image_window(void);
 extern int window_auto_pairs(gpointer window);
+
+extern struct ccd_frame *frame_from_window (gpointer window);
+extern void frame_to_window(struct ccd_frame *fr, gpointer window);
 
 extern void act_user_quit (GtkAction *action, gpointer window);
 extern void act_file_new (GtkAction *action, gpointer window);
@@ -136,8 +74,8 @@ extern void act_recipe_open (GtkAction *action, gpointer window);
 extern void act_stars_add_gsc2_file (GtkAction *action, gpointer window);
 
 /* from imadjust.c */
-extern void set_default_channel_cuts(struct image_channel* channel);
-extern void set_darea_size(GtkWidget *window, struct map_geometry *geom, double xc, double yc);
+//extern void set_default_channel_cuts(struct image_channel* channel);
+//extern void set_darea_size(GtkWidget *window, struct map_geometry *geom, double xc, double yc);
 extern void drag_adjust_cuts(GtkWidget *window, int dx, int dy);
 extern void pan_cursor(GtkWidget *window);
 extern void show_region_stats(GtkWidget *window, double x, double y);

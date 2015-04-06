@@ -732,7 +732,7 @@ int window_fit_wcs(GtkWidget *window)
 	double ra_err = HUGE, de_err = HUGE;
 	int npairs, gpairs;
 	char buf[256];
-	struct image_channel *i_chan;
+	struct ccd_frame *fr;
 
 	wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
 	if (wcs == NULL || wcs->wcsset == WCS_INVALID) {
@@ -795,10 +795,11 @@ int window_fit_wcs(GtkWidget *window)
 	info_printf_sb2(window, buf);
 	cat_change_wcs(gsl->sl, wcs);
 
-	i_chan = g_object_get_data(G_OBJECT(window), "i_channel");
-	if (wcs == NULL || i_chan == NULL || i_chan->fr == NULL)
+	fr = frame_from_window (window);
+	if (wcs == NULL || fr == NULL)
 		return 0;
-	memcpy(&(i_chan->fr->fim), wcs, sizeof (struct wcs));
+
+	memcpy(&fr->fim, wcs, sizeof (struct wcs));
 
 //	d3_printf("final xinc: %f\n", wcs->xinc);
 	return 0;

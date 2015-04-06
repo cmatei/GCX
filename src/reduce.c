@@ -1655,7 +1655,6 @@ int aphot_imf(struct image_file *imf, struct ccd_reduce *ccdr,
 {
 	char msg[256];
 	struct gui_star_list *gsl = NULL;
-	struct image_channel *i_chan = NULL;
 	struct ccd_frame *fr = NULL;
 	struct wcs *wcs;
 	struct stf *stf;
@@ -1664,18 +1663,18 @@ int aphot_imf(struct image_file *imf, struct ccd_reduce *ccdr,
 	char *ret = NULL;
 
 	load_image_file(imf);
+
 	g_return_val_if_fail(imf->fr != NULL, -1);
 	g_return_val_if_fail(window != NULL, -1);
 
-	frame_to_channel(imf->fr, window, "i_channel");
+	frame_to_window (imf->fr, window);
 
-	i_chan = g_object_get_data(G_OBJECT(window), "i_channel");
-	if (i_chan == NULL || i_chan->fr == NULL) {
+	fr = frame_from_window(window);
+	if (fr == NULL) {
 		err_printf("aphot_imf: No frame\n");
 		return -1;
-	} else {
-		fr = i_chan->fr;
 	}
+
 	remove_off_frame_stars(window);
 	if (ccdr->recipe) {
 		load_rcp_to_window(window, ccdr->recipe, NULL);

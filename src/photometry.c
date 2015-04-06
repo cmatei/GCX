@@ -615,7 +615,6 @@ int stf_centering_stats(struct stf *stf, struct wcs *wcs, double *rms, double *m
 static void photometry_cb(gpointer window, guint action)
 {
 	struct gui_star_list *gsl = NULL;
-	struct image_channel *i_chan = NULL;
 	struct ccd_frame *fr = NULL;
 	struct wcs *wcs;
 	struct mband_dataset *mbds;
@@ -624,12 +623,10 @@ static void photometry_cb(gpointer window, guint action)
 	int n;
 	FILE *plfp;
 
-	i_chan = g_object_get_data(G_OBJECT(window), "i_channel");
-	if (i_chan == NULL || i_chan->fr == NULL) {
+	fr = frame_from_window (window);
+	if (fr == NULL) {
 		err_printf_sb2(window, "No frame\n");
 		return;
-	} else {
-		fr = i_chan->fr;
 	}
 	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl == NULL) {
@@ -785,20 +782,18 @@ void act_phot_to_stdout (GtkAction *action, gpointer window)
 char * phot_to_fd(gpointer window, FILE *fd, int format)
 {
 	struct gui_star_list *gsl = NULL;
-	struct image_channel *i_chan = NULL;
 	struct ccd_frame *fr = NULL;
 	struct wcs *wcs;
 	struct mband_dataset *mbds;
 	char *ret = NULL;
 	struct stf *stf;
 
-	i_chan = g_object_get_data(G_OBJECT(window), "i_channel");
-	if (i_chan == NULL || i_chan->fr == NULL) {
+	fr = frame_from_window (window);
+	if (fr == NULL) {
 		err_printf("No frame\n");
 		return NULL;
-	} else {
-		fr = i_chan->fr;
 	}
+
 	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl == NULL) {
 		err_printf("No phot stars\n");

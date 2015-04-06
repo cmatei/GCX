@@ -573,12 +573,140 @@ static int check_multiple(struct sources *src, struct star *s)
 	return 1;
 }
 
+// same as extract_stars, but uses an annulus instead of a box region
+int extract_stars_annular(struct ccd_frame *fr, struct annular_region *reg, double min_flux, double sigmas, struct sources *src)
+{
+	struct rstats *rsn;
+	struct moments m;
+	struct star st;
+	int ret;
+	int x, y;
+	int xs, ys, w, h, xc, yc;
+	int rn;
+	double minpk, pk;
+	double skycut, sky;
+	int starr;
+	double fwhm;
+	float dp;
+	int candidates = 0;
+	int r1sq, r2sq;
 
-// find the src->maxn brightest 'stars' in the supplied region;
-// if region is NULL, search the whole frame
-// returns the actual number of stars found, a neagtive number for errors.
-// the star centroided positions, estimated fluxes and sizes are updated in
-// the result table
+	if (reg != NULL) {
+		xs = reg->xc - reg->r2;
+		if (xs < 0)
+			xs = 0;
+		if (xs > fr->w - 1)
+			xs = fr->w - 1;
+
+		ys = reg->yc - reg->r2;
+		if (ys < 0)
+			ys = 0;
+		if (ys > fr->h - 1)
+			ys = fr->h - 1;
+
+		w = 2 * reg->r2;
+		h = 2 * reg->r2;
+		xc = reg->xc;
+		yc = reg->yc;
+		r1sq = sqr(reg->r1);
+		r2sq = sqr(reg->r2);
+	} else {
+		xs = 0;
+		ys = 0;
+		w = fr->w;
+		h = fr->h;
+		xc = fr->w / 2;
+		yc = fr->h / 2;
+
+		r1sq = 0;
+		r2sq = sqr(fr->h / 2);
+		if (r2sq > sqr(fr->w / 2))
+			r2sq = sqr(fr->w / 2);
+	}
+
+	if (!fr->stats.statsok)
+		frame_stats(fr);
+
+//	d3_printf("extract_stars: frame size is %dx%d\n", fr->w, fr->h);
+
+	minpk = fr->stats.cavg + 2 * sigmas * fr->stats.csigma;
+
+	rsn = malloc(sizeof(struct rstats));
+
+	for (y = ys; y < ys + h; y++) {
+		for (x = xs; x < xs + w; x++) {
+			if (x > fr->w - 1 || y > fr->h - 1)
+				continue;
+
+			double d = sqr(x - xc) + sqr(y - yc);
+			if (d < r1sq || d > r2sq)
+				continue;
+
+			dp = get_pixel_luminence(fr, x, y);
+			if ((pk = dp) <= minpk) {// below detection threshold
+				continue;
+			}
+			candidates ++;
+			if (candidates > MAX_STAR_CANDIDATES) {
+				err_printf("extract_stars: Too many bad candidates, aborting\n");
+				return 0;
+			}
+// now check if the star is valid
+			ret = star_radius(fr, x, y, pk, minpk, &fwhm);
+			if (ret < 0)
+				continue;
+			else starr = ret;
+// estimate sky here
+			rn = SKYR * starr;
+			if (rn > MAXSR)
+				rn = MAXSR;
+			thin_ring_stats(fr, x, y, starr, rsn, -HUGE, HUGE);
+			skycut = NSIGMA * rsn->sigma;
+			thin_ring_stats(fr, x, y, rn, rsn, -HUGE, HUGE);
+			skycut += rsn->median;
+			sky = rsn->median;
+			if (pk < skycut) {
+//				d3_printf("peak %.2f lower than skycut %.2f\n", rs->max, skycut);
+				continue;
+			}
+// check that we have a few connected pixels above the cut
+			ret = ring_stats(fr, 1.0*x, 1.0*y, 0, 2,
+					 QUAD1|QUAD2|QUAD3|QUAD4, rsn, skycut, HUGE);
+			if (ret < 0 || rsn->used < NCONN) {
+//				d3_printf("only %d connected pixels found\n", rsn->used);
+				continue;
+			}
+			st.peak = rsn->max;
+// get the star's centroid and flux
+			star_moments(fr, 1.0*x, 1.0*y, 1.0*starr, sky, &m);
+// check star has enough flux
+			if ((m.sum) < min_flux) {
+//				d3_printf("flux %.2f too low\n", (rsn->sum - rsn->used * skycut));
+				continue;
+			}
+// we finally have it; fill up return values and exit
+			st.x = m.mx;
+			st.y = m.my;
+			st.flux = m.sum;
+			st.starr = starr;
+			st.fwhm = fwhm;
+//			d3_printf("mx2:%.1f my2:%.1f mxy:%.1f\n", m.mx2, m.my2, m.mxy);
+			moments_to_ecc(&m, &st.fwhm_pa, &st.fwhm_ec);
+//			d3_printf("ecc:%.1f pa:%.1f\n", s->fwhm_ec, s->fwhm_pa);
+//			s->fwhm_ec = 0;
+//			s->fwhm_pa = 0;
+			st.datavalid = 1;
+			if (check_multiple(src, &st)) {
+//				d3_printf("candidates so far: %d\n", candidates);
+				candidates = 0;
+				insert_star(src, &st);
+			}
+		}
+	}
+	free(rsn);
+	return src->ns;
+}
+
 int extract_stars(struct ccd_frame *fr, struct region *reg, double min_flux, double sigmas, struct sources *src)
 {
 	struct rstats *rsn;

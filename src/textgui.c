@@ -81,11 +81,11 @@ static void set_named_callback(void *dialog, char *name, char *callback, void *f
 void act_show_fits_headers (GtkAction *action, gpointer window)
 {
 	GtkWidget *dialog;
-	struct image_channel *i_chan;
+	struct ccd_frame *fr;
 	char title[256];
 
-	i_chan = g_object_get_data(G_OBJECT(window), "i_channel");
-	if (i_chan == NULL || i_chan->fr == NULL) {
+	fr = frame_from_window (window);
+	if (fr == NULL) {
 		err_printf_sb2(window, "No frame loaded");
 		error_beep();
 		return;
@@ -103,13 +103,13 @@ void act_show_fits_headers (GtkAction *action, gpointer window)
 		set_named_callback (G_OBJECT (dialog), "close_button", "clicked",
 				    G_CALLBACK (close_fits_dialog));
 		gtk_window_set_default_size(GTK_WINDOW(dialog), 600, 400);
-		update_fits_header_dialog(dialog, i_chan->fr);
+		update_fits_header_dialog(dialog, fr);
 		gtk_widget_show(dialog);
 	} else {
-		update_fits_header_dialog(dialog, i_chan->fr);
+		update_fits_header_dialog(dialog, fr);
 		gdk_window_raise(dialog->window);
 	}
-	snprintf(title, 255, "%s header", i_chan->fr->name);
+	snprintf(title, 255, "%s header", fr->name);
 	gtk_window_set_title(GTK_WINDOW(dialog), title);
 }
 
@@ -215,6 +215,3 @@ static void update_fits_header_dialog(GtkWidget *dialog, struct ccd_frame *fr)
 		gtk_text_buffer_insert_at_cursor(buffer, line, -1);
 	}
 }
-
-
-

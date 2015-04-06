@@ -1,17 +1,17 @@
 #ifndef _MULTIBAND_H_
 #define _MULTIBAND_H_
 
-#include "sourcesdraw.h"
+//#include "sourcesdraw.h"
 
 #define MAX_MBANDS 8		/* max number of bands we care about at one time */
 #define OUTLIER_THRESHOLD P_DBL(MB_OUTLIER_THRESHOLD)
 #define ZP_OUTLIER_THRESHOLD P_DBL(MB_ZP_OUTLIER_THRESHOLD)
 #define SMALL_ERR 0.00000001 	/* residual at which we stop iterating */
-#define MIN_AM_VARIANCE P_DBL(MB_MIN_AM_VARIANCE) 
-#define MIN_COLOR_VARIANCE P_DBL(MB_MIN_COLOR_VARIANCE) 
+#define MIN_AM_VARIANCE P_DBL(MB_MIN_AM_VARIANCE)
+#define MIN_COLOR_VARIANCE P_DBL(MB_MIN_COLOR_VARIANCE)
 #define AIRMASS_BRACKET_OVERSIZE P_DBL(MB_AIRMASS_BRACKET_OVSIZE)
 #define AIRMASS_BRACKET_MAX_OVERSIZE P_DBL(MB_AIRMASS_BRACKET_OVSIZE)
-#define LMAG_FROM_ZP P_DBL(MB_LMAG_FROM_ZP)	
+#define LMAG_FROM_ZP P_DBL(MB_LMAG_FROM_ZP)
 
 /* an object being observed */
 struct o_star {
@@ -26,7 +26,7 @@ struct o_star {
 #define ZP_FIT_ERR 1		/* a fit couldn't be obtained */
 #define ZP_ALL_SKY 2		/* The zeropoint value comes from an all-sky reduction */
 #define ZP_DIFF 3		/* Zeropoint comes from a single comp star */
-#define ZP_FIT_NOCOLOR 4	/* the fit is valid, but didn't 
+#define ZP_FIT_NOCOLOR 4	/* the fit is valid, but didn't
 				 * include any color transformation */
 #define ZP_FIT_OK 5		/* A complete fit, with transformation was done */
 #define ZP_STATE_M 0x0f
@@ -39,9 +39,9 @@ struct transform {
 	int c1;			/* first band of color used for transform */
 	int c2;			/* the second band (so the index is c1-c2) */
 	double k;		/* transformation coeff */
-	double kerr;		
+	double kerr;
 	double e;		/* extinction coeff */
-	double eerr;		
+	double eerr;
 	double zz;		/* airmass zeropoint */
 	double zzerr;
 	double am;		/* airmass of airmass zeropoint */
@@ -51,18 +51,18 @@ struct transform {
 
 /* an observation frame */
 struct o_frame{
-	int skip;		/* this frame is marked deleted, and should 
+	int skip;		/* this frame is marked deleted, and should
 				   not be used for anything or saved */
 	GList *sol;		/* list of star observations in this frame */
 //	struct obs_data *obs;	/* the obs_data for the frame */
 	struct stf *stf;	/* the stf made from the observation frame*/
-	long band;		/* index for the observation's band 
+	long band;		/* index for the observation's band
 				 * -1 if the frame has an invalid band */
 	double zpoint;		/* zeropoint of frame */
 	double zpointerr;	/* error of zerpoint */
 	int zpstate;		/* flags and status info for the zeropoint */
 	double lmag;		/* limiting magnitude for the frame */
-	struct transform *trans; /* pointer to the frame's transformation. This is common 
+	struct transform *trans; /* pointer to the frame's transformation. This is common
 				    for all frames of the same band. */
 	struct transform ltrans; /* the transformation used to calculate the standard mags
 				    in this frame */
@@ -73,7 +73,7 @@ struct o_frame{
 	double tweight; 	/* total weight of obseravtions used for fit */
 	double tnweight; 	/* total natural weight of obseravtions used for fit */
 	double me1;		/* the mean error of unit weight */
-	int vstars; 		/* number of valid standard stars (used in the fit) 
+	int vstars; 		/* number of valid standard stars (used in the fit)
 				 * vstars is < 0 before a fit is attempted */
 	int outliers; 		/* number of stars with errors > 6 sigma */
 	/* vars used in the all-sky fit */
@@ -125,7 +125,7 @@ struct mband_dataset {
 int mband_reduce(FILE *inf, FILE *outf);
 struct mband_dataset *mband_dataset_new(void);
 void mband_dataset_release(struct mband_dataset *mbds);
-double ofr_fit_zpoint(struct o_frame *ofr,  
+double ofr_fit_zpoint(struct o_frame *ofr,
 		      double alpha, double beta, int w_res);
 void mband_dataset_set_ubvri(struct mband_dataset *mbds);
 void mband_dataset_set_bands_by_string(struct mband_dataset *mbds, char *bspec);
@@ -159,7 +159,7 @@ int stf_centering_stats(struct stf *stf, struct wcs *wcs, double *rms, double *m
 void ap_params_from_par(struct ap_params *ap);
 int center_star(struct ccd_frame *fr, struct star *st, double max_ce);
 
-struct stf * run_phot(gpointer window, struct wcs *wcs, struct gui_star_list *gsl, 
+struct stf * run_phot(gpointer window, struct wcs *wcs, struct gui_star_list *gsl,
 		      struct ccd_frame *fr);
 
 

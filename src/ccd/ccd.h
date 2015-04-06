@@ -153,6 +153,13 @@ struct region {
 	int h;
 };
 
+struct annular_region {
+	int xc;
+	int yc;
+	int r1;
+	int r2;
+};
+
 // bad pixel
 struct bad_pixel {
 	char type;	// type of bad pixel
@@ -590,6 +597,7 @@ extern int locate_star(struct ccd_frame *fr, double x, double y, double r, doubl
 extern int get_star_near(struct ccd_frame *fr, int x, int y, double min_flux, struct star *s);
 extern int follow_star(struct ccd_frame *fr, double r, struct star *old_star, struct star *s);
 extern int extract_stars(struct ccd_frame *fr, struct region *reg, double min_flux, double sigmas, struct sources *src);
+extern int extract_stars_annular(struct ccd_frame *fr, struct annular_region *reg, double min_flux, double sigmas, struct sources *src);
 extern void release_sources(struct sources *src);
 extern void ref_sources(struct sources *src);
 extern struct sources *new_sources(int n);

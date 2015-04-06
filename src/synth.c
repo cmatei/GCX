@@ -228,16 +228,17 @@ int synth_stars_to_frame(struct ccd_frame * fr, struct wcs *wcs, GList *sl)
 /* menu callback */
 void act_stars_add_synthetic (GtkAction *action, gpointer window)
 {
-	struct image_channel *i_ch;
+	struct ccd_frame *fr;
 	struct wcs *wcs;
 	struct gui_star_list *gsl;
 	struct gui_star *gs;
 	GList *ssl = NULL;
 	GSList *sl;
 
-	i_ch = g_object_get_data(G_OBJECT(window), "i_channel");
-	if (i_ch == NULL || i_ch->fr == NULL)
+	fr = frame_from_window (window);
+	if (fr == NULL)
 		return;
+
 	wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");
 	if (wcs == NULL || wcs->wcsset == WCS_INVALID) {
 		err_printf_sb2(window, "Need a WCS to Create Synthetic Stars");
@@ -257,10 +258,10 @@ void act_stars_add_synthetic (GtkAction *action, gpointer window)
 		    (TYPE_MASK_GSTAR(gs) & TYPE_MASK_CATREF))
 			ssl = g_list_prepend(ssl, gs->s);
 	}
-	synth_stars_to_frame(i_ch->fr, wcs, ssl);
-	frame_stats(i_ch->fr);
-	i_ch->channel_changed = 1;
+	synth_stars_to_frame(fr, wcs, ssl);
+	frame_stats(fr);
+	//i_ch->channel_changed = 1;
+
 	gtk_widget_queue_draw(GTK_WIDGET(window));
 	g_list_free(ssl);
 }
-

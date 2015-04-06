@@ -162,16 +162,17 @@ static void mkrcp_ok_cb( GtkWidget *widget, gpointer dialog)
 	struct stf *rcp;
 	FILE *rfp;
 	char qu[1024];
-	struct image_channel *i_ch;
 	GList *stars;
+	struct ccd_frame *fr;
 
 
 	window = g_object_get_data(G_OBJECT(dialog), "im_window");
 	g_return_if_fail(window != NULL);
-	i_ch = g_object_get_data(G_OBJECT(window), "i_channel");
-	if (i_ch != NULL && i_ch->fr != NULL) {
-		w = i_ch->fr->w;
-		h = i_ch->fr->h;
+
+	fr = frame_from_window (window);
+	if (fr != NULL) {
+		w = fr->w;
+		h = fr->h;
 	}
 
 	wcs = g_object_get_data(G_OBJECT(window), "wcs_of_window");

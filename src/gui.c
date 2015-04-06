@@ -41,6 +41,23 @@
 #include "query.h"
 
 
+/* helpers to get/set a ccd_frame in a main window */
+struct ccd_frame *frame_from_window (gpointer window)
+{
+	GcxView *view;
+
+	view = g_object_get_data (G_OBJECT(window), "image");
+	return gcx_view_get_frame (view);
+}
+
+void frame_to_window(struct ccd_frame *fr, gpointer window)
+{
+	GcxView *view = g_object_get_data (G_OBJECT(window), "image");
+
+	if (view)
+		gcx_view_set_frame (view, fr);
+}
+
 /* yes/no modal dialog */
 static void yes_no_yes( GtkWidget *widget, gpointer data )
 {
@@ -255,7 +272,7 @@ void act_file_new (GtkAction *action, gpointer window)
 {
 	struct ccd_frame *fr;
 	fr = new_frame(P_INT(FILE_NEW_WIDTH), P_INT(FILE_NEW_HEIGHT));
-	frame_to_channel(fr, window, "i_channel");
+	frame_to_window(fr, window);
 }
 
 /*
@@ -741,9 +758,7 @@ static GtkWidget *get_main_menu_bar(GtkWidget *window)
 GtkWidget * create_image_window()
 {
 	GtkWidget *window;
-	GtkWidget *scrolled_window;
 	GtkWidget *image;
-	GtkWidget *alignment;
 	GtkWidget *image_popup;
 	GtkWidget *vbox;
 	GtkWidget *hbox;
@@ -753,7 +768,7 @@ GtkWidget * create_image_window()
 	GtkWidget *statuslabel2;
 
 
-	image = gtk_drawing_area_new();
+	image = gcx_view_new();
 
 	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	g_object_ref_sink(window);
@@ -764,15 +779,8 @@ GtkWidget * create_image_window()
 	gtk_window_set_title (GTK_WINDOW (window), "gcx");
 	gtk_container_set_border_width (GTK_CONTAINER (window), 0);
 
-	scrolled_window = gtk_scrolled_window_new (NULL, NULL);
 	vbox = gtk_vbox_new(0, 0);
 	hbox = gtk_hbox_new(0, 0);
-
-	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled_window),
-					GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-//					GTK_POLICY_ALWAYS, GTK_POLICY_ALWAYS);
-	alignment = gtk_alignment_new(0.5, 0.5, 0.0, 0.0);
-	gtk_widget_show(alignment);
 
 	statuslabel1 = gtk_label_new ("");
 	g_object_ref (statuslabel1);
@@ -797,33 +805,28 @@ GtkWidget * create_image_window()
 	gtk_box_pack_start(GTK_BOX(hbox), statuslabel1, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 0);
 
-	gtk_box_pack_start(GTK_BOX(vbox), scrolled_window, 1, 1, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), image, 1, 1, 0);
 	gtk_box_pack_start(GTK_BOX(vbox), statuslabel2, 0, 0, 0);
 	gtk_container_add(GTK_CONTAINER(window), vbox);
-	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled_window), alignment);
-	gtk_container_add(GTK_CONTAINER(alignment), image);
 
-	g_signal_connect(G_OBJECT(scrolled_window), "button_press_event",
+	g_signal_connect(G_OBJECT(image), "button_press_event",
 			 G_CALLBACK(sources_clicked_cb), window);
-	g_signal_connect(G_OBJECT(scrolled_window), "button_press_event",
+	g_signal_connect(G_OBJECT(image), "button_press_event",
 			 G_CALLBACK(image_clicked_cb), window);
-	g_signal_connect(G_OBJECT(image), "motion_notify_event",
-			 G_CALLBACK(motion_event_cb), window);
-	g_signal_connect(G_OBJECT(image), "expose_event",
-			 G_CALLBACK(image_expose_cb), window);
+//	g_signal_connect(G_OBJECT(image), "motion_notify_event",
+//			 G_CALLBACK(motion_event_cb), window);
+//	g_signal_connect(G_OBJECT(image), "expose_event",
+//			 G_CALLBACK(image_expose_cb), window);
 
 	gtk_widget_set_events(image,  GDK_BUTTON_PRESS_MASK
 			      | GDK_POINTER_MOTION_MASK
 			      | GDK_POINTER_MOTION_HINT_MASK);
 
-	g_object_set_data(G_OBJECT(window), "scrolled_window", scrolled_window);
-	g_object_set_data(G_OBJECT(window), "image_alignment", alignment);
 	g_object_set_data(G_OBJECT(window), "image", image);
 
   	gtk_window_set_default_size(GTK_WINDOW(window), 700, 500);
 
 	gtk_widget_show(image);
-	gtk_widget_show (scrolled_window);
 	gtk_widget_show(vbox);
 
 	image_popup = get_image_popup_menu(window);
@@ -834,8 +837,7 @@ GtkWidget * create_image_window()
 	g_object_set_data_full(G_OBJECT(window), "star_popup", star_popup,
 			       (GDestroyNotify) g_object_unref);
 
-//	gtk_widget_show_all(window);
-	gtk_widget_show(image_popup);
+	gtk_widget_show_all(window);
 
 	return window;
 }
