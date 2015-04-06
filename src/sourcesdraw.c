@@ -40,6 +40,7 @@
 #include "gcx.h"
 #include "catalogs.h"
 #include "gui.h"
+#include "gcximageview.h"
 #include "sourcesdraw.h"
 #include "params.h"
 #include "wcs.h"
@@ -358,28 +359,25 @@ double cat_star_size(struct cat_star *cats)
  * draw_star_helper for expose redraws */
 void draw_gui_star(struct gui_star *gs, GtkWidget *window)
 {
-#if 0
-	GtkWidget *darea;
 	struct gui_star_list *gsl;
+	GcxImageView *iv;
 	cairo_t *cr;
+	double zoom;
 
-	darea = g_object_get_data(G_OBJECT(window), "image_view");
-	if (darea == NULL)
+	iv = g_object_get_data(G_OBJECT(window), "image_view");
+	if (iv == NULL)
 		return;
-	//geom = g_object_get_data(G_OBJECT(window), "geometry");
-	//if (geom == NULL)
-	//	return;
 
 	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl == NULL)
 		return;
 
-	cr = gdk_cairo_create (darea->window);
+	zoom = gcx_image_view_get_zoom (iv);
+	cr = gcx_image_view_cairo_surface (iv);
 
-	draw_star_helper(gs, cr, gsl, map->zoom);
+	draw_star_helper(gs, cr, gsl, zoom);
 
 	cairo_destroy(cr);
-#endif
 }
 
 /* draw a GSList of gui_stars
@@ -387,55 +385,53 @@ void draw_gui_star(struct gui_star *gs, GtkWidget *window)
  */
 void draw_star_list(GSList *stars, GtkWidget *window)
 {
-#if 0
 	struct gui_star *gs;
+	GcxImageView *iv;
 	GSList *sl = NULL;
-	GtkWidget *darea;
 	struct gui_star_list *gsl;
 	cairo_t *cr;
+	double zoom;
 
-	darea = g_object_get_data(G_OBJECT(window), "image_view");
-	if (darea == NULL)
+	iv = g_object_get_data(G_OBJECT(window), "image_view");
+	if (iv == NULL)
 		return;
-	//geom = g_object_get_data(G_OBJECT(window), "geometry");
-	//if (geom == NULL)
-	//	return;
+
 	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl == NULL)
 		return;
 
-	cr = gdk_cairo_create (darea->window);
+	zoom = gcx_image_view_get_zoom (iv);
+	cr = gcx_image_view_cairo_surface (iv);
+
 	sl = stars;
 	while(sl != NULL) {
 		gs = GUI_STAR(sl->data);
 		sl = g_slist_next(sl);
-		draw_star_helper(gs, cr, gsl, map->zoom);
+		draw_star_helper(gs, cr, gsl, zoom);
 	}
+
 	cairo_destroy (cr);
-#endif
 }
 
 /* hook function for sources drawing on expose */
-void draw_sources(GtkWidget *darea, GdkRectangle *area)
+void draw_sources_hook(GtkWidget *iv, GdkRectangle *area)
 {
 #if 0
 	GSList *sl = NULL;
-	cairo_t *cr;
-	struct map_geometry *geom;
 	struct gui_star_list *gsl;
 	struct gui_star *gs;
 	int ix, iy, isz;
+	cairo_t *cr;
+	double zoom;
 
-	geom = g_object_get_data(G_OBJECT(window), "geometry");
-	if (geom == NULL)
-		return;
 	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
 	if (gsl == NULL)
 		return;
 
 	gui_star_list_update_colors(gsl);
 
-	cr = gdk_cairo_create(darea->window);
+	zoom = gcx_image_view_get_zoom (iv);
+	cr = gcx_image_view_cairo_surface (iv);
 
 /*  	d3_printf("expose area is %d by %d starting at %d, %d\n", */
 /*  		  area->width, area->height, area->x, area->y); */
@@ -446,19 +442,19 @@ void draw_sources(GtkWidget *darea, GdkRectangle *area)
 		sl = g_slist_next(sl);
 		if (!(TYPE_MASK_GSTAR(gs) & gsl->display_mask))
 			continue;
-		ix = (gs->x + 0.5) * geom->zoom;
-		iy = (gs->y + 0.5) * geom->zoom;
-		isz = gs->size * geom->zoom + gsl->max_size;
+		ix = (gs->x + 0.5) * zoom;
+		iy = (gs->y + 0.5) * zoom;
+		isz = gs->size * zoom + gsl->max_size;
 		if (star_near_area(ix, iy, area, isz)) {
-			draw_star_helper(gs, cr, gsl, geom->zoom);
+			draw_star_helper(gs, cr, gsl, zoom);
 		}
 
 		if (gs->pair != NULL) {
-			ix = (gs->pair->x + 0.5) * geom->zoom;
-			iy = (gs->pair->y + 0.5) * geom->zoom;
-			isz = gs->pair->size * geom->zoom + gsl->max_size;
+			ix = (gs->pair->x + 0.5) * zoom;
+			iy = (gs->pair->y + 0.5) * zoom;
+			isz = gs->pair->size * zoom + gsl->max_size;
 			if (star_near_area(ix, iy, area, isz)) {
-				draw_star_helper(gs, cr, gsl, geom->zoom);
+				draw_star_helper(gs, cr, gsl, zoom);
 			}
 		}
 	}

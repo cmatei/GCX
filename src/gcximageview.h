@@ -26,6 +26,10 @@ struct ccd_frame *gcx_image_view_get_frame  (GcxImageView *view);
 void              gcx_image_view_set_scrolls(GcxImageView *view, double xc, double yc);
 void              gcx_image_view_get_scrolls(GcxImageView *view, double *xc, double *yc);
 
+double            gcx_image_view_get_zoom   (GcxImageView *view);
+
+cairo_t          *gcx_image_view_cairo_surface (GcxImageView *view);
+
 int               gcx_image_view_to_pnm_file(GcxImageView *view, char *fn, int is_16bit);
 
 

@@ -28,6 +28,14 @@
 
 #include "gcximageview.h"
 
+enum {
+	FRAME_CHANGED,
+	MAPPING_CHANGED,
+
+	LAST_SIGNAL
+};
+
+static guint image_view_signals[LAST_SIGNAL] = { 0 };
 
 
 /* image display parameters */
@@ -105,6 +113,9 @@ struct _GcxImageView {
 
 struct _GcxImageViewClass {
 	GtkScrolledWindowClass parent_class;
+
+	void (*frame_changed)(GcxImageView *);
+	void (*mapping_changed)(GcxImageView *);
 };
 
 G_DEFINE_TYPE(GcxImageView, gcx_image_view, GTK_TYPE_SCROLLED_WINDOW);
@@ -156,6 +167,25 @@ gcx_image_view_class_init(GcxImageViewClass *klass)
 	GObjectClass *gobject_class = (GObjectClass *) klass;
 
 	gobject_class->finalize = gcx_image_view_finalize;
+
+	image_view_signals[FRAME_CHANGED] =
+		g_signal_new ("frame-changed",
+			      G_TYPE_FROM_CLASS (klass),
+			      G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+			      G_STRUCT_OFFSET (GcxImageViewClass, frame_changed),
+			      NULL, NULL,
+			      g_cclosure_marshal_VOID__VOID,
+			      G_TYPE_NONE, 0);
+
+	image_view_signals[MAPPING_CHANGED] =
+		g_signal_new ("mapping-changed",
+			      G_TYPE_FROM_CLASS (klass),
+			      G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+			      G_STRUCT_OFFSET (GcxImageViewClass, mapping_changed),
+			      NULL, NULL,
+			      g_cclosure_marshal_VOID__VOID,
+			      G_TYPE_NONE, 0);
+
 }
 
 
@@ -236,7 +266,7 @@ free_frame_map(struct frame_map *map)
 	g_free (map);
 }
 
-void set_default_channel_cuts(struct frame_map *map);
+static void set_default_channel_cuts(struct frame_map *map);
 static void set_view_size(GcxImageView *view, double xc, double yc);
 
 
@@ -620,34 +650,36 @@ static void update_cache(struct map_cache *cache, struct frame_map *map,
  */
 int gcx_image_view_set_frame(GcxImageView *view, struct ccd_frame *fr)
 {
-	g_return_val_if_fail (IS_GCX_IMAGE_VIEW(view), -1);
+	struct map_cache *cache = view->cache;
+	struct frame_map *map = view->map;
 
 	//if ((fr->magic & FRAME_VALID_RGB) == 0)
 	//	bayer_interpolate(fr);
 
-	view->cache->valid = 0;
+	cache->valid = 0;
 
-	if (view->map->fr)
-		release_frame(view->map->fr);
+	if (map->fr)
+		release_frame(map->fr);
+
 	get_frame(fr);
-	view->map->fr = fr;
+	map->fr = fr;
 
 	if (fr->magic & FRAME_VALID_RGB)
-		view->map->color = 1;
+		map->color = 1;
 
 	/* set default cuts */
 	if (!fr->stats.statsok)
 		frame_stats(fr);
 
-	set_default_channel_cuts(view->map);
+	set_default_channel_cuts(map);
 
-	view->map->changed = 1;
+	map->changed = 1;
 
 	wcs_from_frame(fr, view->wcs);
 	//wcsedit_refresh(window);
 
-	view->map->width = fr->w;
-	view->map->height = fr->h;
+	map->width = fr->w;
+	map->height = fr->h;
 
 	set_view_size(view, 0.5, 0.5);
 
@@ -656,11 +688,17 @@ int gcx_image_view_set_frame(GcxImageView *view, struct ccd_frame *fr)
 
 	//stats_cb(window, 0);
 	//show_zoom_cuts(window);
+
+	g_signal_emit (view, image_view_signals[FRAME_CHANGED], 0);
+	g_signal_emit (view, image_view_signals[MAPPING_CHANGED], 0);
+
 	gtk_widget_queue_draw(GTK_WIDGET(view));
 
 	return 0;
 }
 
+/* return the mapped frame
+ */
 struct ccd_frame *
 gcx_image_view_get_frame (GcxImageView *view)
 {
@@ -675,7 +713,8 @@ gcx_image_view_get_frame (GcxImageView *view)
 /*
  * paint screen from cache
  */
-static void paint_from_gray_cache(GtkWidget *widget, struct map_cache *cache, GdkRectangle *area)
+static void
+paint_from_gray_cache(GtkWidget *widget, struct map_cache *cache, GdkRectangle *area)
 {
 	unsigned char *dat;
 
@@ -696,9 +735,11 @@ static void paint_from_gray_cache(GtkWidget *widget, struct map_cache *cache, Gd
 			     GDK_RGB_DITHER_MAX, dat, cache->w);
 }
 
-static void paint_from_rgb_cache(GtkWidget *widget, struct map_cache *cache, GdkRectangle *area)
+static void
+paint_from_rgb_cache(GtkWidget *widget, struct map_cache *cache, GdkRectangle *area)
 {
 	unsigned char *dat;
+
 	if (!area_in_cache(area, cache)) {
 		err_printf("paint_from_cache: oops - area not in cache\n");
 		d3_printf("area is %d by %d starting at %d,%d\n",
@@ -718,132 +759,79 @@ static void paint_from_rgb_cache(GtkWidget *widget, struct map_cache *cache, Gdk
 /*
  * an expose event to our image window
  */
-static void draw_sources(GtkWidget *darea, GdkRectangle *area);
 
 static gboolean
 gcx_image_view_expose_cb(GtkWidget *darea, GdkEventExpose *event, void *user)
 {
 	GcxImageView *view = GCX_IMAGE_VIEW(user);
+	struct map_cache *cache = view->cache;
+	struct frame_map *map = view->map;
 
-	if (view->map->fr == NULL) /* no frame */
+	if (map->fr == NULL) /* no frame */
 		return TRUE;
 
 	/* invalidate cache if needed */
-	if (view->map->color && view->cache->type != MAP_CACHE_RGB)
-		view->cache->valid = 0;
+	if (map->color && cache->type != MAP_CACHE_RGB)
+		cache->valid = 0;
 
-	if (!view->map->color && view->cache->type != MAP_CACHE_GRAY)
-		view->cache->valid = 0;
+	if (!map->color && cache->type != MAP_CACHE_GRAY)
+		cache->valid = 0;
 
-	if (view->cache->zoom != view->map->zoom)
-		view->cache->valid = 0;
+	if (cache->zoom != map->zoom)
+		cache->valid = 0;
 
-	if (view->map->changed)
-		view->cache->valid = 0;
+	if (map->changed)
+		cache->valid = 0;
 
-	if (!area_in_cache(&event->area, view->cache))
-		view->cache->valid = 0;
+	if (!area_in_cache(&event->area, cache))
+		cache->valid = 0;
 
-	if (!view->cache->valid)
-		update_cache(view->cache, view->map, &event->area);
+	if (!cache->valid)
+		update_cache(cache, map, &event->area);
 
-	if (view->cache->valid) {
+	if (cache->valid) {
 		d3_printf("cache valid, area is %d by %d starting at %d, %d\n",
-			  view->cache->w, view->cache->h,
-			  view->cache->x, view->cache->y);
+			  cache->w, cache->h,
+			  cache->x, cache->y);
 		d3_printf("expose: from cache\n");
-		if (view->cache->type == MAP_CACHE_GRAY)
-			paint_from_gray_cache(darea, view->cache, &event->area);
+		if (cache->type == MAP_CACHE_GRAY)
+			paint_from_gray_cache(darea, cache, &event->area);
 		else
-			paint_from_rgb_cache(darea, view->cache, &event->area);
+			paint_from_rgb_cache(darea, cache, &event->area);
 	}
 
-	draw_sources(darea, &event->area);
+	draw_sources_hook(GTK_WIDGET(view), &event->area);
 
-	view->map->changed = 0;
+	map->changed = 0;
 
 	return TRUE;
 }
 
-#if 0
-/* paint the given area of a frame to the given image cache
- */
+/* save a mapped image to a 8/16-bit pnm file. The image is curved to the
+ * current cuts/lut
+ * if fname is null, the file is output on stdout
+ * return 0 for success */
 
-static void image_box_to_cache(struct map_cache *cache, struct image_channel *channel,
-			       double zoom, int x, int y, int w, int h)
+int gcx_image_view_to_pnm_file(GcxImageView *iv, char *fn, int is_16bit)
 {
-	struct map_geometry geom;
-	GdkRectangle area;
-	int zoom_in = 1;
-	int zoom_out = 1;
-
-	if (zoom > 1.0 && zoom <= 16.0) {
-		zoom_in = floor(zoom + 0.5);
-	} else if (zoom < 1.0 && zoom >= (1.0 / 16.0)) {
-		zoom_out = floor(1.0 / zoom + 0.5);
-	}
-
-	memset(&geom, 0, sizeof(struct map_geometry));
-	geom.zoom = zoom;
-	area.x = x * zoom_in / zoom_out;
-	area.y = y * zoom_in / zoom_out;
-	area.width = w * zoom_in;
-	area.height = h * zoom_in;
-	update_cache(cache, &geom, channel, &area);
-}
-#endif
-
-/* write the (float) image as a pnm file */
-static void float_chan_to_pnm(struct frame_map *map, FILE *pnmf, int is_16bit)
-{
-	struct ccd_frame *fr = map->fr;
+	struct ccd_frame *fr = gcx_image_view_get_frame (iv);
+	FILE *pnmf;
 	int i;
 	float *fdat;
 	unsigned short pix;
 	int lndx, all;
-	float gain = LUT_SIZE / (map->hcut - map->lcut);
-	float flr = map->lcut;
+	float gain = LUT_SIZE / (iv->map->hcut - iv->map->lcut);
+	float flr = iv->map->lcut;
 
-	fdat = (float *)fr->dat;
-	all = fr->w * fr->h;
-
-	for (i=0; i<all; i++) {
-		lndx = (gain * (*fdat-flr));
-		if (lndx < 0)
-			lndx = 0;
-		if (lndx > LUT_SIZE - 1)
-			lndx = LUT_SIZE - 1;
-		pix = map->lut[lndx];
-		fdat ++;
-		putc(pix >> 8, pnmf);
-		if (is_16bit)
-			putc(pix & 0xff, pnmf);
-	}
-}
-
-
-/* save a channel's image to a 8-bit pnm file. The image is curved to the
- * current cuts/lut
- * window is only used to print status messages, it can be NULL
- * if fname is null, the file is output on stdout
- * return 0 for success */
-
-int gcx_image_view_to_pnm_file(GcxImageView *view, char *fn, int is_16bit)
-{
-#if 0
-	struct ccd_frame *fr;
-	int ret=0;
-	FILE *pnmf;
-
-	if (channel->fr == NULL) {
-		err_printf("channel_to_pnm_file: no frame\n");
+	if (fr == NULL) {
+		err_printf("view_to_pnm: no frame\n");
 		return -1;
 	}
 
 	if (fn != NULL) {
 		pnmf = fopen(fn, "w");
 		if (pnmf == NULL) {
-			err_printf("channel_to_pnm_file: "
+			err_printf("view_to_pnm_file: "
 				   "cannot open file %s for writing\n", fn);
 			return -1;
 		}
@@ -851,17 +839,29 @@ int gcx_image_view_to_pnm_file(GcxImageView *view, char *fn, int is_16bit)
 		pnmf = stdout;
 	}
 
-	fprintf(pnmf, "P5 %d %d %d\n", channel->fr->w, channel->fr->h, is_16bit ? 65535 : 255);
+	fprintf(pnmf, "P5 %d %d %d\n", fr->w, fr->h, is_16bit ? 65535 : 255);
 
-	float_chan_to_pnm(channel, pnmf, is_16bit);
+	fdat = (float *)fr->dat;
+	all = fr->w * fr->h;
+
+	for (i = 0; i < all; i++) {
+		lndx = (gain * (*fdat - flr));
+
+		clamp_int(&lndx, 0, LUT_SIZE - 1);
+
+		pix = iv->map->lut[lndx];
+		fdat ++;
+		putc(pix >> 8, pnmf);
+		if (is_16bit)
+			putc(pix & 0xff, pnmf);
+	}
 
 	if (pnmf != stdout)
 		fclose(pnmf);
 
-	if (window != NULL)
-		info_printf_sb2(window, "Pnm file created");
-	return ret;
-#endif
+//	if (window != NULL)
+//		info_printf_sb2(window, "Pnm file created");
+
 	return 0;
 }
 
@@ -1037,7 +1037,7 @@ static void channel_cuts_action(struct frame_map *map, int action)
 	map->changed = 1;
 }
 
-void set_default_channel_cuts(struct frame_map* map)
+static void set_default_channel_cuts(struct frame_map* map)
 {
 	channel_cuts_action(map, CUTS_AUTO);
 }
@@ -1047,7 +1047,8 @@ void set_default_channel_cuts(struct frame_map* map)
  * of the image's width/height
  */
 
-void gcx_image_view_set_scrolls(GcxImageView *view, double xc, double yc)
+void
+gcx_image_view_set_scrolls(GcxImageView *view, double xc, double yc)
 {
 	GtkAdjustment *hadj, *vadj;
 
@@ -1077,7 +1078,8 @@ void gcx_image_view_set_scrolls(GcxImageView *view, double xc, double yc)
  * the fraction of the image's dimension the center of the
  * visible area is at
  */
-void gcx_image_view_get_scrolls(GcxImageView *view, double *xc, double *yc)
+void
+gcx_image_view_get_scrolls(GcxImageView *view, double *xc, double *yc)
 {
 	GtkAdjustment *hadj, *vadj;
 
@@ -1090,6 +1092,25 @@ void gcx_image_view_get_scrolls(GcxImageView *view, double *xc, double *yc)
 
 	*xc = (hadj->value + hadj->page_size / 2) / (hadj->upper - hadj->lower);
 	*yc = (vadj->value + vadj->page_size / 2) / (vadj->upper - vadj->lower);
+}
+
+
+double
+gcx_image_view_get_zoom (GcxImageView *iv)
+{
+	return iv->map->zoom;
+}
+
+
+cairo_t *
+gcx_image_view_cairo_surface (GcxImageView *iv)
+{
+	GdkWindow *gdkw = gtk_widget_get_window (iv->darea);
+	cairo_t *cr;
+
+	cr = gdk_cairo_create (gdkw);
+
+	return cr;
 }
 
 static void set_view_size(GcxImageView *view, double xc, double yc)
@@ -1169,7 +1190,7 @@ static void set_view_size(GcxImageView *view, double xc, double yc)
 /*
  * step the zoom up/down
  */
-void step_zoom(struct frame_map *map, int step)
+static void step_zoom(struct frame_map *map, int step)
 {
 	double zoom = map->zoom;
 

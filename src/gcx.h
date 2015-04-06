@@ -48,7 +48,7 @@ struct obsdata {
 	double ra;		// ra of center of field (degrees)
 	double dec;		// dec of center of field
 	double rot;		// field rotation (N through E)
-	double altitude;	// altitude of target 
+	double altitude;	// altitude of target
 	int equinox;		// equinox of ra/dec
 	double mag;		// magnitude from catalog
 };
@@ -74,9 +74,46 @@ extern struct obsdata obs;
 #define MA_READ 5
 
 /* clamp functions */
-int clamp_double(double *val, double min, double max);
-int clamp_float(float *val, float min, float max);
-int clamp_int(int *val, int min, int max);
+static inline int clamp_double(double *val, double min, double max)
+{
+	if (*val < min) {
+		*val = min;
+		return 1;
+	}
+	if (*val > max) {
+		*val = max;
+		return 1;
+	}
+	return 0;
+}
+
+static inline int clamp_float(float *val, float min, float max)
+{
+	if (*val < min) {
+		*val = min;
+		return 1;
+	}
+	if (*val > max) {
+		*val = max;
+		return 1;
+	}
+
+	return 0;
+}
+
+static inline int clamp_int(int *val, int min, int max)
+{
+	if (*val < min) {
+		*val = min;
+		return 1;
+	}
+
+	if (*val > max) {
+		*val = max;
+		return 1;
+	}
+	return 0;
+}
 
 // from track.c
 

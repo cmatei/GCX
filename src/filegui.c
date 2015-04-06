@@ -232,6 +232,7 @@ static void export_pnm(GtkWidget *chooser, gpointer user_data)
 {
 	char *fn, *fne;
 	struct file_action *fa = user_data;
+	GcxImageView *iv;
 
 	fn = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(chooser));
 	g_return_if_fail(fn != NULL);
@@ -240,7 +241,8 @@ static void export_pnm(GtkWidget *chooser, gpointer user_data)
 
 	d3_printf("Saving pnm file: %s\n", fne);
 
-	gcx_image_view_to_pnm_file (GCX_IMAGE_VIEW(fa->window), fne, fa->arg1);
+	iv = g_object_get_data (G_OBJECT(fa->window), "image_view");
+	gcx_image_view_to_pnm_file (GCX_IMAGE_VIEW(iv), fne, fa->arg1);
 
 	free(fne);
 	g_free(fn);

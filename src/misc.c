@@ -436,46 +436,6 @@ char *lstrndup(char *str, int n)
 }
 
 
-/* clamp functions */
-int clamp_double(double *val, double min, double max)
-{
-	if (*val < min) {
-		*val = min;
-		return 1;
-	}
-	if (*val > max) {
-		*val = max;
-		return 1;
-	}
-	return 0;
-}
-
-int clamp_float(float *val, float min, float max)
-{
-	if (*val < min) {
-		*val = min;
-		return 1;
-	}
-	if (*val > max) {
-		*val = max;
-		return 1;
-	}
-	return 0;
-}
-
-int clamp_int(int *val, int min, int max)
-{
-	if (*val < min) {
-		*val = min;
-		return 1;
-	}
-	if (*val > max) {
-		*val = max;
-		return 1;
-	}
-	return 0;
-}
-
 int intval(GScanner *scan) {return (int)g_scanner_cur_value(scan).v_int;}
 double floatval(GScanner *scan) {return (double)g_scanner_cur_value(scan).v_float;}
 char * stringval(GScanner *scan) {return g_scanner_cur_value(scan).v_string;}

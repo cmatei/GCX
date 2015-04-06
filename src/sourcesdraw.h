@@ -98,8 +98,7 @@ struct gui_star_list {
 void gsl_unselect_all(GtkWidget *window);
 extern void find_stars_cb(gpointer window, guint action);
 
-extern void draw_sources_hook(GtkWidget *darea, GtkWidget *window,
-			      GdkRectangle *area);
+extern void draw_sources_hook(GtkWidget *imview, GdkRectangle *area);
 extern void toggle_selection(GtkWidget *window, GSList *stars);
 extern void single_selection(GtkWidget *window, GSList *stars);
 extern struct gui_star *gui_star_new(void);
