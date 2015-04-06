@@ -323,7 +323,7 @@ static void setup_par_combo(gpointer parwin, GtkWidget *combo, GcxPar p)
 
 
 	d4_printf("setup_par_combo\n");
-	entry = GTK_WIDGET (GTK_BIN(combo)->child);
+	entry = gtk_bin_get_child (GTK_BIN(combo));
 	g_signal_handlers_block_by_func(G_OBJECT(entry), par_edit_changed, parwin);
 
 	/* clear previous combo box entries */
@@ -606,7 +606,6 @@ void act_control_options (GtkAction *action, gpointer window)
 		gtk_widget_show(parwin);
 	} else {
 		par_update_current(parwin);
-		gdk_window_raise(parwin->window);
+		gdk_window_raise (gtk_widget_get_window (GTK_WIDGET(parwin)));
 	}
 }
-

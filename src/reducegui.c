@@ -354,7 +354,7 @@ static void set_processing_dialog_ccdr(GtkWidget *dialog, struct ccd_reduce *ccd
 		i++;
 	}
 
-	gtk_editable_set_editable (GTK_EDITABLE(GTK_BIN(stack_combo)->child), FALSE);
+	gtk_editable_set_editable (GTK_EDITABLE (gtk_bin_get_child (GTK_BIN(stack_combo))), FALSE);
 	gtk_combo_box_set_active (stack_combo, P_INT(CCDRED_STACK_METHOD));
 	g_signal_connect (G_OBJECT(stack_combo), "changed",
 			  G_CALLBACK(stack_method_activate), dialog);
@@ -382,7 +382,7 @@ static void set_processing_dialog_ccdr(GtkWidget *dialog, struct ccd_reduce *ccd
 		i++;
 	}
 
-	gtk_editable_set_editable (GTK_EDITABLE(GTK_BIN(demosaic_combo)->child), FALSE);
+	gtk_editable_set_editable (GTK_EDITABLE (gtk_bin_get_child (GTK_BIN(demosaic_combo))), FALSE);
 	gtk_combo_box_set_active (demosaic_combo, P_INT(CCDRED_DEMOSAIC_METHOD));
 	g_signal_connect (G_OBJECT(demosaic_combo), "changed",
 			  G_CALLBACK(demosaic_method_activate), dialog);
@@ -629,6 +629,7 @@ static void imf_next_cb(GtkAction *action, gpointer dialog)
 	GtkWidget *scw;
 	GtkAdjustment *vadj;
 	double nv;
+	gdouble value, lower, upper, page_size;
 
 	list = g_object_get_data (G_OBJECT(dialog), "image_file_list");
 	g_return_if_fail (list != NULL);
@@ -682,13 +683,17 @@ static void imf_next_cb(GtkAction *action, gpointer dialog)
 	g_return_if_fail(scw != NULL);
 
 	vadj =  gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW(scw));
-	d3_printf("vadj at %.3f\n", vadj->value);
+	g_object_get (G_OBJECT(vadj), "value", &value,
+		      "lower", &lower, "upper", &upper,
+		      "page-size", &page_size, NULL);
+
+	d3_printf("vadj at %.3f\n", value);
 
 	if (len != 0) {
-		nv = (vadj->upper + vadj->lower) * index / len - vadj->page_size / 2;
-		clamp_double(&nv, vadj->lower, vadj->upper - vadj->page_size);
+		nv = (upper + lower) * index / len - page_size / 2;
+		clamp_double(&nv, lower, upper - page_size);
 		gtk_adjustment_set_value(vadj, nv);
-		d3_printf("vadj set to %.3f\n", vadj->value);
+		d3_printf("vadj set to %.3f\n", nv);
 	}
 
 	update_selected_status_label (dialog);
@@ -709,6 +714,7 @@ static void imf_prev_cb(GtkAction *action, gpointer dialog)
 	GtkWidget *scw;
 	GtkAdjustment *vadj;
 	double nv;
+	gdouble value, lower, upper, page_size;
 
 	list = g_object_get_data (G_OBJECT(dialog), "image_file_list");
 	g_return_if_fail (list != NULL);
@@ -758,13 +764,17 @@ static void imf_prev_cb(GtkAction *action, gpointer dialog)
 	g_return_if_fail(scw != NULL);
 
 	vadj =  gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW(scw));
-	d3_printf("vadj at %.3f\n", vadj->value);
+	g_object_get (G_OBJECT(vadj), "value", &value,
+		      "lower", &lower, "upper", &upper,
+		      "page-size", &page_size, NULL);
+
+	d3_printf("vadj at %.3f\n", value);
 
 	if (len != 0) {
-		nv = (vadj->upper + vadj->lower) * index / len - vadj->page_size / 2;
-		clamp_double(&nv, vadj->lower, vadj->upper - vadj->page_size);
+		nv = (upper + lower) * index / len - page_size / 2;
+		clamp_double(&nv, lower, upper - page_size);
 		gtk_adjustment_set_value(vadj, nv);
-		d3_printf("vadj set to %.3f\n", vadj->value);
+		d3_printf("vadj set to %.3f\n", nv);
 	}
 
 	update_selected_status_label (dialog);
@@ -1526,6 +1536,7 @@ static void select_next_imf(gpointer dialog)
 	GtkWidget *scw;
 	GtkAdjustment *vadj;
 	double nv;
+	gdouble value, lower, upper, page_size;
 
 	list = g_object_get_data (G_OBJECT(dialog), "image_file_list");
 	g_return_if_fail (list != NULL);
@@ -1577,13 +1588,17 @@ static void select_next_imf(gpointer dialog)
 	g_return_if_fail(scw != NULL);
 
 	vadj =  gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW(scw));
-	d3_printf("vadj at %.3f\n", vadj->value);
+	g_object_get (G_OBJECT(vadj), "value", &value,
+		      "lower", &lower, "upper", &upper,
+		      "page-size", &page_size, NULL);
+
+	d3_printf("vadj at %.3f\n", value);
 
 	if (len != 0) {
-		nv = (vadj->upper + vadj->lower) * index / len - vadj->page_size / 2;
-		clamp_double(&nv, vadj->lower, vadj->upper - vadj->page_size);
+		nv = (upper + lower) * index / len - page_size / 2;
+		clamp_double(&nv, lower, upper - page_size);
 		gtk_adjustment_set_value(vadj, nv);
-		d3_printf("vadj set to %.3f\n", vadj->value);
+		d3_printf("vadj set to %.3f\n", nv);
 	}
 
 	update_selected_status_label (dialog);
@@ -1791,6 +1806,6 @@ void act_control_processing (GtkAction *action, gpointer window)
 		gtk_widget_show_all(dialog);
 	} else {
 		gtk_widget_show(dialog);
-		gdk_window_raise(dialog->window);
+		gdk_window_raise (gtk_widget_get_window(GTK_WIDGET(dialog)));
 	}
 }

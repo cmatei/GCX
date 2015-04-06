@@ -794,7 +794,6 @@ static void browse_cb( GtkWidget *widget, gpointer dialog)
 
 void obs_list_callbacks(GtkWidget *dialog)
 {
-	GtkWidget *combo;
 
 	//set_named_callback(dialog, "obs_list_commands", "select-child", obs_list_select_cb);
 
@@ -804,8 +803,9 @@ void obs_list_callbacks(GtkWidget *dialog)
 
 	set_named_callback(dialog, "obs_list_file_button", "clicked", browse_cb);
 
-	combo = g_object_get_data(G_OBJECT(dialog), "obs_list_fname_combo");
-	gtk_combo_box_set_button_sensitivity (GTK_COMBO_BOX(combo), GTK_SENSITIVITY_AUTO);
+	//GtkWidget *combo;
+	//combo = g_object_get_data(G_OBJECT(dialog), "obs_list_fname_combo");
+	//gtk_combo_box_set_button_sensitivity (GTK_COMBO_BOX(combo), GTK_SENSITIVITY_AUTO);
 
 	set_named_callback(dialog, "obs_list_run_button", "clicked", obs_list_start_cb);
 	set_named_callback(dialog, "obs_list_step_button", "clicked", obs_list_start_cb);

@@ -160,7 +160,7 @@ void indisave_show_dialog(struct indi_t *indi)
 		GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 		GTK_STOCK_OK, GTK_RESPONSE_ACCEPT,
 		GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT,NULL);
-	content_area = GTK_DIALOG (dlg)->vbox;
+	content_area = gtk_dialog_get_content_area (GTK_DIALOG(dlg));
 
 	scroll = gtk_scrolled_window_new(NULL, NULL);
 	gtk_container_add(GTK_CONTAINER (content_area), scroll);

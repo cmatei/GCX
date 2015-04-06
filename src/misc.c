@@ -162,7 +162,7 @@ void named_spin_set(GtkWidget *dialog, char *name, double val)
 	if (val != gtk_spin_button_get_value(GTK_SPIN_BUTTON(spin))) {
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin), val);
 	}
-	clamp_spin_value(GTK_SPIN_BUTTON(spin));
+	//clamp_spin_value(GTK_SPIN_BUTTON(spin));
 }
 
 double named_spin_get_value(GtkWidget *dialog, char *name)
@@ -216,16 +216,20 @@ long set_named_callback_data(void *dialog, char *name, char *callback,
 				 G_CALLBACK (func), data);
 }
 
+#if 0
 /* make sure our value is properly clamped */
 void clamp_spin_value(GtkSpinButton *spin)
 {
 	GtkAdjustment *adj;
+
 	g_return_if_fail(spin != NULL);
 	adj = gtk_spin_button_get_adjustment(GTK_SPIN_BUTTON(spin));
 	g_return_if_fail(adj != NULL);
+
 	if (clamp_float((float *)&adj->value, adj->lower, adj->upper))
 		gtk_adjustment_value_changed(GTK_ADJUSTMENT(adj));
 }
+#endif
 
 /* angular distance (a-b) reduced to [-180..180] */
 

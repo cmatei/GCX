@@ -729,8 +729,9 @@ paint_from_gray_cache(GtkWidget *widget, struct map_cache *cache, GdkRectangle *
 
 	dat = cache->dat + area->x - cache->x
 		+ (area->y - cache->y) * cache->w;
+
 	gdk_draw_gray_image (gtk_widget_get_window (widget),
-			     widget->style->fg_gc[GTK_STATE_NORMAL],
+			     (gtk_widget_get_style (widget))->fg_gc[GTK_STATE_NORMAL],
 			     area->x, area->y, area->width, area->height,
 			     GDK_RGB_DITHER_MAX, dat, cache->w);
 }
@@ -751,8 +752,8 @@ paint_from_rgb_cache(GtkWidget *widget, struct map_cache *cache, GdkRectangle *a
 
 	dat = cache->dat + (area->x - cache->x
 		+ (area->y - cache->y) * cache->w) * 3;
-	gdk_draw_rgb_image (gtk_widget_get_window(widget),
-			    widget->style->fg_gc[GTK_STATE_NORMAL],
+	gdk_draw_rgb_image (gtk_widget_get_window (widget),
+			    (gtk_widget_get_style (widget))->fg_gc[GTK_STATE_NORMAL],
 			    area->x, area->y, area->width, area->height,
 			    GDK_RGB_DITHER_MAX, dat, cache->w*3);
 }
@@ -1121,7 +1122,8 @@ gcx_image_view_cairo_surface (GcxImageView *iv)
 static void set_view_size(GcxImageView *view, double xc, double yc)
 {
 	GdkWindow *window;
-	GtkAdjustment *hadj, *vadj;
+	GtkAdjustment *adj;
+	gdouble value, lower, upper, page_size;
 	int zi, zo;
 	int w, h;
 
@@ -1156,36 +1158,33 @@ static void set_view_size(GcxImageView *view, double xc, double yc)
 			gtk_main_iteration ();
 	}
 
-	hadj = gtk_scrolled_window_get_hadjustment (GTK_SCROLLED_WINDOW(view));
-	vadj = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW(view));
+	adj = gtk_scrolled_window_get_hadjustment (GTK_SCROLLED_WINDOW(view));
+	g_object_get (G_OBJECT(adj), "value", &value, "lower", &lower, "upper", &upper,
+		      "page-size", &page_size, NULL);
 
-	if (hadj->page_size < view->map->width * zi / zo) {
-		hadj->upper = view->map->width * zi / zo;
-		if (hadj->upper < hadj->page_size)
-			hadj->upper = hadj->page_size;
-		hadj->value = (hadj->upper - hadj->lower) * xc + hadj->lower
-			- hadj->page_size / 2;
-		if (hadj->value < hadj->lower)
-			hadj->value = hadj->lower;
-		if (hadj->value > hadj->upper - hadj->page_size)
-			hadj->value = hadj->upper - hadj->page_size;
+	if (page_size < view->map->width * zi / zo) {
+		upper = view->map->width * zi / zo;
+		if (upper < page_size)
+			upper = page_size;
+
+		value = (upper - lower) * xc + lower - page_size / 2;
+		clamp_double(&value, lower, upper - page_size);
+
+		g_object_set (G_OBJECT(adj), "upper", upper, "value", value, NULL);
 	}
 
-	if (vadj->page_size < view->map->height * zi / zo) {
-		vadj->upper = view->map->height * zi / zo;
-		if (vadj->upper < vadj->page_size)
-			vadj->upper = vadj->page_size;
-		vadj->value = (vadj->upper - vadj->lower) * yc + vadj->lower
-			- vadj->page_size / 2;
-		if (vadj->value < vadj->lower)
-			vadj->value = vadj->lower;
-		if (vadj->value > vadj->upper - vadj->page_size)
-			vadj->value = vadj->upper - vadj->page_size;
+	adj = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW(view));
+	if (page_size < view->map->height * zi / zo) {
+		upper = view->map->height * zi / zo;
+		if (upper < page_size)
+			upper = page_size;
+
+		value = (upper - lower) * yc + lower - page_size / 2;
+		clamp_double(&value, lower, upper - page_size);
+
+		g_object_set (G_OBJECT(adj), "upper", upper, "value", value, NULL);
 	}
-	gtk_adjustment_changed(vadj);
-	gtk_adjustment_value_changed(vadj);
-	gtk_adjustment_changed(hadj);
-	gtk_adjustment_value_changed(hadj);
+
 	gtk_widget_queue_draw(GTK_WIDGET(view));
 
 	gdk_window_thaw_updates(window);
@@ -1672,40 +1671,43 @@ void scale_histogram(double *rbh, int dbins, double max, int logh)
 void plot_histogram(GtkWidget *darea, GdkRectangle *area,
 		    int dskip, double *rbh, int dbins)
 {
+	GtkAllocation allocation;
 	int firstx, lcx, hcx;
 	int i, h;
 	cairo_t *cr;
 
-	cr = gdk_cairo_create (darea->window);
+	cr = gdk_cairo_create (gtk_widget_get_window (GTK_WIDGET(darea)));
+
+	gtk_widget_get_allocation (GTK_WIDGET(darea), &allocation);
 
 	firstx = area->x / dskip;
-	lcx = darea->allocation.width * (1 - CUTS_FACTOR) / 2;
-	hcx = darea->allocation.width - darea->allocation.width * (1 - CUTS_FACTOR) / 2;
+	lcx = allocation.width * (1 - CUTS_FACTOR) / 2;
+	hcx = allocation.width - allocation.width * (1 - CUTS_FACTOR) / 2;
 
-	d3_printf("aw=%d lc=%d hc=%d\n", darea->allocation.width, lcx, hcx);
+	d3_printf("aw=%d lc=%d hc=%d\n", allocation.width, lcx, hcx);
 
         /* clear the area */
 	cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
-	cairo_rectangle (cr, area->x, 0, area->width, darea->allocation.height);
+	cairo_rectangle (cr, area->x, 0, area->width, allocation.height);
 	cairo_fill (cr);
 
 	cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
 
 	for (i = firstx; i < (area->x + area->width) / dskip + 1 && i < dbins; i++) {
-		h = darea->allocation.height - rbh[i] * darea->allocation.height;
+		h = allocation.height - rbh[i] * allocation.height;
 //		d3_printf("hist line v=%.3f x=%d  h=%d\n", rbh[i], i, h);
-		cairo_move_to (cr, i * dskip, darea->allocation.height);
+		cairo_move_to (cr, i * dskip, allocation.height);
 		cairo_line_to (cr, i * dskip, h);
 		cairo_stroke (cr);
 	}
 
 	cairo_set_source_rgb (cr, 1.0, 0.0, 0.0);
 
-	cairo_move_to (cr, lcx, darea->allocation.height);
+	cairo_move_to (cr, lcx, allocation.height);
 	cairo_line_to (cr, lcx, 0);
 	cairo_stroke (cr);
 
-	cairo_move_to (cr, hcx, darea->allocation.height);
+	cairo_move_to (cr, hcx, allocation.height);
 	cairo_line_to (cr, hcx, 0);
 	cairo_stroke (cr);
 
@@ -1715,28 +1717,31 @@ void plot_histogram(GtkWidget *darea, GdkRectangle *area,
 /* draw the curve over the histogram area */
 void plot_curve(GtkWidget *darea, GdkRectangle *area, struct frame_map *map)
 {
+	GtkAllocation allocation;
 	int lcx, hcx, span;
 	int i, ci;
 	cairo_t *cr;
 
-	cr = gdk_cairo_create (darea->window);
+	cr = gdk_cairo_create (gtk_widget_get_window (GTK_WIDGET(darea)));
+
+	gtk_widget_get_allocation (GTK_WIDGET(darea), &allocation);
 
 	cairo_set_source_rgb (cr, 0.15, 0.60, 0.15);
 	cairo_set_line_width (cr, 2.0);
 	cairo_set_line_join (cr, CAIRO_LINE_JOIN_ROUND);
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
 
-	lcx = darea->allocation.width * (1 - CUTS_FACTOR) / 2;
-	hcx = darea->allocation.width - darea->allocation.width * (1 - CUTS_FACTOR) / 2;
+	lcx = allocation.width * (1 - CUTS_FACTOR) / 2;
+	hcx = allocation.width - allocation.width * (1 - CUTS_FACTOR) / 2;
 	span = hcx - lcx;
 
-	cairo_move_to (cr, 0, darea->allocation.height -
-		       darea->allocation.height * map->lut[0] / 65536);
+	cairo_move_to (cr, 0, allocation.height -
+		       allocation.height * map->lut[0] / 65536);
 	for (i = 0; i < span; i++) {
 		ci = LUT_SIZE * i / span;
 
-		cairo_line_to (cr, lcx + i, darea->allocation.height -
-			       darea->allocation.height * map->lut[ci] / 65536);
+		cairo_line_to (cr, lcx + i, allocation.height -
+			       allocation.height * map->lut[ci] / 65536);
 	}
 	cairo_stroke (cr);
 
@@ -1748,6 +1753,7 @@ void plot_curve(GtkWidget *darea, GdkRectangle *area, struct frame_map *map)
 void draw_histogram(GtkWidget *darea, GdkRectangle *area, struct frame_map *map,
 		    double low, double high, int logh)
 {
+	GtkAllocation allocation;
 	struct im_histogram *hist;
 	double *rbh, max = 0.0;
 	double hbinsize, dbinsize;
@@ -1757,15 +1763,18 @@ void draw_histogram(GtkWidget *darea, GdkRectangle *area, struct frame_map *map,
 		err_printf("draw_histogram: no stats\n");
 		return;
 	}
+
+	gtk_widget_get_allocation (GTK_WIDGET(darea), &allocation);
+
 	hist = &(map->fr->stats.hist);
 	hbinsize = (hist->end - hist->st) / hist->hsize;
-	dbinsize = (high - low) / darea->allocation.width;
+	dbinsize = (high - low) / allocation.width;
 	if (dbinsize < hbinsize) {
 		dskip = 1 + floor(hbinsize / dbinsize);
 	} else {
 		dskip = 1;
 	}
-	dbins = darea->allocation.width / dskip + 1;
+	dbins = allocation.width / dskip + 1;
 	rbh = calloc(dbins, sizeof(double));
 	if (rbh == NULL)
 		return;
@@ -2044,7 +2053,7 @@ void act_control_histogram(GtkAction *action, gpointer window)
 		imadj_set_callbacks(dialog);
 		gtk_widget_show(dialog);
 	} else {
-		gdk_window_raise(dialog->window);
+		gdk_window_raise (gtk_widget_get_window(GTK_WIDGET(dialog)));
 	}
 	//ref_image_channel(i_channel);
 	//g_object_set_data_full(G_OBJECT(dialog), "i_channel", i_channel,
@@ -2105,7 +2114,7 @@ GtkWidget* create_imadj_dialog (void)
   gtk_window_set_title (GTK_WINDOW (imadj_dialog), ("Curves / Histogram"));
 //  GTK_WINDOW (imadj_dialog)->type = GTK_WINDOW_DIALOG;
 
-  dialog_vbox1 = GTK_DIALOG (imadj_dialog)->vbox;
+  dialog_vbox1 = gtk_dialog_get_content_area (GTK_DIALOG(imadj_dialog));
   g_object_set_data (G_OBJECT (imadj_dialog), "dialog_vbox1", dialog_vbox1);
   gtk_widget_show (dialog_vbox1);
 
@@ -2124,7 +2133,8 @@ GtkWidget* create_imadj_dialog (void)
   gtk_box_pack_start (GTK_BOX (vbox1), hist_scrolled_win, TRUE, TRUE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hist_scrolled_win), 2);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (hist_scrolled_win), GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
-  gtk_range_set_update_policy (GTK_RANGE (GTK_SCROLLED_WINDOW (hist_scrolled_win)->hscrollbar), GTK_POLICY_NEVER);
+
+  //gtk_range_set_update_policy (GTK_RANGE (GTK_SCROLLED_WINDOW (hist_scrolled_win)->hscrollbar), GTK_POLICY_NEVER);
 
   viewport1 = gtk_viewport_new (NULL, NULL);
   g_object_ref (viewport1);
@@ -2363,7 +2373,7 @@ GtkWidget* create_imadj_dialog (void)
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (GTK_EXPAND), 0, 0);
 
-  dialog_action_area1 = GTK_DIALOG (imadj_dialog)->action_area;
+  dialog_action_area1 = gtk_dialog_get_action_area (GTK_DIALOG(imadj_dialog));
   g_object_set_data (G_OBJECT (imadj_dialog), "dialog_action_area1", dialog_action_area1);
   gtk_widget_show (dialog_action_area1);
   gtk_container_set_border_width (GTK_CONTAINER (dialog_action_area1), 3);
