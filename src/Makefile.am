@@ -25,7 +25,7 @@ gcx_SOURCES = \
 	tele_indi.c tele_indi.h camera_indi.c camera_indi.h \
 	fwheel_indi.c fwheel_indi.h focus_indi.c focus_indi.h \
 	common_indi.c common_indi.h \
-	gcxview.c gcxview.h \
+	gcximageview.c gcximageview.h \
         \
 	libindiclient/lilxml.h libindiclient/lilxml.c \
 	libindiclient/base64.h libindiclient/base64.c \

@@ -42,6 +42,7 @@
 #include "gcx.h"
 #include "catalogs.h"
 #include "gui.h"
+#include "gcximageview.h"
 #include "obsdata.h"
 #include "sourcesdraw.h"
 #include "params.h"
@@ -239,7 +240,7 @@ static void export_pnm(GtkWidget *chooser, gpointer user_data)
 
 	d3_printf("Saving pnm file: %s\n", fne);
 
-	gcx_view_to_pnm_file (GCX_VIEW(fa->window), fne, fa->arg1);
+	gcx_image_view_to_pnm_file (GCX_IMAGE_VIEW(fa->window), fne, fa->arg1);
 
 	free(fne);
 	g_free(fn);

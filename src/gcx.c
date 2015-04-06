@@ -39,6 +39,7 @@
 #include "gcx.h"
 #include "catalogs.h"
 #include "gui.h"
+#include "gcximageview.h"
 #include "params.h"
 #include "filegui.h"
 #include "obslist.h"
@@ -1165,8 +1166,8 @@ int main(int ac, char **av)
 		frame_to_window (fr, window);
 		release_frame(fr);
 		if (to_pnm) {
-			GcxView *view = g_object_get_data (G_OBJECT(window), "image");
-			ret = gcx_view_to_pnm_file (view, *outf ? outf : NULL, 0);
+			GcxImageView *view = g_object_get_data (G_OBJECT(window), "image_view");
+			ret = gcx_image_view_to_pnm_file (view, *outf ? outf : NULL, 0);
 			if (ret) {
 				err_printf("error writing pnm file\n");
 				if (batch && !interactive)

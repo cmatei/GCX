@@ -2,10 +2,6 @@
 #define _GUI_H_
 
 #include <gtk/gtk.h>
-#include "gcxview.h"
-
-
-
 
 
 /* from gui.c */

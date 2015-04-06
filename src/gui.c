@@ -31,6 +31,7 @@
 #include "gcx.h"
 #include "catalogs.h"
 #include "gui.h"
+#include "gcximageview.h"
 #include "sourcesdraw.h"
 #include "params.h"
 #include "wcs.h"
@@ -44,18 +45,18 @@
 /* helpers to get/set a ccd_frame in a main window */
 struct ccd_frame *frame_from_window (gpointer window)
 {
-	GcxView *view;
+	GcxImageView *view;
 
-	view = g_object_get_data (G_OBJECT(window), "image");
-	return gcx_view_get_frame (view);
+	view = g_object_get_data (G_OBJECT(window), "image_view");
+	return gcx_image_view_get_frame (view);
 }
 
 void frame_to_window(struct ccd_frame *fr, gpointer window)
 {
-	GcxView *view = g_object_get_data (G_OBJECT(window), "image");
+	GcxImageView *view = g_object_get_data (G_OBJECT(window), "image_view");
 
 	if (view)
-		gcx_view_set_frame (view, fr);
+		gcx_image_view_set_frame (view, fr);
 }
 
 /* yes/no modal dialog */
@@ -758,7 +759,7 @@ static GtkWidget *get_main_menu_bar(GtkWidget *window)
 GtkWidget * create_image_window()
 {
 	GtkWidget *window;
-	GtkWidget *image;
+	GtkWidget *imview;
 	GtkWidget *image_popup;
 	GtkWidget *vbox;
 	GtkWidget *hbox;
@@ -768,7 +769,7 @@ GtkWidget * create_image_window()
 	GtkWidget *statuslabel2;
 
 
-	image = gcx_view_new();
+	imview = gcx_image_view_new();
 
 	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	g_object_ref_sink(window);
@@ -805,28 +806,26 @@ GtkWidget * create_image_window()
 	gtk_box_pack_start(GTK_BOX(hbox), statuslabel1, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 0);
 
-	gtk_box_pack_start(GTK_BOX(vbox), image, 1, 1, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), imview, 1, 1, 0);
 	gtk_box_pack_start(GTK_BOX(vbox), statuslabel2, 0, 0, 0);
 	gtk_container_add(GTK_CONTAINER(window), vbox);
 
-	g_signal_connect(G_OBJECT(image), "button_press_event",
+	g_signal_connect(G_OBJECT(imview), "button_press_event",
 			 G_CALLBACK(sources_clicked_cb), window);
-	g_signal_connect(G_OBJECT(image), "button_press_event",
+	g_signal_connect(G_OBJECT(imview), "button_press_event",
 			 G_CALLBACK(image_clicked_cb), window);
-//	g_signal_connect(G_OBJECT(image), "motion_notify_event",
+//	g_signal_connect(G_OBJECT(imview), "motion_notify_event",
 //			 G_CALLBACK(motion_event_cb), window);
-//	g_signal_connect(G_OBJECT(image), "expose_event",
-//			 G_CALLBACK(image_expose_cb), window);
 
-	gtk_widget_set_events(image,  GDK_BUTTON_PRESS_MASK
+	gtk_widget_set_events(imview,  GDK_BUTTON_PRESS_MASK
 			      | GDK_POINTER_MOTION_MASK
 			      | GDK_POINTER_MOTION_HINT_MASK);
 
-	g_object_set_data(G_OBJECT(window), "image", image);
+	g_object_set_data(G_OBJECT(window), "image_view", imview);
 
   	gtk_window_set_default_size(GTK_WINDOW(window), 700, 500);
 
-	gtk_widget_show(image);
+	gtk_widget_show(imview);
 	gtk_widget_show(vbox);
 
 	image_popup = get_image_popup_menu(window);

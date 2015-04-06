@@ -363,7 +363,7 @@ void draw_gui_star(struct gui_star *gs, GtkWidget *window)
 	struct gui_star_list *gsl;
 	cairo_t *cr;
 
-	darea = g_object_get_data(G_OBJECT(window), "image");
+	darea = g_object_get_data(G_OBJECT(window), "image_view");
 	if (darea == NULL)
 		return;
 	//geom = g_object_get_data(G_OBJECT(window), "geometry");
@@ -394,7 +394,7 @@ void draw_star_list(GSList *stars, GtkWidget *window)
 	struct gui_star_list *gsl;
 	cairo_t *cr;
 
-	darea = g_object_get_data(G_OBJECT(window), "image");
+	darea = g_object_get_data(G_OBJECT(window), "image_view");
 	if (darea == NULL)
 		return;
 	//geom = g_object_get_data(G_OBJECT(window), "geometry");

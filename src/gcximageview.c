@@ -26,7 +26,7 @@
 #include "misc.h"
 #include "demosaic.h"
 
-#include "gcxview.h"
+#include "gcximageview.h"
 
 
 
@@ -92,7 +92,7 @@ static struct frame_map *new_frame_map();
 static void free_frame_map(struct frame_map *map);
 
 
-struct _GcxView {
+struct _GcxImageView {
 	GtkScrolledWindow parent;
 
 	GtkWidget *darea;
@@ -103,17 +103,17 @@ struct _GcxView {
 };
 
 
-struct _GcxViewClass {
+struct _GcxImageViewClass {
 	GtkScrolledWindowClass parent_class;
 };
 
-G_DEFINE_TYPE(GcxView, gcx_view, GTK_TYPE_SCROLLED_WINDOW);
+G_DEFINE_TYPE(GcxImageView, gcx_image_view, GTK_TYPE_SCROLLED_WINDOW);
 
-static gboolean gcx_view_expose (GtkWidget *widget, GdkEventExpose *event, void *user);
+static gboolean gcx_image_view_expose_cb (GtkWidget *widget, GdkEventExpose *event, void *user);
 
 
 static void
-gcx_view_init(GcxView *view)
+gcx_image_view_init(GcxImageView *view)
 {
 	GtkWidget *alignment;
 
@@ -130,7 +130,7 @@ gcx_view_init(GcxView *view)
 					       GTK_WIDGET(alignment));
 
 	g_signal_connect (G_OBJECT(view->darea), "expose_event",
-			  G_CALLBACK(gcx_view_expose), view);
+			  G_CALLBACK(gcx_image_view_expose_cb), view);
 
 
 	view->cache = new_map_cache (0, MAP_CACHE_GRAY);
@@ -139,30 +139,30 @@ gcx_view_init(GcxView *view)
 }
 
 static void
-gcx_view_finalize(GObject *object)
+gcx_image_view_finalize(GObject *object)
 {
-	GcxView *view = (GcxView *) object;
+	GcxImageView *view = (GcxImageView *) object;
 
 	free_map_cache (view->cache);
 	free_frame_map (view->map);
 	wcs_release(view->wcs);
 
-	G_OBJECT_CLASS (gcx_view_parent_class)->finalize (object);
+	G_OBJECT_CLASS (gcx_image_view_parent_class)->finalize (object);
 }
 
 static void
-gcx_view_class_init(GcxViewClass *klass)
+gcx_image_view_class_init(GcxImageViewClass *klass)
 {
 	GObjectClass *gobject_class = (GObjectClass *) klass;
 
-	gobject_class->finalize = gcx_view_finalize;
+	gobject_class->finalize = gcx_image_view_finalize;
 }
 
 
 GtkWidget *
-gcx_view_new()
+gcx_image_view_new()
 {
-	return GTK_WIDGET(g_object_new (GCX_VIEW_TYPE, NULL));
+	return GTK_WIDGET(g_object_new (GCX_IMAGE_VIEW_TYPE, NULL));
 }
 
 
@@ -237,7 +237,7 @@ free_frame_map(struct frame_map *map)
 }
 
 void set_default_channel_cuts(struct frame_map *map);
-static void set_view_size(GcxView *view, double xc, double yc);
+static void set_view_size(GcxImageView *view, double xc, double yc);
 
 
 /*
@@ -614,14 +614,13 @@ static void update_cache(struct map_cache *cache, struct frame_map *map,
 //		  cache->w, cache->h, cache->x, cache->y);
 }
 
-/* attach a frame to the given window/channel for display
- * if the requested channel does not exist, it is created;
+/* attach a frame to the given view for display
  * it ref's the frame, so the frame should be released after
- * frame_to_channel is called
+ * frame_to_window is called
  */
-int gcx_view_set_frame(GcxView *view, struct ccd_frame *fr)
+int gcx_image_view_set_frame(GcxImageView *view, struct ccd_frame *fr)
 {
-	g_return_val_if_fail (IS_GCX_VIEW(view), -1);
+	g_return_val_if_fail (IS_GCX_IMAGE_VIEW(view), -1);
 
 	//if ((fr->magic & FRAME_VALID_RGB) == 0)
 	//	bayer_interpolate(fr);
@@ -663,10 +662,9 @@ int gcx_view_set_frame(GcxView *view, struct ccd_frame *fr)
 }
 
 struct ccd_frame *
-gcx_view_get_frame (GcxView *view)
+gcx_image_view_get_frame (GcxImageView *view)
 {
-	g_return_val_if_fail (IS_GCX_VIEW(view), 0);
-
+	g_return_val_if_fail (IS_GCX_IMAGE_VIEW(view), 0);
 	return view->map->fr;
 }
 
@@ -723,9 +721,9 @@ static void paint_from_rgb_cache(GtkWidget *widget, struct map_cache *cache, Gdk
 static void draw_sources(GtkWidget *darea, GdkRectangle *area);
 
 static gboolean
-gcx_view_expose(GtkWidget *darea, GdkEventExpose *event, void *user)
+gcx_image_view_expose_cb(GtkWidget *darea, GdkEventExpose *event, void *user)
 {
-	GcxView *view = GCX_VIEW(user);
+	GcxImageView *view = GCX_IMAGE_VIEW(user);
 
 	if (view->map->fr == NULL) /* no frame */
 		return TRUE;
@@ -830,7 +828,7 @@ static void float_chan_to_pnm(struct frame_map *map, FILE *pnmf, int is_16bit)
  * if fname is null, the file is output on stdout
  * return 0 for success */
 
-int gcx_view_to_pnm_file(GcxView *view, char *fn, int is_16bit)
+int gcx_image_view_to_pnm_file(GcxImageView *view, char *fn, int is_16bit)
 {
 #if 0
 	struct ccd_frame *fr;
@@ -1049,7 +1047,7 @@ void set_default_channel_cuts(struct frame_map* map)
  * of the image's width/height
  */
 
-void gcx_view_set_scrolls(GcxView *view, double xc, double yc)
+void gcx_image_view_set_scrolls(GcxImageView *view, double xc, double yc)
 {
 	GtkAdjustment *hadj, *vadj;
 
@@ -1079,7 +1077,7 @@ void gcx_view_set_scrolls(GcxView *view, double xc, double yc)
  * the fraction of the image's dimension the center of the
  * visible area is at
  */
-void gcx_view_get_scrolls(GcxView *view, double *xc, double *yc)
+void gcx_image_view_get_scrolls(GcxImageView *view, double *xc, double *yc)
 {
 	GtkAdjustment *hadj, *vadj;
 
@@ -1094,7 +1092,7 @@ void gcx_view_get_scrolls(GcxView *view, double *xc, double *yc)
 	*yc = (vadj->value + vadj->page_size / 2) / (vadj->upper - vadj->lower);
 }
 
-static void set_view_size(GcxView *view, double xc, double yc)
+static void set_view_size(GcxImageView *view, double xc, double yc)
 {
 	GdkWindow *window;
 	GtkAdjustment *hadj, *vadj;
@@ -1218,18 +1216,18 @@ void step_zoom(struct frame_map *map, int step)
  */
 void pan_cursor(GtkWidget *window)
 {
-	GcxView *image;
+	GcxImageView *image;
 	int x, y, w, h;
 	GdkModifierType mask;
 
-	image = GCX_VIEW(g_object_get_data(G_OBJECT(window), "image"));
+	image = GCX_IMAGE_VIEW(g_object_get_data(G_OBJECT(window), "image_view"));
 
 	gdk_window_get_pointer (gtk_widget_get_window (image->darea), &x, &y, &mask);
 	gdk_drawable_get_size (gtk_widget_get_window (image->darea), &w, &h);
 
 	d3_printf("mouse x=%d, y=%d drawable w=%d, h=%d\n", x, y, w, h);
 
-	gcx_view_set_scrolls(image, 1.0 * x / w, 1.0 * y / h);
+	gcx_image_view_set_scrolls(image, 1.0 * x / w, 1.0 * y / h);
 }
 
 
@@ -1245,9 +1243,9 @@ void pan_cursor(GtkWidget *window)
 static void cuts_option_cb(gpointer data, guint action)
 {
 	GtkWidget *window = data;
-	GcxView *view;
+	GcxImageView *view;
 
-	view = g_object_get_data(G_OBJECT(window), "image");
+	view = g_object_get_data(G_OBJECT(window), "image_view");
 
 	channel_cuts_action(view->map, action);
 	show_zoom_cuts(window);
@@ -1335,13 +1333,13 @@ void act_view_cuts_contrast_8 (GtkAction *action, gpointer window)
  */
 static void view_option_cb(gpointer window, guint action)
 {
-	GcxView *view;
+	GcxImageView *view;
 	int x, y, w, h;
 	GdkModifierType mask;
 	double xc, yc;
 
-	view = g_object_get_data(G_OBJECT(window), "image");
-	g_return_if_fail (IS_GCX_VIEW(view));
+	view = g_object_get_data(G_OBJECT(window), "image_view");
+	g_return_if_fail (IS_GCX_IMAGE_VIEW(view));
 
 	gdk_window_get_pointer(gtk_widget_get_window(GTK_WIDGET(view->darea)), &x, &y, &mask);
 	gdk_drawable_get_size(gtk_widget_get_window(GTK_WIDGET(view->darea)), &w, &h);
@@ -1351,20 +1349,20 @@ static void view_option_cb(gpointer window, guint action)
 
 	switch(action) {
 	case VIEW_ZOOM_IN:
-		gcx_view_get_scrolls(view, &xc, &yc);
+		gcx_image_view_get_scrolls(view, &xc, &yc);
 		step_zoom(view->map, +1);
 		set_view_size(view, 1.0 * x / w, 1.0 * y / h);
 		gtk_widget_queue_draw(window);
 		break;
 	case VIEW_ZOOM_OUT:
-		gcx_view_get_scrolls(view, &xc, &yc);
+		gcx_image_view_get_scrolls(view, &xc, &yc);
 		step_zoom(view->map, -1);
 		set_view_size(view, xc, yc);
-		gcx_view_set_scrolls(view, xc, yc);
+		gcx_image_view_set_scrolls(view, xc, yc);
 		gtk_widget_queue_draw(window);
 		break;
 	case VIEW_PIXELS:
-		gcx_view_get_scrolls(view, &xc, &yc);
+		gcx_image_view_get_scrolls(view, &xc, &yc);
 		if (view->map->zoom > 1) {
 			view->map->zoom = 1.0;
 			set_view_size(view, xc, yc);
@@ -1376,10 +1374,10 @@ static void view_option_cb(gpointer window, guint action)
 		}
 		break;
 	case VIEW_PAN_CENTER:
-		gcx_view_set_scrolls(view, 0.5, 0.5);
+		gcx_image_view_set_scrolls(view, 0.5, 0.5);
 		break;
 	case VIEW_PAN_CURSOR:
-		gcx_view_set_scrolls(view, 1.0 * x / w, 1.0 * y / h);
+		gcx_image_view_set_scrolls(view, 1.0 * x / w, 1.0 * y / h);
 		break;
 
 	default:

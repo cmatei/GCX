@@ -709,7 +709,7 @@ static gboolean wait_for_indi_cb(gpointer data)
 /* create / open the guiding dialog */
 void act_control_guider (GtkAction *action, gpointer window)
 {
-	GtkWidget *gwindow, *vb, *hb, *menubar, *im, *scw;
+	GtkWidget *gwindow, *vb, *hb, *menubar, *imview;
 	GtkWidget *statuslabel1;
 	long signal;
 	struct camera_t *camera;
@@ -738,19 +738,17 @@ void act_control_guider (GtkAction *action, gpointer window)
 		gtk_box_pack_start(GTK_BOX(vb), hb, FALSE, TRUE, 0);
 		gtk_box_reorder_child(GTK_BOX(vb), hb, 0);
 
-		scw = g_object_get_data(G_OBJECT(gwindow), "scrolled_window");
-		im = g_object_get_data(G_OBJECT(gwindow), "image");
-//		set_named_callback(gwindow, "image", "expose_event", image_expose_cb);
+		imview = g_object_get_data(G_OBJECT(gwindow), "image_view");
 //		set_named_callback(gwindow, "guide_box_darea", "expose_event", gbox_expose_cb);
 		g_signal_connect(G_OBJECT(gwindow), "delete_event",
 				 G_CALLBACK(guide_window_delete), window);
-		g_signal_connect(G_OBJECT(im), "motion-notify-event",
+		g_signal_connect(G_OBJECT(imview), "motion-notify-event",
 				 G_CALLBACK(motion_event_cb), gwindow);
-		g_signal_connect(G_OBJECT(scw), "button_press_event",
+		g_signal_connect(G_OBJECT(imview), "button_press_event",
 				 G_CALLBACK(sources_clicked_cb), gwindow);
-		g_signal_connect(G_OBJECT(scw), "button_press_event",
+		g_signal_connect(G_OBJECT(imview), "button_press_event",
 				 G_CALLBACK(image_clicked_cb), gwindow);
-		gtk_widget_add_events(im, GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK
+		gtk_widget_add_events(imview, GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK
 				      | GDK_POINTER_MOTION_HINT_MASK);
 		set_named_callback(gwindow, "guide_find_star", "clicked", find_guide_star_cb);
 		signal = set_named_callback(gwindow, "guide_run", "clicked", run_button_cb);
@@ -758,8 +756,8 @@ void act_control_guider (GtkAction *action, gpointer window)
 		signal = set_named_callback(gwindow, "guide_calibrate", "clicked", calibrate_button_cb);
 		g_object_set_data(G_OBJECT(gwindow), "calibrate_button_signal", (gpointer)signal);
 		set_named_callback(gwindow, "guide_options", "clicked", options_button_cb);
-		im = g_object_get_data(G_OBJECT(gwindow), "guide_box_darea");
-		gtk_widget_set_size_request(GTK_WIDGET(im), GUIDE_BOX_SIZE, GUIDE_BOX_SIZE);
+		imview = g_object_get_data(G_OBJECT(gwindow), "guide_box_darea");
+		gtk_widget_set_size_request(GTK_WIDGET(imview), GUIDE_BOX_SIZE, GUIDE_BOX_SIZE);
 
 		if (! (tele = tele_find(window))) {
 			gtk_widget_set_sensitive(
