@@ -642,18 +642,23 @@ static void center_selected(gpointer user_data, int index)
 {
 	GtkWidget *scw;
 	GtkAdjustment *vadj;
-	double nv;
+	gdouble nvalue, value, lower, upper, page_size;
 	int all;
 
 	all = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(user_data), "commands"));
 	scw = g_object_get_data(G_OBJECT(user_data), "obs_list_scrolledwin");
+
 	vadj =  gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(scw));
-	d3_printf("vadj at %.3f\n", vadj->value);
+
+	g_object_get (vadj, "value", &value, "lower", &lower,
+		      "upper", &upper, "page-size", &page_size, NULL);
+
+	d3_printf("vadj at %.3f\n", value);
 	if (all != 0) {
-		nv = (vadj->upper + vadj->lower) * index / all - vadj->page_size / 2.5;
-		clamp_double(&nv, vadj->lower, vadj->upper - vadj->page_size);
-		gtk_adjustment_set_value(vadj, nv);
-		d3_printf("vadj set to %.3f\n", vadj->value);
+		nvalue = (upper + lower) * index / all - page_size / 2.5;
+		clamp_double(&nvalue, lower, upper - page_size);
+		gtk_adjustment_set_value(vadj, nvalue);
+		d3_printf("vadj set to %.3f\n", nvalue);
 	}
 }
 

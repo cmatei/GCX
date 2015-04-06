@@ -86,14 +86,15 @@ static void named_spin_set_limits(GtkWidget *dialog, char *name, double min, dou
 {
 	GtkWidget *spin;
 	GtkAdjustment *adj;
+
 	g_return_if_fail(dialog != NULL);
 	spin = g_object_get_data(G_OBJECT(dialog), name);
 	g_return_if_fail(spin != NULL);
+
 	adj = gtk_spin_button_get_adjustment(GTK_SPIN_BUTTON(spin));
 	g_return_if_fail(adj != NULL);
-	adj->lower = min;
-	adj->upper = max;
-	gtk_adjustment_changed(GTK_ADJUSTMENT(adj));
+
+	g_object_set (adj, "lower", min, "upper", max, NULL);
 }
 
 /* Set current temperature in widget */
@@ -740,11 +741,17 @@ static void img_multiple_cb( GtkWidget *widget, gpointer data )
 {
 	char buf[64];
 	int nf;
+
 	if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)) ) {
-		gtk_label_set_text(GTK_LABEL(GTK_BIN(widget)->child), "Multiple");
+		//gtk_label_set_text(GTK_LABEL(GTK_BIN(widget)->child), "Multiple");
+		g_object_set (widget, "label", "Multiple", NULL);
 		return;
 	}
-	gtk_label_set_text(GTK_LABEL(GTK_BIN(widget)->child), "Stop");
+
+
+	//gtk_label_set_text(GTK_LABEL(GTK_BIN(widget)->child), "Stop");
+	g_object_set (widget, "label", "Stop", NULL);
+
 	nf = named_spin_get_value(data, "img_number_spin");
 	snprintf(buf, 63, "%d", nf);
 	named_entry_set(data, "current_frame_entry", buf);
@@ -754,10 +761,14 @@ static void img_multiple_cb( GtkWidget *widget, gpointer data )
 static void img_focus_cb( GtkWidget *widget, gpointer data )
 {
 	if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)) ) {
-		gtk_label_set_text(GTK_LABEL(GTK_BIN(widget)->child), "Focus");
+		//gtk_label_set_text(GTK_LABEL(GTK_BIN(widget)->child), "Focus");
+		g_object_set (widget, "label", "Focus", NULL);
 		return;
 	}
-	gtk_label_set_text(GTK_LABEL(GTK_BIN(widget)->child), "Stop");
+
+	// gtk_label_set_text(GTK_LABEL(GTK_BIN(widget)->child), "Stop");
+	g_object_set (widget, "label", "Stop", NULL);
+
 	img_get_image_cb(widget, data);
 }
 
@@ -1078,7 +1089,7 @@ void act_control_camera (GtkAction *action, gpointer window)
 		gtk_widget_show_all(dialog);
 	} else {
 		gtk_widget_show(dialog);
-		gdk_window_raise(dialog->window);
+		gdk_window_raise( gtk_widget_get_window (dialog));
 	}
 //	cam_dialog_update(dialog);
 //	cam_dialog_edit(dialog);

@@ -433,7 +433,7 @@ static int run_guider( GtkWidget *window)
 
 	run_button = g_object_get_data(G_OBJECT(window), "guide_run");
 
-	if(! GTK_TOGGLE_BUTTON (run_button)->active) {
+	if (! gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(run_button))) {
 		// We shouldn't be guiding anymore
 		return TRUE;
 	}
@@ -455,11 +455,10 @@ static int run_guider( GtkWidget *window)
 
 static void run_button_cb( GtkWidget *run_button, gpointer window)
 {
-	GtkWidget *calibrate_button;
+	//GtkWidget *calibrate_button;
+	//calibrate_button = g_object_get_data(G_OBJECT(window), "guide_calibrate");
 
-	calibrate_button = g_object_get_data(G_OBJECT(window), "guide_calibrate");
-
-	if(! GTK_TOGGLE_BUTTON (run_button)->active) {
+	if (! gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(run_button))) {
 		return;
 	}
 	if (run_guider(window)) {
@@ -475,12 +474,12 @@ static void calibrate_button_cb( GtkWidget *calibrate_button, gpointer window)
 
 	run_button = g_object_get_data(G_OBJECT(window), "guide_run");
 
-	if(! GTK_TOGGLE_BUTTON (calibrate_button)->active) {
+	if (! gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(calibrate_button))) {
 		gtk_widget_set_sensitive(run_button, TRUE);
 		return;
 	}
 
-	if (GTK_TOGGLE_BUTTON (run_button)->active) {
+	if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(run_button))) {
 		err_printf("Can't calibrate while running\n");
 		toggle_button_no_cb(window, calibrate_button, "calibrate_button_signal", 0);
 		return;
@@ -656,9 +655,9 @@ void guide_image_update(GtkWidget *window)
 				 guider->xtgt + guider->xbias,
 				 guider->ytgt + guider->ybias,
 				 s.x + dx, s.y + dy, delta_x, delta_y, derr);
-			if(GTK_TOGGLE_BUTTON (calibrate_button)->active) {
+			if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(calibrate_button))) {
 				calibrate_sm(window, guider, tele, delta_x, delta_y);
-			} else if(GTK_TOGGLE_BUTTON (run_button)->active) {
+			} else if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(run_button))) {
 				guide_adjust_mount(window, guider, tele, delta_x, delta_y);
 			}
 			return;
@@ -666,12 +665,12 @@ void guide_image_update(GtkWidget *window)
 	}
 	err_printf("failed to find guide-star in image\n");
 
-	if (GTK_TOGGLE_BUTTON (run_button)->active) {
+	if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(run_button))) {
 		// Try again
 		run_guider(window);
 	}
 
-	if (GTK_TOGGLE_BUTTON (calibrate_button)->active) {
+	if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(calibrate_button))) {
 		// Calibration failed
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON (calibrate_button), 0);
 	}
@@ -775,7 +774,7 @@ void act_control_guider (GtkAction *action, gpointer window)
 		gtk_widget_show_all(gwindow);
 
 	} else {
-		gdk_window_raise(gwindow->window);
+		gdk_window_raise (gtk_widget_get_window (GTK_WIDGET(gwindow)));
 	}
 
 }

@@ -252,9 +252,9 @@ void act_about_cx (GtkAction *action, gpointer data)
 	gtk_widget_show(about_cx);
 }
 
-void close_about_cx( GtkWidget *widget, gpointer data )
+void close_about_cx (GtkWidget *widget, gpointer data)
 {
-	gtk_widget_destroy(GTK_WIDGET(data));
+	gtk_widget_destroy(widget);
 }
 
 static int destroy_cb(GtkWidget *widget, gpointer data)
@@ -862,21 +862,14 @@ GtkWidget* create_about_cx (void)
 	GtkWidget *label9;
 	GtkWidget *label10;
 	GtkWidget *label11;
-	GtkWidget *dialog_action_area1;
-	GtkWidget *button1;
 
-	about_cx = gtk_dialog_new ();
-	g_object_set_data (G_OBJECT (about_cx), "about_cx", about_cx);
-	gtk_window_set_title (GTK_WINDOW (about_cx), ("About gcx"));
-	GTK_WINDOW (about_cx)->type = GTK_WINDOW_TOPLEVEL;
-	gtk_window_set_position (GTK_WINDOW (about_cx), GTK_WIN_POS_CENTER);
 
-	//deprecated gtk_window_set_policy (GTK_WINDOW (about_cx), TRUE, TRUE, FALSE);
-	gtk_window_set_resizable (GTK_WINDOW (about_cx), TRUE);
+	about_cx = gtk_dialog_new_with_buttons ("About gcx", NULL, 0,
+						GTK_STOCK_OK, GTK_RESPONSE_ACCEPT,
+						NULL);
 
-	dialog_vbox1 = GTK_DIALOG (about_cx)->vbox;
+	dialog_vbox1 = gtk_dialog_get_content_area (GTK_DIALOG(about_cx));
 	g_object_set_data (G_OBJECT (about_cx), "dialog_vbox1", dialog_vbox1);
-	gtk_widget_show (dialog_vbox1);
 
 	vbox1 = gtk_vbox_new (FALSE, 0);
 	g_object_ref (vbox1);
@@ -999,21 +992,8 @@ GtkWidget* create_about_cx (void)
 	gtk_widget_show (label11);
 	gtk_box_pack_start (GTK_BOX (vbox2), label11, FALSE, FALSE, 0);
 
-	dialog_action_area1 = GTK_DIALOG (about_cx)->action_area;
-	g_object_set_data (G_OBJECT (about_cx), "dialog_action_area1", dialog_action_area1);
-	gtk_widget_show (dialog_action_area1);
-	gtk_container_set_border_width (GTK_CONTAINER (dialog_action_area1), 10);
-
-	button1 = gtk_button_new_with_label("Close");
-	g_object_ref (button1);
-	g_object_set_data_full (G_OBJECT (about_cx), "button1", button1,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (button1);
-	gtk_box_pack_start (GTK_BOX (dialog_action_area1), button1, FALSE, FALSE, 0);
-
-	g_signal_connect (G_OBJECT (button1), "clicked",
-			    G_CALLBACK (close_about_cx),
-			    about_cx);
+	g_signal_connect_swapped (GTK_DIALOG(about_cx), "response",
+				  G_CALLBACK(close_about_cx), about_cx);
 
 	return about_cx;
 }

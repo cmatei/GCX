@@ -729,8 +729,8 @@ paint_from_gray_cache(GtkWidget *widget, struct map_cache *cache, GdkRectangle *
 
 	dat = cache->dat + area->x - cache->x
 		+ (area->y - cache->y) * cache->w;
-
-	gdk_draw_gray_image (widget->window, widget->style->fg_gc[GTK_STATE_NORMAL],
+	gdk_draw_gray_image (gtk_widget_get_window (widget),
+			     widget->style->fg_gc[GTK_STATE_NORMAL],
 			     area->x, area->y, area->width, area->height,
 			     GDK_RGB_DITHER_MAX, dat, cache->w);
 }
@@ -751,9 +751,10 @@ paint_from_rgb_cache(GtkWidget *widget, struct map_cache *cache, GdkRectangle *a
 
 	dat = cache->dat + (area->x - cache->x
 		+ (area->y - cache->y) * cache->w) * 3;
-	gdk_draw_rgb_image (widget->window, widget->style->fg_gc[GTK_STATE_NORMAL],
-			     area->x, area->y, area->width, area->height,
-			     GDK_RGB_DITHER_MAX, dat, cache->w*3);
+	gdk_draw_rgb_image (gtk_widget_get_window(widget),
+			    widget->style->fg_gc[GTK_STATE_NORMAL],
+			    area->x, area->y, area->width, area->height,
+			    GDK_RGB_DITHER_MAX, dat, cache->w*3);
 }
 
 /*
@@ -1047,30 +1048,28 @@ static void set_default_channel_cuts(struct frame_map* map)
  * of the image's width/height
  */
 
+static void
+__set_scroll(GtkAdjustment *adjustment, gdouble position)
+{
+	gdouble value, lower, upper, page_size;
+
+	g_object_get (G_OBJECT(adjustment),
+		      "lower",     &lower,
+		      "upper",     &upper,
+		      "page-size", &page_size,
+		      NULL);
+
+	value = (upper - lower) * position + lower - page_size / 2;
+	clamp_double(&value, lower, upper - page_size);
+
+	g_object_set (G_OBJECT(adjustment), "value", value, NULL);
+}
+
 void
 gcx_image_view_set_scrolls(GcxImageView *view, double xc, double yc)
 {
-	GtkAdjustment *hadj, *vadj;
-
-	hadj = gtk_scrolled_window_get_hadjustment (GTK_SCROLLED_WINDOW(view));
-	vadj = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW(view));
-
-	/* center the adjustments */
-	hadj->value = (hadj->upper - hadj->lower) * xc + hadj->lower
-		- hadj->page_size / 2;
-	if (hadj->value < hadj->lower)
-		hadj->value = hadj->lower;
-	if (hadj->value > hadj->upper - hadj->page_size)
-		hadj->value = hadj->upper - hadj->page_size;
-	vadj->value = (vadj->upper - vadj->lower) * yc + vadj->lower
-		- vadj->page_size / 2;
-	if (vadj->value < vadj->lower)
-		vadj->value = vadj->lower;
-	if (vadj->value > vadj->upper - vadj->page_size)
-		vadj->value = vadj->upper - vadj->page_size;
-
-	gtk_adjustment_value_changed(hadj);
-	gtk_adjustment_value_changed(vadj);
+	__set_scroll (gtk_scrolled_window_get_hadjustment (GTK_SCROLLED_WINDOW(view)), xc);
+	__set_scroll (gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW(view)), yc);
 }
 
 
@@ -1078,20 +1077,26 @@ gcx_image_view_set_scrolls(GcxImageView *view, double xc, double yc)
  * the fraction of the image's dimension the center of the
  * visible area is at
  */
+static void
+__get_scroll(GtkAdjustment *adjustment, gdouble *position)
+{
+	gdouble value, lower, upper, page_size;
+
+	g_object_get (G_OBJECT(adjustment),
+		      "value",     &value,
+		      "lower",     &lower,
+		      "upper",     &upper,
+		      "page-size", &page_size,
+		      NULL);
+
+	*position = (value + page_size / 2) / (upper - lower);
+}
+
 void
 gcx_image_view_get_scrolls(GcxImageView *view, double *xc, double *yc)
 {
-	GtkAdjustment *hadj, *vadj;
-
-	hadj = gtk_scrolled_window_get_hadjustment (GTK_SCROLLED_WINDOW(view));
-	vadj = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW(view));
-
-	/* center the adjustments */
-	d3_printf("v %.3f p %.3f l %.3f u %.3f\n",
-		  hadj->value, hadj->page_size, hadj->lower, hadj->upper);
-
-	*xc = (hadj->value + hadj->page_size / 2) / (hadj->upper - hadj->lower);
-	*yc = (vadj->value + vadj->page_size / 2) / (vadj->upper - vadj->lower);
+	__get_scroll (gtk_scrolled_window_get_hadjustment (GTK_SCROLLED_WINDOW(view)), xc);
+	__get_scroll (gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW(view)), yc);
 }
 
 

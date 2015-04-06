@@ -135,7 +135,7 @@ void act_control_wcs (GtkAction *action, gpointer window)
 	} else {
 //		update_fits_header_dialog(dialog, i_chan->fr);
 		update_wcs_dialog(dialog, wcs);
-		gdk_window_raise(dialog->window);
+		gdk_window_raise (gtk_widget_get_window(GTK_WIDGET(dialog)));
 	}
 }
 
@@ -626,9 +626,12 @@ static void wcs_step_cb(GtkWidget *wid, gpointer dialog)
 	button = g_object_get_data(G_OBJECT(dialog), "wcs_step_button");
 	/* label = gtk_label_get_text(GTK_LABEL(GTK_BIN(button)->child)); */
 	btnstate = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
-	if (btnstate > 0)
-		gtk_label_set_text(GTK_LABEL(GTK_BIN(button)->child), "x10");
-	else
-		gtk_label_set_text(GTK_LABEL(GTK_BIN(button)->child), "x1");
+	if (btnstate) {
+		//gtk_label_set_text(GTK_LABEL(GTK_BIN(button)->child), "x10");
+		g_object_set (G_OBJECT(button), "label", "x10", NULL);
+	} else {
+		//gtk_label_set_text(GTK_LABEL(GTK_BIN(button)->child), "x1");
+		g_object_set (G_OBJECT(button), "label", "x1", NULL);
+	}
 }
 /* Pertti's code end */
