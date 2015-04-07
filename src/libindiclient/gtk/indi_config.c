@@ -14,8 +14,8 @@
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-  
-  
+
+
   Contact Information: gcx@phracturedblue.com <Geoffrey Hausheer>
 *******************************************************************************/
 
@@ -97,7 +97,7 @@ void ic_update_props(void *c)
 	char num[20];
 	GIOChannel *fh;
 
-	if (! c) 
+	if (! c)
 		return;
 
 	for (isl_d = il_iter(cfg->indi->devices); ! il_is_last(isl_d); isl_d = il_next(isl_d)) {
@@ -135,15 +135,15 @@ void ic_update_props(void *c)
 		char *io = g_key_file_to_data (cfg->keyfile, &length, NULL);
 		g_io_channel_write_chars(fh, io, length, &length, NULL);
 		g_free(io);
-		g_io_channel_close(fh);
+		g_io_channel_shutdown(fh, TRUE, NULL);
 	}
 }
-			
+
 static void ic_send_elems(struct indi_config_t *cfg, struct indi_prop_t *iprop)
 {
 	indi_list *isl;
 	char *group, *value;
-	
+
 	if (asprintf(&group, "%s/%s", iprop->idev->name, iprop->name) == -1)
 		return;
 	for (isl = il_iter(iprop->elems); ! il_is_last(isl); isl = il_next(isl)) {
