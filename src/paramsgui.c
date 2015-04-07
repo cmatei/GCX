@@ -329,7 +329,7 @@ static void setup_par_combo(gpointer parwin, GtkWidget *combo, GcxPar p)
 	/* clear previous combo box entries */
 	nvals = (unsigned long) g_object_get_data (G_OBJECT(combo), "nvals");
 	for (i = 0; i < nvals; i++) {
-		gtk_combo_box_remove_text (GTK_COMBO_BOX(combo), 0);
+		gtk_combo_box_text_remove (GTK_COMBO_BOX_TEXT(combo), 0);
 	}
 
 	nvals = 0;
@@ -337,13 +337,13 @@ static void setup_par_combo(gpointer parwin, GtkWidget *combo, GcxPar p)
 	if ((PAR_FORMAT(p) == FMT_OPTION) && PAR(p)->choices != NULL) {
 		c = PAR(p)->choices;
 		while (*c != NULL) {
-			gtk_combo_box_append_text (GTK_COMBO_BOX (combo), *c);
+			gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (combo), *c);
 			c++;
 			nvals++;
 		}
 	} else if (PAR_FORMAT(p) == FMT_BOOL) {
-		gtk_combo_box_append_text (GTK_COMBO_BOX (combo), "yes");
-		gtk_combo_box_append_text (GTK_COMBO_BOX (combo), "no");
+		gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (combo), "yes");
+		gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (combo), "no");
 		nvals = 2;
 	}
 

@@ -62,28 +62,14 @@ void named_entry_set(GtkWidget *dialog, char *name, char *text)
 /* set the entry named name under dialog to the given text */
 void named_cbentry_set(GtkWidget *dialog, char *name, char *text)
 {
+	GtkComboBoxText *combo;
 	GtkWidget *entry;
-	GtkTreeModel *model;
-	GtkTreeIter iter;
-	const char *data;
-	int ok;
-	int count = 0;
 
 	g_return_if_fail(dialog != NULL);
-	entry = g_object_get_data(G_OBJECT (dialog), name);
-	g_return_if_fail(entry != NULL);
-	model = gtk_combo_box_get_model(GTK_COMBO_BOX (entry));
-	for(ok = gtk_tree_model_get_iter_first(model, &iter); ok;
-		ok = gtk_tree_model_iter_next(model, &iter), count++)
-	{
-		gtk_tree_model_get(model, &iter, 0, &data, -1);
-		if (strcmp(data, text) == 0) {
-			gtk_combo_box_set_active_iter(GTK_COMBO_BOX (entry), &iter);
-			return;
-		}
-	}
-	gtk_combo_box_append_text(GTK_COMBO_BOX (entry), text);
-	gtk_combo_box_set_active(GTK_COMBO_BOX (entry), count);
+	combo = g_object_get_data(G_OBJECT (dialog), name);
+	g_return_if_fail(combo != NULL);
+	entry = gtk_bin_get_child (GTK_BIN(combo));
+	gtk_entry_set_text (GTK_ENTRY(entry), text);
 }
 
 

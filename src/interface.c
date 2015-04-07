@@ -3268,7 +3268,7 @@ create_par_edit (void)
   gtk_label_set_line_wrap (GTK_LABEL (par_type_label), TRUE);
   gtk_misc_set_alignment (GTK_MISC (par_type_label), 7.45058e-09, 0.5);
 
-  par_combo = gtk_combo_box_entry_new_text ();
+  par_combo = gtk_combo_box_text_new_with_entry();
   g_object_ref (par_combo);
   g_object_set_data_full (G_OBJECT (par_edit), "par_combo", par_combo,
 			  (GDestroyNotify) g_object_unref);
@@ -3581,19 +3581,19 @@ create_guide_window (void)
   gtk_box_pack_start (GTK_BOX (vbox32), label92, FALSE, FALSE, 0);
   gtk_misc_set_alignment (GTK_MISC (label92), 7.45058e-09, 1);
 
-  guide_exp_combo = gtk_combo_box_new_with_entry ();
+  guide_exp_combo = gtk_combo_box_text_new_with_entry ();
   g_object_ref (guide_exp_combo);
   g_object_set_data_full (G_OBJECT (guide_window), "guide_exp_combo", guide_exp_combo,
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (guide_exp_combo);
   gtk_box_pack_start (GTK_BOX (vbox32), guide_exp_combo, FALSE, FALSE, 0);
 
-  gtk_combo_box_append_text (GTK_COMBO_BOX (guide_exp_combo), "1/8");
-  gtk_combo_box_append_text (GTK_COMBO_BOX (guide_exp_combo), "1/4");
-  gtk_combo_box_append_text (GTK_COMBO_BOX (guide_exp_combo), "1/2");
-  gtk_combo_box_append_text (GTK_COMBO_BOX (guide_exp_combo), "1");
-  gtk_combo_box_append_text (GTK_COMBO_BOX (guide_exp_combo), "2");
-  gtk_combo_box_append_text (GTK_COMBO_BOX (guide_exp_combo), "4");
+  gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (guide_exp_combo), "1/8");
+  gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (guide_exp_combo), "1/4");
+  gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (guide_exp_combo), "1/2");
+  gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (guide_exp_combo), "1");
+  gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (guide_exp_combo), "2");
+  gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (guide_exp_combo), "4");
 
   guide_exp_combo_entry = gtk_bin_get_child (GTK_BIN(guide_exp_combo));
   g_object_ref (guide_exp_combo_entry);
@@ -3781,19 +3781,19 @@ create_focus_window (void)
   gtk_box_pack_start (GTK_BOX (vbox32), label92, FALSE, FALSE, 0);
   gtk_misc_set_alignment (GTK_MISC (label92), 7.45058e-09, 1);
 
-  guide_exp_combo = gtk_combo_box_entry_new_text ();
+  guide_exp_combo = gtk_combo_box_text_new_with_entry ();
   g_object_ref (guide_exp_combo);
   g_object_set_data_full (G_OBJECT (guide_window), "guide_exp_combo", guide_exp_combo,
                             (GDestroyNotify) g_object_unref);
   gtk_widget_show (guide_exp_combo);
   gtk_box_pack_start (GTK_BOX (vbox32), guide_exp_combo, FALSE, FALSE, 0);
 
-  gtk_combo_box_append_text (GTK_COMBO_BOX (guide_exp_combo), "1/8");
-  gtk_combo_box_append_text (GTK_COMBO_BOX (guide_exp_combo), "1/4");
-  gtk_combo_box_append_text (GTK_COMBO_BOX (guide_exp_combo), "1/2");
-  gtk_combo_box_append_text (GTK_COMBO_BOX (guide_exp_combo), "1");
-  gtk_combo_box_append_text (GTK_COMBO_BOX (guide_exp_combo), "2");
-  gtk_combo_box_append_text (GTK_COMBO_BOX (guide_exp_combo), "4");
+  gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (guide_exp_combo), "1/8");
+  gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (guide_exp_combo), "1/4");
+  gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (guide_exp_combo), "1/2");
+  gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (guide_exp_combo), "1");
+  gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (guide_exp_combo), "2");
+  gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (guide_exp_combo), "4");
 
   guide_exp_combo_entry = gtk_bin_get_child (GTK_BIN(guide_exp_combo));
   g_object_ref (guide_exp_combo_entry);
