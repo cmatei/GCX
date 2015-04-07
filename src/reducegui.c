@@ -308,54 +308,54 @@ static GtkWidget *make_image_processing(gpointer window)
 	return dialog;
 }
 
-static void demosaic_method_activate(GtkComboBox *combo, gpointer dialog)
+static void demosaic_method_activate(GtkComboBoxText *combo, gpointer dialog)
 {
-	int i = gtk_combo_box_get_active (combo);
+	char *str = gtk_combo_box_text_get_active_text (combo);
+	int i;
 
-	if (i != -1) {
-		P_INT(CCDRED_DEMOSAIC_METHOD) = i;
-		par_touch(CCDRED_DEMOSAIC_METHOD);
+	for (i = 0; demosaic_methods[i]; i++) {
+		if (!strcmp(demosaic_methods[i], str)) {
+			P_INT(CCDRED_DEMOSAIC_METHOD) = i;
+			par_touch(CCDRED_DEMOSAIC_METHOD);
+			g_free(str);
+			return;
+		}
 	}
+
+	g_free(str);
 }
 
 
-static void stack_method_activate(GtkComboBox *combo, gpointer dialog)
+static void stack_method_activate(GtkComboBoxText *combo, gpointer dialog)
 {
-	int i = gtk_combo_box_get_active (combo);
+	char *str = gtk_combo_box_text_get_active_text (combo);
+	int i;
 
-	if (i != -1) {
-		P_INT(CCDRED_STACK_METHOD) = i;
-		par_touch(CCDRED_STACK_METHOD);
+	for (i = 0; stack_methods[i]; i++) {
+		if (!strcmp(stack_methods[i], str)) {
+			P_INT(CCDRED_STACK_METHOD) = i;
+			par_touch(CCDRED_STACK_METHOD);
+			g_free(str);
+			return;
+		}
 	}
+
+	g_free(str);
 }
 
 /* update the dialog to match the supplied ccdr */
 /* in ccdr is null, just update the settings from the pars */
 static void set_processing_dialog_ccdr(GtkWidget *dialog, struct ccd_reduce *ccdr)
 {
-	GtkComboBox *stack_combo, *demosaic_combo;
-	char **c;
-	long i;
-	int nvals;
+	GtkComboBoxText *stack_combo, *demosaic_combo;
+	GtkWidget *entry;
 
 	stack_combo = g_object_get_data (G_OBJECT(dialog), "stack_method_combo");
 	g_return_if_fail(stack_combo != NULL);
 
-	nvals = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(stack_combo), "stack_method_combo_nvals"));
-	for (i = 0; i < nvals; i++)
-		gtk_combo_box_remove_text (stack_combo, 0);
+	entry = gtk_bin_get_child (GTK_BIN(stack_combo));
+	gtk_entry_set_text (GTK_ENTRY(entry), stack_methods[P_INT(CCDRED_STACK_METHOD)]);
 
-	c = stack_methods;
-	i = 0;
-	while (*c != NULL) {
-		gtk_combo_box_append_text (stack_combo, *c);
-		d3_printf("add %s to stack method menu\n", *c);
-		c++;
-		i++;
-	}
-
-	gtk_editable_set_editable (GTK_EDITABLE (gtk_bin_get_child (GTK_BIN(stack_combo))), FALSE);
-	gtk_combo_box_set_active (stack_combo, P_INT(CCDRED_STACK_METHOD));
 	g_signal_connect (G_OBJECT(stack_combo), "changed",
 			  G_CALLBACK(stack_method_activate), dialog);
 
@@ -367,23 +367,9 @@ static void set_processing_dialog_ccdr(GtkWidget *dialog, struct ccd_reduce *ccd
 	demosaic_combo = g_object_get_data (G_OBJECT(dialog), "demosaic_method_combo");
 	g_return_if_fail(demosaic_combo != NULL);
 
-	nvals = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(demosaic_combo), "demosaic_method_combo_nvals"));
-	for (i = 0; i < nvals; i++)
-		gtk_combo_box_remove_text (demosaic_combo, 0);
+	entry = gtk_bin_get_child (GTK_BIN(demosaic_combo));
+	gtk_entry_set_text (GTK_ENTRY(entry), demosaic_methods[P_INT(CCDRED_DEMOSAIC_METHOD)]);
 
-	c = demosaic_methods;
-	i = 0;
-	while (*c != NULL) {
-		gtk_combo_box_append_text (demosaic_combo, *c);
-		//g_signal_connect (G_OBJECT (menuitem), "activate",
-		//		  G_CALLBACK (demosaic_method_activate), (gpointer)i);
-		d3_printf("add %s to demosaic method menu\n", *c);
-		c++;
-		i++;
-	}
-
-	gtk_editable_set_editable (GTK_EDITABLE (gtk_bin_get_child (GTK_BIN(demosaic_combo))), FALSE);
-	gtk_combo_box_set_active (demosaic_combo, P_INT(CCDRED_DEMOSAIC_METHOD));
 	g_signal_connect (G_OBJECT(demosaic_combo), "changed",
 			  G_CALLBACK(demosaic_method_activate), dialog);
 

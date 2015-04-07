@@ -391,14 +391,14 @@ static int parse_bin_string(char *text, int *bx, int *by)
 /* read the exp settings from the img page into the cam structure */
 void set_exp_from_img_dialog(struct camera_t *camera, GtkWidget *dialog)
 {
-	GtkComboBox *combo;
+	GtkComboBoxText *combo;
 	char *text;
 	int bx=1, by=1, ret;
 
 	combo = g_object_get_data(G_OBJECT(dialog), "img_bin_combo");
 	g_return_if_fail(combo != NULL);
 
-	text = gtk_combo_box_get_active_text(combo);
+	text = gtk_combo_box_text_get_active_text(combo);
 	ret = parse_bin_string(text, &bx, &by);
 	g_free(text);
 	if (!ret) {
@@ -598,7 +598,7 @@ static void obsdata_cb( GtkWidget *widget, gpointer data )
 	char *text, *end;
 	char buf[128];
 	GtkWidget *wid;
-	GtkComboBox *combo;
+	GtkComboBoxText *combo;
 	double d;
 
 	obs = g_object_get_data(G_OBJECT(data), "obs_data");
@@ -610,8 +610,8 @@ static void obsdata_cb( GtkWidget *widget, gpointer data )
 		}
 		g_object_set_data_full(G_OBJECT(data), "obs_data", obs,
 				       (GDestroyNotify) obs_data_release);
-		combo = (GtkComboBox *)g_object_get_data(G_OBJECT(data), "obs_filter_combo");
-		text = gtk_combo_box_get_active_text(combo);
+		combo = g_object_get_data(G_OBJECT(data), "obs_filter_combo");
+		text = gtk_combo_box_text_get_active_text(combo);
 		replace_strval(&obs->filter, text);
 	}
 	wid = g_object_get_data(G_OBJECT(data), "obs_object_entry");
@@ -633,7 +633,7 @@ static void obsdata_cb( GtkWidget *widget, gpointer data )
 	}
 	wid = g_object_get_data(G_OBJECT (data), "obs_filter_combo");
 	if (widget == wid) {
-		text = gtk_combo_box_get_active_text(GTK_COMBO_BOX (widget));
+		text = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT (widget));
 		d3_printf("obs_cb: setting filter to %s\n", text);
 		replace_strval(&obs->filter, text);
 		update_obs_entries(data, obs);

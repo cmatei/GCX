@@ -2171,12 +2171,12 @@ GtkWidget* create_imadj_dialog (void)
   gtk_widget_show (hbox2);
   gtk_container_add (GTK_CONTAINER (frame3), hbox2);
 
-  channel_combo = gtk_combo_box_new_text ();
+  channel_combo = gtk_combo_box_text_new ();
   g_object_ref (channel_combo);
   g_object_set_data_full (G_OBJECT (imadj_dialog), "chanel_combo", channel_combo,
                             (GDestroyNotify) g_object_unref);
-  gtk_combo_box_append_text (GTK_COMBO_BOX(channel_combo), "Channel");
-  gtk_combo_box_set_active (GTK_COMBO_BOX(channel_combo), 0);
+  gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT(channel_combo), "Channel");
+  //gtk_combo_box_set_active (GTK_COMBO_BOX(channel_combo), 0);
   gtk_widget_show (channel_combo);
   gtk_box_pack_start (GTK_BOX (hbox2), channel_combo, FALSE, FALSE, 0);
 

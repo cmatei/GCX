@@ -523,7 +523,7 @@ create_camera_control (void)
   gtk_widget_show (table2);
   gtk_box_pack_start (GTK_BOX (vbox4), table2, TRUE, TRUE, 0);
 
-  img_bin_combo = gtk_combo_box_entry_new_text ();
+  img_bin_combo = gtk_combo_box_text_new_with_entry ();
   g_object_ref (img_bin_combo);
   g_object_set_data_full (G_OBJECT (camera_control), "img_bin_combo", img_bin_combo,
                             (GDestroyNotify) g_object_unref);
@@ -532,11 +532,11 @@ create_camera_control (void)
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
-  gtk_combo_box_append_text(GTK_COMBO_BOX (img_bin_combo), "1x1");
-  gtk_combo_box_append_text(GTK_COMBO_BOX (img_bin_combo), "2x2");
-  gtk_combo_box_append_text(GTK_COMBO_BOX (img_bin_combo), "3x3");
-  gtk_combo_box_append_text(GTK_COMBO_BOX (img_bin_combo), "4x4");
-  gtk_combo_box_set_active(GTK_COMBO_BOX (img_bin_combo), 0);
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT (img_bin_combo), "1x1");
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT (img_bin_combo), "2x2");
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT (img_bin_combo), "3x3");
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT (img_bin_combo), "4x4");
+  gtk_entry_set_text (GTK_ENTRY (gtk_bin_get_child (GTK_BIN(img_bin_combo))), "1x1");
 
   img_exp_spin_adj = gtk_adjustment_new (1, 0, 3600, 0.01, 10, 0);
   img_exp_spin = gtk_spin_button_new (GTK_ADJUSTMENT (img_exp_spin_adj), 1, 2);
@@ -803,7 +803,7 @@ create_camera_control (void)
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
-  obs_filter_combo = gtk_combo_box_new_text();
+  obs_filter_combo = gtk_combo_box_text_new_with_entry();
   g_object_ref (obs_filter_combo);
   g_object_set_data_full (G_OBJECT (camera_control), "obs_filter_combo", obs_filter_combo,
                             (GDestroyNotify) g_object_unref);
@@ -2378,6 +2378,8 @@ create_image_processing (void)
   GtkObject *overscan_spin_adj;
   GtkWidget *overscan_spin;
 
+  GtkWidget *entry;
+  int i;
 
   image_processing = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   g_object_set_data (G_OBJECT (image_processing), "image_processing", image_processing);
@@ -2762,11 +2764,16 @@ create_image_processing (void)
   gtk_widget_show (hbox23);
   gtk_container_add (GTK_CONTAINER (frame11), hbox23);
 
-  demosaic_method_combo = gtk_combo_box_entry_new_text ();
+  demosaic_method_combo = gtk_combo_box_text_new_with_entry ();
+  for (i = 0; demosaic_methods[i]; i++) {
+	  gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT(demosaic_method_combo), demosaic_methods[i]);
+  }
+  entry = gtk_bin_get_child (GTK_BIN(demosaic_method_combo));
+  gtk_editable_set_editable (GTK_EDITABLE (entry), FALSE);
+
   g_object_ref (demosaic_method_combo);
   g_object_set_data_full (G_OBJECT (image_processing), "demosaic_method_combo", demosaic_method_combo,
 			  (GDestroyNotify) g_object_unref);
-  g_object_set_data (G_OBJECT(demosaic_method_combo), "demosaic_method_combo_nvals", GINT_TO_POINTER(0));
   gtk_widget_show (demosaic_method_combo);
   gtk_box_pack_start (GTK_BOX (hbox23), demosaic_method_combo, TRUE, TRUE, 0);
   gtk_widget_set_tooltip_text (demosaic_method_combo, "Demosaic method (when applying Bayer matrix)");
@@ -2889,12 +2896,16 @@ create_image_processing (void)
   gtk_box_pack_start (GTK_BOX (hbox20), table26, TRUE, TRUE, 3);
   gtk_table_set_col_spacings (GTK_TABLE (table26), 6);
 
-  stack_method_combo = gtk_combo_box_entry_new_text ();
+  stack_method_combo = gtk_combo_box_text_new_with_entry ();
+  for (i = 0; stack_methods[i]; i++) {
+	  gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT(stack_method_combo), stack_methods[i]);
+  }
+  entry = gtk_bin_get_child (GTK_BIN(stack_method_combo));
+  gtk_editable_set_editable (GTK_EDITABLE (entry), FALSE);
+
   g_object_ref (stack_method_combo);
   g_object_set_data_full (G_OBJECT (image_processing), "stack_method_combo", stack_method_combo,
 			  (GDestroyNotify) g_object_unref);
-
-  g_object_set_data (G_OBJECT(stack_method_combo), "stack_method_combo_nvals", GINT_TO_POINTER(0));
   gtk_widget_show (stack_method_combo);
   gtk_table_attach (GTK_TABLE (table26), stack_method_combo, 0, 1, 0, 1,
                     (GtkAttachOptions) (GTK_FILL),

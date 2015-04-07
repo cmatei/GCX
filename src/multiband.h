@@ -1,7 +1,7 @@
 #ifndef _MULTIBAND_H_
 #define _MULTIBAND_H_
 
-//#include "sourcesdraw.h"
+#include "sourcesdraw.h"
 
 #define MAX_MBANDS 8		/* max number of bands we care about at one time */
 #define OUTLIER_THRESHOLD P_DBL(MB_OUTLIER_THRESHOLD)
