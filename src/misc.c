@@ -179,7 +179,7 @@ void set_named_checkb_val(GtkWidget *dialog, char *name, int val)
 
 long set_named_callback(void *dialog, char *name, char *callback, void *func)
 {
-	GtkObject *wid;
+	GObject *wid;
 	wid = g_object_get_data(G_OBJECT(dialog), name);
 	if (wid == NULL) {
 		err_printf("cannot find object : %s\n", name);
@@ -192,7 +192,7 @@ long set_named_callback(void *dialog, char *name, char *callback, void *func)
 long set_named_callback_data(void *dialog, char *name, char *callback,
 			     void *func, gpointer data)
 {
-	GtkObject *wid;
+	GObject *wid;
 	wid = g_object_get_data(G_OBJECT(dialog), name);
 	if (wid == NULL) {
 		err_printf("cannot find object : %s\n", name);

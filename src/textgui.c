@@ -66,7 +66,7 @@ static void close_fits_dialog( GtkWidget *widget, gpointer data )
 
 static void set_named_callback(void *dialog, char *name, char *callback, void *func)
 {
-	GtkObject *wid;
+	GObject *wid;
 	wid = g_object_get_data(G_OBJECT(dialog), name);
 	if (wid == NULL) {
 		err_printf("cannot find object : %s\n", name);

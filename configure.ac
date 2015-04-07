@@ -21,7 +21,7 @@ AC_REPLACE_FUNCS(dirname)
 AC_REPLACE_FUNCS(getline)
 
 
-AM_PATH_GTK_2_0(2.20.0, , AC_MSG_ERROR(Cannot find GTK >= 2.20.0))
+AM_PATH_GTK_3_0(3.0.0, , AC_MSG_ERROR(Cannot find GTK >= 3.0))
 
 AC_CHECK_HEADERS([zlib.h])
 AC_CHECK_LIB(z, inflate,,AC_MSG_ERROR(Cannot find zlib))
