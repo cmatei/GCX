@@ -126,19 +126,15 @@ static gboolean gcx_image_view_expose_cb (GtkWidget *widget, GdkEventExpose *eve
 static void
 gcx_image_view_init(GcxImageView *view)
 {
-	GtkWidget *alignment;
-
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(view),
 					GTK_POLICY_AUTOMATIC,
 					GTK_POLICY_AUTOMATIC);
 
 	view->darea = gtk_drawing_area_new ();
+	gtk_widget_set_halign (GTK_WIDGET(view->darea), GTK_ALIGN_CENTER);
+	gtk_widget_set_valign (GTK_WIDGET(view->darea), GTK_ALIGN_CENTER);
 
-	alignment = gtk_alignment_new (0.5, 0.5, 0.0, 0.0);
-	gtk_container_add (GTK_CONTAINER (alignment), view->darea);
-
-	gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW(view),
-					       GTK_WIDGET(alignment));
+	gtk_container_add (GTK_CONTAINER(view), GTK_WIDGET(view->darea));
 
 	g_signal_connect (G_OBJECT(view->darea), "expose_event",
 			  G_CALLBACK(gcx_image_view_expose_cb), view);
@@ -730,10 +726,12 @@ paint_from_gray_cache(GtkWidget *widget, struct map_cache *cache, GdkRectangle *
 	dat = cache->dat + area->x - cache->x
 		+ (area->y - cache->y) * cache->w;
 
+	/* GTK3
 	gdk_draw_gray_image (gtk_widget_get_window (widget),
 			     (gtk_widget_get_style (widget))->fg_gc[GTK_STATE_NORMAL],
 			     area->x, area->y, area->width, area->height,
 			     GDK_RGB_DITHER_MAX, dat, cache->w);
+	*/
 }
 
 static void
@@ -752,10 +750,13 @@ paint_from_rgb_cache(GtkWidget *widget, struct map_cache *cache, GdkRectangle *a
 
 	dat = cache->dat + (area->x - cache->x
 		+ (area->y - cache->y) * cache->w) * 3;
+
+	/* GTK3
 	gdk_draw_rgb_image (gtk_widget_get_window (widget),
 			    (gtk_widget_get_style (widget))->fg_gc[GTK_STATE_NORMAL],
 			    area->x, area->y, area->width, area->height,
 			    GDK_RGB_DITHER_MAX, dat, cache->w*3);
+	*/
 }
 
 /*
@@ -1139,7 +1140,9 @@ static void set_view_size(GcxImageView *view, double xc, double yc)
 	}
 
 	window = gtk_widget_get_window (GTK_WIDGET(view->darea));
-	gdk_drawable_get_size (window, &w, &h);
+	//gdk_drawable_get_size (window, &w, &h);
+	w = gdk_window_get_width (window);
+	h = gdk_window_get_height (window);
 
 	d3_printf("scw size id %d %d\n", w, h);
 
@@ -1241,18 +1244,23 @@ static void step_zoom(struct frame_map *map, int step)
  */
 void pan_cursor(GtkWidget *window)
 {
-	GcxImageView *image;
+	GcxImageView *iv;
 	int x, y, w, h;
 	GdkModifierType mask;
+	GdkWindow *gdkw;
 
-	image = GCX_IMAGE_VIEW(g_object_get_data(G_OBJECT(window), "image_view"));
+	iv = GCX_IMAGE_VIEW(g_object_get_data(G_OBJECT(window), "image_view"));
 
-	gdk_window_get_pointer (gtk_widget_get_window (image->darea), &x, &y, &mask);
-	gdk_drawable_get_size (gtk_widget_get_window (image->darea), &w, &h);
+	gdkw = gtk_widget_get_window (iv->darea);
+
+	gdk_window_get_pointer (gdkw, &x, &y, &mask);
+	w = gdk_window_get_width (gdkw);
+	h = gdk_window_get_height (gdkw);
+	//gdk_drawable_get_size (gtk_widget_get_window (iv->darea), &w, &h);
 
 	d3_printf("mouse x=%d, y=%d drawable w=%d, h=%d\n", x, y, w, h);
 
-	gcx_image_view_set_scrolls(image, 1.0 * x / w, 1.0 * y / h);
+	gcx_image_view_set_scrolls(iv, 1.0 * x / w, 1.0 * y / h);
 }
 
 
@@ -1361,13 +1369,17 @@ static void view_option_cb(gpointer window, guint action)
 	GcxImageView *view;
 	int x, y, w, h;
 	GdkModifierType mask;
+	GdkWindow *gdkw;
 	double xc, yc;
 
 	view = g_object_get_data(G_OBJECT(window), "image_view");
 	g_return_if_fail (IS_GCX_IMAGE_VIEW(view));
 
-	gdk_window_get_pointer(gtk_widget_get_window(GTK_WIDGET(view->darea)), &x, &y, &mask);
-	gdk_drawable_get_size(gtk_widget_get_window(GTK_WIDGET(view->darea)), &w, &h);
+	gdkw = gtk_widget_get_window(GTK_WIDGET(view->darea));
+	gdk_window_get_pointer(gdkw, &x, &y, &mask);
+	//gdk_drawable_get_size(gtk_widget_get_window(GTK_WIDGET(view->darea)), &w, &h);
+	w = gdk_window_get_width (gdkw);
+	h = gdk_window_get_height (gdkw);
 
 	d2_printf("view action %d at x:%d y:%d  (w:%d h:%d) mask: %d\n",
 	       action, x, y, w, h, mask);
@@ -2060,360 +2072,4 @@ void act_control_histogram(GtkAction *action, gpointer window)
 	//			 (GDestroyNotify)release_image_channel);
 	imadj_dialog_update(dialog);
 	imadj_dialog_edit(dialog);
-}
-
-
-/* from Glade */
-
-GtkWidget* create_imadj_dialog (void)
-{
-	GtkWidget *imadj_dialog;
-	GtkWidget *dialog_vbox1;
-	GtkWidget *vbox1;
-	GtkWidget *hist_scrolled_win;
-	GtkWidget *viewport1;
-	GtkWidget *hist_area;
-	GtkWidget *vbox2;
-	GtkWidget *frame3;
-	GtkWidget *hbox2;
-	GtkWidget *channel_combo;
-	GtkWidget *label3;
-	GObject   *gamma_spin_adj;
-	GtkWidget *gamma_spin;
-	GtkWidget *label4;
-	GObject   *toe_spin_adj;
-	GtkWidget *toe_spin;
-	GtkWidget *label5;
-	GtkWidget *log_hist_check;
-	GtkWidget *frame2;
-	GtkWidget *table1;
-	GtkWidget *hseparator1;
-	GObject   *low_cut_spin_adj;
-	GtkWidget *low_cut_spin;
-	GObject   *high_cut_spin_adj;
-	GtkWidget *high_cut_spin;
-	GObject   *offset_spin_adj;
-	GtkWidget *offset_spin;
-	GtkWidget *label2;
-	GtkWidget *label1;
-	GtkWidget *table2;
-	GtkWidget *cuts_darker;
-	GtkWidget *cuts_sharper;
-	GtkWidget *cuts_duller;
-	GtkWidget *cuts_auto;
-	GtkWidget *cuts_min_max;
-	GtkWidget *cuts_brighter;
-	GtkWidget *dialog_action_area1;
-	GtkWidget *hbuttonbox1;
-	GtkWidget *hist_close;
-	GtkWidget *hist_apply;
-	GtkWidget *hist_redraw;
-
-	imadj_dialog = gtk_dialog_new ();
-	g_object_set_data (G_OBJECT (imadj_dialog), "imadj_dialog", imadj_dialog);
-	gtk_window_set_title (GTK_WINDOW (imadj_dialog), ("Curves / Histogram"));
-	//  GTK_WINDOW (imadj_dialog)->type = GTK_WINDOW_DIALOG;
-
-	dialog_vbox1 = gtk_dialog_get_content_area (GTK_DIALOG(imadj_dialog));
-	g_object_set_data (G_OBJECT (imadj_dialog), "dialog_vbox1", dialog_vbox1);
-	gtk_widget_show (dialog_vbox1);
-
-	vbox1 = gtk_vbox_new (FALSE, 0);
-	g_object_ref (vbox1);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "vbox1", vbox1,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (vbox1);
-	gtk_box_pack_start (GTK_BOX (dialog_vbox1), vbox1, TRUE, TRUE, 0);
-
-	hist_scrolled_win = gtk_scrolled_window_new (NULL, NULL);
-	g_object_ref (hist_scrolled_win);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "hist_scrolled_win", hist_scrolled_win,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (hist_scrolled_win);
-	gtk_box_pack_start (GTK_BOX (vbox1), hist_scrolled_win, TRUE, TRUE, 0);
-	gtk_container_set_border_width (GTK_CONTAINER (hist_scrolled_win), 2);
-	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (hist_scrolled_win), GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
-
-	//gtk_range_set_update_policy (GTK_RANGE (GTK_SCROLLED_WINDOW (hist_scrolled_win)->hscrollbar), GTK_POLICY_NEVER);
-
-	viewport1 = gtk_viewport_new (NULL, NULL);
-	g_object_ref (viewport1);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "viewport1", viewport1,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (viewport1);
-	gtk_container_add (GTK_CONTAINER (hist_scrolled_win), viewport1);
-
-	hist_area = gtk_drawing_area_new ();
-	g_object_ref (hist_area);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "hist_area", hist_area,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (hist_area);
-	gtk_container_add (GTK_CONTAINER (viewport1), hist_area);
-
-	vbox2 = gtk_vbox_new (FALSE, 0);
-	g_object_ref (vbox2);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "vbox2", vbox2,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (vbox2);
-	gtk_box_pack_start (GTK_BOX (vbox1), vbox2, FALSE, TRUE, 0);
-
-	frame3 = gtk_frame_new (("Curve/Histogram"));
-	g_object_ref (frame3);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "frame3", frame3,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (frame3);
-	gtk_box_pack_start (GTK_BOX (vbox2), frame3, TRUE, TRUE, 0);
-
-	hbox2 = gtk_hbox_new (FALSE, 0);
-	g_object_ref (hbox2);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "hbox2", hbox2,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (hbox2);
-	gtk_container_add (GTK_CONTAINER (frame3), hbox2);
-
-	channel_combo = gtk_combo_box_text_new ();
-	g_object_ref (channel_combo);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "chanel_combo", channel_combo,
-				(GDestroyNotify) g_object_unref);
-	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT(channel_combo), "Channel");
-	//gtk_combo_box_set_active (GTK_COMBO_BOX(channel_combo), 0);
-	gtk_widget_show (channel_combo);
-	gtk_box_pack_start (GTK_BOX (hbox2), channel_combo, FALSE, FALSE, 0);
-
-	label3 = gtk_label_new (("Gamma"));
-	g_object_ref (label3);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "label3", label3,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (label3);
-	gtk_box_pack_start (GTK_BOX (hbox2), label3, FALSE, FALSE, 0);
-	gtk_misc_set_alignment (GTK_MISC (label3), 1, 0.5);
-	gtk_misc_set_padding (GTK_MISC (label3), 5, 0);
-
-	gamma_spin_adj = gtk_adjustment_new (1, 0.1, 10, 0.1, 1, 0.0);
-	gamma_spin = gtk_spin_button_new (GTK_ADJUSTMENT (gamma_spin_adj), 1, 1);
-	g_object_ref (gamma_spin);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "gamma_spin", gamma_spin,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_set_size_request (GTK_WIDGET(&(GTK_SPIN_BUTTON(gamma_spin)->entry)), 60, -1);
-	gtk_widget_show (gamma_spin);
-	gtk_box_pack_start (GTK_BOX (hbox2), gamma_spin, FALSE, TRUE, 0);
-
-	label4 = gtk_label_new (("Toe"));
-	g_object_ref (label4);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "label4", label4,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (label4);
-	gtk_box_pack_start (GTK_BOX (hbox2), label4, FALSE, FALSE, 0);
-	gtk_misc_set_alignment (GTK_MISC (label4), 1, 0.5);
-	gtk_misc_set_padding (GTK_MISC (label4), 6, 0);
-
-	toe_spin_adj = gtk_adjustment_new (0, 0, 0.4, 0.002, 0.1, 0);
-	toe_spin = gtk_spin_button_new (GTK_ADJUSTMENT (toe_spin_adj), 0.002, 3);
-	g_object_ref (toe_spin);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "toe_spin", toe_spin,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_set_size_request(GTK_WIDGET(&(GTK_SPIN_BUTTON(toe_spin)->entry)), 60, -1);
-	gtk_widget_show (toe_spin);
-	gtk_box_pack_start (GTK_BOX (hbox2), toe_spin, FALSE, FALSE, 0);
-
-	label5 = gtk_label_new (("Offset"));
-	g_object_ref (label5);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "label5", label5,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (label5);
-	gtk_box_pack_start (GTK_BOX (hbox2), label5, FALSE, FALSE, 0);
-	gtk_misc_set_alignment (GTK_MISC (label5), 1, 0.5);
-	gtk_misc_set_padding (GTK_MISC (label5), 5, 0);
-
-	offset_spin_adj = gtk_adjustment_new (0, 0, 1, 0.01, 1, 0.0);
-	offset_spin = gtk_spin_button_new (GTK_ADJUSTMENT (offset_spin_adj), 0.01, 2);
-	g_object_ref (offset_spin);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "offset_spin", offset_spin,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_set_size_request(GTK_WIDGET(&(GTK_SPIN_BUTTON(offset_spin)->entry)), 60, -1);
-	gtk_widget_show (offset_spin);
-	gtk_box_pack_start (GTK_BOX (hbox2), offset_spin, FALSE, TRUE, 0);
-
-	log_hist_check = gtk_check_button_new_with_label (("Log"));
-	g_object_ref (log_hist_check);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "log_hist_check", log_hist_check,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (log_hist_check);
-	gtk_box_pack_start (GTK_BOX (hbox2), log_hist_check, FALSE, FALSE, 0);
-
-	frame2 = gtk_frame_new (("Cuts"));
-	g_object_ref (frame2);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "frame2", frame2,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (frame2);
-	gtk_box_pack_start (GTK_BOX (vbox2), frame2, TRUE, TRUE, 0);
-
-	table1 = gtk_table_new (3, 3, FALSE);
-	g_object_ref (table1);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "table1", table1,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (table1);
-	gtk_container_add (GTK_CONTAINER (frame2), table1);
-
-	hseparator1 = gtk_hseparator_new ();
-	g_object_ref (hseparator1);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "hseparator1", hseparator1,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (hseparator1);
-	gtk_table_attach (GTK_TABLE (table1), hseparator1, 0, 3, 0, 1,
-			  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-			  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 0, 0);
-
-	low_cut_spin_adj = gtk_adjustment_new (1, -65535, 65535, 2, 10, 0);
-	low_cut_spin = gtk_spin_button_new (GTK_ADJUSTMENT (low_cut_spin_adj), 2, 0);
-	g_object_ref (low_cut_spin);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "low_cut_spin", low_cut_spin,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (low_cut_spin);
-	gtk_table_attach (GTK_TABLE (table1), low_cut_spin, 0, 1, 2, 3,
-			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-
-	high_cut_spin_adj = gtk_adjustment_new (1, -65535, 65535, 10, 10, 0);
-	high_cut_spin = gtk_spin_button_new (GTK_ADJUSTMENT (high_cut_spin_adj), 10, 0);
-	g_object_ref (high_cut_spin);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "high_cut_spin", high_cut_spin,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (high_cut_spin);
-	gtk_table_attach (GTK_TABLE (table1), high_cut_spin, 0, 1, 1, 2,
-			  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-
-	label2 = gtk_label_new (("High"));
-	g_object_ref (label2);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "label2", label2,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (label2);
-	gtk_table_attach (GTK_TABLE (table1), label2, 1, 2, 1, 2,
-			  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-			  (GtkAttachOptions) (GTK_EXPAND), 0, 0);
-	gtk_label_set_justify (GTK_LABEL (label2), GTK_JUSTIFY_LEFT);
-	gtk_misc_set_alignment (GTK_MISC (label2), 0, 0.5);
-	gtk_misc_set_padding (GTK_MISC (label2), 6, 0);
-
-	label1 = gtk_label_new (("Low"));
-	g_object_ref (label1);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "label1", label1,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (label1);
-	gtk_table_attach (GTK_TABLE (table1), label1, 1, 2, 2, 3,
-			  (GtkAttachOptions) (GTK_EXPAND | GTK_SHRINK | GTK_FILL),
-			  (GtkAttachOptions) (GTK_EXPAND), 0, 0);
-	gtk_label_set_justify (GTK_LABEL (label1), GTK_JUSTIFY_LEFT);
-	gtk_misc_set_alignment (GTK_MISC (label1), 0, 0.5);
-	gtk_misc_set_padding (GTK_MISC (label1), 6, 0);
-
-	table2 = gtk_table_new (2, 3, TRUE);
-	g_object_ref (table2);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "table2", table2,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (table2);
-	gtk_table_attach (GTK_TABLE (table1), table2, 2, 3, 1, 3,
-			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (GTK_FILL), 0, 0);
-	gtk_table_set_row_spacings (GTK_TABLE (table2), 3);
-	gtk_table_set_col_spacings (GTK_TABLE (table2), 3);
-
-	cuts_darker = gtk_button_new_with_label (("Darker"));
-	g_object_ref (cuts_darker);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "cuts_darker", cuts_darker,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (cuts_darker);
-	gtk_table_attach (GTK_TABLE (table2), cuts_darker, 2, 3, 0, 1,
-			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-
-	cuts_sharper = gtk_button_new_with_label (("Sharper"));
-	g_object_ref (cuts_sharper);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "cuts_sharper", cuts_sharper,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (cuts_sharper);
-	gtk_table_attach (GTK_TABLE (table2), cuts_sharper, 1, 2, 1, 2,
-			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-
-	cuts_duller = gtk_button_new_with_label (("Flatter"));
-	g_object_ref (cuts_duller);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "cuts_duller", cuts_duller,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (cuts_duller);
-	gtk_table_attach (GTK_TABLE (table2), cuts_duller, 1, 2, 0, 1,
-			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-
-	cuts_auto = gtk_button_new_with_label (("Auto Cuts"));
-	g_object_ref (cuts_auto);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "cuts_auto", cuts_auto,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (cuts_auto);
-	gtk_table_attach (GTK_TABLE (table2), cuts_auto, 0, 1, 1, 2,
-			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-
-	cuts_min_max = gtk_button_new_with_label (("Min-Max"));
-	g_object_ref (cuts_min_max);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "cuts_min_max", cuts_min_max,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (cuts_min_max);
-	gtk_table_attach (GTK_TABLE (table2), cuts_min_max, 0, 1, 0, 1,
-			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-
-	cuts_brighter = gtk_button_new_with_label (("Brighter"));
-	g_object_ref (cuts_brighter);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "cuts_brighter", cuts_brighter,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (cuts_brighter);
-	gtk_table_attach (GTK_TABLE (table2), cuts_brighter, 2, 3, 1, 2,
-			  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-			  (GtkAttachOptions) (GTK_EXPAND), 0, 0);
-
-	dialog_action_area1 = gtk_dialog_get_action_area (GTK_DIALOG(imadj_dialog));
-	g_object_set_data (G_OBJECT (imadj_dialog), "dialog_action_area1", dialog_action_area1);
-	gtk_widget_show (dialog_action_area1);
-	gtk_container_set_border_width (GTK_CONTAINER (dialog_action_area1), 3);
-
-	hbuttonbox1 = gtk_hbutton_box_new ();
-	g_object_ref (hbuttonbox1);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "hbuttonbox1", hbuttonbox1,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (hbuttonbox1);
-	gtk_box_pack_start (GTK_BOX (dialog_action_area1), hbuttonbox1, TRUE, TRUE, 0);
-	gtk_container_set_border_width (GTK_CONTAINER (hbuttonbox1), 3);
-	gtk_button_box_set_layout (GTK_BUTTON_BOX (hbuttonbox1), GTK_BUTTONBOX_EDGE);
-	gtk_box_set_spacing (GTK_BOX (hbuttonbox1), 4);
-
-	//gtk_button_box_set_child_size (GTK_BUTTON_BOX (hbuttonbox1), 0, 0);
-	//gtk_button_box_set_child_ipadding (GTK_BUTTON_BOX (hbuttonbox1), 15, -1);
-
-	hist_close = gtk_button_new_with_label (("Close"));
-	g_object_ref (hist_close);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "hist_close", hist_close,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (hist_close);
-	gtk_container_add (GTK_CONTAINER (hbuttonbox1), hist_close);
-	gtk_widget_set_can_default (hist_close, TRUE);
-
-	hist_apply = gtk_button_new_with_label (("Apply"));
-	g_object_ref (hist_apply);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "hist_apply", hist_apply,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (hist_apply);
-	gtk_container_add (GTK_CONTAINER (hbuttonbox1), hist_apply);
-	gtk_widget_set_can_default (hist_apply, TRUE);
-
-	hist_redraw = gtk_button_new_with_label (("Redraw"));
-	g_object_ref (hist_redraw);
-	g_object_set_data_full (G_OBJECT (imadj_dialog), "hist_redraw", hist_redraw,
-				(GDestroyNotify) g_object_unref);
-	gtk_widget_show (hist_redraw);
-	gtk_container_add (GTK_CONTAINER (hbuttonbox1), hist_redraw);
-	gtk_widget_set_can_default (hist_redraw, TRUE);
-
-	return imadj_dialog;
 }

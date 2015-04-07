@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <string.h>
 
-#include <gdk/gdkkeysyms.h>
+#include <gdk/gdkkeysyms-compat.h>
 #include <gtk/gtk.h>
 
 #include "interface.h"
@@ -18,353 +18,174 @@
 GtkWidget*
 create_pstar (void)
 {
-  GtkWidget *pstar;
-  GtkWidget *vbox1;
-  GtkWidget *table1;
-  GtkWidget *label1;
-  GtkWidget *label2;
-  GtkWidget *label3;
-  GtkWidget *label5;
-  GtkWidget *magnitude_entry;
-  GtkWidget *declination_entry;
-  GtkWidget *ra_entry;
-  GtkWidget *designation_entry;
-  GSList *startype_group = NULL;
-  GtkWidget *field_star_radiob;
-  GtkWidget *std_star_radiob;
-  GtkWidget *ap_target_radiob;
-  GtkWidget *hbox4;
-  GtkWidget *astrometric_check_button;
-  GtkWidget *variable_check_button;
-  GtkWidget *equinox_entry;
-  GtkWidget *label107;
-  GtkWidget *cat_object_radiob;
-  GtkWidget *vbox2;
-  GtkWidget *label6;
-  GtkWidget *comment_entry;
-  GtkWidget *label7;
-  GtkWidget *smag_entry;
-  GtkWidget *label8;
-  GtkWidget *imag_entry;
-  GtkWidget *star_details;
-  GtkWidget *hbuttonbox1;
-  GtkWidget *ok_button;
-  GtkWidget *make_ref_button;
-  GtkWidget *cancel_button;
-  GtkAccelGroup *accel_group;
+	GSList *startype_group = NULL;
+	GtkAccelGroup *accel_group;
 
-  accel_group = gtk_accel_group_new ();
+	accel_group = gtk_accel_group_new ();
 
-  pstar = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  g_object_set_data (G_OBJECT (pstar), "pstar", pstar);
-  gtk_window_set_title (GTK_WINDOW (pstar), "Edit Star");
-  gtk_window_set_position (GTK_WINDOW (pstar), GTK_WIN_POS_MOUSE);
+	GtkWidget *pstar = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_title (GTK_WINDOW (pstar), "Edit Star");
+	gtk_window_set_position (GTK_WINDOW (pstar), GTK_WIN_POS_MOUSE);
 
-  vbox1 = gtk_vbox_new (FALSE, 0);
-  g_object_ref (vbox1);
-  g_object_set_data_full (G_OBJECT (pstar), "vbox1", vbox1,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (vbox1);
-  gtk_container_add (GTK_CONTAINER (pstar), vbox1);
+	GtkWidget *grid1 = gtk_grid_new ();
+	gtk_container_add (GTK_CONTAINER(pstar), grid1);
 
-  table1 = gtk_table_new (5, 3, FALSE);
-  g_object_ref (table1);
-  g_object_set_data_full (G_OBJECT (pstar), "table1", table1,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (table1);
-  gtk_box_pack_start (GTK_BOX (vbox1), table1, TRUE, TRUE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (table1), 5);
-  gtk_table_set_col_spacings (GTK_TABLE (table1), 2);
+	GtkWidget *grid2 = gtk_grid_new ();
+	gtk_grid_set_column_spacing (GTK_GRID(grid2), 2);
+	gtk_widget_set_margin_start (grid2, 5);
+	gtk_widget_set_margin_end   (grid2, 5);
+	gtk_widget_set_margin_top   (grid2, 5);
+	gtk_grid_attach (GTK_GRID(grid1), grid2, 0, 0, 1, 1);
 
-  label1 = gtk_label_new ("Name:");
-  g_object_ref (label1);
-  g_object_set_data_full (G_OBJECT (pstar), "label1", label1,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (label1);
-  gtk_table_attach (GTK_TABLE (table1), label1, 0, 1, 0, 1,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-  gtk_misc_set_alignment (GTK_MISC (label1), 0, 0.5);
-  gtk_misc_set_padding (GTK_MISC (label1), 3, 0);
+	GtkWidget *label1 = gtk_label_new ("Name:");
+	gtk_widget_set_halign (label1, GTK_ALIGN_START);
+	gtk_widget_set_valign (label1, GTK_ALIGN_CENTER);
+	gtk_grid_attach (GTK_GRID(grid2), label1, 0, 0, 1, 1);
 
-  label2 = gtk_label_new ("R.A:");
-  g_object_ref (label2);
-  g_object_set_data_full (G_OBJECT (pstar), "label2", label2,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (label2);
-  gtk_table_attach (GTK_TABLE (table1), label2, 0, 1, 1, 2,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-  gtk_misc_set_alignment (GTK_MISC (label2), 0, 0.5);
-  gtk_misc_set_padding (GTK_MISC (label2), 3, 0);
+	GtkWidget *designation_entry = gtk_entry_new ();
+	gtk_widget_set_hexpand (designation_entry, TRUE);
+	gtk_grid_attach (GTK_GRID(grid2), designation_entry, 1, 0, 1, 1);
 
-  label3 = gtk_label_new ("Declination:");
-  g_object_ref (label3);
-  g_object_set_data_full (G_OBJECT (pstar), "label3", label3,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (label3);
-  gtk_table_attach (GTK_TABLE (table1), label3, 0, 1, 2, 3,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-  gtk_misc_set_alignment (GTK_MISC (label3), 0, 0.5);
-  gtk_misc_set_padding (GTK_MISC (label3), 3, 0);
+	GtkWidget *label2 = gtk_label_new ("R.A:");
+	gtk_widget_set_halign (label2, GTK_ALIGN_START);
+	gtk_widget_set_valign (label2, GTK_ALIGN_CENTER);
+	gtk_grid_attach (GTK_GRID(grid2), label2, 0, 1, 1, 1);
 
-  label5 = gtk_label_new ("Magnitude:");
-  g_object_ref (label5);
-  g_object_set_data_full (G_OBJECT (pstar), "label5", label5,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (label5);
-  gtk_table_attach (GTK_TABLE (table1), label5, 0, 1, 4, 5,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-  gtk_misc_set_alignment (GTK_MISC (label5), 0, 0.5);
-  gtk_misc_set_padding (GTK_MISC (label5), 3, 0);
+	GtkWidget *ra_entry = gtk_entry_new ();
+	gtk_widget_set_hexpand (ra_entry, TRUE);
+	gtk_grid_attach (GTK_GRID(grid2), ra_entry, 1, 1, 1, 1);
 
-  magnitude_entry = gtk_entry_new ();
-  g_object_ref (magnitude_entry);
-  g_object_set_data_full (G_OBJECT (pstar), "magnitude_entry", magnitude_entry,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (magnitude_entry);
-  gtk_table_attach (GTK_TABLE (table1), magnitude_entry, 1, 2, 4, 5,
-                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 1);
-  gtk_widget_set_tooltip_text (magnitude_entry, "Generic magnitude of object, used for classification only");
+	GtkWidget *label3 = gtk_label_new ("Declination:");
+	gtk_widget_set_halign (label3, GTK_ALIGN_START);
+	gtk_widget_set_valign (label3, GTK_ALIGN_CENTER);
+	gtk_grid_attach (GTK_GRID(grid2), label3, 0, 2, 1, 1);
 
-  declination_entry = gtk_entry_new ();
-  g_object_ref (declination_entry);
-  g_object_set_data_full (G_OBJECT (pstar), "declination_entry", declination_entry,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (declination_entry);
-  gtk_table_attach (GTK_TABLE (table1), declination_entry, 1, 2, 2, 3,
-                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 1);
+	GtkWidget *declination_entry = gtk_entry_new ();
+	gtk_widget_set_hexpand (declination_entry, TRUE);
+	gtk_grid_attach (GTK_GRID(grid2), declination_entry, 1, 2, 1, 1);
 
-  ra_entry = gtk_entry_new ();
-  g_object_ref (ra_entry);
-  g_object_set_data_full (G_OBJECT (pstar), "ra_entry", ra_entry,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (ra_entry);
-  gtk_table_attach (GTK_TABLE (table1), ra_entry, 1, 2, 1, 2,
-                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 1);
+	GtkWidget *label4 = gtk_label_new ("Equinox:");
+	gtk_widget_set_halign (label4, GTK_ALIGN_START);
+	gtk_widget_set_valign (label4, GTK_ALIGN_CENTER);
+	gtk_grid_attach (GTK_GRID(grid2), label4, 0, 3, 1, 1);
 
-  designation_entry = gtk_entry_new ();
-  g_object_ref (designation_entry);
-  g_object_set_data_full (G_OBJECT (pstar), "designation_entry", designation_entry,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (designation_entry);
-  gtk_table_attach (GTK_TABLE (table1), designation_entry, 1, 2, 0, 1,
-                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 1);
+	GtkWidget *equinox_entry = gtk_entry_new ();
+	gtk_widget_set_hexpand (equinox_entry, TRUE);
+	gtk_grid_attach (GTK_GRID(grid2), equinox_entry, 1, 3, 1, 1);
 
-  field_star_radiob = gtk_radio_button_new_with_label (startype_group, "Field star");
+	GtkWidget *label5 = gtk_label_new ("Magnitude:");
+	gtk_widget_set_halign (label5, GTK_ALIGN_START);
+	gtk_widget_set_valign (label5, GTK_ALIGN_CENTER);
+	gtk_grid_attach (GTK_GRID(grid2), label5, 0, 4, 1, 1);
 
-  startype_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (field_star_radiob));
-  g_object_ref (field_star_radiob);
-  g_object_set_data_full (G_OBJECT (pstar), "field_star_radiob", field_star_radiob,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (field_star_radiob);
-  gtk_table_attach (GTK_TABLE (table1), field_star_radiob, 2, 3, 0, 1,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-  gtk_widget_set_tooltip_text (field_star_radiob, "Object is a generic field star");
+	GtkWidget *magnitude_entry = gtk_entry_new ();
+	gtk_widget_set_hexpand (magnitude_entry, TRUE);
+	gtk_grid_attach (GTK_GRID(grid2), magnitude_entry, 1, 4, 1, 1);
+	gtk_widget_set_tooltip_text (magnitude_entry, "Generic magnitude of object, used for classification only");
 
-  std_star_radiob = gtk_radio_button_new_with_label (startype_group, "Standard star");
-  startype_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (std_star_radiob));
-  g_object_ref (std_star_radiob);
-  g_object_set_data_full (G_OBJECT (pstar), "std_star_radiob", std_star_radiob,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (std_star_radiob);
-  gtk_table_attach (GTK_TABLE (table1), std_star_radiob, 2, 3, 1, 2,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-  gtk_widget_set_tooltip_text (std_star_radiob, "Objct is a photometric standard star");
 
-  ap_target_radiob = gtk_radio_button_new_with_label (startype_group, "AP Target");
-  startype_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (ap_target_radiob));
-  g_object_ref (ap_target_radiob);
-  g_object_set_data_full (G_OBJECT (pstar), "ap_target_radiob", ap_target_radiob,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (ap_target_radiob);
-  gtk_table_attach (GTK_TABLE (table1), ap_target_radiob, 2, 3, 2, 3,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-  gtk_widget_set_tooltip_text (ap_target_radiob, "Object is a photometric target");
 
-  hbox4 = gtk_hbox_new (FALSE, 0);
-  g_object_ref (hbox4);
-  g_object_set_data_full (G_OBJECT (pstar), "hbox4", hbox4,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (hbox4);
-  gtk_table_attach (GTK_TABLE (table1), hbox4, 2, 3, 4, 5,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (GTK_FILL), 0, 0);
+	GtkWidget *field_star_radiob = gtk_radio_button_new_with_label (startype_group, "Field star");
+	gtk_widget_set_tooltip_text (field_star_radiob, "Object is a generic field star");
+	gtk_grid_attach (GTK_GRID(grid2), field_star_radiob, 2, 0, 1, 1);
+	startype_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (field_star_radiob));
 
-  astrometric_check_button = gtk_check_button_new_with_label ("Astrometric");
-  g_object_ref (astrometric_check_button);
-  g_object_set_data_full (G_OBJECT (pstar), "astrometric_check_button", astrometric_check_button,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (astrometric_check_button);
-  gtk_box_pack_start (GTK_BOX (hbox4), astrometric_check_button, FALSE, FALSE, 0);
-  gtk_widget_set_tooltip_text (astrometric_check_button, "Star has precise position data");
+	GtkWidget *std_star_radiob = gtk_radio_button_new_with_label (startype_group, "Standard star");
+	gtk_widget_set_tooltip_text (std_star_radiob, "Object is a photometric standard star");
+	gtk_grid_attach (GTK_GRID(grid2), std_star_radiob, 2, 1, 1, 1);
+	startype_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (std_star_radiob));
 
-  variable_check_button = gtk_check_button_new_with_label ("Var");
-  g_object_ref (variable_check_button);
-  g_object_set_data_full (G_OBJECT (pstar), "variable_check_button", variable_check_button,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (variable_check_button);
-  gtk_box_pack_start (GTK_BOX (hbox4), variable_check_button, FALSE, FALSE, 0);
-  gtk_widget_set_tooltip_text (variable_check_button, "Star is known to be variable");
+	GtkWidget *ap_target_radiob = gtk_radio_button_new_with_label (startype_group, "AP Target");
+	gtk_widget_set_tooltip_text (ap_target_radiob, "Object is a photometric target");
+	gtk_grid_attach (GTK_GRID(grid2), ap_target_radiob, 2, 2, 1, 1);
+	startype_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (ap_target_radiob));
 
-  equinox_entry = gtk_entry_new ();
-  g_object_ref (equinox_entry);
-  g_object_set_data_full (G_OBJECT (pstar), "equinox_entry", equinox_entry,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (equinox_entry);
-  gtk_table_attach (GTK_TABLE (table1), equinox_entry, 1, 2, 3, 4,
-                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
+	GtkWidget *cat_object_radiob = gtk_radio_button_new_with_label (startype_group, "Object");
+	gtk_widget_set_tooltip_text (cat_object_radiob, "Generic catalog object");
+	gtk_grid_attach (GTK_GRID(grid2), cat_object_radiob, 2, 3, 1, 1);
+	startype_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (cat_object_radiob));
 
-  label107 = gtk_label_new ("Equinox:");
-  g_object_ref (label107);
-  g_object_set_data_full (G_OBJECT (pstar), "label107", label107,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (label107);
-  gtk_table_attach (GTK_TABLE (table1), label107, 0, 1, 3, 4,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-  gtk_misc_set_alignment (GTK_MISC (label107), 0, 0.5);
-  gtk_misc_set_padding (GTK_MISC (label107), 3, 0);
 
-  cat_object_radiob = gtk_radio_button_new_with_label (startype_group, "Object");
-  startype_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (cat_object_radiob));
-  g_object_ref (cat_object_radiob);
-  g_object_set_data_full (G_OBJECT (pstar), "cat_object_radiob", cat_object_radiob,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (cat_object_radiob);
-  gtk_table_attach (GTK_TABLE (table1), cat_object_radiob, 2, 3, 3, 4,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-  gtk_widget_set_tooltip_text (cat_object_radiob, "Generic catalog object");
+	GtkWidget *grid3 = gtk_grid_new ();
+	gtk_grid_attach (GTK_GRID(grid2), grid3, 2, 4, 1, 1);
 
-  vbox2 = gtk_vbox_new (FALSE, 0);
-  g_object_ref (vbox2);
-  g_object_set_data_full (G_OBJECT (pstar), "vbox2", vbox2,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (vbox2);
-  gtk_box_pack_start (GTK_BOX (vbox1), vbox2, FALSE, TRUE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (vbox2), 5);
+	GtkWidget *astrometric_check_button = gtk_check_button_new_with_label ("Astrometric");
+	gtk_widget_set_tooltip_text (astrometric_check_button, "Star has precise position data");
+	gtk_grid_attach (GTK_GRID(grid3), astrometric_check_button, 0, 0, 1, 1);
 
-  label6 = gtk_label_new ("Comments:");
-  g_object_ref (label6);
-  g_object_set_data_full (G_OBJECT (pstar), "label6", label6,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (label6);
-  gtk_box_pack_start (GTK_BOX (vbox2), label6, FALSE, FALSE, 0);
-  gtk_misc_set_alignment (GTK_MISC (label6), 0, 0.5);
-  gtk_misc_set_padding (GTK_MISC (label6), 3, 0);
+	GtkWidget *variable_check_button = gtk_check_button_new_with_label ("Var");
+	gtk_widget_set_tooltip_text (variable_check_button, "Star is known to be variable");
+	gtk_grid_attach (GTK_GRID(grid3), variable_check_button, 1, 0, 1, 1);
 
-  comment_entry = gtk_entry_new ();
-  g_object_ref (comment_entry);
-  g_object_set_data_full (G_OBJECT (pstar), "comment_entry", comment_entry,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (comment_entry);
-  gtk_box_pack_start (GTK_BOX (vbox2), comment_entry, FALSE, FALSE, 0);
+	GtkWidget *grid4 = gtk_grid_new ();
+	gtk_widget_set_vexpand (grid4, TRUE);
+	gtk_grid_attach (GTK_GRID(grid2), grid4, 0, 5, 3, 1);
+	gtk_container_set_border_width (GTK_CONTAINER (grid4), 5);
 
-  label7 = gtk_label_new ("Standard magnitudes");
-  g_object_ref (label7);
-  g_object_set_data_full (G_OBJECT (pstar), "label7", label7,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (label7);
-  gtk_box_pack_start (GTK_BOX (vbox2), label7, FALSE, FALSE, 0);
-  gtk_label_set_justify (GTK_LABEL (label7), GTK_JUSTIFY_LEFT);
-  gtk_misc_set_alignment (GTK_MISC (label7), 7.45058e-09, 0.5);
-  gtk_misc_set_padding (GTK_MISC (label7), 3, 0);
+	GtkWidget *label6 = gtk_label_new ("Comments");
+	gtk_widget_set_hexpand (label6, TRUE);
+	gtk_widget_set_halign (label6, GTK_ALIGN_START);
+	gtk_widget_set_valign (label6, GTK_ALIGN_CENTER);
+	gtk_grid_attach (GTK_GRID(grid4), label6, 0, 0, 1, 1);
 
-  smag_entry = gtk_entry_new ();
-  g_object_ref (smag_entry);
-  g_object_set_data_full (G_OBJECT (pstar), "smag_entry", smag_entry,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (smag_entry);
-  gtk_box_pack_start (GTK_BOX (vbox2), smag_entry, FALSE, FALSE, 0);
-  gtk_widget_set_tooltip_text (smag_entry, "Standard magnitudes list, formated as <band>=<mag>/<error> ...");
+	GtkWidget *comment_entry = gtk_entry_new ();
+	gtk_grid_attach (GTK_GRID(grid4), comment_entry, 0, 1, 1, 1);
 
-  label8 = gtk_label_new ("Instrumental magnitudes");
-  g_object_ref (label8);
-  g_object_set_data_full (G_OBJECT (pstar), "label8", label8,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (label8);
-  gtk_box_pack_start (GTK_BOX (vbox2), label8, FALSE, FALSE, 0);
-  gtk_misc_set_alignment (GTK_MISC (label8), 7.45058e-09, 0.5);
-  gtk_misc_set_padding (GTK_MISC (label8), 3, 0);
+	GtkWidget *label7 = gtk_label_new ("Standard magnitudes");
+	gtk_widget_set_hexpand (label7, TRUE);
+	gtk_widget_set_halign (label7, GTK_ALIGN_START);
+	gtk_widget_set_valign (label7, GTK_ALIGN_CENTER);
+	gtk_grid_attach (GTK_GRID(grid4), label7, 0, 2, 1, 1);
 
-  imag_entry = gtk_entry_new ();
-  g_object_ref (imag_entry);
-  g_object_set_data_full (G_OBJECT (pstar), "imag_entry", imag_entry,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (imag_entry);
-  gtk_box_pack_start (GTK_BOX (vbox2), imag_entry, FALSE, FALSE, 0);
-  gtk_widget_set_tooltip_text (imag_entry, "Instrumental magnitudes list, formated as <band>=<mag>/<error> ...");
+	GtkWidget *smag_entry = gtk_entry_new ();
+	gtk_widget_set_tooltip_text (smag_entry, "Standard magnitudes list, formatted as <band>=<mag>/<error> ...");
+	gtk_grid_attach (GTK_GRID(grid4), smag_entry, 0, 3, 1, 1);
 
-  star_details = gtk_label_new ("");
-  g_object_ref (star_details);
-  g_object_set_data_full (G_OBJECT (pstar), "star_details", star_details,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (star_details);
-  gtk_box_pack_start (GTK_BOX (vbox2), star_details, FALSE, FALSE, 0);
-  gtk_label_set_justify (GTK_LABEL (star_details), GTK_JUSTIFY_LEFT);
-  gtk_misc_set_alignment (GTK_MISC (star_details), 7.45058e-09, 1);
-  gtk_misc_set_padding (GTK_MISC (star_details), 3, 3);
+	GtkWidget *label8 = gtk_label_new ("Instrumental magnitudes");
+	gtk_widget_set_hexpand (label8, TRUE);
+	gtk_widget_set_halign (label8, GTK_ALIGN_START);
+	gtk_widget_set_valign (label8, GTK_ALIGN_CENTER);
+	gtk_grid_attach (GTK_GRID(grid4), label8, 0, 4, 1, 1);
 
-  hbuttonbox1 = gtk_hbutton_box_new ();
-  g_object_ref (hbuttonbox1);
-  g_object_set_data_full (G_OBJECT (pstar), "hbuttonbox1", hbuttonbox1,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (hbuttonbox1);
-  gtk_box_pack_start (GTK_BOX (vbox1), hbuttonbox1, FALSE, TRUE, 0);
+	GtkWidget *imag_entry = gtk_entry_new ();
+	gtk_widget_set_tooltip_text (imag_entry, "Instrumental magnitudes list, formatted as <band>=<mag>/<error> ...");
+	gtk_grid_attach (GTK_GRID(grid4), imag_entry, 0, 5, 1, 1);
 
-  gtk_box_set_spacing (GTK_BOX (hbuttonbox1), 0);
-  //gtk_button_box_set_child_ipadding (GTK_BUTTON_BOX (hbuttonbox1), 6, 0);
 
-  ok_button = gtk_button_new_with_label ("OK");
-  g_object_ref (ok_button);
-  g_object_set_data_full (G_OBJECT (pstar), "ok_button", ok_button,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (ok_button);
-  gtk_container_add (GTK_CONTAINER (hbuttonbox1), ok_button);
-  gtk_widget_set_can_default (ok_button, TRUE);
-  gtk_widget_set_tooltip_text (ok_button, "Accept changes and exit");
-  gtk_widget_add_accelerator (ok_button, "clicked", accel_group,
-                              GDK_Return, 0,
-                              GTK_ACCEL_VISIBLE);
 
-  make_ref_button = gtk_button_new_with_label ("Make Std");
-  g_object_ref (make_ref_button);
-  g_object_set_data_full (G_OBJECT (pstar), "make_ref_button", make_ref_button,
-                            (GDestroyNotify) g_object_unref);
-  gtk_container_add (GTK_CONTAINER (hbuttonbox1), make_ref_button);
-  gtk_container_set_border_width (GTK_CONTAINER (make_ref_button), 5);
-  gtk_widget_set_sensitive (make_ref_button, FALSE);
-  gtk_widget_set_tooltip_text (make_ref_button, "Mark star as photometric standard");
-  gtk_widget_add_accelerator (make_ref_button, "clicked", accel_group,
-                              GDK_r, 0,
-                              GTK_ACCEL_VISIBLE);
+	GtkWidget *buttonbox1 = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
+	gtk_container_set_border_width (GTK_CONTAINER(buttonbox1), 10);
+	gtk_button_box_set_layout (GTK_BUTTON_BOX(buttonbox1), GTK_BUTTONBOX_SPREAD);
+	gtk_grid_attach (GTK_GRID(grid1), buttonbox1, 0, 2, 1, 1);
 
-  cancel_button = gtk_button_new_with_label ("Undo Edits");
-  g_object_ref (cancel_button);
-  g_object_set_data_full (G_OBJECT (pstar), "cancel_button", cancel_button,
-                            (GDestroyNotify) g_object_unref);
-  gtk_widget_show (cancel_button);
-  gtk_container_add (GTK_CONTAINER (hbuttonbox1), cancel_button);
-  gtk_container_set_border_width (GTK_CONTAINER (cancel_button), 5);
-  gtk_widget_set_tooltip_text (cancel_button, "Revert to initial values");
+	GtkWidget *ok_button = gtk_button_new_with_label ("OK");
+	gtk_widget_set_tooltip_text (ok_button, "Accept changes and exit");
+	gtk_container_add (GTK_CONTAINER (buttonbox1), ok_button);
+	gtk_widget_set_can_default (ok_button, TRUE);
+	gtk_widget_add_accelerator (ok_button, "clicked", accel_group,
+				    GDK_Return, 0,
+				    GTK_ACCEL_VISIBLE);
 
-  gtk_widget_grab_focus (smag_entry);
-  gtk_widget_grab_default (ok_button);
+	GtkWidget *make_ref_button = gtk_button_new_with_label ("Make Std");
+	gtk_widget_set_tooltip_text (make_ref_button, "Mark star as photometric standard");
+	gtk_widget_set_sensitive (make_ref_button, FALSE);
+	gtk_container_add (GTK_CONTAINER (buttonbox1), make_ref_button);
+	gtk_widget_add_accelerator (make_ref_button, "clicked", accel_group,
+				    GDK_r, 0,
+				    GTK_ACCEL_VISIBLE);
 
-  gtk_window_add_accel_group (GTK_WINDOW (pstar), accel_group);
+	GtkWidget *cancel_button = gtk_button_new_with_label ("Undo Edits");
+	gtk_widget_set_tooltip_text (cancel_button, "Revert to initial values");
+	gtk_container_add (GTK_CONTAINER (buttonbox1), cancel_button);
 
-  return pstar;
+	gtk_widget_show_all (pstar);
+
+	gtk_widget_grab_focus (smag_entry);
+	gtk_widget_grab_default (ok_button);
+
+	gtk_window_add_accel_group (GTK_WINDOW (pstar), accel_group);
+
+	return pstar;
 }
 
 GtkWidget*
@@ -3977,4 +3798,359 @@ create_query_log_window (void)
   gtk_box_pack_start (GTK_BOX (vbox33), query_stop_toggle, FALSE, FALSE, 0);
 
   return query_log_window;
+}
+
+/* from Glade */
+
+GtkWidget* create_imadj_dialog (void)
+{
+	GtkWidget *imadj_dialog;
+	GtkWidget *dialog_vbox1;
+	GtkWidget *vbox1;
+	GtkWidget *hist_scrolled_win;
+	GtkWidget *viewport1;
+	GtkWidget *hist_area;
+	GtkWidget *vbox2;
+	GtkWidget *frame3;
+	GtkWidget *hbox2;
+	GtkWidget *channel_combo;
+	GtkWidget *label3;
+	GObject   *gamma_spin_adj;
+	GtkWidget *gamma_spin;
+	GtkWidget *label4;
+	GObject   *toe_spin_adj;
+	GtkWidget *toe_spin;
+	GtkWidget *label5;
+	GtkWidget *log_hist_check;
+	GtkWidget *frame2;
+	GtkWidget *table1;
+	GtkWidget *hseparator1;
+	GObject   *low_cut_spin_adj;
+	GtkWidget *low_cut_spin;
+	GObject   *high_cut_spin_adj;
+	GtkWidget *high_cut_spin;
+	GObject   *offset_spin_adj;
+	GtkWidget *offset_spin;
+	GtkWidget *label2;
+	GtkWidget *label1;
+	GtkWidget *table2;
+	GtkWidget *cuts_darker;
+	GtkWidget *cuts_sharper;
+	GtkWidget *cuts_duller;
+	GtkWidget *cuts_auto;
+	GtkWidget *cuts_min_max;
+	GtkWidget *cuts_brighter;
+	GtkWidget *dialog_action_area1;
+	GtkWidget *hbuttonbox1;
+	GtkWidget *hist_close;
+	GtkWidget *hist_apply;
+	GtkWidget *hist_redraw;
+
+	imadj_dialog = gtk_dialog_new ();
+	g_object_set_data (G_OBJECT (imadj_dialog), "imadj_dialog", imadj_dialog);
+	gtk_window_set_title (GTK_WINDOW (imadj_dialog), ("Curves / Histogram"));
+	//  GTK_WINDOW (imadj_dialog)->type = GTK_WINDOW_DIALOG;
+
+	dialog_vbox1 = gtk_dialog_get_content_area (GTK_DIALOG(imadj_dialog));
+	g_object_set_data (G_OBJECT (imadj_dialog), "dialog_vbox1", dialog_vbox1);
+	gtk_widget_show (dialog_vbox1);
+
+	vbox1 = gtk_vbox_new (FALSE, 0);
+	g_object_ref (vbox1);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "vbox1", vbox1,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (vbox1);
+	gtk_box_pack_start (GTK_BOX (dialog_vbox1), vbox1, TRUE, TRUE, 0);
+
+	hist_scrolled_win = gtk_scrolled_window_new (NULL, NULL);
+	g_object_ref (hist_scrolled_win);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "hist_scrolled_win", hist_scrolled_win,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (hist_scrolled_win);
+	gtk_box_pack_start (GTK_BOX (vbox1), hist_scrolled_win, TRUE, TRUE, 0);
+	gtk_container_set_border_width (GTK_CONTAINER (hist_scrolled_win), 2);
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (hist_scrolled_win), GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
+
+	//gtk_range_set_update_policy (GTK_RANGE (GTK_SCROLLED_WINDOW (hist_scrolled_win)->hscrollbar), GTK_POLICY_NEVER);
+
+	viewport1 = gtk_viewport_new (NULL, NULL);
+	g_object_ref (viewport1);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "viewport1", viewport1,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (viewport1);
+	gtk_container_add (GTK_CONTAINER (hist_scrolled_win), viewport1);
+
+	hist_area = gtk_drawing_area_new ();
+	g_object_ref (hist_area);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "hist_area", hist_area,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (hist_area);
+	gtk_container_add (GTK_CONTAINER (viewport1), hist_area);
+
+	vbox2 = gtk_vbox_new (FALSE, 0);
+	g_object_ref (vbox2);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "vbox2", vbox2,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (vbox2);
+	gtk_box_pack_start (GTK_BOX (vbox1), vbox2, FALSE, TRUE, 0);
+
+	frame3 = gtk_frame_new (("Curve/Histogram"));
+	g_object_ref (frame3);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "frame3", frame3,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (frame3);
+	gtk_box_pack_start (GTK_BOX (vbox2), frame3, TRUE, TRUE, 0);
+
+	hbox2 = gtk_hbox_new (FALSE, 0);
+	g_object_ref (hbox2);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "hbox2", hbox2,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (hbox2);
+	gtk_container_add (GTK_CONTAINER (frame3), hbox2);
+
+	channel_combo = gtk_combo_box_text_new ();
+	g_object_ref (channel_combo);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "chanel_combo", channel_combo,
+				(GDestroyNotify) g_object_unref);
+	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT(channel_combo), "Channel");
+	//gtk_combo_box_set_active (GTK_COMBO_BOX(channel_combo), 0);
+	gtk_widget_show (channel_combo);
+	gtk_box_pack_start (GTK_BOX (hbox2), channel_combo, FALSE, FALSE, 0);
+
+	label3 = gtk_label_new (("Gamma"));
+	g_object_ref (label3);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "label3", label3,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (label3);
+	gtk_box_pack_start (GTK_BOX (hbox2), label3, FALSE, FALSE, 0);
+	gtk_misc_set_alignment (GTK_MISC (label3), 1, 0.5);
+	gtk_misc_set_padding (GTK_MISC (label3), 5, 0);
+
+	gamma_spin_adj = gtk_adjustment_new (1, 0.1, 10, 0.1, 1, 0.0);
+	gamma_spin = gtk_spin_button_new (GTK_ADJUSTMENT (gamma_spin_adj), 1, 1);
+	g_object_ref (gamma_spin);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "gamma_spin", gamma_spin,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_set_size_request (GTK_WIDGET(&(GTK_SPIN_BUTTON(gamma_spin)->entry)), 60, -1);
+	gtk_widget_show (gamma_spin);
+	gtk_box_pack_start (GTK_BOX (hbox2), gamma_spin, FALSE, TRUE, 0);
+
+	label4 = gtk_label_new (("Toe"));
+	g_object_ref (label4);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "label4", label4,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (label4);
+	gtk_box_pack_start (GTK_BOX (hbox2), label4, FALSE, FALSE, 0);
+	gtk_misc_set_alignment (GTK_MISC (label4), 1, 0.5);
+	gtk_misc_set_padding (GTK_MISC (label4), 6, 0);
+
+	toe_spin_adj = gtk_adjustment_new (0, 0, 0.4, 0.002, 0.1, 0);
+	toe_spin = gtk_spin_button_new (GTK_ADJUSTMENT (toe_spin_adj), 0.002, 3);
+	g_object_ref (toe_spin);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "toe_spin", toe_spin,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_set_size_request(GTK_WIDGET(&(GTK_SPIN_BUTTON(toe_spin)->entry)), 60, -1);
+	gtk_widget_show (toe_spin);
+	gtk_box_pack_start (GTK_BOX (hbox2), toe_spin, FALSE, FALSE, 0);
+
+	label5 = gtk_label_new (("Offset"));
+	g_object_ref (label5);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "label5", label5,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (label5);
+	gtk_box_pack_start (GTK_BOX (hbox2), label5, FALSE, FALSE, 0);
+	gtk_misc_set_alignment (GTK_MISC (label5), 1, 0.5);
+	gtk_misc_set_padding (GTK_MISC (label5), 5, 0);
+
+	offset_spin_adj = gtk_adjustment_new (0, 0, 1, 0.01, 1, 0.0);
+	offset_spin = gtk_spin_button_new (GTK_ADJUSTMENT (offset_spin_adj), 0.01, 2);
+	g_object_ref (offset_spin);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "offset_spin", offset_spin,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_set_size_request(GTK_WIDGET(&(GTK_SPIN_BUTTON(offset_spin)->entry)), 60, -1);
+	gtk_widget_show (offset_spin);
+	gtk_box_pack_start (GTK_BOX (hbox2), offset_spin, FALSE, TRUE, 0);
+
+	log_hist_check = gtk_check_button_new_with_label (("Log"));
+	g_object_ref (log_hist_check);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "log_hist_check", log_hist_check,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (log_hist_check);
+	gtk_box_pack_start (GTK_BOX (hbox2), log_hist_check, FALSE, FALSE, 0);
+
+	frame2 = gtk_frame_new (("Cuts"));
+	g_object_ref (frame2);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "frame2", frame2,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (frame2);
+	gtk_box_pack_start (GTK_BOX (vbox2), frame2, TRUE, TRUE, 0);
+
+	table1 = gtk_table_new (3, 3, FALSE);
+	g_object_ref (table1);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "table1", table1,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (table1);
+	gtk_container_add (GTK_CONTAINER (frame2), table1);
+
+	hseparator1 = gtk_hseparator_new ();
+	g_object_ref (hseparator1);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "hseparator1", hseparator1,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (hseparator1);
+	gtk_table_attach (GTK_TABLE (table1), hseparator1, 0, 3, 0, 1,
+			  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+			  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 0, 0);
+
+	low_cut_spin_adj = gtk_adjustment_new (1, -65535, 65535, 2, 10, 0);
+	low_cut_spin = gtk_spin_button_new (GTK_ADJUSTMENT (low_cut_spin_adj), 2, 0);
+	g_object_ref (low_cut_spin);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "low_cut_spin", low_cut_spin,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (low_cut_spin);
+	gtk_table_attach (GTK_TABLE (table1), low_cut_spin, 0, 1, 2, 3,
+			  (GtkAttachOptions) (GTK_FILL),
+			  (GtkAttachOptions) (0), 0, 0);
+
+	high_cut_spin_adj = gtk_adjustment_new (1, -65535, 65535, 10, 10, 0);
+	high_cut_spin = gtk_spin_button_new (GTK_ADJUSTMENT (high_cut_spin_adj), 10, 0);
+	g_object_ref (high_cut_spin);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "high_cut_spin", high_cut_spin,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (high_cut_spin);
+	gtk_table_attach (GTK_TABLE (table1), high_cut_spin, 0, 1, 1, 2,
+			  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+			  (GtkAttachOptions) (0), 0, 0);
+
+	label2 = gtk_label_new (("High"));
+	g_object_ref (label2);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "label2", label2,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (label2);
+	gtk_table_attach (GTK_TABLE (table1), label2, 1, 2, 1, 2,
+			  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+			  (GtkAttachOptions) (GTK_EXPAND), 0, 0);
+	gtk_label_set_justify (GTK_LABEL (label2), GTK_JUSTIFY_LEFT);
+	gtk_misc_set_alignment (GTK_MISC (label2), 0, 0.5);
+	gtk_misc_set_padding (GTK_MISC (label2), 6, 0);
+
+	label1 = gtk_label_new (("Low"));
+	g_object_ref (label1);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "label1", label1,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (label1);
+	gtk_table_attach (GTK_TABLE (table1), label1, 1, 2, 2, 3,
+			  (GtkAttachOptions) (GTK_EXPAND | GTK_SHRINK | GTK_FILL),
+			  (GtkAttachOptions) (GTK_EXPAND), 0, 0);
+	gtk_label_set_justify (GTK_LABEL (label1), GTK_JUSTIFY_LEFT);
+	gtk_misc_set_alignment (GTK_MISC (label1), 0, 0.5);
+	gtk_misc_set_padding (GTK_MISC (label1), 6, 0);
+
+	table2 = gtk_table_new (2, 3, TRUE);
+	g_object_ref (table2);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "table2", table2,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (table2);
+	gtk_table_attach (GTK_TABLE (table1), table2, 2, 3, 1, 3,
+			  (GtkAttachOptions) (GTK_FILL),
+			  (GtkAttachOptions) (GTK_FILL), 0, 0);
+	gtk_table_set_row_spacings (GTK_TABLE (table2), 3);
+	gtk_table_set_col_spacings (GTK_TABLE (table2), 3);
+
+	cuts_darker = gtk_button_new_with_label (("Darker"));
+	g_object_ref (cuts_darker);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "cuts_darker", cuts_darker,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (cuts_darker);
+	gtk_table_attach (GTK_TABLE (table2), cuts_darker, 2, 3, 0, 1,
+			  (GtkAttachOptions) (GTK_FILL),
+			  (GtkAttachOptions) (0), 0, 0);
+
+	cuts_sharper = gtk_button_new_with_label (("Sharper"));
+	g_object_ref (cuts_sharper);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "cuts_sharper", cuts_sharper,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (cuts_sharper);
+	gtk_table_attach (GTK_TABLE (table2), cuts_sharper, 1, 2, 1, 2,
+			  (GtkAttachOptions) (GTK_FILL),
+			  (GtkAttachOptions) (0), 0, 0);
+
+	cuts_duller = gtk_button_new_with_label (("Flatter"));
+	g_object_ref (cuts_duller);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "cuts_duller", cuts_duller,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (cuts_duller);
+	gtk_table_attach (GTK_TABLE (table2), cuts_duller, 1, 2, 0, 1,
+			  (GtkAttachOptions) (GTK_FILL),
+			  (GtkAttachOptions) (0), 0, 0);
+
+	cuts_auto = gtk_button_new_with_label (("Auto Cuts"));
+	g_object_ref (cuts_auto);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "cuts_auto", cuts_auto,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (cuts_auto);
+	gtk_table_attach (GTK_TABLE (table2), cuts_auto, 0, 1, 1, 2,
+			  (GtkAttachOptions) (GTK_FILL),
+			  (GtkAttachOptions) (0), 0, 0);
+
+	cuts_min_max = gtk_button_new_with_label (("Min-Max"));
+	g_object_ref (cuts_min_max);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "cuts_min_max", cuts_min_max,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (cuts_min_max);
+	gtk_table_attach (GTK_TABLE (table2), cuts_min_max, 0, 1, 0, 1,
+			  (GtkAttachOptions) (GTK_FILL),
+			  (GtkAttachOptions) (0), 0, 0);
+
+	cuts_brighter = gtk_button_new_with_label (("Brighter"));
+	g_object_ref (cuts_brighter);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "cuts_brighter", cuts_brighter,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (cuts_brighter);
+	gtk_table_attach (GTK_TABLE (table2), cuts_brighter, 2, 3, 1, 2,
+			  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+			  (GtkAttachOptions) (GTK_EXPAND), 0, 0);
+
+	dialog_action_area1 = gtk_dialog_get_action_area (GTK_DIALOG(imadj_dialog));
+	g_object_set_data (G_OBJECT (imadj_dialog), "dialog_action_area1", dialog_action_area1);
+	gtk_widget_show (dialog_action_area1);
+	gtk_container_set_border_width (GTK_CONTAINER (dialog_action_area1), 3);
+
+	hbuttonbox1 = gtk_hbutton_box_new ();
+	g_object_ref (hbuttonbox1);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "hbuttonbox1", hbuttonbox1,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (hbuttonbox1);
+	gtk_box_pack_start (GTK_BOX (dialog_action_area1), hbuttonbox1, TRUE, TRUE, 0);
+	gtk_container_set_border_width (GTK_CONTAINER (hbuttonbox1), 3);
+	gtk_button_box_set_layout (GTK_BUTTON_BOX (hbuttonbox1), GTK_BUTTONBOX_EDGE);
+	gtk_box_set_spacing (GTK_BOX (hbuttonbox1), 4);
+
+	//gtk_button_box_set_child_size (GTK_BUTTON_BOX (hbuttonbox1), 0, 0);
+	//gtk_button_box_set_child_ipadding (GTK_BUTTON_BOX (hbuttonbox1), 15, -1);
+
+	hist_close = gtk_button_new_with_label (("Close"));
+	g_object_ref (hist_close);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "hist_close", hist_close,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (hist_close);
+	gtk_container_add (GTK_CONTAINER (hbuttonbox1), hist_close);
+	gtk_widget_set_can_default (hist_close, TRUE);
+
+	hist_apply = gtk_button_new_with_label (("Apply"));
+	g_object_ref (hist_apply);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "hist_apply", hist_apply,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (hist_apply);
+	gtk_container_add (GTK_CONTAINER (hbuttonbox1), hist_apply);
+	gtk_widget_set_can_default (hist_apply, TRUE);
+
+	hist_redraw = gtk_button_new_with_label (("Redraw"));
+	g_object_ref (hist_redraw);
+	g_object_set_data_full (G_OBJECT (imadj_dialog), "hist_redraw", hist_redraw,
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (hist_redraw);
+	gtk_container_add (GTK_CONTAINER (hbuttonbox1), hist_redraw);
+	gtk_widget_set_can_default (hist_redraw, TRUE);
+
+	return imadj_dialog;
 }

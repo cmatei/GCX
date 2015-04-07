@@ -939,6 +939,7 @@ int run_obs_file(gpointer window, char *obsf)
 	return 0;
 }
 
+#if 0
 static void get_color_action(int action, GdkColor *color, GdkColormap *cmap)
 {
 	switch(action) {
@@ -967,16 +968,18 @@ static void get_color_action(int action, GdkColor *color, GdkColormap *cmap)
 		g_error("couldn't allocate color");
 	}
 }
+#endif
 
 static void obslist_background(gpointer window, int action)
 {
+#if 0
+/* FIXME: There have been some changes re: widget styles in gtk3 and gtk2 vs this */
+
 	GtkWidget *list;
 	GdkColormap *cmap;
 	GdkColor color;
-#if 0
 	GtkRcStyle *rcstyle;
 	int i;
-#endif
 
 	cmap = gdk_colormap_get_system();
 	get_color_action(action, &color, cmap);
@@ -984,8 +987,6 @@ static void obslist_background(gpointer window, int action)
 	list = g_object_get_data(G_OBJECT(window), "obs_list_store");
 	g_return_if_fail(list != NULL);
 
-/* FIXME: There have been some changes re: widget styles in gtk3 and gtk2 vs this */
-#if 0
 	if (action == OBSLIST_BACKGROUND_RUNNING) {
 		gtk_widget_restore_default_style(list);
 	} else {
