@@ -121,7 +121,7 @@ struct _GcxImageViewClass {
 G_DEFINE_TYPE(GcxImageView, gcx_image_view, GTK_TYPE_SCROLLED_WINDOW);
 
 static gboolean gcx_image_view_expose_cb (GtkWidget *widget, GdkEventExpose *event, void *user);
-
+static gboolean gcx_image_view_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer user);
 
 static void
 gcx_image_view_init(GcxImageView *view)
@@ -136,9 +136,11 @@ gcx_image_view_init(GcxImageView *view)
 
 	gtk_container_add (GTK_CONTAINER(view), GTK_WIDGET(view->darea));
 
-	g_signal_connect (G_OBJECT(view->darea), "expose_event",
-			  G_CALLBACK(gcx_image_view_expose_cb), view);
+	//g_signal_connect (G_OBJECT(view->darea), "expose-event",
+	//		  G_CALLBACK(gcx_image_view_expose_cb), view);
 
+	g_signal_connect (G_OBJECT(view->darea), "draw",
+			  G_CALLBACK(gcx_image_view_draw_cb), view);
 
 	view->cache = new_map_cache (0, MAP_CACHE_GRAY);
 	view->map = new_frame_map ();
@@ -762,6 +764,55 @@ paint_from_rgb_cache(GtkWidget *widget, struct map_cache *cache, GdkRectangle *a
 /*
  * an expose event to our image window
  */
+
+static gboolean
+gcx_image_view_draw_cb(GtkWidget *darea, cairo_t *cr, gpointer user)
+{
+	GcxImageView *view = GCX_IMAGE_VIEW(user);
+	struct map_cache *cache = view->cache;
+	struct frame_map *map = view->map;
+	GdkRectangle area;
+
+	if (map->fr == NULL) /* no frame */
+		return TRUE;
+
+	/* invalidate cache if needed */
+	if (map->color && cache->type != MAP_CACHE_RGB)
+		cache->valid = 0;
+
+	if (!map->color && cache->type != MAP_CACHE_GRAY)
+		cache->valid = 0;
+
+	if (cache->zoom != map->zoom)
+		cache->valid = 0;
+
+	if (map->changed)
+		cache->valid = 0;
+
+	gdk_cairo_get_clip_rectangle (cr, &area);
+	if (!area_in_cache(&area, cache))
+		cache->valid = 0;
+
+	if (!cache->valid)
+		update_cache(cache, map, &area);
+
+	if (cache->valid) {
+		d3_printf("cache valid, area is %d by %d starting at %d, %d\n",
+			  cache->w, cache->h,
+			  cache->x, cache->y);
+		d3_printf("expose: from cache\n");
+		if (cache->type == MAP_CACHE_GRAY)
+			paint_from_gray_cache(darea, cache, &area);
+		else
+			paint_from_rgb_cache(darea, cache, &area);
+	}
+
+	draw_sources_hook(GTK_WIDGET(view), &area);
+
+	map->changed = 0;
+
+	return TRUE;
+}
 
 static gboolean
 gcx_image_view_expose_cb(GtkWidget *darea, GdkEventExpose *event, void *user)
