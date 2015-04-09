@@ -13,6 +13,8 @@ configure
 debian
 depcomp
 dscupload
+ar-lib
+compile
 install-sh
 makedeb
 missing
@@ -20,3 +22,8 @@ src/stamp-h1
 TAGS
 *.CR2
 *.fits
+*.fit
+.dirstamp
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
