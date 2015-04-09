@@ -38,7 +38,6 @@ AC_CONFIG_FILES([
 	Makefile
 	docs/Makefile
 	src/Makefile
-	src/ccd/Makefile
 	src/gsc/Makefile
 ])
 AC_OUTPUT

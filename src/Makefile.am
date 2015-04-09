@@ -26,7 +26,7 @@ gcx_SOURCES = \
 	guide.c guide.h multiband.c multiband.h mbandgui.c plots.c plots.h \
 	mbandrep.c starfile.c getline.h synth.c psf.c psf.h dsimplex.c dsimplex.h \
 	basename.c dirname.c libgen.h query.c query.h plate.c \
-	demosaic.c demosaic.h skyview.c  \
+	demosaic.c demosaic.h skyview.c skyview.h \
 	tele_indi.c tele_indi.h camera_indi.c camera_indi.h \
 	fwheel_indi.c fwheel_indi.h focus_indi.c focus_indi.h \
 	common_indi.c common_indi.h \

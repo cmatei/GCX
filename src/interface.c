@@ -115,6 +115,7 @@ create_entry_prompt (void)
 	return widget;
 }
 
+
 GtkWidget*
 create_guide_window (void)
 {
