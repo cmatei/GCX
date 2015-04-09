@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/org/gcx">
-    <file preprocess="xml-stripblanks">resources/camera.ui</file>
-    <file preprocess="xml-stripblanks">resources/ccdreduction.ui</file>
-    <file preprocess="xml-stripblanks">resources/entryprompt.ui</file>
-    <file preprocess="xml-stripblanks">resources/multiband.ui</file>
-    <file preprocess="xml-stripblanks">resources/paredit.ui</file>
-    <file preprocess="xml-stripblanks">resources/pstar.ui</file>
-    <file preprocess="xml-stripblanks">resources/query_window.ui</file>
-    <file preprocess="xml-stripblanks">resources/recipe.ui</file>
-    <file preprocess="xml-stripblanks">resources/showtext.ui</file>
-    <file preprocess="xml-stripblanks">resources/wcsedit.ui</file>
-    <file preprocess="xml-stripblanks">resources/yesno.ui</file>
+    <file preprocess="xml-stripblanks">ui/camera.ui</file>
+    <file preprocess="xml-stripblanks">ui/ccdreduction.ui</file>
+    <file preprocess="xml-stripblanks">ui/entryprompt.ui</file>
+    <file preprocess="xml-stripblanks">ui/multiband.ui</file>
+    <file preprocess="xml-stripblanks">ui/paredit.ui</file>
+    <file preprocess="xml-stripblanks">ui/pstar.ui</file>
+    <file preprocess="xml-stripblanks">ui/query_window.ui</file>
+    <file preprocess="xml-stripblanks">ui/recipe.ui</file>
+    <file preprocess="xml-stripblanks">ui/showtext.ui</file>
+    <file preprocess="xml-stripblanks">ui/wcsedit.ui</file>
+    <file preprocess="xml-stripblanks">ui/yesno.ui</file>
   </gresource>
 </gresources>

@@ -18,7 +18,7 @@
 GtkWidget*
 create_pstar (void)
 {
-	GtkBuilder *builder = gtk_builder_new_from_resource ("/org/gcx/resources/pstar.ui");
+	GtkBuilder *builder = gtk_builder_new_from_resource ("/org/gcx/ui/pstar.ui");
 	GtkWidget *widget = GTK_WIDGET(gtk_builder_get_object (builder, "pstar"));
 
 	g_object_unref (G_OBJECT(builder));
@@ -29,7 +29,7 @@ create_pstar (void)
 GtkWidget*
 create_camera_control (void)
 {
-	GtkBuilder *builder = gtk_builder_new_from_resource ("/org/gcx/resources/camera.ui");
+	GtkBuilder *builder = gtk_builder_new_from_resource ("/org/gcx/ui/camera.ui");
 	GtkWidget *widget = GTK_WIDGET(gtk_builder_get_object (builder, "camera_control"));
 
 	g_object_unref (G_OBJECT(builder));
@@ -40,7 +40,7 @@ create_camera_control (void)
 GtkWidget*
 create_wcs_edit (void)
 {
-	GtkBuilder *builder = gtk_builder_new_from_resource ("/org/gcx/resources/wcsedit.ui");
+	GtkBuilder *builder = gtk_builder_new_from_resource ("/org/gcx/ui/wcsedit.ui");
 	GtkWidget *widget = GTK_WIDGET(gtk_builder_get_object (builder, "wcs_edit"));
 
 	g_object_unref (G_OBJECT(builder));
@@ -51,7 +51,7 @@ create_wcs_edit (void)
 GtkWidget*
 create_show_text (void)
 {
-	GtkBuilder *builder = gtk_builder_new_from_resource ("/org/gcx/resources/showtext.ui");
+	GtkBuilder *builder = gtk_builder_new_from_resource ("/org/gcx/ui/showtext.ui");
 	GtkWidget *widget = GTK_WIDGET(gtk_builder_get_object (builder, "show_text"));
 
 	g_object_unref (G_OBJECT(builder));
@@ -62,7 +62,7 @@ create_show_text (void)
 GtkWidget*
 create_create_recipe (void)
 {
-	GtkBuilder *builder = gtk_builder_new_from_resource ("/org/gcx/resources/recipe.ui");
+	GtkBuilder *builder = gtk_builder_new_from_resource ("/org/gcx/ui/recipe.ui");
 	GtkWidget *widget = GTK_WIDGET(gtk_builder_get_object (builder, "create_recipe"));
 
 	g_object_unref (G_OBJECT(builder));
@@ -73,7 +73,7 @@ create_create_recipe (void)
 GtkWidget*
 create_yes_no (void)
 {
-	GtkBuilder *builder = gtk_builder_new_from_resource ("/org/gcx/resources/yesno.ui");
+	GtkBuilder *builder = gtk_builder_new_from_resource ("/org/gcx/ui/yesno.ui");
 	GtkWidget *widget = GTK_WIDGET(gtk_builder_get_object (builder, "yes_no"));
 
 	g_object_unref (G_OBJECT(builder));
@@ -84,7 +84,7 @@ create_yes_no (void)
 GtkWidget*
 create_image_processing (void)
 {
-	GtkBuilder *builder = gtk_builder_new_from_resource ("/org/gcx/resources/ccdreduction.ui");
+	GtkBuilder *builder = gtk_builder_new_from_resource ("/org/gcx/ui/ccdreduction.ui");
 	GtkWidget *widget = GTK_WIDGET(gtk_builder_get_object (builder, "image_processing"));
 
 	g_object_unref (G_OBJECT(builder));
@@ -96,7 +96,7 @@ create_image_processing (void)
 GtkWidget*
 create_par_edit (void)
 {
-	GtkBuilder *builder = gtk_builder_new_from_resource ("/org/gcx/resources/paredit.ui");
+	GtkBuilder *builder = gtk_builder_new_from_resource ("/org/gcx/ui/paredit.ui");
 	GtkWidget *widget = GTK_WIDGET(gtk_builder_get_object (builder, "par_edit"));
 
 	g_object_unref (G_OBJECT(builder));
@@ -107,7 +107,7 @@ create_par_edit (void)
 GtkWidget*
 create_entry_prompt (void)
 {
-	GtkBuilder *builder = gtk_builder_new_from_resource ("/org/gcx/resources/entryprompt.ui");
+	GtkBuilder *builder = gtk_builder_new_from_resource ("/org/gcx/ui/entryprompt.ui");
 	GtkWidget *widget = GTK_WIDGET(gtk_builder_get_object (builder, "entry_prompt"));
 
 	g_object_unref (G_OBJECT(builder));
@@ -319,7 +319,7 @@ create_guide_window (void)
 GtkWidget*
 create_mband_dialog (void)
 {
-	GtkBuilder *builder = gtk_builder_new_from_resource ("/org/gcx/resources/multiband.ui");
+	GtkBuilder *builder = gtk_builder_new_from_resource ("/org/gcx/ui/multiband.ui");
 	GtkWidget *widget = GTK_WIDGET(gtk_builder_get_object (builder, "mband_dialog"));
 
 	g_object_unref (G_OBJECT(builder));
@@ -330,7 +330,7 @@ create_mband_dialog (void)
 GtkWidget*
 create_query_log_window (void)
 {
-	GtkBuilder *builder = gtk_builder_new_from_resource ("/org/gcx/resources/query_window.ui");
+	GtkBuilder *builder = gtk_builder_new_from_resource ("/org/gcx/ui/query_window.ui");
 	GtkWidget *widget = GTK_WIDGET(gtk_builder_get_object (builder, "query_window"));
 
 	g_object_unref (G_OBJECT(builder));
@@ -338,9 +338,8 @@ create_query_log_window (void)
 	return widget;
 }
 
-/* from Glade */
-
-GtkWidget* create_imadj_dialog (void)
+GtkWidget*
+create_imadj_dialog (void)
 {
 	GtkWidget *imadj_dialog;
 	GtkWidget *dialog_vbox1;
