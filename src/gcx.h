@@ -8,7 +8,7 @@
 
 #include <glib/gi18n.h>
 
-#include "ccd/ccd.h"
+#include "ccd.h"
 
 #ifndef PI
 #define PI 3.141592653589793

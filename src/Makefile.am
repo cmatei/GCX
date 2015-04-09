@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-SUBDIRS = ccd gsc
+SUBDIRS = gsc
 
 AM_CPPFLAGS = @GTK_CFLAGS@
 
@@ -8,6 +8,10 @@ AM_CFLAGS = -Wall
 bin_PROGRAMS = gcx
 
 gcx_SOURCES = \
+        ccd_frame.c dslr.c median.c badpix.c \
+        edb.c aphot.c worldpos.c sources.c \
+        warp.c recipy1.c errlog.c use_dcraw.c \
+        ccd.h dslr.h tiff.c jpeg.c \
 	cameragui.c cameragui.h catalogs.c catalogs.h \
 	filegui.c filegui.h gcx.c gcx.h gui.c gui.h imadjust.c \
 	interface.c interface.h obsdata.c obsdata.h obslist.c \
@@ -45,6 +49,6 @@ resource_files=$(shell $(GLIB_COMPILE_RESOURCES) --generate-dependencies $(build
 gcxresources.c: gcx.gresource.xml $(resource_files)
 	$(GLIB_COMPILE_RESOURCES) $< --target=$@ --generate-source
 
-gcx_LDADD = @GTK_LIBS@ ccd/libccd.a gsc/libgsc.a
+gcx_LDADD = @GTK_LIBS@ gsc/libgsc.a
 
 CLEANFILES = gcxresources.c *~
