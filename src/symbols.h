@@ -2,7 +2,6 @@
 #define _SYMBOL_H_
 
 /* symbols we use in recipe and photometry reports */
-
 typedef enum {
 	SYM_NULL,
 	SYM_RECIPE,

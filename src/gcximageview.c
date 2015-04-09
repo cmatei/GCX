@@ -183,7 +183,7 @@ gcx_image_view_class_init(GcxImageViewClass *klass)
 GtkWidget *
 gcx_image_view_new()
 {
-	return GTK_WIDGET(g_object_new (GCX_IMAGE_VIEW_TYPE, NULL));
+	return GTK_WIDGET(g_object_new (GCX_TYPE_IMAGE_VIEW, NULL));
 }
 
 
@@ -673,7 +673,7 @@ int gcx_image_view_set_frame(GcxImageView *view, struct ccd_frame *fr)
 struct ccd_frame *
 gcx_image_view_get_frame (GcxImageView *view)
 {
-	g_return_val_if_fail (IS_GCX_IMAGE_VIEW(view), 0);
+	g_return_val_if_fail (GCX_IS_IMAGE_VIEW(view), 0);
 	return view->map->fr;
 }
 
@@ -1310,7 +1310,7 @@ static void view_option_cb(gpointer window, guint action)
 	double xc, yc;
 
 	view = g_object_get_data(G_OBJECT(window), "image_view");
-	g_return_if_fail (IS_GCX_IMAGE_VIEW(view));
+	g_return_if_fail (GCX_IS_IMAGE_VIEW(view));
 
 	gdkw = gtk_widget_get_window(GTK_WIDGET(view->darea));
 	gdk_window_get_pointer(gdkw, &x, &y, &mask);

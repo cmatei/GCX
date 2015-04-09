@@ -492,7 +492,8 @@ static void par_update_current(gpointer parwin)
 
 static void par_save_cb( GtkWidget *widget, gpointer parwin )
 {
-	save_params_rc();
+	/* FIXME: NULL arg should be gcx instance */
+	gcx_save_rcfile (NULL);
 	par_update_current(parwin);
 }
 
@@ -519,7 +520,8 @@ static void par_load_cb( GtkWidget *widget, gpointer parwin )
 	tree = GTK_TREE_VIEW(g_object_get_data(G_OBJECT(parwin), "par_tree"));
 	g_return_if_fail(tree != NULL);
 
-	if (!load_params_rc())
+	/* FIXME: NULL arg should be gcx instance */
+	if (! gcx_load_rcfile(NULL, NULL))
 		par_update_items(tree, PAR_FIRST);
 
 	par_update_current(parwin);

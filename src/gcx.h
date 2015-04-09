@@ -1,12 +1,41 @@
-// gcx.h: general declarations and options for the gcx program
-// $Revision: 1.21 $
-// $Date: 2005/06/25 00:57:12 $
+#ifndef __GCX_H
+#define __GCX_H
 
-#ifndef _GCX_H
-
-#define _GCX_H
-
+#include <glib-object.h>
 #include <glib/gi18n.h>
+#include <gtk/gtk.h>
+
+G_BEGIN_DECLS
+
+typedef struct _Gcx      Gcx;
+typedef struct _GcxClass GcxClass;
+
+#define GCX_TYPE_GCX            (gcx_get_type())
+#define GCX(obj)                (G_TYPE_CHECK_INSTANCE_CAST ((obj), GCX_TYPE_GCX, Gcx))
+#define GCX_CLASS(klass)        (G_TYPE_CHECK_CLASS_CAST ((klass),  GCX_TYPE_GCX, GcxClass))
+#define GCX_IS_GCX(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GCX_TYPE_GCX))
+#define GCX_IS_GCX_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass),  GCX_TYPE_GCX))
+
+
+GType gcx_get_type (void);
+
+Gcx * gcx_new();
+
+GtkWidget * gcx_get_image_window (Gcx *gcx);
+
+int gcx_save_rcfile (Gcx *gcx);
+int gcx_load_rcfile (Gcx *gcx, char *filename);
+
+/* from gcx.c */
+
+int save_params_rc(void);
+int load_params_rc(void);
+
+
+G_END_DECLS
+
+
+/* FIXME: remove when the dust settles */
 
 #include "ccd.h"
 
@@ -67,13 +96,6 @@ extern struct obsdata obs;
 #define STACK_MINMAXREJ 4
 #define STACK_AVGSIGCLIP 5
 
-// main imager state machine states
-#define MA_INIT 0
-#define MA_RDY 1
-#define MA_FOCUS_EXPST 2
-#define MA_FOCUS_READ 3
-#define MA_EXPST 4
-#define MA_READ 5
 
 /* clamp functions */
 static inline int clamp_double(double *val, double min, double max)
@@ -117,31 +139,6 @@ static inline int clamp_int(int *val, int min, int max)
 	return 0;
 }
 
-// from track.c
-
-extern void do_track(char *cmd);
-extern void track_machine(void);
-extern void track_init(void);
-extern int get_track_spot_distance(float *d);
-
-// from imgctrl.c
-
-extern void do_main(char *cmd);
-extern int main_machine(void);
-extern void main_init(void);
-extern int main_cam_state(void);
-extern int main_state(void);
-extern int get_main_spot_distance(float *d);
-extern int main_cam_exp(void);
-
-// from command.c
-
-extern void command_loop(void);
-
-/* from gcx.c */
-
-int save_params_rc(void);
-int load_params_rc(void);
 
 
-#endif // _GCX_H
+#endif

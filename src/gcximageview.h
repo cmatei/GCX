@@ -1,5 +1,5 @@
-#ifndef __GCXVIEW_H
-#define __GCXVIEW_H
+#ifndef __GCXIMAGEVIEW_H
+#define __GCXIMAGEVIEW_H
 
 #include <glib-object.h>
 #include <gtk/gtk.h>
@@ -9,11 +9,11 @@ G_BEGIN_DECLS
 typedef struct _GcxImageView          GcxImageView;
 typedef struct _GcxImageViewClass     GcxImageViewClass;
 
-#define GCX_IMAGE_VIEW_TYPE            (gcx_image_view_get_type())
-#define GCX_IMAGE_VIEW(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), GCX_IMAGE_VIEW_TYPE, GcxImageView))
-#define GCX_IMAGE_VIEW_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass),  GCX_IMAGE_VIEW_TYPE, GcxImageViewClass))
-#define IS_GCX_IMAGE_VIEW(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GCX_IMAGE_VIEW_TYPE))
-#define IS_GCX_IMAGE_VIEW_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass),  GCX_IMAGE_VIEW_TYPE))
+#define GCX_TYPE_IMAGE_VIEW            (gcx_image_view_get_type())
+#define GCX_IMAGE_VIEW(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), GCX_TYPE_IMAGE_VIEW, GcxImageView))
+#define GCX_IMAGE_VIEW_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass),  GCX_TYPE_IMAGE_VIEW, GcxImageViewClass))
+#define GCX_IS_IMAGE_VIEW(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GCX_TYPE_IMAGE_VIEW))
+#define GCX_IS_IMAGE_VIEW_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass),  GCX_TYPE_IMAGE_VIEW))
 
 
 GType gcx_image_view_get_type (void);
