@@ -35,8 +35,6 @@
 #include <string.h>
 
 #include "ccd.h"
-//#include "x11ops.h"
-
 
 /* compute the average and median of the k-s clipped histogram */
 double hist_clip_avg(struct rstats *rs, double *median, double sigmas,
@@ -290,7 +288,7 @@ static int ap_get_sky(struct ccd_frame *fr, struct star *s,
 
 /* calculate total flux inside an aperture of radius r centered on x, y;
  * update min, max, npix */
-static double aperture_flux(struct ccd_frame *fr, double r, double x, double y,
+double aperture_flux(struct ccd_frame *fr, double r, double x, double y,
 			    double *minv, double *maxv, double *npix, double *ssq)
 {
 	int ix, iy;
@@ -751,5 +749,3 @@ void get_ph_solution(struct vs_recipy *vs)
 		}
 	}
 }
-
-

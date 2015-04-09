@@ -2,20 +2,12 @@
 #define _OBSDATA_H_
 
 
-/* obs flag values */
-#define OBSDATA_RA_VALID 0x01
-#define OBSDATA_DEC_VALID 0x02
-#define OBSDATA_EQUINOX_VALID 0x04
-#define OBSDATA_AIRMASS_VALID 0x08
-#define OBSDATA_MJD_VALID 0x10
-
 #define mjd_to_jd(x) ((x) + 2400000.5)
 #define jd_to_mjd(x) ((x) - 2400000.5)
 
 /* data that we need to adnotate an observation */
 struct obs_data {
 	int ref_count;
-	int flags;
 	char *objname; /* malloced designation of object */
 	double ra; /* coordinates */
 	double dec;

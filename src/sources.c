@@ -35,7 +35,6 @@
 #include <string.h>
 
 #include "ccd.h"
-//#include "x11ops.h"
 
 // parameters for source extraction
 #define	MAXSR		50		// max star radius

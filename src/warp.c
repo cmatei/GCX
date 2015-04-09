@@ -36,9 +36,6 @@
 #include <time.h>
 
 #include "ccd.h"
-//#include "x11ops.h"
-//#include "warp.h"
-
 
 float smooth3[9] = {0.25, 0.5, 0.25, 0.5, 1.0, 0.5, 0.25, 0.5, 0.25};
 

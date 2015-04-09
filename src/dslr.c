@@ -64,7 +64,7 @@ static inline uint16_t endian_to_host_16(int endian, uint16_t val)
 	return val;
 }
 
-static int read_file_u32(uint32_t *result, int fd, off_t offset, int endian)
+static inline int read_file_u32(uint32_t *result, int fd, off_t offset, int endian)
 {
 	uint32_t val;
 	int r;
@@ -80,7 +80,7 @@ static int read_file_u32(uint32_t *result, int fd, off_t offset, int endian)
 	return 0;
 }
 
-static int read_file_u16(uint16_t *result, int fd, off_t offset, int endian)
+static inline int read_file_u16(uint16_t *result, int fd, off_t offset, int endian)
 {
 	uint16_t val;
 	int r;
@@ -96,8 +96,7 @@ static int read_file_u16(uint16_t *result, int fd, off_t offset, int endian)
 	return 0;
 }
 
-#if 0
-static int read_file_u8(uint8_t *result, int fd, off_t offset)
+static inline int read_file_u8(uint8_t *result, int fd, off_t offset)
 {
 	uint8_t val;
 	int r;
@@ -112,7 +111,6 @@ static int read_file_u8(uint8_t *result, int fd, off_t offset)
 	*result = val;
 	return 0;
 }
-#endif
 
 static int read_file_block(int fd, off_t offset, size_t len, void **dest)
 {
@@ -828,7 +826,7 @@ static void free_mrw(struct mrw *mrw)
 static struct ccd_frame *read_mrw_file(struct raw_file *raw)
 {
 	struct ccd_frame *frame = NULL;
-	uint32_t block_magic, block_len;
+	uint32_t block_magic = 0, block_len = 0;
 	off_t next_block;
 	int i, byteorder, pair_bytes;
 	size_t image_bytes, file_image_bytes;
@@ -1320,7 +1318,7 @@ static struct ccd_frame *read_cr2_file(struct raw_file *raw)
 {
 	struct ccd_frame *frame = NULL;
 	struct cr2 *cr2;
-	uint16_t bom, tiff_magic, cr2_magic, cr2_version;
+	uint16_t bom, tiff_magic = 0, cr2_magic = 0, cr2_version = 0;
 	uint32_t tiff_offset, raw_ifd_offset;
 	uint32_t dummy;
 	int ifd, failed = 0;

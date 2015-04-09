@@ -69,19 +69,6 @@ void status_message(GtkWidget *dialog, char *msg)
 	}
 }
 
-#if 0
-// Toggle a button without sending a 'clicked' message
-static void toggle_button_no_cb(GtkWidget *window, GtkWidget *button, const char *signame, int state)
-{
-	long signal;
-	signal = (long)g_object_get_data(G_OBJECT(window), signame);
-	g_signal_handler_block(G_OBJECT (button), signal);
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON (button), state);
-	g_signal_handler_unblock(G_OBJECT (button), signal);
-
-}
-#endif
-
 static void named_spin_set_limits(GtkWidget *dialog, char *name, double min, double max)
 {
 	GtkWidget *spin;
