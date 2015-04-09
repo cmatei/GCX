@@ -2,6 +2,7 @@ Makefile*
 *.o
 *.a
 src/gcx
+src/gcxresources.c
 config.*
 .deps/
 docs/*
