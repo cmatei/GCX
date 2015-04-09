@@ -25,7 +25,7 @@
 #include "../indi.h"
 #include "../indigui.h"
 
-
+#include <glib/gi18n.h>
 #include <gtk/gtk.h>
 
 #include "gtkled.h"

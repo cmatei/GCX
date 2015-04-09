@@ -1,0 +1,455 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <!-- interface-requires gtk+ 3.0 -->
+  <object class="GtkWindow" id="create_recipe">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Create Recipe</property>
+    <property name="window_position">center</property>
+    <child>
+      <object class="GtkGrid" id="grid1">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkGrid" id="grid2">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="row_homogeneous">True</property>
+            <child>
+              <object class="GtkLabel" id="label1">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="hexpand">True</property>
+                <property name="xalign">0</property>
+                <property name="xpad">3</property>
+                <property name="label" translatable="yes">File name:</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">0</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label2">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="hexpand">True</property>
+                <property name="xalign">0</property>
+                <property name="xpad">3</property>
+                <property name="label" translatable="yes">Target object:</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">2</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label3">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="hexpand">True</property>
+                <property name="xalign">0</property>
+                <property name="xpad">3</property>
+                <property name="label" translatable="yes">Sequence source:</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">4</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label4">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="hexpand">True</property>
+                <property name="xalign">0</property>
+                <property name="xpad">3</property>
+                <property name="label" translatable="yes">Comments:</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">6</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="tgt_entry">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="has_tooltip">True</property>
+                <property name="tooltip_text" translatable="yes">The name of the object that is the main target of the recipe, to be set in the recipe header</property>
+                <property name="hexpand">True</property>
+                <property name="invisible_char">●</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">3</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="seq_entry">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="has_tooltip">True</property>
+                <property name="tooltip_text" translatable="yes">A description of where the sequnce information (std magnitudes) comes from</property>
+                <property name="hexpand">True</property>
+                <property name="invisible_char">●</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">5</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="comments_entry">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="has_tooltip">True</property>
+                <property name="tooltip_text" translatable="yes">Recipe comments</property>
+                <property name="hexpand">True</property>
+                <property name="invisible_char">●</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">7</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkGrid" id="grid4">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkEntry" id="recipe_file_entry">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="has_tooltip">True</property>
+                    <property name="tooltip_text" translatable="yes">Recipe file name</property>
+                    <property name="hexpand">True</property>
+                    <property name="invisible_char">●</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">0</property>
+                    <property name="width">1</property>
+                    <property name="height">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="browse_file_button">
+                    <property name="label" translatable="yes"> ... </property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="has_tooltip">True</property>
+                    <property name="tooltip_text" translatable="yes">Browse for file name</property>
+                    <property name="halign">center</property>
+                    <property name="valign">center</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="top_attach">0</property>
+                    <property name="width">1</property>
+                    <property name="height">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">1</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">0</property>
+            <property name="width">1</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkGrid" id="grid3">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="row_homogeneous">True</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="off_frame_checkb">
+                <property name="label" translatable="yes">Include off-frame stars</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="has_tooltip">True</property>
+                <property name="tooltip_text" translatable="yes">If this option is cleared, stars outside the frame area are not included in the recipe</property>
+                <property name="xalign">0</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">0</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="std_checkb">
+                <property name="label" translatable="yes">Standard stars</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="has_tooltip">True</property>
+                <property name="tooltip_text" translatable="yes">Save standard stars to the recipe</property>
+                <property name="xalign">0</property>
+                <property name="active">True</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">1</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="var_checkb">
+                <property name="label" translatable="yes">Target stars</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="has_tooltip">True</property>
+                <property name="tooltip_text" translatable="yes">Save target stars to the recipe</property>
+                <property name="xalign">0</property>
+                <property name="active">True</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">2</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="catalog_checkb">
+                <property name="label" translatable="yes">Catalog objects</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="has_tooltip">True</property>
+                <property name="tooltip_text" translatable="yes">Save catalog objects to the recipe</property>
+                <property name="xalign">0</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">3</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="field_checkb">
+                <property name="label" translatable="yes">Field stars</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="has_tooltip">True</property>
+                <property name="tooltip_text" translatable="yes">Save field stars to the recipe</property>
+                <property name="xalign">0</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">4</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="user_checkb">
+                <property name="label" translatable="yes">User stars</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="has_tooltip">True</property>
+                <property name="tooltip_text" translatable="yes">Save user-selected stars to the recipe</property>
+                <property name="xalign">0</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">5</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="det_checkb">
+                <property name="label" translatable="yes">Detected stars</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="has_tooltip">True</property>
+                <property name="tooltip_text" translatable="yes">Save detected stars to the recipe</property>
+                <property name="xalign">0</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">6</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="convcat_checkb">
+                <property name="label" translatable="yes">Convert catalog objects to std</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="has_tooltip">True</property>
+                <property name="tooltip_text" translatable="yes">Set the catalog objects' type to standard when saving</property>
+                <property name="xalign">0</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">3</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="convfield_checkb">
+                <property name="label" translatable="yes">Convert field stars to target</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="has_tooltip">True</property>
+                <property name="tooltip_text" translatable="yes">Create targets in the recipe from the fields stars</property>
+                <property name="xalign">0</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">4</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="convuser_checkb">
+                <property name="label" translatable="yes">Convert user stars to target</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="has_tooltip">True</property>
+                <property name="tooltip_text" translatable="yes">Create target stars in the recipe from the user-selected stars</property>
+                <property name="xalign">0</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">5</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="convdet_checkb">
+                <property name="label" translatable="yes">Convert detected stars to target</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="has_tooltip">True</property>
+                <property name="tooltip_text" translatable="yes">Create standard stars in the recipe from detected stars</property>
+                <property name="xalign">0</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">6</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">1</property>
+            <property name="width">1</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButtonBox" id="buttonbox1">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_top">10</property>
+            <property name="margin_bottom">10</property>
+            <property name="hexpand">True</property>
+            <property name="homogeneous">True</property>
+            <property name="layout_style">spread</property>
+            <child>
+              <object class="GtkButton" id="mkrcp_ok_button">
+                <property name="label" translatable="yes">OK</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="has_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="has_default">True</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="mkrcp_close_button">
+                <property name="label" translatable="yes">Close</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">2</property>
+            <property name="width">1</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>

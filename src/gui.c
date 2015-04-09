@@ -108,7 +108,9 @@ int modal_yes_no(char *text, char *title)
 		g_object_set_data_full (G_OBJECT (dialog), "message", label,
 					(GDestroyNotify) g_object_unref);
 		gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
-		gtk_misc_set_alignment (GTK_MISC (label), 0.5, 1);
+
+		gtk_widget_set_halign (GTK_WIDGET(label), GTK_ALIGN_CENTER);
+		gtk_widget_set_valign (GTK_WIDGET(label), GTK_ALIGN_END);
 		gtk_widget_show (label);
 	}
 	gtk_widget_show(dialog);
@@ -865,7 +867,7 @@ GtkWidget* create_about_cx (void)
 
 
 	about_cx = gtk_dialog_new_with_buttons ("About gcx", NULL, 0,
-						GTK_STOCK_OK, GTK_RESPONSE_ACCEPT,
+						_("_Close"), GTK_RESPONSE_ACCEPT,
 						NULL);
 
 	dialog_vbox1 = gtk_dialog_get_content_area (GTK_DIALOG(about_cx));

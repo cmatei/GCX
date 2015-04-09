@@ -35,10 +35,16 @@ gcx_SOURCES = \
 	libindiclient/indi_config.h libindiclient/gtk/indi_config.c \
 	libindiclient/indi_list.h libindiclient/gtk/indi_list.c \
 	libindiclient/gtk/indisave.h libindiclient/gtk/indisave.c \
-	libindiclient/gtk/gtkled.h libindiclient/gtk/gtkled.c
+	libindiclient/gtk/gtkled.h libindiclient/gtk/gtkled.c \
+	gcxresources.c
 
         # focus.c focus.h focusgui.c
 
+resource_files=$(shell $(GLIB_COMPILE_RESOURCES) --generate-dependencies $(builddir)/gcx.gresource.xml)
+
+gcxresources.c: gcx.gresource.xml $(resource_files)
+	$(GLIB_COMPILE_RESOURCES) $< --target=$@ --generate-source
+
 gcx_LDADD = @GTK_LIBS@ ccd/libccd.a gsc/libgsc.a
 
-CLEANFILES = *~
+CLEANFILES = gcxresources.c *~

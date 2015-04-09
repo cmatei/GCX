@@ -77,9 +77,6 @@ struct frame_map {
 /* we keep a cache of the already trasformed image for quick expose
  * redraws.
  */
-#define MAP_CACHE_GRAY 0
-#define MAP_CACHE_RGB  1
-
 struct map_cache {
 	int valid;		/* the cache is valid */
 	int type;		/* type of cache: gray or rgb */
@@ -88,12 +85,12 @@ struct map_cache {
 	int y;
 	int w; /* width of cache (in display pixels) */
 	int h; /* height of cache (in display pixels) */
-	unsigned size;		/* size of cache (in bytes) */
-	unsigned char *dat;	/* pointer to cache data area */
+
+	cairo_surface_t *data;
 };
 
 
-static struct map_cache *new_map_cache(int size, int type);
+static struct map_cache *new_map_cache(int width, int height);
 static void free_map_cache(struct map_cache *cache);
 
 static struct frame_map *new_frame_map();
@@ -120,7 +117,6 @@ struct _GcxImageViewClass {
 
 G_DEFINE_TYPE(GcxImageView, gcx_image_view, GTK_TYPE_SCROLLED_WINDOW);
 
-static gboolean gcx_image_view_expose_cb (GtkWidget *widget, GdkEventExpose *event, void *user);
 static gboolean gcx_image_view_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer user);
 
 static void
@@ -136,13 +132,10 @@ gcx_image_view_init(GcxImageView *view)
 
 	gtk_container_add (GTK_CONTAINER(view), GTK_WIDGET(view->darea));
 
-	//g_signal_connect (G_OBJECT(view->darea), "expose-event",
-	//		  G_CALLBACK(gcx_image_view_expose_cb), view);
-
 	g_signal_connect (G_OBJECT(view->darea), "draw",
 			  G_CALLBACK(gcx_image_view_draw_cb), view);
 
-	view->cache = new_map_cache (0, MAP_CACHE_GRAY);
+	view->cache = new_map_cache (0, 0);
 	view->map = new_frame_map ();
 	view->wcs = wcs_new();
 }
@@ -198,19 +191,13 @@ gcx_image_view_new()
 
 /* create a map cache */
 static struct map_cache *
-new_map_cache(int size, int type)
+new_map_cache(int width, int height)
 {
 	struct map_cache *cache;
 
 	cache = g_new0 (struct map_cache, 1);
 
-	cache->type = type;
-	cache->size = size;
-
-	if (type == MAP_CACHE_RGB)
-		cache->size = 3 * size;
-
-	cache->dat = g_malloc (cache->size);
+	cache->data = cairo_image_surface_create (CAIRO_FORMAT_RGB24, width, height);
 
 	return cache;
 }
@@ -218,10 +205,9 @@ new_map_cache(int size, int type)
 static void
 free_map_cache(struct map_cache *cache)
 {
-	if (!cache)
-		return;
+	if (!cache) return;
 
-	g_free (cache->dat);
+	cairo_surface_destroy (cache->data);
 	g_free (cache);
 }
 
@@ -271,7 +257,7 @@ static void set_view_size(GcxImageView *view, double xc, double yc);
 /*
  * return 1 if the requested area is inside the cache
  */
-static int area_in_cache(GdkRectangle *area, struct map_cache *cache)
+static int area_in_cache(cairo_rectangle_int_t *area, struct map_cache *cache)
 {
 	if (area->x < cache->x)
 		return 0;
@@ -295,15 +281,14 @@ static void cache_render_rgb_float_zi(struct map_cache *cache, struct frame_map 
 	int x, y, z;
 	float *fdat_r, *fdat_g, *fdat_b;
 	int lndx;
-	float gain_r = LUT_SIZE / (map->hcut - map->lcut);
-	float flr_r = map->lcut;
-	float gain_g = LUT_SIZE / (map->hcut - map->lcut);
-	float flr_g = map->lcut;
-	float gain_b = LUT_SIZE / (map->hcut - map->lcut);
-	float flr_b = map->lcut;
+	float gain = LUT_SIZE / (map->hcut - map->lcut);
+	float flr = map->lcut;
+	guint8  pix;
+	guint32 val;
 
-	unsigned char *cdat = cache->dat;
-	unsigned char pix_r, pix_g, pix_b;
+
+	guint32 *cdat = (guint32 *) cairo_image_surface_get_data (cache->data);
+	int stride = cairo_image_surface_get_stride (cache->data) / sizeof(guint32); /* in 32 bit ints */
 
 	cache->x = fx * zoom;
 	cache->y = fy * zoom;
@@ -311,75 +296,68 @@ static void cache_render_rgb_float_zi(struct map_cache *cache, struct frame_map 
 	cache->w = fw * zoom;
 	cache->h = fh * zoom;
 
-	cjump = cache->w * 3 - fw * zoom * 3;
+	cjump = stride - cache->w;
 
-	fdat_r = (float *)fr->rdat + fx + fy * fr->w;
-	fdat_g = (float *)fr->gdat + fx + fy * fr->w;
-	fdat_b = (float *)fr->bdat + fx + fy * fr->w;
+	fdat_r = fr->rdat + fy * fr->w + fx;
+	fdat_g = fr->gdat + fy * fr->w + fx;
+	fdat_b = fr->bdat + fy * fr->w + fx;
 
 	for (y = 0; y < fh; y++) {
 		for (x = 0; x < fw; x++) {
-			lndx = (gain_r * (*fdat_r - flr_r));
-			if (lndx < 0)
-				lndx = 0;
-			if (lndx > LUT_SIZE - 1)
-				lndx = LUT_SIZE - 1;
-			pix_r = map->lut[lndx] >> 8;
-			fdat_r ++;
+			lndx = gain * (*fdat_r++ - flr);
+			clamp_int (&lndx, 0, LUT_SIZE - 1);
+			pix = (map->lut[lndx] >> 8);
+			val = (pix << 16);
 
-			lndx = (gain_g * (*fdat_g - flr_g));
-			if (lndx < 0)
-				lndx = 0;
-			if (lndx > LUT_SIZE - 1)
-				lndx = LUT_SIZE - 1;
-			pix_g = map->lut[lndx] >> 8;
-			fdat_g ++;
+			lndx = gain * (*fdat_g++ - flr);
+			clamp_int (&lndx, 0, LUT_SIZE - 1);
+			pix = (map->lut[lndx] >> 8);
+			val += (pix << 8);
 
-			lndx = (gain_b * (*fdat_b - flr_b));
-			if (lndx < 0)
-				lndx = 0;
-			if (lndx > LUT_SIZE - 1)
-				lndx = LUT_SIZE - 1;
-			pix_b = map->lut[lndx] >> 8;
-			fdat_b ++;
+			lndx = gain * (*fdat_b++ - flr);
+			clamp_int (&lndx, 0, LUT_SIZE - 1);
+			pix = (map->lut[lndx] >> 8);
+			val += pix;
 
 			for (z = 0; z < zoom; z++) {
-				*cdat++ = pix_r;
-				*cdat++ = pix_g;
-				*cdat++ = pix_b;
+				*cdat++ = val;
 			}
 		}
 		fdat_r += fjump;
 		fdat_g += fjump;
 		fdat_b += fjump;
-		cdat += cjump;
+		cdat   += cjump;
+
 		for (z = 0; z < zoom - 1; z++) {
-			memcpy(cdat, cdat - cache->w*3, cache->w*3);
-			cdat += cache->w*3;
+			memcpy(cdat, cdat - stride, cache->w * sizeof(guint32));
+			cdat += stride;
 		}
 	}
 	cache->valid = 1;
-//	d3_printf("end of render\n");
 }
 
 static void cache_render_rgb_float_zo(struct map_cache *cache, struct frame_map *map,
-			  int zoom, int fx, int fy, int fw, int fh)
+				      int zoom, int fx, int fy, int fw, int fh)
 {
 	struct ccd_frame *fr = map->fr;
-	int fjump = fr->w - fw;
+	int fjump;
 	int x, y;
 	float *fdat_r, *fdat_g, *fdat_b;
 	float *fd0_r, *fd0_g, *fd0_b;
 	int lndx;
-	float gain_r = LUT_SIZE / (map->hcut - map->lcut);
-	float flr_r = map->lcut;
-	float gain_g = LUT_SIZE / (map->hcut - map->lcut);
-	float flr_g = map->lcut;
-	float gain_b = LUT_SIZE / (map->hcut - map->lcut);
-	float flr_b = map->lcut;
+	float gain = LUT_SIZE / (map->hcut - map->lcut);
+	float flr = map->lcut;
 
-	unsigned char *cdat = cache->dat;
-	unsigned char pix;
+	guint32 *cdat = (guint32 *) cairo_image_surface_get_data (cache->data);
+	int stride = cairo_image_surface_get_stride (cache->data) / sizeof(guint32); /* in 32 bit ints */
+
+	guint32 val;
+
+	float avgf = 1.0 / (zoom * zoom);
+	float pixf_r, pixf_g, pixf_b;
+
+	int fj2, xx, yy;
+	int cjump;
 
 	cache->x = fx / zoom;
 	cache->y = fy / zoom;
@@ -387,25 +365,22 @@ static void cache_render_rgb_float_zo(struct map_cache *cache, struct frame_map 
 	cache->w = fw / zoom;
 	cache->h = fh / zoom;
 
-	float avgf = 1.0 / (zoom * zoom);
-	float pixf_r, pixf_g, pixf_b;
+	fdat_r = fr->rdat + fy * fr->w + fx;
+	fdat_g = fr->gdat + fy * fr->w + fx;
+	fdat_b = fr->bdat + fy * fr->w + fx;
 
-	int fj2, xx, yy;
+        fjump = fr->w - fw + (zoom - 1) * fr->w;
+        fj2 = fr->w - zoom; /* jump from last pixel in zoom row to first one in the next row */
 
-	fdat_r = (float *) fr->rdat + fx + fy * fr->w;
-	fdat_g = (float *) fr->gdat + fx + fy * fr->w;
-	fdat_b = (float *) fr->bdat + fx + fy * fr->w;
-
-	fjump = fr->w - fw + (zoom - 1) * fr->w;
-	fj2 = fr->w - zoom; /* jump from last pixel in zoom row to first one in the next row */
+        cjump = stride - cache->w;
 
 	for (y = 0; y < cache->h; y++) {
 		for (x = 0; x < cache->w; x++) {
-			pixf_r = pixf_g = pixf_b = 0.0;
-
 			fd0_r = fdat_r;
 			fd0_g = fdat_g;
 			fd0_b = fdat_b;
+
+			pixf_r = pixf_g = pixf_b = 0.0;
 
 			for (yy = 0; yy < zoom; yy++) {
 				for (xx = 0; xx < zoom; xx++) {
@@ -423,25 +398,24 @@ static void cache_render_rgb_float_zo(struct map_cache *cache, struct frame_map 
 			fdat_g = fd0_g + zoom;
 			fdat_b = fd0_b + zoom;
 
-			lndx = floor(gain_r * (pixf_r * avgf - flr_r));
+			lndx = floor(gain * (pixf_r * avgf - flr));
 			clamp_int(&lndx, 0, LUT_SIZE - 1);
-			pix = map->lut[lndx] >> 8;
-			*cdat++ = pix;
+			val = (map->lut[lndx] >> 8);
 
-			lndx = floor(gain_g * (pixf_g * avgf - flr_g));
-			clamp_int(&lndx, 0, LUT_SIZE - 1);
-			pix = map->lut[lndx] >> 8;
-			*cdat++ = pix;
+                        lndx = floor(gain * (pixf_g * avgf - flr));
+                        clamp_int(&lndx, 0, LUT_SIZE - 1);
+                        val += (map->lut[lndx] >> 8) << 8;
 
-			lndx = floor(gain_b * (pixf_b * avgf - flr_b));
-			clamp_int(&lndx, 0, LUT_SIZE - 1);
-			pix = map->lut[lndx] >> 8;
-			*cdat++ = pix;
+                        lndx = floor(gain * (pixf_b * avgf - flr));
+                        clamp_int(&lndx, 0, LUT_SIZE - 1);
+                        val += (map->lut[lndx] >> 8);
 
+                        *cdat++ = val;
 		}
 		fdat_r += fjump;
 		fdat_g += fjump;
 		fdat_b += fjump;
+		cdat   += cjump;
 	}
 
 	cache->valid = 1;
@@ -460,8 +434,10 @@ static void cache_render_float_zi(struct map_cache *cache, struct frame_map *map
 	float gain = LUT_SIZE / (map->hcut - map->lcut);
 	float flr = map->lcut;
 
-	unsigned char *cdat = cache->dat;
-	unsigned char pix;
+	guint32 *cdat = (guint32 *) cairo_image_surface_get_data(cache->data);
+        int stride = cairo_image_surface_get_stride(cache->data) / sizeof(guint32); /* in 32bit ints */
+        unsigned char pix;
+	guint32 val;
 
 	if (map->color) {
 		cache_render_rgb_float_zi(cache, map, zoom, fx, fy, fw, fh);
@@ -474,32 +450,31 @@ static void cache_render_float_zi(struct map_cache *cache, struct frame_map *map
 	cache->w = fw * zoom;
 	cache->h = fh * zoom;
 
-	cjump = cache->w - fw*zoom;
+	cjump = stride - cache->w;
 
-	fdat = (float *)fr->dat + fx + fy * fr->w;
+	fdat = fr->dat + fy * fr->w + fx;
 
 	for (y = 0; y < fh; y++) {
 		for (x = 0; x < fw; x++) {
-			lndx = (gain * (*fdat-flr));
-			if (lndx < 0)
-				lndx = 0;
-			if (lndx > LUT_SIZE - 1)
-				lndx = LUT_SIZE - 1;
-			pix = map->lut[lndx] >> 8;
-			fdat ++;
-			for (z = 0; z < zoom; z++)
-				*cdat++ = pix;
+			lndx = (gain * (*fdat++ - flr));
+			clamp_int (&lndx, 0, LUT_SIZE - 1);
+			pix = (map->lut[lndx] >> 8);
+
+			val = (pix << 16) + (pix << 8) + pix;
+
+			for (z = 0; z < zoom; z++) {
+				*cdat++ = val;
+			}
 		}
 		fdat += fjump;
 		cdat += cjump;
 		for (z = 0; z < zoom - 1; z++) {
-			memcpy(cdat, cdat - cache->w, cache->w);
-			cdat += cache->w;
+			memcpy(cdat, cdat - stride, cache->w * sizeof(guint32));
+			cdat += stride;
 		}
 	}
 
 	cache->valid = 1;
-//	d3_printf("end of render\n");
 }
 
 static void cache_render_float_zo(struct map_cache *cache, struct frame_map *map,
@@ -513,18 +488,21 @@ static void cache_render_float_zo(struct map_cache *cache, struct frame_map *map
 	float gain = LUT_SIZE / (map->hcut - map->lcut);
 	float flr = map->lcut;
 
-	if (map->color) {
-		cache_render_rgb_float_zo(cache, map, zoom, fx, fy, fw, fh);
-		return;
-	}
-
-	unsigned char *cdat = cache->dat;
-	unsigned char pix;
+	guint32 *cdat = (guint32 *) cairo_image_surface_get_data(cache->data);
+        int stride = cairo_image_surface_get_stride(cache->data) / sizeof(guint32); /* in 32bit ints */
+        unsigned char pix;
+	guint32 val;
 
 	float avgf = 1.0 / (zoom * zoom);
 	float pixf;
 
 	int fj2, xx, yy;
+	int cjump;
+
+	if (map->color) {
+		cache_render_rgb_float_zo(cache, map, zoom, fx, fy, fw, fh);
+		return;
+	}
 
 	cache->x = fx / zoom;
 	cache->y = fy / zoom;
@@ -532,14 +510,13 @@ static void cache_render_float_zo(struct map_cache *cache, struct frame_map *map
 	cache->w = fw / zoom;
 	cache->h = fh / zoom;
 
-	fdat = (float *)fr->dat + fx + fy * fr->w;
+	fdat = fr->dat + fy * fr->w + fx;
 	fd0 = fdat;
 
 	fjump = fr->w - fw + (zoom - 1) * fr->w;
 	fj2 = fr->w - zoom; /* jump from last pixel in zoom row to first one in the next row */
 
-//	d3_printf("zoom %d, fjump:%d, fj2:%d, fj3:%d\n", zoom, fjump, fj2, fj3);
-
+	cjump = stride - cache->w;
 
 	for (y = 0; y < cache->h; y++) {
 		for (x = 0; x < cache->w; x++) {
@@ -551,15 +528,17 @@ static void cache_render_float_zo(struct map_cache *cache, struct frame_map *map
 				fdat += fj2;
 			}
 			fdat = fd0 + zoom;
+
 			lndx = floor(gain * (pixf * avgf - flr));
-			if (lndx < 0)
-				lndx = 0;
-			if (lndx > LUT_SIZE - 1)
-				lndx = LUT_SIZE - 1;
+			clamp_int(&lndx, 0, LUT_SIZE - 1);
+
 			pix = map->lut[lndx] >> 8;
-			*cdat++ = pix;
+			val = (pix << 16) + (pix << 8) + pix;
+
+			*cdat++ = val;
 		}
 		fdat += fjump;
+		cdat += cjump;
 	}
 	cache->valid = 1;
 }
@@ -568,12 +547,10 @@ static void cache_render_float_zo(struct map_cache *cache, struct frame_map *map
 /*
  * compute the size a cache needs to be so that the give area can fit
  */
-static unsigned cached_area_size(GdkRectangle *area, struct map_cache *cache)
+static unsigned area_fits_in_cache(cairo_rectangle_int_t *area, struct map_cache *cache)
 {
-	int psize;
-
-	psize = cache->type == MAP_CACHE_GRAY ? 1 : 3;
-	return psize * (area->width + 2 * MAX_ZOOM) * (area->height + 2 * MAX_ZOOM);
+	return (area->width + MAX_ZOOM <= cairo_image_surface_get_width(cache->data)) &&
+                (area->height + MAX_ZOOM <= cairo_image_surface_get_height(cache->data));
 }
 
 
@@ -581,7 +558,7 @@ static unsigned cached_area_size(GdkRectangle *area, struct map_cache *cache)
  * update the cache so that it contains a representation of the given area
  */
 static void update_cache(struct map_cache *cache, struct frame_map *map,
-			 GdkRectangle *area)
+			 cairo_rectangle_int_t *area)
 {
 	struct ccd_frame *fr;
 	int fx, fy, fw, fh;
@@ -596,29 +573,23 @@ static void update_cache(struct map_cache *cache, struct frame_map *map,
 	cache->zoom = map->zoom;
 
 	fr = map->fr;
-	if (cached_area_size(area, cache) > cache->size) {
-/* free the cache and realloc */
+	if (! area_fits_in_cache (area, cache)) {
+		/* free the cache and realloc */
 		d3_printf("freeing old cache\n");
-		free(cache->dat);
-		cache->dat = NULL;
+		cairo_surface_destroy (cache->data);
+		cache->data = NULL;
 	}
-	if (cache->dat == NULL) { /* we need to alloc (new) data area */
-		void *dat;
-		if (map->color)
-			cache->type = MAP_CACHE_RGB;
-		else
-			cache->type = MAP_CACHE_GRAY;
-		cache->size = cached_area_size(area, cache);
-		dat = malloc(cache->size);
-		if (dat == NULL) {
-			err_printf("update cache: alloc error\n");
-			return ;
-		}
-		cache->dat = dat;
+
+	if (cache->data == NULL) { /* we need to alloc (new) data area */
+		cache->data = cairo_image_surface_create (CAIRO_FORMAT_RGB24,
+							  area->width + 2 * MAX_ZOOM,
+							  area->height + 2 * MAX_ZOOM);
 	}
-//	d3_printf("expose area is %d by %d starting at %d, %d\n",
-//		  area->width, area->height, area->x, area->y);
-/* calculate the frame coords for the exposed area */
+
+	d3_printf("expose area is %d by %d starting at %d, %d\n",
+		  area->width, area->height, area->x, area->y);
+
+	/* calculate the frame coords for the exposed area */
 	fx = area->x * zoom_out / zoom_in;
 	fy = area->y * zoom_out / zoom_in;
 	fw = area->width * zoom_out / zoom_in + (zoom_in > 1 ? 2 : 0);
@@ -631,15 +602,17 @@ static void update_cache(struct map_cache *cache, struct frame_map *map,
 		fy = fr->h - 1;
 	if (fy + fh > fr->h - 1)
 		fh = fr->h - fy;
-//	d3_printf("frame region: %d by %d at %d, %d\n", fw, fh, fx, fy);
-/* and now to the actual cache rendering. We call different
-   functions for each frame format / zoom mode combination */
+	d3_printf("frame region: %d by %d at %d, %d\n", fw, fh, fx, fy);
+
+	/* and now to the actual cache rendering. We call different
+	   functions for each frame format / zoom mode combination */
 	if (zoom_out > 1)
 		cache_render_float_zo(cache, map, zoom_out, fx, fy, fw, fh);
 	else
 		cache_render_float_zi(cache, map, zoom_in, fx, fy, fw, fh);
-//	d3_printf("cache area is %d by %d starting at %d, %d\n",
-//		  cache->w, cache->h, cache->x, cache->y);
+
+	d3_printf("cache area is %d by %d starting at %d, %d\n",
+		  cache->w, cache->h, cache->x, cache->y);
 }
 
 /* attach a frame to the given view for display
@@ -712,57 +685,24 @@ gcx_image_view_get_frame (GcxImageView *view)
  * paint screen from cache
  */
 static void
-paint_from_gray_cache(GtkWidget *widget, struct map_cache *cache, GdkRectangle *area)
+paint_from_cache (cairo_t *cr, struct map_cache *cache, cairo_rectangle_int_t *area)
 {
-	unsigned char *dat;
+        if (!area_in_cache(area, cache)) {
+                err_printf("paint_from_cache: oops - area not in cache\n");
+//              d3_printf("area is %d by %d starting at %d,%d\n",
+//                        area->width, area->height, area->x, area->y);
+//              d3_printf("cache is %d by %d starting at %d,%d\n",
+//                        cache->w, cache->h, cache->x, cache->y);
+//              return;
+        }
 
-	if (!area_in_cache(area, cache)) {
-		err_printf("paint_from_cache: oops - area not in cache\n");
-		d3_printf("area is %d by %d starting at %d,%d\n",
-			  area->width, area->height, area->x, area->y);
-		d3_printf("cache is %d by %d starting at %d,%d\n",
-			  cache->w, cache->h, cache->x, cache->y);
-		return;
-	}
-
-	dat = cache->dat + area->x - cache->x
-		+ (area->y - cache->y) * cache->w;
-
-	/* GTK3
-	gdk_draw_gray_image (gtk_widget_get_window (widget),
-			     (gtk_widget_get_style (widget))->fg_gc[GTK_STATE_NORMAL],
-			     area->x, area->y, area->width, area->height,
-			     GDK_RGB_DITHER_MAX, dat, cache->w);
-	*/
+	cairo_set_source_surface (cr, cache->data, (double) area->x, (double) area->y);
+	cairo_paint (cr);
 }
 
-static void
-paint_from_rgb_cache(GtkWidget *widget, struct map_cache *cache, GdkRectangle *area)
-{
-	unsigned char *dat;
-
-	if (!area_in_cache(area, cache)) {
-		err_printf("paint_from_cache: oops - area not in cache\n");
-		d3_printf("area is %d by %d starting at %d,%d\n",
-			  area->width, area->height, area->x, area->y);
-		d3_printf("cache is %d by %d starting at %d,%d\n",
-			  cache->w, cache->h, cache->x, cache->y);
-		return;
-	}
-
-	dat = cache->dat + (area->x - cache->x
-		+ (area->y - cache->y) * cache->w) * 3;
-
-	/* GTK3
-	gdk_draw_rgb_image (gtk_widget_get_window (widget),
-			    (gtk_widget_get_style (widget))->fg_gc[GTK_STATE_NORMAL],
-			    area->x, area->y, area->width, area->height,
-			    GDK_RGB_DITHER_MAX, dat, cache->w*3);
-	*/
-}
 
 /*
- * an expose event to our image window
+ * a draw event to our image window
  */
 
 static gboolean
@@ -771,25 +711,22 @@ gcx_image_view_draw_cb(GtkWidget *darea, cairo_t *cr, gpointer user)
 	GcxImageView *view = GCX_IMAGE_VIEW(user);
 	struct map_cache *cache = view->cache;
 	struct frame_map *map = view->map;
-	GdkRectangle area;
+	cairo_rectangle_int_t area;
 
 	if (map->fr == NULL) /* no frame */
 		return TRUE;
 
+	/* no clip rectangle means all is clipped */
+	if (! gdk_cairo_get_clip_rectangle (cr, &area))
+		return TRUE;
+
 	/* invalidate cache if needed */
-	if (map->color && cache->type != MAP_CACHE_RGB)
-		cache->valid = 0;
-
-	if (!map->color && cache->type != MAP_CACHE_GRAY)
-		cache->valid = 0;
-
 	if (cache->zoom != map->zoom)
 		cache->valid = 0;
 
 	if (map->changed)
 		cache->valid = 0;
 
-	gdk_cairo_get_clip_rectangle (cr, &area);
 	if (!area_in_cache(&area, cache))
 		cache->valid = 0;
 
@@ -801,64 +738,15 @@ gcx_image_view_draw_cb(GtkWidget *darea, cairo_t *cr, gpointer user)
 			  cache->w, cache->h,
 			  cache->x, cache->y);
 		d3_printf("expose: from cache\n");
-		if (cache->type == MAP_CACHE_GRAY)
-			paint_from_gray_cache(darea, cache, &area);
-		else
-			paint_from_rgb_cache(darea, cache, &area);
+
+		paint_from_cache (cr, cache, &area);
 	}
 
-	draw_sources_hook(GTK_WIDGET(view), &area);
+	//draw_sources_hook(cr, window, &area);
 
 	map->changed = 0;
 
-	return TRUE;
-}
-
-static gboolean
-gcx_image_view_expose_cb(GtkWidget *darea, GdkEventExpose *event, void *user)
-{
-	GcxImageView *view = GCX_IMAGE_VIEW(user);
-	struct map_cache *cache = view->cache;
-	struct frame_map *map = view->map;
-
-	if (map->fr == NULL) /* no frame */
-		return TRUE;
-
-	/* invalidate cache if needed */
-	if (map->color && cache->type != MAP_CACHE_RGB)
-		cache->valid = 0;
-
-	if (!map->color && cache->type != MAP_CACHE_GRAY)
-		cache->valid = 0;
-
-	if (cache->zoom != map->zoom)
-		cache->valid = 0;
-
-	if (map->changed)
-		cache->valid = 0;
-
-	if (!area_in_cache(&event->area, cache))
-		cache->valid = 0;
-
-	if (!cache->valid)
-		update_cache(cache, map, &event->area);
-
-	if (cache->valid) {
-		d3_printf("cache valid, area is %d by %d starting at %d, %d\n",
-			  cache->w, cache->h,
-			  cache->x, cache->y);
-		d3_printf("expose: from cache\n");
-		if (cache->type == MAP_CACHE_GRAY)
-			paint_from_gray_cache(darea, cache, &event->area);
-		else
-			paint_from_rgb_cache(darea, cache, &event->area);
-	}
-
-	draw_sources_hook(GTK_WIDGET(view), &event->area);
-
-	map->changed = 0;
-
-	return TRUE;
+	return FALSE;
 }
 
 /* save a mapped image to a 8/16-bit pnm file. The image is curved to the
@@ -912,9 +800,6 @@ int gcx_image_view_to_pnm_file(GcxImageView *iv, char *fn, int is_16bit)
 
 	if (pnmf != stdout)
 		fclose(pnmf);
-
-//	if (window != NULL)
-//		info_printf_sb2(window, "Pnm file created");
 
 	return 0;
 }
@@ -1333,7 +1218,8 @@ static void cuts_option_cb(gpointer data, guint action)
 
 	channel_cuts_action(view->map, action);
 	show_zoom_cuts(window);
-	gtk_widget_queue_draw(window);
+
+	gtk_widget_queue_draw(GTK_WIDGET(view->darea));
 }
 
 void act_view_cuts_brighter(GtkAction *action, gpointer window)

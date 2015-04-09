@@ -93,19 +93,19 @@ gboolean chooser_response_cb(GtkWidget *widget, gint response, struct file_actio
 	return TRUE;
 }
 
-GtkWidget * create_file_chooser(char *title, GtkFileChooserAction chooser_type, struct file_action *fa)
+GtkWidget * create_file_chooser(char *title, GtkFileChooserAction action, struct file_action *fa)
 {
 	GtkWidget *chooser;
 
-	if (chooser_type == F_OPEN)
-		chooser = gtk_file_chooser_dialog_new(title, NULL, chooser_type,
-						      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-						      GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+	if (action == F_OPEN)
+		chooser = gtk_file_chooser_dialog_new(title, NULL, action,
+						      _("_Cancel"), GTK_RESPONSE_CANCEL,
+						      _("_Open"), GTK_RESPONSE_ACCEPT,
 						      NULL);
 	else
-		chooser = gtk_file_chooser_dialog_new(title, NULL, chooser_type,
-						      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-						      GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+		chooser = gtk_file_chooser_dialog_new(title, NULL, action,
+						      _("_Cancel"), GTK_RESPONSE_CANCEL,
+						      _("_Save"), GTK_RESPONSE_ACCEPT,
 						      NULL);
 
 	gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(chooser), TRUE);
@@ -948,8 +948,8 @@ char * modal_file_prompt(char *title, char *initial)
 
 	chooser = gtk_file_chooser_dialog_new(title, NULL,
 					      GTK_FILE_CHOOSER_ACTION_OPEN,
-					      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-					      GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+					      _("_Cancel"), GTK_RESPONSE_CANCEL,
+					      _("_Open"), GTK_RESPONSE_ACCEPT,
 					      NULL);
 
 	gtk_window_set_title(GTK_WINDOW(chooser), title);

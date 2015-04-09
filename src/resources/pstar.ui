@@ -1,0 +1,424 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <!-- interface-requires gtk+ 3.0 -->
+  <object class="GtkAccelGroup" id="accelgroup1"/>
+  <object class="GtkWindow" id="pstar">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Edit Star</property>
+    <property name="resizable">False</property>
+    <property name="window_position">mouse</property>
+    <accel-groups>
+      <group name="accelgroup1"/>
+    </accel-groups>
+    <child>
+      <object class="GtkGrid" id="grid2">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="margin_left">4</property>
+        <property name="margin_right">4</property>
+        <property name="margin_top">4</property>
+        <property name="margin_bottom">4</property>
+        <property name="row_spacing">4</property>
+        <property name="column_spacing">4</property>
+        <child>
+          <object class="GtkLabel" id="label9">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="xalign">0</property>
+            <property name="label" translatable="yes">Name:</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">0</property>
+            <property name="width">1</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label10">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="xalign">0</property>
+            <property name="label" translatable="yes">R.A:</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">1</property>
+            <property name="width">1</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label11">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="xalign">0</property>
+            <property name="label" translatable="yes">Declination:</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">2</property>
+            <property name="width">1</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label12">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="xalign">0</property>
+            <property name="label" translatable="yes">Equinox:</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">3</property>
+            <property name="width">1</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label13">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="xalign">0</property>
+            <property name="label" translatable="yes">Magnitude:</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">4</property>
+            <property name="width">1</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label14">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_left">4</property>
+            <property name="xalign">0</property>
+            <property name="label" translatable="yes">Comments:</property>
+            <property name="lines">0</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">5</property>
+            <property name="width">4</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label15">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_left">4</property>
+            <property name="xalign">0</property>
+            <property name="label" translatable="yes">Standard magnitudes</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">7</property>
+            <property name="width">4</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label16">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_left">4</property>
+            <property name="xalign">0</property>
+            <property name="label" translatable="yes">Instrumental magnitudes</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">9</property>
+            <property name="width">4</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="designation_entry">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="invisible_char">●</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">0</property>
+            <property name="width">1</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="ra_entry">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="invisible_char">●</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">1</property>
+            <property name="width">1</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="declination_entry">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="invisible_char">●</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">2</property>
+            <property name="width">1</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="equinox_entry">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="invisible_char">●</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">3</property>
+            <property name="width">1</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="magnitude_entry">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="has_tooltip">True</property>
+            <property name="tooltip_text" translatable="yes">Generic magnitude of object, used for classification only</property>
+            <property name="hexpand">True</property>
+            <property name="invisible_char">●</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">4</property>
+            <property name="width">1</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkRadioButton" id="field_star_radiob">
+            <property name="label" translatable="yes">Field star</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="has_tooltip">True</property>
+            <property name="tooltip_text" translatable="yes">Object is a generic field star</property>
+            <property name="xalign">0</property>
+            <property name="active">True</property>
+            <property name="draw_indicator">True</property>
+          </object>
+          <packing>
+            <property name="left_attach">2</property>
+            <property name="top_attach">0</property>
+            <property name="width">2</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkRadioButton" id="std_star_radiob">
+            <property name="label" translatable="yes">Standard star</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="has_tooltip">True</property>
+            <property name="tooltip_text" translatable="yes">Object is a photometric standard star</property>
+            <property name="xalign">0</property>
+            <property name="active">True</property>
+            <property name="draw_indicator">True</property>
+            <property name="group">field_star_radiob</property>
+          </object>
+          <packing>
+            <property name="left_attach">2</property>
+            <property name="top_attach">1</property>
+            <property name="width">2</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkRadioButton" id="ap_target_radiob">
+            <property name="label" translatable="yes">AP Target</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="has_tooltip">True</property>
+            <property name="tooltip_text" translatable="yes">Object is a photometric target</property>
+            <property name="xalign">0</property>
+            <property name="active">True</property>
+            <property name="draw_indicator">True</property>
+            <property name="group">field_star_radiob</property>
+          </object>
+          <packing>
+            <property name="left_attach">2</property>
+            <property name="top_attach">2</property>
+            <property name="width">2</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkRadioButton" id="cat_object_radiob">
+            <property name="label" translatable="yes">Object</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="has_tooltip">True</property>
+            <property name="tooltip_text" translatable="yes">Generic catalog object</property>
+            <property name="xalign">0</property>
+            <property name="active">True</property>
+            <property name="draw_indicator">True</property>
+            <property name="group">field_star_radiob</property>
+          </object>
+          <packing>
+            <property name="left_attach">2</property>
+            <property name="top_attach">3</property>
+            <property name="width">2</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkCheckButton" id="astrometric_check_button">
+            <property name="label" translatable="yes">Astrometric</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="has_tooltip">True</property>
+            <property name="tooltip_text" translatable="yes">Star has precise position data</property>
+            <property name="xalign">0</property>
+            <property name="draw_indicator">True</property>
+          </object>
+          <packing>
+            <property name="left_attach">2</property>
+            <property name="top_attach">4</property>
+            <property name="width">1</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkCheckButton" id="variable_check_button">
+            <property name="label" translatable="yes">Var</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="has_tooltip">True</property>
+            <property name="tooltip_text" translatable="yes">Star is known to be variable</property>
+            <property name="xalign">0</property>
+            <property name="draw_indicator">True</property>
+          </object>
+          <packing>
+            <property name="left_attach">3</property>
+            <property name="top_attach">4</property>
+            <property name="width">1</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="comment_entry">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="invisible_char">●</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">6</property>
+            <property name="width">4</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="smag_entry">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="has_focus">True</property>
+            <property name="is_focus">True</property>
+            <property name="has_tooltip">True</property>
+            <property name="tooltip_text" translatable="yes">Standard magnitudes list, formatted as &lt;band&gt;=&lt;mag&gt;/&lt;error&gt; ...</property>
+            <property name="hexpand">True</property>
+            <property name="invisible_char">●</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">8</property>
+            <property name="width">4</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="imag_entry">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="has_tooltip">True</property>
+            <property name="tooltip_text" translatable="yes">Instrumental magnitudes list, formatted as &lt;band&gt;=&lt;mag&gt;/&lt;error&gt; ...</property>
+            <property name="hexpand">True</property>
+            <property name="invisible_char">●</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">10</property>
+            <property name="width">4</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButtonBox" id="buttonbox2">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_top">10</property>
+            <property name="margin_bottom">10</property>
+            <property name="layout_style">spread</property>
+            <child>
+              <object class="GtkButton" id="ok_button">
+                <property name="label" translatable="yes">OK</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="has_default">True</property>
+                <property name="receives_default">True</property>
+                <property name="has_tooltip">True</property>
+                <property name="tooltip_text" translatable="yes">Accept changes and exit</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="cancel_button">
+                <property name="label" translatable="yes">Undo Edits</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="has_tooltip">True</property>
+                <property name="tooltip_text" translatable="yes">Revert to initial values</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">11</property>
+            <property name="width">4</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>

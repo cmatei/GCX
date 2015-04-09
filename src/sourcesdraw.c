@@ -24,8 +24,7 @@
 /* functions that manage 'gui_stars', star and object markers
  * that are overlaid on the images
  *
- * all the sources are linked in the list attached to the window as
- * "gui_star_list"
+ * the sources are attached to a GcxImageView
  */
 
 

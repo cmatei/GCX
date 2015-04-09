@@ -6,6 +6,8 @@
 
 #define _GCX_H
 
+#include <glib/gi18n.h>
+
 #include "ccd/ccd.h"
 
 #ifndef PI

@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.18.3 -->
+<interface>
+  <requires lib="gtk+" version="3.0"/>
+  <object class="GtkWindow" id="wcs_edit">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Edit WCS</property>
+    <property name="window_position">mouse</property>
+    <child>
+      <object class="GtkGrid" id="grid2">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="row_spacing">4</property>
+        <property name="column_spacing">4</property>
+        <child>
+          <object class="GtkLabel" id="label1">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="xalign">0</property>
+            <property name="label" translatable="yes">R.A. of field center</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label2">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="xalign">0</property>
+            <property name="label" translatable="yes">Declination of field center</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label3">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="xalign">0</property>
+            <property name="label" translatable="yes">Equinox of coordinates</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">4</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label4">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="xalign">0</property>
+            <property name="label" translatable="yes">Arcsec/pixel down (negative if N is up)</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">6</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label5">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="xalign">0</property>
+            <property name="label" translatable="yes">Arcsec/pixel right (negative if W is right)</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">8</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label6">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="xalign">0</property>
+            <property name="label" translatable="yes">Field rotation (degrees E of N)</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">10</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="wcs_ra_entry">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="invisible_char">●</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="wcs_dec_entry">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="invisible_char">●</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="wcs_equinox_entry">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="invisible_char">●</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">5</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="wcs_v_scale_entry">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="invisible_char">●</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">7</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="wcs_h_scale_entry">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="invisible_char">●</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">9</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="wcs_rot_entry">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="invisible_char">●</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">11</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButtonBox" id="buttonbox1">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_top">20</property>
+            <property name="margin_bottom">10</property>
+            <property name="homogeneous">True</property>
+            <property name="layout_style">spread</property>
+            <child>
+              <object class="GtkButton" id="wcs_ok_button">
+                <property name="label" translatable="yes">Update</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="wcs_close_button">
+                <property name="label" translatable="yes">Close</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">12</property>
+            <property name="width">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkFrame" id="frame1">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label_xalign">0</property>
+            <child>
+              <object class="GtkAlignment" id="alignment1">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkGrid" id="grid3">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkRadioButton" id="wcs_unset_rb">
+                        <property name="label" translatable="yes">Unset</property>
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can_focus">False</property>
+                        <property name="receives_default">False</property>
+                        <property name="focus_on_click">False</property>
+                        <property name="xalign">0</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkRadioButton" id="wcs_initial_rb">
+                        <property name="label" translatable="yes">Initial</property>
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can_focus">False</property>
+                        <property name="receives_default">False</property>
+                        <property name="focus_on_click">False</property>
+                        <property name="xalign">0</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                        <property name="group">wcs_unset_rb</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkRadioButton" id="wcs_fitted_rb">
+                        <property name="label" translatable="yes">Fitted</property>
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can_focus">False</property>
+                        <property name="receives_default">False</property>
+                        <property name="focus_on_click">False</property>
+                        <property name="xalign">0</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                        <property name="group">wcs_unset_rb</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkRadioButton" id="wcs_valid_rb">
+                        <property name="label" translatable="yes">Validated</property>
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can_focus">False</property>
+                        <property name="receives_default">False</property>
+                        <property name="focus_on_click">False</property>
+                        <property name="xalign">0</property>
+                        <property name="draw_indicator">True</property>
+                        <property name="group">wcs_unset_rb</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">3</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child type="label">
+              <object class="GtkLabel" id="label7">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">WCS status</property>
+                <property name="use_markup">True</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">0</property>
+            <property name="height">6</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkFrame" id="frame2">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label_xalign">0</property>
+            <child>
+              <object class="GtkAlignment" id="alignment2">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkGrid" id="grid4">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="margin_left">2</property>
+                    <property name="margin_right">2</property>
+                    <property name="margin_top">2</property>
+                    <property name="margin_bottom">2</property>
+                    <property name="row_homogeneous">True</property>
+                    <property name="column_homogeneous">True</property>
+                    <child>
+                      <object class="GtkButton" id="wcs_north_button">
+                        <property name="label" translatable="yes">N</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">Move WCS north by amount of arcsec/pixel down</property>
+                        <property name="margin_left">2</property>
+                        <property name="margin_right">2</property>
+                        <property name="margin_top">2</property>
+                        <property name="margin_bottom">2</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="wcs_south_button">
+                        <property name="label" translatable="yes">S</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">Move WCS south by amount of arcsec/pixel down</property>
+                        <property name="margin_left">2</property>
+                        <property name="margin_right">2</property>
+                        <property name="margin_top">2</property>
+                        <property name="margin_bottom">2</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="wcs_east_button">
+                        <property name="label" translatable="yes">E</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">Move WCS east by amount of arcsec/pixel right</property>
+                        <property name="margin_left">2</property>
+                        <property name="margin_right">2</property>
+                        <property name="margin_top">2</property>
+                        <property name="margin_bottom">2</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="wcs_west_button">
+                        <property name="label" translatable="yes">W</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">Move WCS east by amount of arcsec/pixel right</property>
+                        <property name="margin_left">2</property>
+                        <property name="margin_right">2</property>
+                        <property name="margin_top">2</property>
+                        <property name="margin_bottom">2</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToggleButton" id="wcs_step_button">
+                        <property name="label" translatable="yes">x10</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="margin_left">2</property>
+                        <property name="margin_right">2</property>
+                        <property name="margin_top">2</property>
+                        <property name="margin_bottom">2</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="wcs_rot_dec_button">
+                        <property name="label" translatable="yes">-</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">Decrease rotation</property>
+                        <property name="margin_left">2</property>
+                        <property name="margin_right">2</property>
+                        <property name="margin_top">2</property>
+                        <property name="margin_bottom">2</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="wcs_rot_inc_button">
+                        <property name="label" translatable="yes">+</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">Increase rotation</property>
+                        <property name="margin_left">2</property>
+                        <property name="margin_right">2</property>
+                        <property name="margin_top">2</property>
+                        <property name="margin_bottom">2</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child type="label">
+              <object class="GtkLabel" id="label8">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Move WCS</property>
+                <property name="use_markup">True</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">6</property>
+            <property name="height">6</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>

@@ -1,6 +1,6 @@
 
-AC_INIT([gcx], [1.6])
-AM_INIT_AUTOMAKE([foreign -Wall -Werror subdir-objects])
+AC_INIT([gcx], [1.7])
+AM_INIT_AUTOMAKE([foreign -Wall subdir-objects])
 
 AC_CONFIG_SRCDIR([src/gcx.c])
 
@@ -20,8 +20,8 @@ AC_REPLACE_FUNCS(basename)
 AC_REPLACE_FUNCS(dirname)
 AC_REPLACE_FUNCS(getline)
 
-
-AM_PATH_GTK_3_0(3.0.0, , AC_MSG_ERROR(Cannot find GTK >= 3.0))
+AM_PATH_GLIB_2_0(2.41.2, , AC_MSG_ERROR(Cannot find GLIB >= 2.41.2))
+AM_PATH_GTK_3_0(3.10.0, , AC_MSG_ERROR(Cannot find GTK >= 3.10))
 
 AC_CHECK_HEADERS([zlib.h])
 AC_CHECK_LIB(z, inflate,,AC_MSG_ERROR(Cannot find zlib))
