@@ -41,6 +41,7 @@
 #endif
 
 #include "gcx.h"
+#include "gcximageview.h"
 #include "catalogs.h"
 #include "gui.h"
 #include "params.h"

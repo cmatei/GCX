@@ -1,11 +1,10 @@
 ## Process this file with automake to produce Makefile.in
 
-SUBDIRS = src 
+SUBDIRS = src
 
 EXTRA_DIST = \
 	README.vizquery \
 	autogen.sh \
-	gcx.glade \
 	docs/*
 
 CLEANFILES = *~ docs/*~
@@ -15,4 +14,3 @@ docs: src
 
 realclean:
 	$(MAKE) -C docs realclean
-

@@ -1,23 +1,23 @@
 /*******************************************************************************
   Copyright(c) 2000 - 2003 Radu Corlan. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: radu@corlan.net
 *******************************************************************************/
 
@@ -39,6 +39,7 @@
 #include <gtk/gtk.h>
 
 #include "gcx.h"
+#include "gcximageview.h"
 #include "catalogs.h"
 #include "gui.h"
 #include "obsdata.h"
@@ -141,9 +142,9 @@ void mband_dataset_release(struct mband_dataset *mbds)
 	free(mbds);
 }
 
-/* add a star observation to th dataset. The star observation belongs to frame ofr 
+/* add a star observation to th dataset. The star observation belongs to frame ofr
  * (which is supposed to be in the dataset) */
-static void mband_dataset_add_sob(struct mband_dataset *mbds, struct cat_star *cats, 
+static void mband_dataset_add_sob(struct mband_dataset *mbds, struct cat_star *cats,
 				  struct o_frame *ofr)
 {
 	struct o_star *ost;
@@ -159,11 +160,11 @@ static void mband_dataset_add_sob(struct mband_dataset *mbds, struct cat_star *c
 		g_return_if_fail (ost != NULL);
 		for (i = 0; i < mbds->nbands; i++) {
 			m = 0.0; me = BIG_ERR;
-			if (CATS_TYPE(cats) == CAT_STAR_TYPE_APSTD 
-			    && !get_band_by_name(cats->smags, mbds->trans[i].bname, 
+			if (CATS_TYPE(cats) == CAT_STAR_TYPE_APSTD
+			    && !get_band_by_name(cats->smags, mbds->trans[i].bname,
 						 &m, &me)) {
 				ost->smag[i] = m;
-				if (me >= BIG_ERR) 
+				if (me >= BIG_ERR)
 					ost->smagerr[i] = P_DBL(AP_DEFAULT_STD_ERROR);
 				else
 					ost->smagerr[i] = me;
@@ -197,8 +198,8 @@ static void mband_dataset_add_sob(struct mband_dataset *mbds, struct cat_star *c
 	} else {
 		sob->imag = 0.0;
 		sob->imagerr = BIG_ERR;
-	}	
-	d4_printf("looking for %s imag -- got %.3f/%.3f\n", ofr->trans->bname, 
+	}
+	d4_printf("looking for %s imag -- got %.3f/%.3f\n", ofr->trans->bname,
 		  sob->imag, sob->imagerr);
 }
 
@@ -235,7 +236,7 @@ int mband_dataset_search_add_band(struct mband_dataset *mbds, char *band)
 	return mbds->nbands - 1;
 }
 
-/* add data from a stf report to the dataset 
+/* add data from a stf report to the dataset
  * return the number of star observations added, -1 for errors */
 int mband_dataset_add_stf(struct mband_dataset *mbds, struct stf *stf)
 {
@@ -254,7 +255,7 @@ int mband_dataset_add_stf(struct mband_dataset *mbds, struct stf *stf)
 	}
 	band = mband_dataset_search_add_band(mbds, filter);
 	if (band < 0) {
-		err_printf("cannot use band %s (too many?) aborting add\n", 
+		err_printf("cannot use band %s (too many?) aborting add\n",
 			   filter);
 		return -1;
 	}
@@ -279,7 +280,7 @@ int mband_dataset_add_stf(struct mband_dataset *mbds, struct stf *stf)
 	/* and the individual star observations */
 	for (; ssl != NULL; ssl = ssl->next) {
 		cats = CAT_STAR(ssl->data);
-		if ((CATS_TYPE(cats) != CAT_STAR_TYPE_APSTD) && 
+		if ((CATS_TYPE(cats) != CAT_STAR_TYPE_APSTD) &&
 		    (CATS_TYPE(cats) != CAT_STAR_TYPE_APSTAR))
 			continue;
 		mband_dataset_add_sob(mbds, cats, ofr);
@@ -361,9 +362,9 @@ static double ofr_sob_residuals(struct o_frame *ofr, struct transform *trans)
 			continue;
 		sob->residual = sob->ost->smag[sob->ofr->band] - sob->imag - ofr->zpoint;
 //		if (sob->weight > 0.000000001)
-//			d3_printf("%s residual %.3f sigma %.3f weight %.9f nweight %.9f\n", 
-//				  sob->ost->cats->name, 
-//				  sob->residual, 1 / sqrt(sob->nweight), 
+//			d3_printf("%s residual %.3f sigma %.3f weight %.9f nweight %.9f\n",
+//				  sob->ost->cats->name,
+//				  sob->residual, 1 / sqrt(sob->nweight),
 //				  sob->weight, sob->nweight);
 		if (trans != NULL)
 			sob->residual -= (sob->ost->smag[trans->c1] - sob->ost->smag[trans->c2])
@@ -374,12 +375,12 @@ static double ofr_sob_residuals(struct o_frame *ofr, struct transform *trans)
 		r2m += sqr(sob->residual) * sob->weight;
 		w += sob->weight;
 		nw += sob->nweight;
-		if (sqr(sob->residual) * sob->nweight > sqr(OUTLIER_THRESHOLD)) 
+		if (sqr(sob->residual) * sob->nweight > sqr(OUTLIER_THRESHOLD))
 			/* we define outliers as exceeding 6 sigma */
 			no ++;
 		if (sob->weight > 0.0)
 			ns ++;
-	}	
+	}
 	if (ns > 2) {
 		ofr->me1 = sqrt(r2nm / (ns - 1));
 	} else {
@@ -387,7 +388,7 @@ static double ofr_sob_residuals(struct o_frame *ofr, struct transform *trans)
 	}
 	if (ofr->tweight > 0)
 		ofr->zpointerr = sqrt(r2m / ofr->tweight);
-	else 
+	else
 		ofr->zpointerr = BIG_ERR;
 	ofr->vstars = ns;
 	ofr->outliers = no;
@@ -398,10 +399,10 @@ static double ofr_sob_residuals(struct o_frame *ofr, struct transform *trans)
 	return 0.0;
 }
 
-/* calculate new weights for the sobs, according to their current residuals; 
+/* calculate new weights for the sobs, according to their current residuals;
  * return the mean error of unit weight; alpha and beta are parameters of
  * the weighting function used for robust fitting */
-static void ofr_sob_reweight(struct o_frame *ofr, struct transform *trans, 
+static void ofr_sob_reweight(struct o_frame *ofr, struct transform *trans,
 			       double alpha, double beta)
 {
 	GList *sl;
@@ -417,18 +418,18 @@ static void ofr_sob_reweight(struct o_frame *ofr, struct transform *trans,
 		if (sob->nweight <= 0.0)
 			continue;
 		ns ++;
-		sob->weight = sob->nweight / (1.0 + pow(fabs(sob->residual)/(P_DBL(AP_ALPHA) 
+		sob->weight = sob->nweight / (1.0 + pow(fabs(sob->residual)/(P_DBL(AP_ALPHA)
 									    / sqrt(sob->nweight)), beta));
-//		d3_printf("rbf: %6.3f\n", 1 / (1.0 + pow(fabs(sob->residual)/(P_DBL(AP_ALPHA) 
+//		d3_printf("rbf: %6.3f\n", 1 / (1.0 + pow(fabs(sob->residual)/(P_DBL(AP_ALPHA)
 //									 / sqrt(sob->nweight / 2)), beta)));
 //		rm += sqr(sob->residual) * sob->weight;
-	}	
+	}
 }
 
 /* return statistics of the observations in the frame, (weighted means and deviations), used
  * to fit the color coefficients and calculate errors; the values returned are weighted
  * sums, that can be added up to aggregate more frames; return the total weight */
-static double ofr_sob_stats(struct o_frame *ofr, 
+static double ofr_sob_stats(struct o_frame *ofr,
 			    double *w_res, double *w_col, double *w_rescol, double *w_col2,
 			    double *w_res2, int *nstars)
 {
@@ -451,7 +452,7 @@ static double ofr_sob_stats(struct o_frame *ofr,
 		r += sob->residual * sob->weight;
 		if ((trans != NULL) && (sob->ost->smagerr[trans->c1] < 9) &&
 		    (sob->ost->smagerr[trans->c2] < 9)) {
-			c += (sob->ost->smag[trans->c1] - sob->ost->smag[trans->c2]) 
+			c += (sob->ost->smag[trans->c1] - sob->ost->smag[trans->c2])
 				* sob->weight;
 		}
 	}
@@ -470,9 +471,9 @@ static double ofr_sob_stats(struct o_frame *ofr,
 		r2 += sqr(sob->residual - rm) * sob->weight;
 		if ((trans != NULL) && (sob->ost->smagerr[trans->c1] < 9) &&
 		    (sob->ost->smagerr[trans->c2] < 9)) {
-			c2 += sqr((sob->ost->smag[trans->c1] - sob->ost->smag[trans->c2]) - cm) 
+			c2 += sqr((sob->ost->smag[trans->c1] - sob->ost->smag[trans->c2]) - cm)
 				* sob->weight;
-			rc += (sob->residual - rm) * (sob->ost->smag[trans->c1] 
+			rc += (sob->residual - rm) * (sob->ost->smag[trans->c1]
 				- sob->ost->smag[trans->c2] - cm)
 				* sob->weight;
 		}
@@ -534,13 +535,13 @@ static double ofr_median_residual(struct o_frame *ofr)
 
 
 /* fit the zeropoint of the given frame; return the me1; if w_res = 1, the weights are reset */
-double ofr_fit_zpoint(struct o_frame *ofr, 
+double ofr_fit_zpoint(struct o_frame *ofr,
 		      double alpha, double beta, int w_res)
 {
 	double res;
 	int i;
 	struct transform *trans = ofr->trans;
-	
+
 	if (w_res) {
 		ofr_sob_initial_weights(ofr, trans);
 		res = ofr_sob_residuals(ofr, trans);
@@ -569,15 +570,15 @@ double ofr_fit_zpoint(struct o_frame *ofr,
 		ofr->zpointerr = BIG_ERR;
 	}
 	ofr->lmag = ofr->zpoint - LMAG_FROM_ZP;
-	d4_printf("(%s) zeropoint fit: zp: %.5f  zperr %.3f  me1: %.3f  ns %d  no %d\n", 
-		  ofr->trans->bname, 
+	d4_printf("(%s) zeropoint fit: zp: %.5f  zperr %.3f  me1: %.3f  ns %d  no %d\n",
+		  ofr->trans->bname,
 		  ofr->zpoint, ofr->zpointerr, ofr->me1, ofr->vstars, ofr->outliers);
 	return ofr->me1;
 }
 
 
 /* fit the zeropoints and transformation coefficients for frames taken in the specified
- * band. the initial transformation coefficients are assumed to be set (could be 0 if 
+ * band. the initial transformation coefficients are assumed to be set (could be 0 if
  * typical values are unknown). */
 void mbds_fit_band(GList *ofrs, int band, int (* progress)(char *msg, void *data), void *data)
 {
@@ -611,7 +612,7 @@ void mbds_fit_band(GList *ofrs, int band, int (* progress)(char *msg, void *data
 		w = c = rc = c2 = r2 = 0.0;
 		ns = 0;
 		sl = ofrs;
-		if (band >= 0) 
+		if (band >= 0)
 			trans->kerr = BIG_ERR;
 		while (sl != NULL) {
 			ofr = O_FRAME(sl->data);
@@ -642,7 +643,7 @@ void mbds_fit_band(GList *ofrs, int band, int (* progress)(char *msg, void *data
 //			  w, rc, c2, r2, rc / c2);
 		if (fabs(rc / c2) < SMALL_ERR) {
 			trans->kerr = sqrt(r2 / (ns - 2)) / sqrt(c2);
-			d3_printf("k = %.3f, kerr = %.3f\n", 
+			d3_printf("k = %.3f, kerr = %.3f\n",
 				  trans->k, trans->kerr);
 			sl = ofrs;
 			while (sl != NULL) {
@@ -678,7 +679,7 @@ void mbds_fit_all(GList *ofrs, int (* progress)(char *msg, void *data), void *da
 	while (osl != NULL) {
 		ofr = O_FRAME(osl->data);
 		osl = g_list_next(osl);
-		if (ofr->band < 0) 
+		if (ofr->band < 0)
 			continue;
 		if (g_list_find(bsl, (gpointer)ofr->band) == NULL) {
 			bsl = g_list_append(bsl, (gpointer)ofr->band);
@@ -714,7 +715,7 @@ void mband_dataset_set_bands_by_string(struct mband_dataset *mbds, char *bspec)
 		switch(state) {
 		case 0: 	/* wait for band */
 			b = -1; c1 = -1; c2 = -1;
-			if (tok != TOK_WORD) 
+			if (tok != TOK_WORD)
 				break;
 			l = end - start > 63 ? 63 : end - start;
 			strncpy(buf, start, l);
@@ -774,7 +775,7 @@ void mband_dataset_set_bands_by_string(struct mband_dataset *mbds, char *bspec)
 			} else {
 				c1 = -1; c2 = -1;
 				if (tok == TOK_WORD) {
-					b = -1; 
+					b = -1;
 					state = 0;
 					continue;
 				}
@@ -786,7 +787,7 @@ void mband_dataset_set_bands_by_string(struct mband_dataset *mbds, char *bspec)
 				if (endp != start && b >= 0) {
 					mbds->trans[b].k = v;
 					mbds->trans[b].kerr = 0.0;
-					d3_printf("%d band k is %.3g\n", 
+					d3_printf("%d band k is %.3g\n",
 						  b, mbds->trans[b].k);
 				}
 				state = 6;
@@ -805,7 +806,7 @@ void mband_dataset_set_bands_by_string(struct mband_dataset *mbds, char *bspec)
 			} else {
 				c1 = -1; c2 = -1;
 				if (tok == TOK_WORD) {
-					b = -1; 
+					b = -1;
 					state = 0;
 					continue;
 				}
@@ -816,7 +817,7 @@ void mband_dataset_set_bands_by_string(struct mband_dataset *mbds, char *bspec)
 				v = strtod(start, &endp);
 				if (endp != start && b >= 0) {
 					mbds->trans[b].kerr = v;
-					d3_printf("%d band kerr is %.3g\n", 
+					d3_printf("%d band kerr is %.3g\n",
 						  b, mbds->trans[b].kerr);
 				}
 				state = 0;
@@ -867,93 +868,93 @@ void mband_dataset_set_ubvri(struct mband_dataset *mbds)
 }
 
 
-/* Linear equation solution by Gauss-Jordan elimination, 
-   equation (2.1.1) above. a[1..n][1..n] is the input matrix. 
-   b[1..n] is input containing the right-hand vector. 
-   On output, a is replaced by its matrix inverse, and b is replaced 
+/* Linear equation solution by Gauss-Jordan elimination,
+   equation (2.1.1) above. a[1..n][1..n] is the input matrix.
+   b[1..n] is input containing the right-hand vector.
+   On output, a is replaced by its matrix inverse, and b is replaced
    by the corresponding solution vector. */
 /* Adapted from Numerical Recipies */
 
-#define SWAP(a,b) {temp=(a);(a)=(b);(b)=temp;} 
+#define SWAP(a,b) {temp=(a);(a)=(b);(b)=temp;}
 
-static int gaussj_mband(double a[MAX_MBANDS + 1][MAX_MBANDS + 1], int n, double b[MAX_MBANDS + 1]) 
- 
-{ 
-	int i, icol = 1, irow = 1, j, k, l, ll; 
-	double big,dum,pivinv,temp; 
+static int gaussj_mband(double a[MAX_MBANDS + 1][MAX_MBANDS + 1], int n, double b[MAX_MBANDS + 1])
+
+{
+	int i, icol = 1, irow = 1, j, k, l, ll;
+	double big,dum,pivinv,temp;
 	int indxc[MAX_MBANDS + 1];
 	int indxr[MAX_MBANDS + 1];
 	int ipiv[MAX_MBANDS + 1];
-	for (j=1;j<=n;j++) 
-		ipiv[j]=0; 
-	for (i=1;i<=n;i++) { 
+	for (j=1;j<=n;j++)
+		ipiv[j]=0;
+	for (i=1;i<=n;i++) {
 /* This is the main loop over the columns to be reduced.  */
-		big=0.0; 
-		for (j=1;j<=n;j++) 
+		big=0.0;
+		for (j=1;j<=n;j++)
 /* This is the outer loop of the search for a pivot element.  */
-			if (ipiv[j] != 1) 
-				for (k=1;k<=n;k++) { 
-					if (ipiv[k] == 0) { 
-						if (fabs(a[j][k]) >= big) { 
-							big=fabs(a[j][k]); 
-							irow=j; 
-							icol=k; 
-						} 
-					} 
-				} 
-		++(ipiv[icol]); 
-/* We now have the pivot element, so we interchange rows, 
-   if needed, to put the pivot element on the diagonal. 
-   The columns are not physically interchanged, only relabeled: 
-   indxc[i],thecolumnoftheith pivot element, is the ith column 
-   that is reduced, while indxr[i] is the row in which that pivot 
-   element was originally located. If indxr[i]   = indxc[i] there 
-   is an implied column interchange. With this form of bookkeeping, 
-   the solution b s will end up in the correct order, and the inverse 
+			if (ipiv[j] != 1)
+				for (k=1;k<=n;k++) {
+					if (ipiv[k] == 0) {
+						if (fabs(a[j][k]) >= big) {
+							big=fabs(a[j][k]);
+							irow=j;
+							icol=k;
+						}
+					}
+				}
+		++(ipiv[icol]);
+/* We now have the pivot element, so we interchange rows,
+   if needed, to put the pivot element on the diagonal.
+   The columns are not physically interchanged, only relabeled:
+   indxc[i],thecolumnoftheith pivot element, is the ith column
+   that is reduced, while indxr[i] is the row in which that pivot
+   element was originally located. If indxr[i]   = indxc[i] there
+   is an implied column interchange. With this form of bookkeeping,
+   the solution b s will end up in the correct order, and the inverse
    matrix will be scrambled by columns. */
-		if (irow != icol) { 
-			for (l=1;l<=n;l++) 
-				SWAP(a[irow][l],a[icol][l]); 
+		if (irow != icol) {
+			for (l=1;l<=n;l++)
+				SWAP(a[irow][l],a[icol][l]);
 				SWAP(b[irow],b[icol]);
-		} 
-		indxr[i]=irow; 
-		/* We are now ready to divide the pivot row by the pivot element, 
+		}
+		indxr[i]=irow;
+		/* We are now ready to divide the pivot row by the pivot element,
 		   located at irow and icol. */
-		indxc[i]=icol; 
+		indxc[i]=icol;
 		if (a[icol][icol] == 0.0) {
 			d3_printf("gaussj_mband: singular matrix\n");
 			return -1;
 		}
-		pivinv=1.0/a[icol][icol]; 
-		a[icol][icol]=1.0; 
-		for (l=1;l<=n;l++) a[icol][l] *= pivinv; 
+		pivinv=1.0/a[icol][icol];
+		a[icol][icol]=1.0;
+		for (l=1;l<=n;l++) a[icol][l] *= pivinv;
 		b[icol] *= pivinv;
-		for (ll=1;ll<=n;ll++) 
+		for (ll=1;ll<=n;ll++)
 			/* Next, we reduce the rows... */
-			if (ll != icol) { 
-				/*...except for the pivot one, of course.*/ 
-				dum=a[ll][icol]; 
-				a[ll][icol]=0.0; 
-				for (l=1;l<=n;l++) 
-					a[ll][l] -= a[icol][l]*dum; 
+			if (ll != icol) {
+				/*...except for the pivot one, of course.*/
+				dum=a[ll][icol];
+				a[ll][icol]=0.0;
+				for (l=1;l<=n;l++)
+					a[ll][l] -= a[icol][l]*dum;
 				b[ll] -= b[icol]*dum;
-			} 
-	} 
-	/* This is the end of the main loop over columns of the reduction. 
-	   It only remains to unscram-ble the solution in view of the column 
-	   interchanges. We do this by interchanging pairs of columns in the 
+			}
+	}
+	/* This is the end of the main loop over columns of the reduction.
+	   It only remains to unscram-ble the solution in view of the column
+	   interchanges. We do this by interchanging pairs of columns in the
 	   reverse order that the permutation was built up. */
-	for (l=n;l>=1;l--) { 
-		if (indxr[l] != indxc[l]) 
-			for (k=1;k<=n;k++) 
-				SWAP(a[k][indxr[l]],a[k][indxc[l]]); 
-	} 
-	/* And we are done. */ 
+	for (l=n;l>=1;l--) {
+		if (indxr[l] != indxc[l])
+			for (k=1;k<=n;k++)
+				SWAP(a[k][indxr[l]],a[k][indxc[l]]);
+	}
+	/* And we are done. */
 	return 0;
 }
 
 /* determine which bands we need for reduction. We start with the target color, and
- * check it's transformation colors until no new colors are found. Returns a bit 
+ * check it's transformation colors until no new colors are found. Returns a bit
  * field of the bands needed */
 
 static unsigned bands_needed(struct mband_dataset *mbds, int band)
@@ -975,15 +976,15 @@ static unsigned bands_needed(struct mband_dataset *mbds, int band)
 					need |= 1 << (mbds->trans[i].c2);
 			}
 		}
-		for (i = 0; i < MAX_MBANDS; i++) 
-			if (need & (1 << (i))) 
+		for (i = 0; i < MAX_MBANDS; i++)
+			if (need & (1 << (i)))
 				n++;
 	} while (n > nn);
 	return need;
 }
 
-/* compute standard mags and errors for a target star; if trans is 0, 
-   no color transformation is performed. the average instrumental color from other 
+/* compute standard mags and errors for a target star; if trans is 0,
+   no color transformation is performed. the average instrumental color from other
    observations in the dataset is used for color transformations; If avg is 1,
    all observations of the target star are averaged together, otherise, just the
    current observation is used
@@ -998,7 +999,7 @@ int solve_star(struct star_obs *sob, struct mband_dataset *mbds, int trans, int 
 	double a[MAX_MBANDS + 1][MAX_MBANDS + 1];	/* the equation matrix */
 	double b[MAX_MBANDS + 1]; /* right-hand term */
 	int need;
-	
+
 	struct star_obs *so;
 	GList *sl;
 	int i;
@@ -1018,9 +1019,9 @@ int solve_star(struct star_obs *sob, struct mband_dataset *mbds, int trans, int 
 	}
 	for (sl = sob->ost->sol; sl != NULL; sl = g_list_next(sl)) {
 		so = STAR_OBS(sl->data);
-		if (so->ofr->band < 0) 
+		if (so->ofr->band < 0)
 			continue;
-		if (ZPSTATE(so->ofr) <= ZP_FIT_ERR) 
+		if (ZPSTATE(so->ofr) <= ZP_FIT_ERR)
 			continue;
 		c[so->ofr->band] += so->imag + so->ofr->zpoint;
 		ce[so->ofr->band] += sqr(so->imagerr) + sqr(so->ofr->zpointerr);
@@ -1031,12 +1032,12 @@ int solve_star(struct star_obs *sob, struct mband_dataset *mbds, int trans, int 
 //	d3_printf("need %x\n", need);
 	for (i = 0; i < MAX_MBANDS; i++) {
 		if ((need & 0x01) && (cn[i] == 0)) {
-//			d3_printf("insufficient color data for %s (no %d)\n", 
+//			d3_printf("insufficient color data for %s (no %d)\n",
 //				  sob->ost->cats->name, i);
 			goto nocol;
 		}
 		need >>= 1;
-	}	
+	}
 	/* build the std-vs-instr system */
 	for (i = 0; i < MAX_MBANDS; i++) {
 		int c1, c2, j;
@@ -1061,9 +1062,9 @@ int solve_star(struct star_obs *sob, struct mband_dataset *mbds, int trans, int 
 		a[i+1][c1+1] += - k;
 		a[i+1][c2+1] += k;
 		b[i+1] = c[i] / cn[i];
-	}	
+	}
 	if (!avg)
-		/* we use this star's imag instead of the average for the righthand term of 
+		/* we use this star's imag instead of the average for the righthand term of
 		 * the target band */
 		b[sob->ofr->band + 1] = sob->imag + sob->ofr->zpoint;
 
@@ -1118,7 +1119,7 @@ void mbds_transform_all(struct mband_dataset *mbds, GList *ofrs, int avg)
 	while (osl != NULL) {
 		ofr = O_FRAME(osl->data);
 		osl = g_list_next(osl);
-		if (ofr->band < 0) 
+		if (ofr->band < 0)
 			continue;
 		ofr_transform_stars(ofr, mbds, 1, avg);
 	}
@@ -1133,7 +1134,7 @@ static void all_sky_initial_weights(GList *ofrs)
 	for (osl = ofrs; osl != NULL; osl = g_list_next(osl)) {
 		ofr = O_FRAME(osl->data);
 		ofr->weight = ofr->nweight = 0.0;
-		if (ofr->zpstate < ZP_FIT_NOCOLOR) 
+		if (ofr->zpstate < ZP_FIT_NOCOLOR)
 			continue;
 		if (ofr->zpointerr <= 0)
 			continue;
@@ -1143,7 +1144,7 @@ static void all_sky_initial_weights(GList *ofrs)
 
 /* return statistics of the zeropoints in the list, (weighted means and deviations), used
  * to fit the extinction coefficient and calculate errors; the values returned are weighted
- * sums; return the total weight. zz is the zero-airmass zeropoint; 
+ * sums; return the total weight. zz is the zero-airmass zeropoint;
  * e is the extinction coeff. Residuals are updated */
 static double all_sky_stats(GList *ofrs, double zz, double e, double tam,
 			    double *w_res, double *w_am, double *w_resam, double *w_am2,
@@ -1195,7 +1196,7 @@ static double all_sky_stats(GList *ofrs, double zz, double e, double tam,
 	return we;
 }
 
-/* calculate new weights for the zeropoints, according to their current residuals; 
+/* calculate new weights for the zeropoints, according to their current residuals;
  * alpha and beta are parameters of
  * the weighting function used for robust fitting */
 static void all_sky_reweight(GList *ofrs, double alpha, double beta)
@@ -1209,7 +1210,7 @@ static void all_sky_reweight(GList *ofrs, double alpha, double beta)
 		sl = g_list_next(sl);
 		if (ofr->nweight <= 0.0)
 			continue;
-		ofr->weight = ofr->nweight / (1.0 + pow(fabs(ofr->residual)/(P_DBL(AP_ALPHA) 
+		ofr->weight = ofr->nweight / (1.0 + pow(fabs(ofr->residual)/(P_DBL(AP_ALPHA)
 						/ sqrt(ofr->nweight)), beta));
 	}
 }
@@ -1272,7 +1273,7 @@ int all_sky_fit_extinction(GList *ofrs, struct transform *trans)
 	trans->zz = all_sky_zz_median(ofrs);
 	w = all_sky_stats(ofrs, trans->zz, trans->e, trans->am, &r, &a, &ra, &a2, &r2, &nf);
 	trans->am = a / w;
-	all_sky_reweight(ofrs, P_DBL(AP_ALPHA), P_DBL(AP_BETA)); 
+	all_sky_reweight(ofrs, P_DBL(AP_ALPHA), P_DBL(AP_BETA));
 	if (nf <= 3) {
 		err_printf("Too few frames to attempt extinction fit\n");
 		trans->zzerr = BIG_ERR;
@@ -1282,31 +1283,31 @@ int all_sky_fit_extinction(GList *ofrs, struct transform *trans)
 
 	for (i = 0; i < 25; i++) {
 		for (k = 0; k < 25; k++) {
-			w = all_sky_stats(ofrs, trans->zz, trans->e, trans->am, 
+			w = all_sky_stats(ofrs, trans->zz, trans->e, trans->am,
 					  &r, &a, &ra, &a2, &r2, &nf);
 			trans->zz += r / w;
 			if (r / w < SMALL_ERR)
 				break;
-			all_sky_reweight(ofrs, P_DBL(AP_ALPHA), P_DBL(AP_BETA)); 
+			all_sky_reweight(ofrs, P_DBL(AP_ALPHA), P_DBL(AP_BETA));
 		}
-		d4_printf("zz = %.3f e = %.3f w = %.3f ra = %.3f a = %.3f a2 = %.3f r2 = %.3f\n", 
+		d4_printf("zz = %.3f e = %.3f w = %.3f ra = %.3f a = %.3f a2 = %.3f r2 = %.3f\n",
 			  trans->zz, trans->e, w, ra / w, a / w, (a2 / w), (r2 / w));
 		if (a2 / w > MIN_AM_VARIANCE) {
 			trans->e += ra / a2;
 			trans->zz -= (a / w - trans->am) * (ra / a2);
-		} 
+		}
 		if ((a2 / w <= MIN_AM_VARIANCE || fabs(ra) / a2 < SMALL_ERR)) {
 			/* we stop iterating */
 			break;
 		}
-		all_sky_reweight(ofrs, P_DBL(AP_ALPHA), P_DBL(AP_BETA)); 
+		all_sky_reweight(ofrs, P_DBL(AP_ALPHA), P_DBL(AP_BETA));
 	}
 	if (a2 != 0)
 		trans->eerr = sqrt(r2 / a2 / (nf - 2));
-	else 
+	else
 		trans->eerr = 1.0;
-		
-	trans->zzerr = sqrt(r2 / w); /* we report the average error as 
+
+	trans->zzerr = sqrt(r2 / w); /* we report the average error as
 					the extinction fit zeropoint error, as we
 					have no way of knowing if the transparency
 					hasn't fluctuated on a lower scale */
@@ -1326,7 +1327,7 @@ int all_sky_fit_extinction(GList *ofrs, struct transform *trans)
 			ofr->as_zp_valid = 1;
 		}
 	}
-	d3_printf("ZP = %.5f - %.3f * (AM - %.2f) %d outliers  zzerr:%.3f eerr:%.3f\n", 
+	d3_printf("ZP = %.5f - %.3f * (AM - %.2f) %d outliers  zzerr:%.3f eerr:%.3f\n",
 		  trans->zz, -trans->e, trans->am, no, trans->zzerr, trans->eerr);
 	return 0;
 }
@@ -1349,7 +1350,7 @@ static int ofr_am_compare(struct o_frame *a, struct o_frame *b)
 	return 0;
 }
 
-/* verify that in the sl, the frame is bracketed by valid frames if val = true, 
+/* verify that in the sl, the frame is bracketed by valid frames if val = true,
    or any frames if val = false. Return 1 if so */
 static int valid_bracket(GList *sl, struct o_frame *ofr)
 {
@@ -1426,20 +1427,20 @@ static void all_sky_zeropoints(GList *aml, GList *tl, struct transform *trans)
 	for (sl = aml; sl != NULL; sl = g_list_next(sl)) {
 		ofr = O_FRAME(sl->data);
 		if (ZPSTATE(ofr) <= ZP_FIT_ERR) {
-			if (ofr->airmass >= minam 
+			if (ofr->airmass >= minam
 			    && ofr->airmass <= maxam
 			    && valid_bracket(tl, ofr)) {
 //				d3_printf("frame in valid bracket (band=%d)\n", band);
 				ofr->zpoint = trans->zz + (ofr->airmass - trans->am) *
 					trans->e;
 				ofr->lmag = ofr->zpoint - LMAG_FROM_ZP;
-				ofr->zpointerr = sqrt(sqr(trans->zzerr) + 
+				ofr->zpointerr = sqrt(sqr(trans->zzerr) +
 						  sqr(trans->eerr * (ofr->airmass - trans->am)) );
 				if (ofr->zpointerr < BIG_ERR)
 					ofr->zpstate = ZP_ALL_SKY;
-			} 
+			}
 		}
-	} 
+	}
 
 //	d3_printf("\n");
 }
@@ -1457,7 +1458,7 @@ int fit_all_sky_zp(struct mband_dataset *mbds, GList *ofrs)
 	while (osl != NULL) {
 		ofr = O_FRAME(osl->data);
 		osl = g_list_next(osl);
-		if (ofr->band < 0) 
+		if (ofr->band < 0)
 			continue;
 		if (g_list_find(bsl, (gpointer)ofr->band) == NULL) {
 			bsl = g_list_append(bsl, (gpointer)ofr->band);
@@ -1513,12 +1514,12 @@ int fit_all_sky_zp(struct mband_dataset *mbds, GList *ofrs)
 int mband_reduce(FILE *inf, FILE *outf)
 {
 	struct mband_dataset *mbds;
-	
+
 	mbds = mband_dataset_new();
 	g_return_val_if_fail(mbds != NULL, -1);
 	mband_dataset_set_ubvri(mbds);
 
-	
+
 //	mbds_fit_band(mbds, 1);
 	mband_dataset_release(mbds);
 	return 0;
@@ -1532,7 +1533,7 @@ void ofr_to_stf_cats(struct o_frame *ofr)
 	for (sl = ofr->sol; sl != NULL; sl = sl->next) {
 		sob = STAR_OBS(sl->data);
 		if (!(CATS_TYPE(sob->cats) == CAT_STAR_TYPE_APSTD)) {
-			update_band_by_name(&sob->cats->smags, ofr->trans->bname, 
+			update_band_by_name(&sob->cats->smags, ofr->trans->bname,
 					    sob->mag, sob->err);
 		} else if ((CATS_TYPE(sob->cats) == CAT_STAR_TYPE_APSTD)) {
 			if (sob->nweight == 0)
@@ -1542,7 +1543,7 @@ void ofr_to_stf_cats(struct o_frame *ofr)
 			sob->cats->flags = sob->flags | INFO_RESIDUAL | INFO_STDERR;
 		}
 	}
-	
+
 }
 
 void ofr_transform_to_stf(struct mband_dataset *mbds, struct o_frame *ofr)
@@ -1553,11 +1554,11 @@ void ofr_transform_to_stf(struct mband_dataset *mbds, struct o_frame *ofr)
 	if (ofr->stf == NULL)
 		return;
 
-	stf = stf_append_string(NULL, SYM_BAND, ofr->ltrans.bname);	
+	stf = stf_append_string(NULL, SYM_BAND, ofr->ltrans.bname);
 	if (ofr->ltrans.c1 >= 0 && ofr->ltrans.c2 >= 0) {
 		snprintf(buf, 64, "%s-%s", mbds->trans[ofr->ltrans.c1].bname,
 			 mbds->trans[ofr->ltrans.c2].bname);
-		stf_append_string(stf, SYM_COLOR, buf);	
+		stf_append_string(stf, SYM_COLOR, buf);
 	}
 	if (ofr->zpstate >= ZP_ALL_SKY) {
 		stf_append_double(stf, SYM_ZP, rprec(ofr->zpoint, 0.001));
@@ -1580,7 +1581,7 @@ void ofr_transform_to_stf(struct mband_dataset *mbds, struct o_frame *ofr)
 	}
 	st = stf_find(ofr->stf, 0, SYM_TRANSFORM);
 	if (st == NULL) {
-		stf_append_list(ofr->stf, SYM_TRANSFORM, stf); 
+		stf_append_list(ofr->stf, SYM_TRANSFORM, stf);
 	} else {
 		if (st->next == NULL) {
 			st->next = stf_new();

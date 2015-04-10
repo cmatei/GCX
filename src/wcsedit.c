@@ -37,6 +37,7 @@
 #include <gtk/gtk.h>
 
 #include "gcx.h"
+#include "gcximageview.h"
 #include "catalogs.h"
 #include "gui.h"
 #include "obsdata.h"

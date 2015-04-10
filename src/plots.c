@@ -1,23 +1,23 @@
 /*******************************************************************************
   Copyright(c) 2000 - 2003 Radu Corlan. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: radu@corlan.net
 *******************************************************************************/
 
@@ -29,7 +29,9 @@
 #include <string.h>
 #include <errno.h>
 #include <math.h>
+
 #include "gcx.h"
+#include "gcximageview.h"
 #include "params.h"
 #include "misc.h"
 #include "obsdata.h"
@@ -47,7 +49,7 @@
 
 /* open a pipe to the plotting process, or a file to hold the plot
    commands. Return -1 for an error, 0 if a file was opened and 1 if a
-   pipe was opened */ 
+   pipe was opened */
 int open_plot(FILE **fp, char *initial)
 {
 	FILE *plfp = NULL;
@@ -127,12 +129,12 @@ int ofrs_plot_residual_vs_mag(FILE *dfp, GList *ofrs, int weighted)
 //	fprintf(dfp, "set title '%s: band:%s mjd=%.5f'\n",
 //		ofr->obs->objname, ofr->filter, ofr->mjd);
 	fprintf(dfp, "plot ");
-	
+
 	osl = ofrs;
 	while (osl != NULL) {
 		ofr = O_FRAME(osl->data);
 		osl = g_list_next(osl);
-		if (ofr->band < 0) 
+		if (ofr->band < 0)
 			continue;
 		if (g_list_find(bsl, (gpointer)ofr->band) == NULL) {
 			bsl = g_list_append(bsl, (gpointer)ofr->band);
@@ -150,7 +152,7 @@ int ofrs_plot_residual_vs_mag(FILE *dfp, GList *ofrs, int weighted)
 		while (osl != NULL) {
 			ofr = O_FRAME(osl->data);
 			osl = g_list_next(osl);
-			if (ofr->band != band) 
+			if (ofr->band != band)
 				continue;
 			sl = ofr->sol;
 			while(sl != NULL) {
@@ -168,10 +170,10 @@ int ofrs_plot_residual_vs_mag(FILE *dfp, GList *ofrs, int weighted)
 				if (weighted)
 					fprintf(dfp, "%.5f %.5f %.5f\n", sob->ost->smag[ofr->band],
 						v, sob->imagerr);
-				else 
+				else
 					fprintf(dfp, "%.5f %.5f %.5f\n", sob->ost->smag[ofr->band],
 						u, sob->imagerr);
-			}	
+			}
 		}
 		fprintf(dfp, "e\n");
 	}
@@ -196,7 +198,7 @@ int ofrs_plot_zp_vs_time(FILE *dfp, GList *ofrs)
 	while (osl != NULL) {
 		ofr = O_FRAME(osl->data);
 		osl = g_list_next(osl);
-		if (ofr->band < 0) 
+		if (ofr->band < 0)
 			continue;
 		mjdi = floor(ofr->mjd);
 		break;
@@ -212,12 +214,12 @@ int ofrs_plot_zp_vs_time(FILE *dfp, GList *ofrs)
 //	fprintf(dfp, "set title '%s: band:%s mjd=%.5f'\n",
 //		ofr->obs->objname, ofr->filter, ofr->mjd);
 	fprintf(dfp, "plot  ");
-	
+
 	osl = ofrs;
 	while (osl != NULL) {
 		ofr = O_FRAME(osl->data);
 		osl = g_list_next(osl);
-		if (ofr->band < 0) 
+		if (ofr->band < 0)
 			continue;
 //		d3_printf("*%d\n", ZPSTATE(ofr));
 		if (ZPSTATE(ofr) == ZP_ALL_SKY) {
@@ -227,17 +229,17 @@ int ofrs_plot_zp_vs_time(FILE *dfp, GList *ofrs)
 			bsl = g_list_append(bsl, (gpointer)ofr->band);
 			if (i > 0)
 				fprintf(dfp, ", ");
-			fprintf(dfp, "'-' title '%s' with errorbars ", 
+			fprintf(dfp, "'-' title '%s' with errorbars ",
 				ofr->trans->bname);
 			bnames = g_list_append(bnames, ofr->trans->bname);
 			i++;
 		}
 	}
-	if (asfl != NULL) 
+	if (asfl != NULL)
 		for (bl = bnames; bl != NULL; bl = g_list_next(bl)) {
-			fprintf(dfp, ", '-' title '%s-allsky' with errorbars ", 
+			fprintf(dfp, ", '-' title '%s-allsky' with errorbars ",
 				(char *)(bl->data));
-		}	
+		}
 	fprintf(dfp, "\n");
 
 	for (bl = bsl; bl != NULL; bl = g_list_next(bl)) {
@@ -246,7 +248,7 @@ int ofrs_plot_zp_vs_time(FILE *dfp, GList *ofrs)
 		while (osl != NULL) {
 			ofr = O_FRAME(osl->data);
 			osl = g_list_next(osl);
-			if (ofr->band != band) 
+			if (ofr->band != band)
 				continue;
 			if (ofr->zpointerr >= BIG_ERR)
 				continue;
@@ -255,24 +257,24 @@ int ofrs_plot_zp_vs_time(FILE *dfp, GList *ofrs)
 			n++;
 			fprintf(dfp, "%.5f %.5f %.5f\n", ofr->mjd - mjdi,
 				ofr->zpoint, ofr->zpointerr);
-			}	
+			}
 		fprintf(dfp, "e\n");
 	}
-	if (asfl != NULL) 
+	if (asfl != NULL)
 		for (bl = bsl; bl != NULL; bl = g_list_next(bl)) {
 			band = (long) bl->data;
 			osl = asfl;
 			while (osl != NULL) {
 				ofr = O_FRAME(osl->data);
 				osl = g_list_next(osl);
-				if (ofr->band != band) 
+				if (ofr->band != band)
 					continue;
 				if (ofr->zpointerr >= BIG_ERR)
 					continue;
 				n++;
 				fprintf(dfp, "%.5f %.5f %.5f\n", ofr->mjd - mjdi,
 					ofr->zpoint, ofr->zpointerr);
-			}	
+			}
 			fprintf(dfp, "e\n");
 		}
 //	fprintf(dfp, "pause -1\n");
@@ -300,12 +302,12 @@ int ofrs_plot_zp_vs_am(FILE *dfp, GList *ofrs)
 //	fprintf(dfp, "set title '%s: band:%s mjd=%.5f'\n",
 //		ofr->obs->objname, ofr->filter, ofr->mjd);
 	fprintf(dfp, "plot  ");
-	
+
 	osl = ofrs;
 	while (osl != NULL) {
 		ofr = O_FRAME(osl->data);
 		osl = g_list_next(osl);
-		if (ofr->band < 0) 
+		if (ofr->band < 0)
 			continue;
 //		d3_printf("*%d\n", ZPSTATE(ofr));
 		if (ZPSTATE(ofr) == ZP_ALL_SKY) {
@@ -315,17 +317,17 @@ int ofrs_plot_zp_vs_am(FILE *dfp, GList *ofrs)
 			bsl = g_list_append(bsl, (gpointer)ofr->band);
 			if (i > 0)
 				fprintf(dfp, ", ");
-			fprintf(dfp, "'-' title '%s' with errorbars ", 
+			fprintf(dfp, "'-' title '%s' with errorbars ",
 				ofr->trans->bname);
 			bnames = g_list_append(bnames, ofr->trans->bname);
 			i++;
 		}
 	}
-	if (asfl != NULL) 
+	if (asfl != NULL)
 		for (bl = bnames; bl != NULL; bl = g_list_next(bl)) {
-			fprintf(dfp, ", '-' title '%s-allsky' with errorbars ", 
+			fprintf(dfp, ", '-' title '%s-allsky' with errorbars ",
 				(char *)(bl->data));
-		}	
+		}
 	fprintf(dfp, "\n");
 
 	for (bl = bsl; bl != NULL; bl = g_list_next(bl)) {
@@ -334,7 +336,7 @@ int ofrs_plot_zp_vs_am(FILE *dfp, GList *ofrs)
 		while (osl != NULL) {
 			ofr = O_FRAME(osl->data);
 			osl = g_list_next(osl);
-			if (ofr->band != band) 
+			if (ofr->band != band)
 				continue;
 			if (ofr->zpointerr >= BIG_ERR)
 				continue;
@@ -343,24 +345,24 @@ int ofrs_plot_zp_vs_am(FILE *dfp, GList *ofrs)
 			n++;
 			fprintf(dfp, "%.5f %.5f %.5f\n", ofr->airmass,
 				ofr->zpoint, ofr->zpointerr);
-			}	
+			}
 		fprintf(dfp, "e\n");
 	}
-	if (asfl != NULL) 
+	if (asfl != NULL)
 		for (bl = bsl; bl != NULL; bl = g_list_next(bl)) {
 			band = (long) bl->data;
 			osl = asfl;
 			while (osl != NULL) {
 				ofr = O_FRAME(osl->data);
 				osl = g_list_next(osl);
-				if (ofr->band != band) 
+				if (ofr->band != band)
 					continue;
 				if (ofr->zpointerr >= BIG_ERR)
 					continue;
 				n++;
 				fprintf(dfp, "%.5f %.5f %.5f\n", ofr->airmass,
 					ofr->zpoint, ofr->zpointerr);
-			}	
+			}
 			fprintf(dfp, "e\n");
 		}
 //	fprintf(dfp, "pause -1\n");
@@ -371,7 +373,7 @@ int ofrs_plot_zp_vs_am(FILE *dfp, GList *ofrs)
 
 
 /* create a plot of ofr residuals versus color (as a gnuplot file) */
-int ofrs_plot_residual_vs_col(struct mband_dataset *mbds, FILE *dfp, 
+int ofrs_plot_residual_vs_col(struct mband_dataset *mbds, FILE *dfp,
 			      int band, GList *ofrs, int weighted)
 {
 	GList *sl, *osl;
@@ -386,9 +388,9 @@ int ofrs_plot_residual_vs_col(struct mband_dataset *mbds, FILE *dfp,
 	g_return_val_if_fail(band >= 0, -1);
 	g_return_val_if_fail(mbds->trans[band].c1 >= 0, -1);
 	g_return_val_if_fail(mbds->trans[band].c2 >= 0, -1);
-	
+
 	plot_preamble(dfp);
-	fprintf(dfp, "set xlabel '%s-%s'\n", mbds->trans[mbds->trans[band].c1].bname, 
+	fprintf(dfp, "set xlabel '%s-%s'\n", mbds->trans[mbds->trans[band].c1].bname,
 		mbds->trans[mbds->trans[band].c2].bname);
 	if (weighted) {
 		fprintf(dfp, "set ylabel 'Standard errors'\n");
@@ -398,21 +400,21 @@ int ofrs_plot_residual_vs_col(struct mband_dataset *mbds, FILE *dfp,
 //	fprintf(dfp, "set ylabel '%s zeropoint fit weighted residuals'\n", mbds->bnames[band]);
 //	fprintf(dfp, "set yrange [-1:1]\n");
 	fprintf(dfp, "set title 'Transformation: %s = %s_i + %s_0 + %.3f * (%s - %s)'\n",
-		mbds->trans[band].bname, mbds->trans[band].bname, 
-		mbds->trans[band].bname, mbds->trans[band].k, 
+		mbds->trans[band].bname, mbds->trans[band].bname,
+		mbds->trans[band].bname, mbds->trans[band].k,
 		mbds->trans[mbds->trans[band].c1].bname, mbds->trans[mbds->trans[band].c2].bname);
 //	fprintf(dfp, "set pointsize 1.5\n");
 	fprintf(dfp, "plot ");
-	
+
 	osl = ofrs;
 	while (osl != NULL) {
 		ofr = O_FRAME(osl->data);
 		osl = g_list_next(osl);
-		if (ofr->band != band) 
+		if (ofr->band != band)
 			continue;
 		if (i > 0)
 			fprintf(dfp, ", ");
-//		fprintf(dfp, "'-' title '%s(%s)'", 
+//		fprintf(dfp, "'-' title '%s(%s)'",
 //			ofr->obs->objname, ofr->xfilter);
 		fprintf(dfp, "'-' notitle ");
 		i++;
@@ -423,9 +425,9 @@ int ofrs_plot_residual_vs_col(struct mband_dataset *mbds, FILE *dfp,
 	while (osl != NULL) {
 		ofr = O_FRAME(osl->data);
 		osl = g_list_next(osl);
-		if (ofr->band != band) 
+		if (ofr->band != band)
 			continue;
-		if (ofr->tweight < 0.0000000001) 
+		if (ofr->tweight < 0.0000000001)
 			continue;
 		sl = ofr->sol;
 		while(sl != NULL) {
@@ -436,31 +438,31 @@ int ofrs_plot_residual_vs_col(struct mband_dataset *mbds, FILE *dfp,
 			if (sob->weight <= 0.00001)
 				continue;
 			n++;
-			if (sob->ost->smagerr[mbds->trans[band].c1] < 9 
+			if (sob->ost->smagerr[mbds->trans[band].c1] < 9
 			    && sob->ost->smagerr[mbds->trans[band].c2] < 9) {
 				v = sob->residual * sqrt(sob->nweight);
 				u = sob->residual;
 				clamp_double(&v, -STD_ERR_CLAMP, STD_ERR_CLAMP);
 				clamp_double(&u, -RESIDUAL_CLAMP, RESIDUAL_CLAMP);
-				if (weighted) 
-					fprintf(dfp, "%.5f %.5f %.5f\n", 
-						sob->ost->smag[mbds->trans[band].c1] 
+				if (weighted)
+					fprintf(dfp, "%.5f %.5f %.5f\n",
+						sob->ost->smag[mbds->trans[band].c1]
 						- sob->ost->smag[mbds->trans[band].c2],
 						v, sob->imagerr);
-				else 
-					fprintf(dfp, "%.5f %.5f %.5f\n", 
-						sob->ost->smag[mbds->trans[band].c1] 
+				else
+					fprintf(dfp, "%.5f %.5f %.5f\n",
+						sob->ost->smag[mbds->trans[band].c1]
 						- sob->ost->smag[mbds->trans[band].c2],
 						u, sob->imagerr);
 			}
-		}	
+		}
 		fprintf(dfp, "e\n");
 	}
 //	fprintf(dfp, "pause -1\n");
 	return n;
 }
 
-static int sol_stats(GList *ssol, double *avg, double *sigma, double *min, 
+static int sol_stats(GList *ssol, double *avg, double *sigma, double *min,
 		     double *max, double *merr)
 {
 	struct star_obs *sol;
@@ -473,7 +475,7 @@ static int sol_stats(GList *ssol, double *avg, double *sigma, double *min,
 	GList *sl;
 	double m, me;
 	int band;
-	
+
 	for (sl = ssol; sl != NULL; sl = sl->next) {
 		sol = STAR_OBS(sl->data);
 		if (sol->ofr->band < 0)
@@ -489,13 +491,13 @@ static int sol_stats(GList *ssol, double *avg, double *sigma, double *min,
 			m = sol->mag; me = sol->err;
 		} else if (CATS_TYPE(sol->cats) == CAT_STAR_TYPE_APSTAR) {
 			m = sol->imag; me = sol->imagerr;
-		} else if (CATS_TYPE(sol->cats) == CAT_STAR_TYPE_APSTD 
+		} else if (CATS_TYPE(sol->cats) == CAT_STAR_TYPE_APSTD
 			   && sol->ofr->zpstate >= ZP_ALL_SKY) {
 			m = sol->ost->smag[band] + sol->residual;
 			me = sqrt( sqr(sol->imagerr) + sqr(sol->ost->smagerr[band]));
 		} else if (CATS_TYPE(sol->cats) == CAT_STAR_TYPE_APSTD) {
 			m = sol->imag; me = sol->imagerr;
-		} else 
+		} else
 			continue;
 		esum += me;
 		sum += m;
@@ -550,7 +552,7 @@ int plot_star_mag_vs_time(FILE *dfp, GList *sobs)
 //	fprintf(dfp, "set title '%s: band:%s mjd=%.5f'\n",
 //		ofr->obs->objname, ofr->filter, ofr->mjd);
 	fprintf(dfp, "plot  ");
-	
+
 	osl = sobs;
 	while (osl != NULL) {
 		int ns;
@@ -562,11 +564,11 @@ int plot_star_mag_vs_time(FILE *dfp, GList *sobs)
 		if (i > 0)
 			fprintf(dfp, ", ");
 		if (ns == 0)
-			fprintf(dfp, "'-' title '%s(%s)' with errorbars ", 
+			fprintf(dfp, "'-' title '%s(%s)' with errorbars ",
 				sob->cats->name, ofr->trans->bname);
 		else
 			fprintf(dfp, "'-' title '%s(%s) avg:%.3f sd:%.3f min:%.3f"
-				" max:%.3f me:%.3f sd/me:%4.1f' with errorbars ", 
+				" max:%.3f me:%.3f sd/me:%4.1f' with errorbars ",
 				sob->cats->name, ofr->trans->bname,
 				avg, sigma, min, max, merr, (merr > 0) ? sigma/merr : 99.999);
 		i++;
@@ -578,9 +580,9 @@ int plot_star_mag_vs_time(FILE *dfp, GList *sobs)
 		sob = STAR_OBS(osl->data);
 		ofr = sob->ofr;
 		osl = g_list_next(osl);
-		if (ofr->band != band) 
+		if (ofr->band != band)
 			continue;
-		
+
 		for (sl = sob->ost->sol; sl != NULL; sl = sl->next) {
 			sol = STAR_OBS(sl->data);
 			if (sol->ofr->skip)
@@ -596,26 +598,26 @@ int plot_star_mag_vs_time(FILE *dfp, GList *sobs)
 			    && sol->err < BIG_ERR)
 				fprintf(dfp, "%.5f %.5f %.5f\n", mjd_to_jd(sol->ofr->mjd) - jdi,
 					sol->mag, sol->err);
-			else if (CATS_TYPE(sol->cats) == CAT_STAR_TYPE_APSTAR) 
+			else if (CATS_TYPE(sol->cats) == CAT_STAR_TYPE_APSTAR)
 				fprintf(dfp, "%.5f %.5f %.5f\n", mjd_to_jd(sol->ofr->mjd) - jdi,
 					sol->imag, sol->imagerr);
 			else if (CATS_TYPE(sol->cats) == CAT_STAR_TYPE_APSTD
-				 && sol->ofr->zpstate >= ZP_ALL_SKY)  
+				 && sol->ofr->zpstate >= ZP_ALL_SKY)
 				fprintf(dfp, "%.5f %.5f %.5f\n", mjd_to_jd(sol->ofr->mjd) - jdi,
-					sol->ost->smag[band] + sol->residual, 
+					sol->ost->smag[band] + sol->residual,
 					sqrt( sqr(sol->imagerr) +
 						sqr(sol->ost->smagerr[band])));
-			else if (CATS_TYPE(sol->cats) == CAT_STAR_TYPE_APSTD) 
+			else if (CATS_TYPE(sol->cats) == CAT_STAR_TYPE_APSTD)
 				fprintf(dfp, "%.5f %.5f %.5f\n", mjd_to_jd(sol->ofr->mjd) - jdi,
 					sol->imag, sol->imagerr);
-		}	
+		}
 		fprintf(dfp, "e\n");
 	}
 	return n;
 }
 
 /* generate a vector plot of astrometric errors */
-int stf_plot_astrom_errors(FILE *dfp, struct stf *stf, struct wcs *wcs) 
+int stf_plot_astrom_errors(FILE *dfp, struct stf *stf, struct wcs *wcs)
 {
 	GList *asl;
 	double x, y;
@@ -642,8 +644,8 @@ int stf_plot_astrom_errors(FILE *dfp, struct stf *stf, struct wcs *wcs)
 		cats_xypix(wcs, cats, &x, &y);
 		if (cats->flags & INFO_POS) {
 			n++;
-			fprintf (dfp, "%.3f %.3f %.3f %.3f\n", 
-				 x, -y, P_DBL(WCS_PLOT_ERR_SCALE) * (cats->pos[POS_X] - x), 
+			fprintf (dfp, "%.3f %.3f %.3f %.3f\n",
+				 x, -y, P_DBL(WCS_PLOT_ERR_SCALE) * (cats->pos[POS_X] - x),
 				 -P_DBL(WCS_PLOT_ERR_SCALE) * (cats->pos[POS_Y] - y) );
 		}
 	}

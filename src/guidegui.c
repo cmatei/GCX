@@ -28,7 +28,9 @@
 #include <stdarg.h>
 #include <string.h>
 #include <math.h>
+
 #include "gcx.h"
+#include "gcximageview.h"
 #include "catalogs.h"
 #include "gui.h"
 #include "sourcesdraw.h"

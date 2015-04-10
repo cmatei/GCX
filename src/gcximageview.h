@@ -28,6 +28,9 @@ void              gcx_image_view_get_scrolls(GcxImageView *view, double *xc, dou
 
 double            gcx_image_view_get_zoom   (GcxImageView *view);
 
+struct gui_star_list *gcx_image_view_get_stars (GcxImageView *view);
+void                  gcx_image_view_set_stars (GcxImageView *view, struct gui_star_list *stars);
+
 cairo_t          *gcx_image_view_cairo_surface (GcxImageView *view);
 
 int               gcx_image_view_to_pnm_file(GcxImageView *view, char *fn, int is_16bit);

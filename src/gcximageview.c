@@ -105,6 +105,8 @@ struct _GcxImageView {
 	struct map_cache *cache;
 	struct frame_map *map;
 	struct wcs *wcs;
+
+	struct gui_star_list *stars;
 };
 
 
@@ -126,11 +128,17 @@ gcx_image_view_init(GcxImageView *view)
 					GTK_POLICY_AUTOMATIC,
 					GTK_POLICY_AUTOMATIC);
 
+
 	view->darea = gtk_drawing_area_new ();
 	gtk_widget_set_halign (GTK_WIDGET(view->darea), GTK_ALIGN_CENTER);
 	gtk_widget_set_valign (GTK_WIDGET(view->darea), GTK_ALIGN_CENTER);
 
 	gtk_container_add (GTK_CONTAINER(view), GTK_WIDGET(view->darea));
+
+	gtk_widget_set_events (view->darea, 0
+			       | GDK_BUTTON_PRESS_MASK
+			       | GDK_POINTER_MOTION_MASK
+			       | GDK_POINTER_MOTION_HINT_MASK);
 
 	g_signal_connect (G_OBJECT(view->darea), "draw",
 			  G_CALLBACK(gcx_image_view_draw_cb), view);
@@ -708,9 +716,9 @@ paint_from_cache (cairo_t *cr, struct map_cache *cache, cairo_rectangle_int_t *a
 static gboolean
 gcx_image_view_draw_cb(GtkWidget *darea, cairo_t *cr, gpointer user)
 {
-	GcxImageView *view = GCX_IMAGE_VIEW(user);
-	struct map_cache *cache = view->cache;
-	struct frame_map *map = view->map;
+	GcxImageView *iv = GCX_IMAGE_VIEW(user);
+	struct map_cache *cache = iv->cache;
+	struct frame_map *map = iv->map;
 	cairo_rectangle_int_t area;
 
 	if (map->fr == NULL) /* no frame */
@@ -742,7 +750,7 @@ gcx_image_view_draw_cb(GtkWidget *darea, cairo_t *cr, gpointer user)
 		paint_from_cache (cr, cache, &area);
 	}
 
-	//draw_sources_hook(cr, window, &area);
+	draw_sources_hook(iv, cr, &area);
 
 	map->changed = 0;
 
@@ -1044,6 +1052,17 @@ gcx_image_view_get_zoom (GcxImageView *iv)
 	return iv->map->zoom;
 }
 
+struct gui_star_list *
+gcx_image_view_get_stars (GcxImageView *iv)
+{
+	return iv->stars;
+}
+
+void
+gcx_image_view_set_stars (GcxImageView *iv, struct gui_star_list *stars)
+{
+	iv->stars = stars;
+}
 
 cairo_t *
 gcx_image_view_cairo_surface (GcxImageView *iv)

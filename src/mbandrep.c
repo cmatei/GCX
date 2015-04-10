@@ -1,23 +1,23 @@
 /*******************************************************************************
   Copyright(c) 2000 - 2003 Radu Corlan. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: radu@corlan.net
 *******************************************************************************/
 
@@ -34,6 +34,7 @@
 #include <ctype.h>
 
 #include "gcx.h"
+#include "gcximageview.h"
 #include "catalogs.h"
 #include "gui.h"
 #include "sourcesdraw.h"
@@ -69,7 +70,7 @@ static int is_constell(char *cc)
 	return 0;
 }
 
-/* search the validation file for an entry matching 
+/* search the validation file for an entry matching
    name; update the designation (up to len characters). return 0 if the star
    was found. */
 static int search_validation_file(FILE *fp, char *name, char *des, int len)
@@ -162,7 +163,7 @@ static int rep_aavso_star(FILE *repfp, struct star_obs *sob, struct star_obs *co
 		sprintf(line+31, "%5.2fK ", sob->mag);
 		if (sob->flags & CPHOT_NOT_FOUND)
 			line[35] = ':';
-	} else { 
+	} else {
 		sprintf(line+30, "<%5.2fK ", sob->ofr->lmag);
 	}
 	/* band */
@@ -187,13 +188,13 @@ static int rep_aavso_star(FILE *repfp, struct star_obs *sob, struct star_obs *co
 			i += sprintf(line+67+i, "Transformed ");
 		if (sob->flags & CPHOT_ALL_SKY)
 			i += sprintf(line+67+i, "All-sky ");
-		if (sob->flags & CPHOT_BURNED) 
+		if (sob->flags & CPHOT_BURNED)
 			i += sprintf(line+67+i, "Possibly_saturated ");
 		if (sob->flags & (CPHOT_BURNED | CPHOT_BADPIX))
 			line[35] = ':';
 	}
 	sequence = stf_find_string(sob->ofr->stf, 0, SYM_SEQUENCE);
-	if (sequence != NULL) 
+	if (sequence != NULL)
 		i += snprintf(line+67+i, 188-i, "Sequence:%s ", sequence);
 	fprintf(repfp, "%s\n", line);
 	return 0;
@@ -241,8 +242,8 @@ int mbds_report_from_ofrs(struct mband_dataset *mbds, FILE *repfp, GList *ofrs, 
 				}
 			}
 			for (sl = O_FRAME(fl->data)->sol; sl != NULL; sl = g_list_next(sl)) {
-				if (CATS_TYPE(STAR_OBS(sl->data)->cats) == CAT_STAR_TYPE_APSTAR) 
-					n += !rep_star(repfp, STAR_OBS(sl->data), action & FMT_MASK, 
+				if (CATS_TYPE(STAR_OBS(sl->data)->cats) == CAT_STAR_TYPE_APSTAR)
+					n += !rep_star(repfp, STAR_OBS(sl->data), action & FMT_MASK,
 						       ncomp == 1 ? comp : NULL);
 			}
 		}
@@ -269,7 +270,7 @@ char * mbds_short_result(struct o_frame *ofr)
 
 	ofr_to_stf_cats(ofr);
 	for (sl = ofr->sol; sl != NULL; sl = g_list_next(sl)) {
-		if (CATS_TYPE(STAR_OBS(sl->data)->cats) != 
+		if (CATS_TYPE(STAR_OBS(sl->data)->cats) !=
 		    CAT_STAR_TYPE_APSTAR)
 			continue;
 		n = snprintf(buf, 1023, "%s: %s=%.3f/%.3f  %d outliers, fit me1=%.2g ",

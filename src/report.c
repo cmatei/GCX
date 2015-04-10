@@ -40,6 +40,7 @@
 #include <gtk/gtk.h>
 
 #include "gcx.h"
+#include "gcximageview.h"
 #include "catalogs.h"
 #include "gui.h"
 #include "obsdata.h"
@@ -961,4 +962,3 @@ int recipe_to_aavso_db(FILE *inf, FILE *outf)
 
 	return ret;
 }
-

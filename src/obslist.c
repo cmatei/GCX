@@ -34,6 +34,7 @@
 #include <gtk/gtk.h>
 
 #include "gcx.h"
+#include "gcximageview.h"
 #include "camera_indi.h"
 #include "tele_indi.h"
 #include "catalogs.h"

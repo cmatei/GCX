@@ -287,13 +287,16 @@ static gboolean image_clicked_cb(GtkWidget *w, GdkEventButton *event, gpointer d
 	GtkMenu *menu, *star_popup;
 	GSList *found;
 
-//	printf("button press : %f %f state %08x button %08x \n",
-//	       event->x, event->y, event->state, event->button);
+	g_return_val_if_fail (GCX_IS_IMAGE_VIEW (w), FALSE);
+
+	printf("button press : %f %f state %08x button %08x \n",
+	       event->x, event->y, event->state, event->button);
+
 	if (event->button == 3) {
 		show_region_stats(data, event->x, event->y);
 		if (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK))
 		    return FALSE;
-		found = stars_under_click(GTK_WIDGET(data), event);
+		found = stars_under_click(w, event);
 		star_popup = g_object_get_data(G_OBJECT(data), "star_popup");
 		menu = g_object_get_data(G_OBJECT(data), "image_popup");
 		if (found != NULL && star_popup != NULL) {
@@ -314,7 +317,7 @@ static gboolean image_clicked_cb(GtkWidget *w, GdkEventButton *event, gpointer d
 		pan_cursor(data);
 	}
 	if (event->button == 1) {
-		found = stars_under_click(GTK_WIDGET(data), event);
+		found = stars_under_click(w, event);
 		if (!(event->state & GDK_SHIFT_MASK) && (found == NULL))
 			gsl_unselect_all(data);
 		if ((event->state & GDK_CONTROL_MASK) || (found != NULL)) {
@@ -814,8 +817,10 @@ GtkWidget * create_image_window()
 
 	g_signal_connect(G_OBJECT(imview), "button_press_event",
 			 G_CALLBACK(sources_clicked_cb), window);
+
 	g_signal_connect(G_OBJECT(imview), "button_press_event",
 			 G_CALLBACK(image_clicked_cb), window);
+
 //	g_signal_connect(G_OBJECT(imview), "motion_notify_event",
 //			 G_CALLBACK(motion_event_cb), window);
 
@@ -1003,10 +1008,11 @@ GtkWidget* create_about_cx (void)
 
 int window_auto_pairs(gpointer window)
 {
+	GcxImageView *iv = g_object_get_data (window, "image_view");
 	struct gui_star_list *gsl;
 	int ret;
 
-	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
+	gsl = gcx_image_view_get_stars (iv);
 	if (gsl == NULL)
 		return -1;
 	info_printf_sb2(window, "Looking for Star Pairs...");

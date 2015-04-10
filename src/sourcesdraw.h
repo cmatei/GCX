@@ -5,6 +5,8 @@
 
 #include <gtk/gtk.h>
 
+#include "gcximageview.h"
+
 /* a star label; shares the ref_count with it's star*/
 struct label {
 	int ox; /* position relative to the star */
@@ -48,6 +50,7 @@ struct gui_star {
 #define STAR_TYPE_ALIGN 0x06 /* a star used for frame alignment */
 
 #define DEFAULT_MAX_SIZE 100
+
 /* structure holding the gui_star list and general parameters for their display */
 struct gui_star_list {
 	int ref_count;
@@ -95,11 +98,12 @@ struct gui_star_list {
 /* function prototypes */
 
 /* from sourcesdraw.c */
+extern void draw_sources_hook(GcxImageView *iv, cairo_t *cr, cairo_rectangle_int_t *area);
+
 void gsl_unselect_all(GtkWidget *window);
 extern void find_stars_cb(gpointer window, guint action);
 
-extern void draw_sources_hook(GtkWidget *imview, GdkRectangle *area);
-extern void toggle_selection(GtkWidget *window, GSList *stars);
+
 extern void single_selection(GtkWidget *window, GSList *stars);
 extern struct gui_star *gui_star_new(void);
 extern void gui_star_ref(struct gui_star *gs);
@@ -123,7 +127,6 @@ int add_cat_stars_to_window(gpointer window, struct cat_star **catsl, int n);
 GSList *gui_stars_of_type(struct gui_star_list *gsl, int type_mask);
 int add_gui_stars_to_window(gpointer window, GSList *sl);
 double cat_star_size(struct cat_star *cats);
-void attach_star_list(struct gui_star_list *gsl, GtkWidget *window);
 void gui_star_list_update_colors(struct gui_star_list *gsl);
 void star_list_update_size(GtkWidget *window);
 void star_list_update_labels(GtkWidget *window);

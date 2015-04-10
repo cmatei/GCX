@@ -31,6 +31,7 @@
 #include <sys/time.h>
 
 #include "gcx.h"
+#include "gcximageview.h"
 #include "catalogs.h"
 #include "gui.h"
 #include "sourcesdraw.h"

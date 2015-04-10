@@ -36,6 +36,7 @@
 #include <glob.h>
 
 #include "gcx.h"
+#include "gcximageview.h"
 //#include "gui.h"
 #include "gsc/gsc.h"
 #include "catalogs.h"

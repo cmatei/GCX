@@ -38,6 +38,7 @@
 #include <gtk/gtk.h>
 
 #include "gcx.h"
+#include "gcximageview.h"
 #include "catalogs.h"
 #include "gui.h"
 #include "sourcesdraw.h"
@@ -334,6 +335,7 @@ int merge_cat_star_list(GList *addsl,
 /* return the number of stars added or a negative error */
 int merge_cat_star_list_to_window(gpointer window, GList *addsl)
 {
+	GcxImageView *iv;
 	struct wcs *wcs;
 	struct gui_star_list *gsl;
 
@@ -342,10 +344,15 @@ int merge_cat_star_list_to_window(gpointer window, GList *addsl)
 		err_printf("merge_cat_star_list_to_window: invalid wcs\n");
 		return -1;
 	}
-	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
+	iv = g_object_get_data (G_OBJECT(window), "image_view");
+	if (iv == NULL)
+		return -1;
+
+	gsl = gcx_image_view_get_stars (iv);
 	if (gsl == NULL) {
 		gsl = gui_star_list_new();
-		attach_star_list(gsl, window);
+		//attach_star_list(gsl, window);
+		gcx_image_view_set_stars (iv, gsl);
 	}
 	gsl->display_mask |= TYPE_MASK_CATREF;
 	gsl->select_mask |= TYPE_MASK_CATREF;
@@ -412,6 +419,7 @@ int add_star_from_frame_header(struct ccd_frame *fr,
 /* it keeps a reference to the cat_stars without ref-ing them */
 int add_cat_stars_to_window(gpointer window, struct cat_star **catsl, int n)
 {
+	GcxImageView *iv;
 	struct wcs *wcs;
 	struct gui_star_list *gsl;
 	int i;
@@ -424,10 +432,15 @@ int add_cat_stars_to_window(gpointer window, struct cat_star **catsl, int n)
 			cat_star_release(catsl[i]);
 		return -1;
 	}
-	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
+	iv = g_object_get_data (G_OBJECT(window), "image_view");
+	if (iv == NULL)
+		return -1;
+
+	gsl = gcx_image_view_get_stars (iv);
 	if (gsl == NULL) {
 		gsl = gui_star_list_new();
-		attach_star_list(gsl, window);
+		//attach_star_list(gsl, window);
+		gcx_image_view_set_stars (iv, gsl);
 	}
 	add_cat_stars(catsl, n, gsl, wcs);
 	gsl->display_mask |= TYPE_MASK_CATREF;
@@ -442,12 +455,18 @@ int add_cat_stars_to_window(gpointer window, struct cat_star **catsl, int n)
 /* the stars are ref'd*/
 int add_gui_stars_to_window(gpointer window, GSList *sl)
 {
+	GcxImageView *iv;
 	struct gui_star_list *gsl;
 
-	gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
+	iv = g_object_get_data (G_OBJECT(window), "image_view");
+	if (iv == NULL)
+		return -1;
+
+	gsl = gcx_image_view_get_stars (iv);
 	if (gsl == NULL) {
 		gsl = gui_star_list_new();
-		attach_star_list(gsl, window);
+		//attach_star_list(gsl, window);
+		gcx_image_view_set_stars (iv, gsl);
 	}
 	while (sl != NULL) {
 		gui_star_ref(GUI_STAR(sl->data));
