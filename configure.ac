@@ -20,6 +20,8 @@ AC_REPLACE_FUNCS(basename)
 AC_REPLACE_FUNCS(dirname)
 AC_REPLACE_FUNCS(getline)
 
+PKG_CHECK_MODULES([libcurl], [libcurl])
+
 AM_PATH_GLIB_2_0(2.41.2, , AC_MSG_ERROR(Cannot find GLIB >= 2.41.2))
 AM_PATH_GTK_3_0(3.10.0, , AC_MSG_ERROR(Cannot find GTK >= 3.10))
 

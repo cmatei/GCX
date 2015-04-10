@@ -41,32 +41,39 @@
 #include "interface.h"
 #include "skyview.h"
 
-struct _GcxSkyviewQuery {
-	GtkWindow parent_instance;
-
+struct _GcxSkyviewQueryPrivate {
 	GcxImageView *iv;
 
 	GtkWidget *target_entry;
-	GtkWidget *resolver_comboboxtext;
+	GtkWidget *resolver_combotext;
 	GtkWidget *pixels_entry;
 	GtkWidget *size_entry;
-	GtkWidget *survey_comboboxtext;
+	GtkWidget *survey_combotext;
 	GtkWidget *rotation_entry;
-	GtkWidget *sampler_comboboxtext;
+	GtkWidget *sampler_combotext;
+	GtkWidget *fetch_toggle;
+};
+
+struct _GcxSkyviewQuery {
+	GtkWindow parent_instance;
+
+	GcxSkyviewQueryPrivate *priv;
 };
 
 struct _GcxSkyviewQueryClass {
 	GtkWindowClass parent_class;
 };
 
-G_DEFINE_TYPE(GcxSkyviewQuery, gcx_skyview_query, GTK_TYPE_WINDOW);
+G_DEFINE_TYPE_WITH_PRIVATE(GcxSkyviewQuery, gcx_skyview_query, GTK_TYPE_WINDOW);
 
-static void skyview_fetch_stop_cb(GtkWidget *button, gpointer window);
+static void skyview_fetch_button_toggled(GtkWidget *button, gpointer window);
 
 static void
 gcx_skyview_query_init (GcxSkyviewQuery *self)
 {
 	gtk_widget_init_template (GTK_WIDGET (self));
+
+	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, GCX_TYPE_SKYVIEW_QUERY, GcxSkyviewQueryPrivate);
 }
 
 static void
@@ -75,8 +82,40 @@ gcx_skyview_query_class_init (GcxSkyviewQueryClass *klass)
 	gtk_widget_class_set_template_from_resource (GTK_WIDGET_CLASS (klass),
 						     "/org/gcx/ui/skyview.ui");
 
+	gtk_widget_class_bind_template_child_private (GTK_WIDGET_CLASS (klass),
+						       GcxSkyviewQuery,
+						       target_entry);
+
+	gtk_widget_class_bind_template_child_private (GTK_WIDGET_CLASS (klass),
+						       GcxSkyviewQuery,
+						       resolver_combotext);
+
+	gtk_widget_class_bind_template_child_private (GTK_WIDGET_CLASS (klass),
+						       GcxSkyviewQuery,
+						       pixels_entry);
+
+	gtk_widget_class_bind_template_child_private (GTK_WIDGET_CLASS (klass),
+						       GcxSkyviewQuery,
+						       size_entry);
+
+	gtk_widget_class_bind_template_child_private (GTK_WIDGET_CLASS (klass),
+						       GcxSkyviewQuery,
+						       survey_combotext);
+
+	gtk_widget_class_bind_template_child_private (GTK_WIDGET_CLASS (klass),
+						       GcxSkyviewQuery,
+						       rotation_entry);
+
+	gtk_widget_class_bind_template_child_private (GTK_WIDGET_CLASS (klass),
+						       GcxSkyviewQuery,
+						       sampler_combotext);
+
+	gtk_widget_class_bind_template_child_private (GTK_WIDGET_CLASS (klass),
+						       GcxSkyviewQuery,
+						       fetch_toggle);
+
 	gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (klass),
-						 skyview_fetch_stop_cb);
+						 skyview_fetch_button_toggled);
 }
 
 GtkWidget *
@@ -84,9 +123,98 @@ gcx_skyview_query_new(GcxImageView *iv)
 {
 	GcxSkyviewQuery *sq = GCX_SKYVIEW_QUERY (g_object_new (GCX_TYPE_SKYVIEW_QUERY, NULL));
 
-	sq->iv = iv;
+//	if (iv) {
+//		sq->priv->iv = iv;
+//		g_object_ref (iv);
+//	}
+
 
 	return GTK_WIDGET (sq);
+}
+
+static char *
+__uri_for_query (GcxSkyviewQueryPrivate *priv)
+{
+	char *q_position, *q_pixels = NULL, *q_size = NULL, *q_rotation = NULL;
+	char *uri = NULL;
+	char **strv;
+
+	/* position: non-empty */
+	q_position = (char *) gtk_entry_get_text (GTK_ENTRY (priv->target_entry));
+	q_position = (strlen (q_position) > 0) ? g_strdup (q_position) : NULL;
+
+	/* pixels: n or n, m */
+	strv = g_strsplit (gtk_entry_get_text (GTK_ENTRY (priv->pixels_entry)), ",", -1);
+	if (g_strv_length (strv) == 1) {
+		q_pixels = g_strdup_printf ("%d", atoi (strv[0]));
+	} else if (g_strv_length (strv) == 2) {
+		q_pixels = g_strdup_printf ("%d,%d", atoi(strv[0]), atoi(strv[1]));
+	}
+	g_strfreev (strv);
+
+	/* size: n or n, m */
+	strv = g_strsplit (gtk_entry_get_text (GTK_ENTRY (priv->size_entry)), ",", -1);
+	if (g_strv_length (strv) == 1) {
+		q_size = g_strdup_printf ("%f", strtod(strv[0], NULL));
+	} else if (g_strv_length (strv) == 2) {
+		q_size = g_strdup_printf ("%f,%f", strtod(strv[0], NULL), strtod(strv[1], NULL));
+	}
+	g_strfreev (strv);
+
+	/* rotation */
+	q_rotation = g_strdup_printf ("%f", strtod (gtk_entry_get_text (GTK_ENTRY (priv->rotation_entry)), NULL));
+
+	if (!q_position || !q_pixels || !q_size)
+		goto out;
+
+
+	uri = g_strdup_printf("%s?Position='%s'&Resolver=%s&Pixels=%s&Size=%s&Survey=%s&Rotation=%s&Sampler=%s&"
+			      "Coordinates=J2000&Projection=Tan&float=on&Scaling=linear&return=filename",
+			      P_STR(QUERY_SKYVIEW_RUNQUERY_URL),
+			      q_position,
+			      gtk_combo_box_text_get_active_text (GTK_COMBO_BOX_TEXT (priv->resolver_combotext)),
+			      q_pixels,
+			      q_size,
+			      gtk_combo_box_text_get_active_text (GTK_COMBO_BOX_TEXT (priv->survey_combotext)),
+			      q_rotation,
+			      gtk_combo_box_text_get_active_text (GTK_COMBO_BOX_TEXT (priv->sampler_combotext)));
+
+out:
+	g_free (q_position);
+	g_free (q_pixels);
+	g_free (q_size);
+	g_free (q_rotation);
+
+	return uri;
+}
+
+static void
+skyview_fetch_button_toggled(GtkWidget *button, gpointer window)
+{
+	GcxSkyviewQuery *sq = GCX_SKYVIEW_QUERY (window);
+	GtkWidget *fetch_toggle = sq->priv->fetch_toggle;
+	gchar *uri;
+
+	if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (fetch_toggle))) {
+		/* fetch */
+
+		if ((uri = __uri_for_query (sq->priv)) == NULL) {
+			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (fetch_toggle), FALSE);
+			return;
+		}
+
+		d3_printf("uri=%s\n", uri);
+
+		gtk_button_set_label (GTK_BUTTON (fetch_toggle), _("Cancel"));
+	} else {
+		/* cancel */
+
+		gtk_button_set_label (GTK_BUTTON (fetch_toggle), _("Fetch"));
+		d3_printf("cancel!\n");
+	}
+
+
+	return;
 }
 
 
@@ -297,15 +425,18 @@ static void skyview_cancel(GtkWidget *button, gpointer window)
 	gtk_widget_destroy (window);
 }
 
+#if 0
 
 static void skyview_fetch_stop_cb(GtkWidget *button, gpointer window)
 {
+	GcxSkyviewQuery *skyview = GCX_SKYVIEW_QUERY (window);
 	d3_printf("fetch/stop!\n");
 
-	g_warn_if_fail (GCX_IS_SKYVIEW_QUERY (window));
+	g_warn_if_fail (GCX_IS_SKYVIEW_QUERY (skyview));
+
+	d3_printf("target=%s\n", gtk_entry_get_text(GTK_ENTRY(skyview->priv->target_entry)));
 
 	return;
-#if 0
 	pos   = gtk_entry_get_text (GTK_ENTRY(wpos));
 	field = gtk_entry_get_text (GTK_ENTRY(wfield));
 
@@ -321,8 +452,9 @@ static void skyview_fetch_stop_cb(GtkWidget *button, gpointer window)
 	}
 
 	g_value_unset (&val);
-#endif
 }
+
+#endif
 
 #if 0
 static GtkWidget *create_skyview(gpointer window)

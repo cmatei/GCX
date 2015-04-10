@@ -2,7 +2,7 @@
 
 SUBDIRS = gsc
 
-AM_CPPFLAGS = @GTK_CFLAGS@
+AM_CPPFLAGS = @GTK_CFLAGS@ @libcurl_CFLAGS@
 
 AM_CFLAGS = -Wall
 bin_PROGRAMS = gcx
@@ -50,6 +50,6 @@ resource_files=$(shell $(GLIB_COMPILE_RESOURCES) --generate-dependencies $(build
 gcxresources.c: gcx.gresource.xml $(resource_files)
 	$(GLIB_COMPILE_RESOURCES) $< --target=$@ --generate-source
 
-gcx_LDADD = @GTK_LIBS@ gsc/libgsc.a
+gcx_LDADD = gsc/libgsc.a @GTK_LIBS@ @libcurl_LIBS@
 
 CLEANFILES = gcxresources.c *~

@@ -28,7 +28,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEntry" id="skyview_target_entry">
+          <object class="GtkEntry" id="target_entry">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="tooltip_text" translatable="yes">Coordinate position or name</property>
@@ -51,9 +51,35 @@
           </packing>
         </child>
         <child>
-          <object class="GtkComboBoxText" id="skyview_survey_combo">
+          <object class="GtkComboBoxText" id="survey_combotext">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <items>
+              <item translatable="yes">DSS</item>
+              <item translatable="yes">DSS1 Blue</item>
+              <item translatable="yes">DSS1 Red</item>
+              <item translatable="yes">DSS2 Red</item>
+              <item translatable="yes">DSS2 Blue</item>
+              <item translatable="yes">DSS2 IR</item>
+              <item translatable="yes">SDSSg</item>
+              <item translatable="yes">SDSSi</item>
+              <item translatable="yes">SDSSr</item>
+              <item translatable="yes">SDSSu</item>
+              <item translatable="yes">SDSSz</item>
+              <item translatable="yes">SDSSdr7g</item>
+              <item translatable="yes">SDSSdr7i</item>
+              <item translatable="yes">SDSSdr7r</item>
+              <item translatable="yes">SDSSdr7u</item>
+              <item translatable="yes">SDSSdr7z</item>
+              <item translatable="yes">NEAT</item>
+              <item translatable="yes">UKIDSS-J</item>
+              <item translatable="yes">UKIDSS-H</item>
+              <item translatable="yes">UKIDSS-K</item>
+              <item translatable="yes">WISE 3.4</item>
+              <item translatable="yes">WISE 4.6</item>
+              <item translatable="yes">WISE 12</item>
+              <item translatable="yes">WISE 22</item>
+            </items>
           </object>
           <packing>
             <property name="left_attach">1</property>
@@ -73,7 +99,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEntry" id="skyview_pixels_entry">
+          <object class="GtkEntry" id="pixels_entry">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="tooltip_text" translatable="yes">The size of the image in pixels. If only one value is given the height and width are the same.</property>
@@ -96,7 +122,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEntry" id="skyview_size_entry">
+          <object class="GtkEntry" id="size_entry">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="tooltip_text" translatable="yes">The size of the image in degrees. If only one value is given the height and width are the same.</property>
@@ -131,7 +157,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkComboBoxText" id="skyview_sampler_combo">
+          <object class="GtkComboBoxText" id="sampler_combotext">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="active">0</property>
@@ -149,7 +175,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEntry" id="skyview_rotation_entry">
+          <object class="GtkEntry" id="rotation_entry">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="tooltip_text" translatable="yes">Position angle in degrees (rotation).</property>
@@ -167,19 +193,6 @@
             <property name="hexpand">True</property>
             <property name="column_spacing">10</property>
             <child>
-              <object class="GtkButton" id="button1">
-                <property name="label" translatable="yes">Fetch</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <signal name="clicked" handler="skyview_fetch_stop_cb" object="GcxSkyviewQuery" swapped="no"/>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">0</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkProgressBar" id="progressbar1">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -188,6 +201,22 @@
               </object>
               <packing>
                 <property name="left_attach">1</property>
+                <property name="top_attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToggleButton" id="fetch_toggle">
+                <property name="label" translatable="yes">Fetch</property>
+                <property name="width_request">100</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="halign">center</property>
+                <property name="hexpand">False</property>
+                <signal name="toggled" handler="skyview_fetch_button_toggled" object="GcxSkyviewQuery" swapped="no"/>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
                 <property name="top_attach">0</property>
               </packing>
             </child>
@@ -211,7 +240,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkComboBoxText" id="skyview_resolver_combo">
+          <object class="GtkComboBoxText" id="resolver_combotext">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="active">0</property>

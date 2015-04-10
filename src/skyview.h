@@ -7,6 +7,7 @@
 G_BEGIN_DECLS
 
 typedef struct _GcxSkyviewQuery          GcxSkyviewQuery;
+typedef struct _GcxSkyviewQueryPrivate   GcxSkyviewQueryPrivate;
 typedef struct _GcxSkyviewQueryClass     GcxSkyviewQueryClass;
 
 #define GCX_TYPE_SKYVIEW_QUERY            (gcx_skyview_query_get_type())
