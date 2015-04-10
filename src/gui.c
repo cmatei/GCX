@@ -329,50 +329,6 @@ static gboolean image_clicked_cb(GtkWidget *w, GdkEventButton *event, gpointer d
 	return TRUE;
 }
 
-#define DRAG_MIN_MOVE 2
-static gint motion_event_cb (GtkWidget *widget, GdkEventMotion *event, gpointer window)
-{
-	int x, y, dx, dy;
-	GdkModifierType state;
-	static int ox, oy;
-
-	if (event->is_hint)
-		gdk_window_get_pointer (event->window, &x, &y, &state);
-	else
-	{
-		x = event->x;
-		y = event->y;
-		state = event->state;
-	}
-//	d3_printf("motion %d %d state %d\n", x - ox, y - oy, state);
-//	show_xy_status(window, 1.0 * x, 1.0 * y);
-	if (state & GDK_BUTTON1_MASK) {
-		dx = x - ox;
-		dy = y - oy;
-//		printf("moving by %d %d\n", x - ox, y - oy);
-		if (abs(dx) > DRAG_MIN_MOVE || abs(dy) > DRAG_MIN_MOVE) {
-			if (dx > DRAG_MIN_MOVE)
-				dx -= DRAG_MIN_MOVE;
-			else if (dx < -DRAG_MIN_MOVE)
-				dx += DRAG_MIN_MOVE;
-			else
-				dx = 0;
-			if (dy > DRAG_MIN_MOVE)
-				dy -= DRAG_MIN_MOVE;
-			else if (dy < -DRAG_MIN_MOVE)
-				dy += DRAG_MIN_MOVE;
-			else
-				dy = 0;
-			drag_adjust_cuts(window, dx, dy);
-			ox = x;
-			oy = y;
-		}
-	} else {
-		ox = x;
-		oy = y;
-	}
-	return TRUE;
-}
 
 
 
@@ -820,9 +776,6 @@ GtkWidget * create_image_window()
 
 	g_signal_connect(G_OBJECT(imview), "button_press_event",
 			 G_CALLBACK(image_clicked_cb), window);
-
-//	g_signal_connect(G_OBJECT(imview), "motion_notify_event",
-//			 G_CALLBACK(motion_event_cb), window);
 
 	gtk_widget_set_events(imview,  GDK_BUTTON_PRESS_MASK
 			      | GDK_POINTER_MOTION_MASK

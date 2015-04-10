@@ -70,9 +70,6 @@ extern void act_recipe_open (GtkAction *action, gpointer window);
 extern void act_stars_add_gsc2_file (GtkAction *action, gpointer window);
 
 /* from imadjust.c */
-//extern void set_default_channel_cuts(struct image_channel* channel);
-//extern void set_darea_size(GtkWidget *window, struct map_geometry *geom, double xc, double yc);
-extern void drag_adjust_cuts(GtkWidget *window, int dx, int dy);
 extern void pan_cursor(GtkWidget *window);
 extern void show_region_stats(GtkWidget *window, double x, double y);
 extern void show_zoom_cuts(GtkWidget * window);

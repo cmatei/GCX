@@ -120,6 +120,7 @@ struct _GcxImageViewClass {
 G_DEFINE_TYPE(GcxImageView, gcx_image_view, GTK_TYPE_SCROLLED_WINDOW);
 
 static gboolean gcx_image_view_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer user);
+static gboolean gcx_image_view_motion_event_cb (GtkWidget *widget, GdkEventMotion *event, gpointer user);
 
 static void
 gcx_image_view_init(GcxImageView *view)
@@ -140,8 +141,11 @@ gcx_image_view_init(GcxImageView *view)
 			       | GDK_POINTER_MOTION_MASK
 			       | GDK_POINTER_MOTION_HINT_MASK);
 
-	g_signal_connect (G_OBJECT(view->darea), "draw",
-			  G_CALLBACK(gcx_image_view_draw_cb), view);
+	g_signal_connect (G_OBJECT (view->darea), "draw",
+			  G_CALLBACK (gcx_image_view_draw_cb), view);
+
+	g_signal_connect (G_OBJECT (view), "motion-notify-event",
+			  G_CALLBACK (gcx_image_view_motion_event_cb), view);
 
 	view->cache = new_map_cache (0, 0);
 	view->map = new_frame_map ();
@@ -855,27 +859,22 @@ static float sigmas[SIGMAS_VALS] = {
 void channel_set_lut_from_gamma(struct frame_map *map);
 
 
-void drag_adjust_cuts(GtkWidget *window, int dx, int dy)
+static void drag_adjust_cuts(GtkWidget *widget, int dx, int dy)
 {
-#if 0
-	struct frame_map *map;
+	GcxImageView *iv = GCX_IMAGE_VIEW (widget);
+	struct frame_map *map = iv->map;
 	double base;
 	double span;
 
-	channel = g_object_get_data(G_OBJECT(window), "i_channel");
-	if (channel == NULL) {
-		err_printf("drag_adjust_cuts: no i_channel\n");
-		return ;
-	}
-	if (channel->fr == NULL) {
+	if (iv->map->fr == NULL) {
 		err_printf("drag_adjust_cuts: no frame in i_channel\n");
 		return ;
 	}
 
-	span = channel->hcut - channel->lcut;
-	base = channel->lcut + channel->avg_at * span;
+	span = map->hcut - map->lcut;
+	base = map->lcut + map->avg_at * span;
 
-	if (channel->invert)
+	if (map->invert)
 		dx = -dx;
 
 	if (dy > 30)
@@ -889,15 +888,61 @@ void drag_adjust_cuts(GtkWidget *window, int dx, int dy)
 
 	if (dy > 0 || span > MIN_SPAN)
 		span = span * (1.0 + dy * CONTRAST_STEP_DRAG);
-	channel->lcut = base - span * channel->avg_at - dx * BRIGHT_STEP_DRAG * span;
-	channel->hcut = base + span * (1 - channel->avg_at)- dx * BRIGHT_STEP_DRAG * span;
+	map->lcut = base - span * map->avg_at - dx * BRIGHT_STEP_DRAG * span;
+	map->hcut = base + span * (1 - map->avg_at)- dx * BRIGHT_STEP_DRAG * span;
 
-//	d3_printf("new cuts: lcut:%.0f hcut:%.0f\n", channel->lcut, channel->hcut);
-	channel->changed = 1;
-	show_zoom_cuts(window);
-	gtk_widget_queue_draw(window);
-#endif
+//	d3_printf("new cuts: lcut:%.0f hcut:%.0f\n", map->lcut, map->hcut);
+	map->changed = 1;
+	//show_zoom_cuts(window);
+	gtk_widget_queue_draw(iv->darea);
 }
+
+#define DRAG_MIN_MOVE 2
+static gboolean gcx_image_view_motion_event_cb (GtkWidget *widget, GdkEventMotion *event, gpointer window)
+{
+	int x, y, dx, dy;
+	GdkModifierType state;
+	static int ox, oy;
+
+	if (event->is_hint)
+		gdk_window_get_pointer (event->window, &x, &y, &state);
+	else
+	{
+		x = event->x;
+		y = event->y;
+		state = event->state;
+	}
+//	d3_printf("motion %d %d state %d\n", x - ox, y - oy, state);
+//	show_xy_status(window, 1.0 * x, 1.0 * y);
+	if (state & GDK_BUTTON1_MASK) {
+		dx = x - ox;
+		dy = y - oy;
+//		printf("moving by %d %d\n", x - ox, y - oy);
+		if (abs(dx) > DRAG_MIN_MOVE || abs(dy) > DRAG_MIN_MOVE) {
+			if (dx > DRAG_MIN_MOVE)
+				dx -= DRAG_MIN_MOVE;
+			else if (dx < -DRAG_MIN_MOVE)
+				dx += DRAG_MIN_MOVE;
+			else
+				dx = 0;
+			if (dy > DRAG_MIN_MOVE)
+				dy -= DRAG_MIN_MOVE;
+			else if (dy < -DRAG_MIN_MOVE)
+				dy += DRAG_MIN_MOVE;
+			else
+				dy = 0;
+			drag_adjust_cuts(widget, dx, dy);
+			ox = x;
+			oy = y;
+		}
+	} else {
+		ox = x;
+		oy = y;
+	}
+
+	return TRUE;
+}
+
 
 /*
  * change channel cuts according to gui action

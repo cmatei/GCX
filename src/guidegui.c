@@ -252,50 +252,6 @@ static gboolean image_clicked_cb(GtkWidget *w, GdkEventButton *event, gpointer d
 	return TRUE;
 }
 
-#define DRAG_MIN_MOVE 2
-static gint motion_event_cb (GtkWidget *widget, GdkEventMotion *event, gpointer window)
-{
-	int x, y, dx, dy;
-	GdkModifierType state;
-	static int ox, oy;
-
-	if (event->is_hint) {
-		gdk_window_get_pointer (event->window, &x, &y, &state);
-	} else {
-		x = event->x;
-		y = event->y;
-		state = event->state;
-	}
-//	d3_printf("motion %d %d state %d\n", x - ox, y - oy, state);
-//	show_xy_status(window, 1.0 * x, 1.0 * y);
-	if (state & GDK_BUTTON1_MASK) {
-		dx = x - ox;
-		dy = y - oy;
-//		printf("moving by %d %d\n", x - ox, y - oy);
-		if (abs(dx) > DRAG_MIN_MOVE || abs(dy) > DRAG_MIN_MOVE) {
-			if (dx > DRAG_MIN_MOVE)
-				dx -= DRAG_MIN_MOVE;
-			else if (dx < -DRAG_MIN_MOVE)
-				dx += DRAG_MIN_MOVE;
-			else
-				dx = 0;
-			if (dy > DRAG_MIN_MOVE)
-				dy -= DRAG_MIN_MOVE;
-			else if (dy < -DRAG_MIN_MOVE)
-				dy += DRAG_MIN_MOVE;
-			else
-				dy = 0;
-			drag_adjust_cuts(window, dx, dy);
-			ox = x;
-			oy = y;
-		}
-	} else {
-		ox = x;
-		oy = y;
-	}
-	return TRUE;
-}
-
 /* find a guide star from the image */
 /* if we have user stars, we use the first of them; otherwise we search for stars */
 static void find_guide_star_cb( GtkWidget *widget, gpointer window)
@@ -743,8 +699,6 @@ void act_control_guider (GtkAction *action, gpointer window)
 //		set_named_callback(gwindow, "guide_box_darea", "expose_event", gbox_expose_cb);
 		g_signal_connect(G_OBJECT(gwindow), "delete_event",
 				 G_CALLBACK(guide_window_delete), window);
-		g_signal_connect(G_OBJECT(imview), "motion-notify-event",
-				 G_CALLBACK(motion_event_cb), gwindow);
 		g_signal_connect(G_OBJECT(imview), "button_press_event",
 				 G_CALLBACK(sources_clicked_cb), gwindow);
 		g_signal_connect(G_OBJECT(imview), "button_press_event",
