@@ -730,7 +730,7 @@ void act_control_guider (GtkAction *action, gpointer window)
 		gtk_widget_show_all(gwindow);
 
 	} else {
-		gdk_window_raise (gtk_widget_get_window (GTK_WIDGET(gwindow)));
+		gtk_window_present (GTK_WINDOW (gwindow));
 	}
 
 }

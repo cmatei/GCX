@@ -609,6 +609,6 @@ void act_control_options (GtkAction *action, gpointer window)
 		gtk_widget_show(parwin);
 	} else {
 		par_update_current(parwin);
-		gdk_window_raise (gtk_widget_get_window (GTK_WIDGET(parwin)));
+		gtk_window_present (GTK_WINDOW (parwin));
 	}
 }

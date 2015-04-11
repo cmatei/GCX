@@ -1075,8 +1075,7 @@ void act_control_camera (GtkAction *action, gpointer window)
 		cam_to_img(dialog);
 		gtk_widget_show_all(dialog);
 	} else {
-		gtk_widget_show(dialog);
-		gdk_window_raise( gtk_widget_get_window (dialog));
+		gtk_window_present (GTK_WINDOW (dialog));
 	}
 //	cam_dialog_update(dialog);
 //	cam_dialog_edit(dialog);

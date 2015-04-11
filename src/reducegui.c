@@ -1792,7 +1792,6 @@ void act_control_processing (GtkAction *action, gpointer window)
 		dialog = make_image_processing(window);
 		gtk_widget_show_all(dialog);
 	} else {
-		gtk_widget_show(dialog);
-		gdk_window_raise (gtk_widget_get_window(GTK_WIDGET(dialog)));
+		gtk_window_present (GTK_WINDOW (dialog));
 	}
 }

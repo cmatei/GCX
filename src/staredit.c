@@ -588,7 +588,8 @@ void star_edit_star(GtkWidget *window, struct cat_star *cats)
 		star_edit_set_star(dialog, cats);
 		update_star_edit(dialog);
 		gtk_widget_queue_draw(dialog);
-		gdk_window_raise (gtk_widget_get_window(GTK_WIDGET(dialog)));
+
+		gtk_window_present (GTK_WINDOW (dialog));
 	}
 
 }

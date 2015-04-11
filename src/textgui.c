@@ -107,7 +107,7 @@ void act_show_fits_headers (GtkAction *action, gpointer window)
 		gtk_widget_show(dialog);
 	} else {
 		update_fits_header_dialog(dialog, fr);
-		gdk_window_raise (gtk_widget_get_window (GTK_WIDGET(dialog)));
+		gtk_window_present (GTK_WINDOW (dialog));
 	}
 	snprintf(title, 255, "%s header", fr->name);
 	gtk_window_set_title(GTK_WINDOW(dialog), title);
@@ -153,7 +153,7 @@ static void help_page_cb(gpointer window, guint action)
 		gtk_widget_show(dialog);
 	} else {
 		update_help_text(dialog, page);
-		gdk_window_raise (gtk_widget_get_window (GTK_WIDGET(dialog)));
+		gtk_window_present (GTK_WINDOW (dialog));
 	}
 	gtk_window_set_title(GTK_WINDOW(dialog), "Help");
 }

@@ -526,7 +526,6 @@ void act_download_skyview(GtkAction *action, gpointer window)
 		dialog = gcx_skyview_query_new (NULL);
 		gtk_widget_show_all (dialog);
 	} else {
-		gtk_widget_show (dialog);
-		gdk_window_raise (gtk_widget_get_window(GTK_WIDGET(dialog)));
+		gtk_window_present (GTK_WINDOW (dialog));
 	}
 }

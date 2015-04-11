@@ -117,8 +117,7 @@ void act_recipe_create (GtkAction *action, gpointer window)
 		gtk_widget_show(dialog);
 	} else {
 		update_rcp_dialog(window, dialog);
-		gtk_widget_show(dialog);
-		gdk_window_raise (gtk_widget_get_window(GTK_WIDGET(dialog)));
+		gtk_window_present (GTK_WINDOW (dialog));
 	}
 }
 

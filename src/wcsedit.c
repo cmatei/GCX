@@ -136,7 +136,7 @@ void act_control_wcs (GtkAction *action, gpointer window)
 	} else {
 //		update_fits_header_dialog(dialog, i_chan->fr);
 		update_wcs_dialog(dialog, wcs);
-		gdk_window_raise (gtk_widget_get_window(GTK_WIDGET(dialog)));
+		gtk_window_present (GTK_WINDOW (dialog));
 	}
 }
 

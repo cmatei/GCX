@@ -1397,7 +1397,6 @@ void act_control_mband(GtkAction *action, gpointer window)
 		if (action)
 			gtk_widget_show(dialog);
 	} else if (action) {
-		gtk_widget_show(dialog);
-		gdk_window_raise (gtk_widget_get_window (GTK_WIDGET(dialog)));
+		gtk_window_present (GTK_WINDOW (dialog));
 	}
 }

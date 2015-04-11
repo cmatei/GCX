@@ -2066,7 +2066,7 @@ void act_control_histogram(GtkAction *action, gpointer window)
 		imadj_set_callbacks(dialog);
 		gtk_widget_show(dialog);
 	} else {
-		gdk_window_raise (gtk_widget_get_window(GTK_WIDGET(dialog)));
+		gtk_window_present (GTK_WINDOW (dialog));
 	}
 	//ref_image_channel(i_channel);
 	//g_object_set_data_full(G_OBJECT(dialog), "i_channel", i_channel,
