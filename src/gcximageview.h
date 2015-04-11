@@ -23,9 +23,6 @@ GtkWidget * gcx_image_view_new();
 int               gcx_image_view_set_frame  (GcxImageView *view, struct ccd_frame *fr);
 struct ccd_frame *gcx_image_view_get_frame  (GcxImageView *view);
 
-void              gcx_image_view_set_scrolls(GcxImageView *view, double xc, double yc);
-void              gcx_image_view_get_scrolls(GcxImageView *view, double *xc, double *yc);
-
 double            gcx_image_view_get_zoom   (GcxImageView *view);
 
 struct gui_star_list *gcx_image_view_get_stars (GcxImageView *view);

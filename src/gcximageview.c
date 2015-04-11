@@ -856,7 +856,7 @@ static float sigmas[SIGMAS_VALS] = {
 #define VIEW_PAN_CURSOR 0x600
 
 
-void channel_set_lut_from_gamma(struct frame_map *map);
+static void channel_set_lut_from_gamma(struct frame_map *map);
 
 
 static void drag_adjust_cuts(GtkWidget *widget, int dx, int dy)
@@ -902,7 +902,7 @@ static gboolean gcx_image_view_motion_event_cb (GtkWidget *widget, GdkEventMotio
 {
 	int x, y, dx, dy;
 	GdkModifierType state;
-	static int ox, oy;
+	static int ox = 0, oy = 0;
 
 	if (event->is_hint)
 		gdk_window_get_pointer (event->window, &x, &y, &state);
@@ -1056,7 +1056,7 @@ __set_scroll(GtkAdjustment *adjustment, gdouble position)
 	g_object_set (G_OBJECT(adjustment), "value", value, NULL);
 }
 
-void
+static void
 gcx_image_view_set_scrolls(GcxImageView *view, double xc, double yc)
 {
 	__set_scroll (gtk_scrolled_window_get_hadjustment (GTK_SCROLLED_WINDOW(view)), xc);
@@ -1083,7 +1083,7 @@ __get_scroll(GtkAdjustment *adjustment, gdouble *position)
 	*position = (value + page_size / 2) / (upper - lower);
 }
 
-void
+static void
 gcx_image_view_get_scrolls(GcxImageView *view, double *xc, double *yc)
 {
 	__get_scroll (gtk_scrolled_window_get_hadjustment (GTK_SCROLLED_WINDOW(view)), xc);
@@ -1567,7 +1567,7 @@ void show_zoom_cuts(GtkWidget * window)
 #define T_START_GAMMA 0.2
 
 /* set LUT from the gamma and toe */
-void channel_set_lut_from_gamma(struct frame_map *map)
+static void channel_set_lut_from_gamma(struct frame_map *map)
 {
 	double x, y;
 	int i;
