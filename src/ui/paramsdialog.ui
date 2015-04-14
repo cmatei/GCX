@@ -28,6 +28,8 @@
         <child internal-child="action_area">
           <object class="GtkButtonBox" id="dialog-action_area1">
             <property name="can_focus">False</property>
+            <property name="margin_top">5</property>
+            <property name="margin_bottom">5</property>
             <property name="layout_style">spread</property>
             <child>
               <object class="GtkButton" id="save_button">
@@ -134,6 +136,10 @@
               <object class="GtkGrid" id="grid1">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="margin_left">5</property>
+                <property name="margin_right">5</property>
+                <property name="margin_top">5</property>
+                <property name="margin_bottom">5</property>
                 <property name="hexpand">True</property>
                 <child>
                   <object class="GtkLabel" id="title_label">
@@ -151,6 +157,7 @@
                   <object class="GtkLabel" id="desc_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="margin_top">5</property>
                     <property name="xalign">0</property>
                     <property name="wrap">True</property>
                     <property name="wrap_mode">word-char</property>
@@ -164,6 +171,7 @@
                   <object class="GtkLabel" id="type_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="margin_top">5</property>
                     <property name="xalign">0</property>
                     <property name="wrap">True</property>
                   </object>
@@ -176,6 +184,7 @@
                   <object class="GtkLabel" id="status_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="margin_top">5</property>
                     <property name="xalign">0</property>
                     <property name="wrap">True</property>
                   </object>
@@ -188,6 +197,7 @@
                   <object class="GtkLabel" id="fname_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="margin_top">5</property>
                     <property name="xalign">0</property>
                   </object>
                   <packing>
@@ -198,6 +208,7 @@
                 <child>
                   <object class="GtkComboBoxText" id="value_comboboxtext">
                     <property name="can_focus">True</property>
+                    <property name="margin_top">5</property>
                     <property name="has_entry">True</property>
                     <child internal-child="entry">
                       <object class="GtkEntry" id="value_entry">
