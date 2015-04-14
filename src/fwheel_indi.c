@@ -1,23 +1,23 @@
 /*******************************************************************************
   Copyright(c) 2009 Geoffrey Hausheer. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: gcx@phracturedblue.com <Geoffrey Hausheer>
 *******************************************************************************/
 
@@ -72,7 +72,8 @@ static void fwheel_connect(struct indi_prop_t *iprop, void *callback_data)
 		indi_prop_add_cb(iprop, (IndiPropCB)fwheel_slot_update, fwheel);
 	}
 	else
-		INDI_try_dev_connect(iprop, INDI_COMMON (fwheel), P_STR(INDI_FWHEEL_PORT));
+		//INDI_try_dev_connect(iprop, INDI_COMMON (fwheel), P_STR(INDI_FWHEEL_PORT));
+		INDI_try_dev_connect(iprop, INDI_COMMON (fwheel), NULL);
 	fwheel_check_state(fwheel);
 }
 
@@ -101,6 +102,7 @@ struct fwheel_t *fwheel_find(void *window)
 {
 	struct fwheel_t *fwheel;
 	struct indi_t *indi;
+	char *device = P_STR(INDI_MAIN_CAMERA_FWHEEL);
 
 	fwheel = (struct fwheel_t *)g_object_get_data(G_OBJECT(window), "fwheel");
 
@@ -115,7 +117,7 @@ struct fwheel_t *fwheel_find(void *window)
 		return NULL;
 	fwheel = g_new0(struct fwheel_t, 1);
 	INDI_common_init(INDI_COMMON (fwheel), "filter wheel", fwheel_check_state, FWHEEL_CALLBACK_MAX);
-	indi_device_add_cb(indi, P_STR(INDI_FWHEEL_NAME), (IndiDevCB)fwheel_connect, fwheel);
+	indi_device_add_cb(indi, device, (IndiDevCB)fwheel_connect, fwheel);
 	g_object_set_data(G_OBJECT(window), "fwheel", fwheel);
 	if (fwheel->ready)
 		return fwheel;

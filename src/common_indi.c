@@ -108,11 +108,23 @@ void INDI_try_dev_connect(struct indi_prop_t *iprop, struct INDI_common_t *devic
 
 struct indi_t *INDI_get_indi(void *window)
 {
-	struct indi_t *indi;
+	struct indi_t *indi = NULL;
+	GNetworkAddress *addr;
+	GError *err = NULL;
+
 	indi = (struct indi_t *)g_object_get_data(G_OBJECT(window), "indi");
 	if (! indi) {
 		d4_printf("Trying indi connection\n");
-		indi = indi_init(P_STR(INDI_HOST_NAME), P_INT(INDI_PORT_NUMBER), "INDI_gcx");
+
+		addr = G_NETWORK_ADDRESS (g_network_address_parse (P_STR(INDI_SERVER), 7624, &err));
+		if (!addr) {
+			err_printf("Cannot parse INDI server option.\n");
+			return NULL;
+		}
+
+		indi = indi_init (g_network_address_get_hostname (addr),
+				  g_network_address_get_port (addr),
+				  "INDI_gcx");
 		if (indi)  {
 			d4_printf("Found indi\n");
 			g_object_set_data(G_OBJECT(window), "indi", indi);

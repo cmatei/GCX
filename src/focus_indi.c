@@ -73,7 +73,8 @@ static void focuser_connect(struct indi_prop_t *iprop, void *callback_data)
 		focuser->temperature_prop = iprop;
 		indi_prop_add_cb(iprop, (IndiPropCB)focuser_temp_change_cb, focuser);
 	}else {
-		INDI_try_dev_connect(iprop, INDI_COMMON (focuser), P_STR(INDI_FOCUSER_PORT));
+		//INDI_try_dev_connect(iprop, INDI_COMMON (focuser), P_STR(INDI_FOCUSER_PORT));
+		INDI_try_dev_connect(iprop, INDI_COMMON (focuser), NULL);
 	}
 
 	focuser_check_state(focuser);
@@ -135,6 +136,7 @@ struct focuser_t *focuser_find(void *window)
 {
 	struct focuser_t *focuser;
 	struct indi_t *indi;
+	char *device = P_STR(INDI_MAIN_CAMERA_FOCUSER);
 
 	focuser = (struct focuser_t *) g_object_get_data(G_OBJECT(window), "focuser");
 	if (focuser) {
@@ -152,7 +154,7 @@ struct focuser_t *focuser_find(void *window)
 
 	focuser = g_new0(struct focuser_t, 1);
 	INDI_common_init(INDI_COMMON (focuser), "focuser", focuser_check_state, FOCUSER_CALLBACK_MAX);
-	indi_device_add_cb(indi, P_STR(INDI_FOCUSER_NAME), (IndiDevCB)focuser_connect, focuser);
+	indi_device_add_cb(indi, device, (IndiDevCB)focuser_connect, focuser);
 
 	g_object_set_data(G_OBJECT(window), "focuser", focuser);
 	if (focuser->ready)

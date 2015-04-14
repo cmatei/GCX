@@ -309,11 +309,15 @@ struct camera_t *camera_find(void *window, int type)
 {
 	struct camera_t *camera;
 	struct indi_t *indi;
+	char *device = NULL;
+	char *port = NULL;
 
 	if (type == CAMERA_MAIN) {
 		camera = (struct camera_t *)g_object_get_data(G_OBJECT(window), "camera-main");
+		device = P_STR(INDI_MAIN_CAMERA);
 	} else {
 		camera = (struct camera_t *)g_object_get_data(G_OBJECT(window), "camera-guide");
+		device = P_STR(INDI_GUIDE_CAMERA);
 	}
 
 	if (camera) {
@@ -329,13 +333,13 @@ struct camera_t *camera_find(void *window, int type)
 	camera = g_new0(struct camera_t, 1);
 	if (type == CAMERA_MAIN) {
 		INDI_common_init(INDI_COMMON (camera), "main camera", camera_check_state, CAMERA_CALLBACK_MAX);
-		camera->portname = P_STR(INDI_MAIN_CAMERA_PORT);
-		indi_device_add_cb(indi, P_STR(INDI_MAIN_CAMERA_NAME), (IndiDevCB)camera_connect, camera);
+		//camera->portname = P_STR(INDI_MAIN_CAMERA_PORT);
+		indi_device_add_cb(indi, device, (IndiDevCB)camera_connect, camera);
 		g_object_set_data(G_OBJECT(window), "camera-main", camera);
 	} else {
 		INDI_common_init(INDI_COMMON (camera), "guide camera", camera_check_state, CAMERA_CALLBACK_MAX);
-		camera->portname = P_STR(INDI_GUIDE_CAMERA_PORT);
-		indi_device_add_cb(indi, P_STR(INDI_GUIDE_CAMERA_NAME), (IndiDevCB)camera_connect, camera);
+		//camera->portname = P_STR(INDI_GUIDE_CAMERA_PORT);
+		indi_device_add_cb(indi, device, (IndiDevCB)camera_connect, camera);
 		g_object_set_data(G_OBJECT(window), "camera-guide", camera);
 	}
 	if (camera->ready)

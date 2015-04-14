@@ -671,7 +671,6 @@ void indi_read_cb (void *fd, void *opaque)
 struct indi_t *indi_init(const char *hostname, int port, const char *config)
 {
 	struct indi_t *indi;
-
 	char msg[1024];
 
 	indi = (struct indi_t *)calloc(1, sizeof(struct indi_t));
@@ -691,4 +690,3 @@ struct indi_t *indi_init(const char *hostname, int port, const char *config)
 	io_indi_sock_write(indi->fh, msg, strlen(msg));
 	return indi;
 }
-

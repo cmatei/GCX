@@ -111,7 +111,6 @@ static void tele_connect(struct indi_prop_t *iprop, void *callback_data)
 {
 	struct tele_t *tele = (struct tele_t *)callback_data;
 
-
 	if (strcmp(iprop->name, "EQUATORIAL_EOD_COORD") == 0) {
 		tele->coord_prop = iprop;
 		indi_prop_add_cb(iprop, (IndiPropCB)tele_new_coords_cb, tele);
@@ -141,8 +140,10 @@ static void tele_connect(struct indi_prop_t *iprop, void *callback_data)
 	else if (strcmp(iprop->name, "Slew rate") == 0) {
 		tele->speed_prop = iprop;
 	}
-	else
-		INDI_try_dev_connect(iprop, INDI_COMMON (tele), P_STR(INDI_SCOPE_PORT));
+	else {
+		//INDI_try_dev_connect(iprop, INDI_COMMON (tele), P_STR(INDI_SCOPE_PORT));
+		INDI_try_dev_connect(iprop, INDI_COMMON (tele), NULL);
+	}
 
 	tele_check_state(tele);
 }

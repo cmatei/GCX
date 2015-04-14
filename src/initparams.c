@@ -203,37 +203,38 @@ static void set_par_description(GcxPar p, char * text)
 
 void init_ptable(void)
 {
-/* first the trees */
+
+	/* first the trees */
 	add_par_tree(PAR_FILES, PAR_NULL,
-		     "file", "File and Device Options");
+		     "file", "Files and Directories");
 	add_par_tree(PAR_FITS_FIELDS, PAR_FILES,
 		     "fits", "Fits Field Names");
 	add_par_tree(PAR_OBS_DEFAULTS, PAR_NULL,
-		     "obs", "General Observation Setup Data");
+		     "obs", "General Observation Setup");
 	add_par_tree(PAR_INDI, PAR_NULL,
-		     "indi", "INDI connection options");
+		     "indi", "INDI");
 	add_par_tree(PAR_TELE, PAR_NULL,
-		     "tel", "Telescope control options");
+		     "tel", "Telescope control");
 	add_par_tree(PAR_GUIDE, PAR_NULL,
-		     "guide", "Guiding options");
+		     "guide", "Guiding");
 	add_par_tree(PAR_CCDRED, PAR_NULL,
-		     "ccdred", "CCD Reduction options");
+		     "ccdred", "CCD Reduction");
 	add_par_tree(PAR_STAR_DET, PAR_NULL,
-		     "stars", "Star Detection and Search Options");
+		     "stars", "Star Detection and Search");
 	add_par_tree(PAR_WCS_OPTIONS, PAR_NULL,
-		     "wcs", "Wcs Fitting Options");
+		     "wcs", "WCS Fitting");
 	add_par_tree(PAR_APHOT, PAR_NULL,
-		     "aphot", "Aperture Photometry Options");
+		     "aphot", "Aperture Photometry");
 	add_par_tree(PAR_MBAND, PAR_NULL,
-		     "mframe", "Multi-Frame Photometry Options");
+		     "mframe", "Multi-Frame Photometry");
 	add_par_tree(PAR_STAR_DISPLAY, PAR_NULL,
-		     "display", "Star Display Options");
+		     "display", "Star Display");
 	add_par_tree(PAR_STAR_COLORS, PAR_STAR_DISPLAY,
 		     "color", "Star Display Colors");
 	add_par_tree(PAR_STAR_SHAPES, PAR_STAR_DISPLAY,
 		     "shape", "Star Display Shapes");
 	add_par_tree(PAR_SYNTH, PAR_NULL,
-		     "synth", "Synthetic Star Generation Options");
+		     "synth", "Synthetic Star Generation");
 	add_par_tree(PAR_QUERY, PAR_NULL,
 		     "query", "On-line Resources");
 
@@ -725,8 +726,6 @@ void init_ptable(void)
 		    "CFA to use with raw FITS files", PAR_DEFAULT_CFA_NONE);
 	set_par_choices(FILE_DEFAULT_CFA, default_cfa);
 
-	add_par_string(FILE_GPS_SERIAL, PAR_FILES, 0, "gps_serial",
-		       "Serial line for gps receiver control", "/dev/ttyS0");
 	add_par_string(FILE_UNCOMPRESS, PAR_FILES, 0, "uncompress",
 		       "Command for uncompressing files", "zcat");
 	set_par_description(FILE_UNCOMPRESS,
@@ -1213,30 +1212,63 @@ void init_ptable(void)
 			    "median of its neighbours to be considered defect.");
 
 	/* INDI setup */
-	add_par_string(INDI_HOST_NAME, PAR_INDI, 0, "indi_host_name",
-		       "INDI server host", "localhost");
-	add_par_int(INDI_PORT_NUMBER, PAR_INDI, 0, "indi_host_port",
-		       "INDI server port", 7624);
-	add_par_string(INDI_MAIN_CAMERA_NAME, PAR_INDI, 0, "camera_main_indi_name",
-		       "INDI name of main camera", "CCD Simulator");
-	add_par_string(INDI_MAIN_CAMERA_PORT, PAR_INDI, 0, "camera_main_indi_port",
-		       "INDI port for main camera control", "/dev/video0");
-	add_par_string(INDI_GUIDE_CAMERA_NAME, PAR_INDI, 0, "camera_guide_indi_name",
-		       "INDI name of guide camera", "CCD Simulator");
-	add_par_string(INDI_GUIDE_CAMERA_PORT, PAR_INDI, 0, "camera_guide_indi_port",
-		       "INDI port for guide camera control", "/dev/video0");
-	add_par_string(INDI_SCOPE_NAME, PAR_INDI, 0, "scope_indi_name",
-		       "INDI name of Telescope", "Telescope Simulator");
-	add_par_string(INDI_SCOPE_PORT, PAR_INDI, 0, "scope_indi_port",
-		       "INDI port for telescope control", "/dev/ttyS0");
-	add_par_string(INDI_FWHEEL_NAME, PAR_INDI, 0, "fwheel_indi_name",
-		       "INDI name of filter wheel", "Filter Wheel Simulator");
-	add_par_string(INDI_FWHEEL_PORT, PAR_INDI, 0, "fwheel_indi_port",
-		       "INDI port for filter wheel control", "/dev/ttyS0");
-	add_par_string(INDI_FOCUSER_NAME, PAR_INDI, 0, "focuser_indi_name",
-		       "INDI name of main focuser", "Focuser Simulator");
-	add_par_string(INDI_FOCUSER_PORT, PAR_INDI, 0, "focuser_indi_port",
-		       "INDI port for main focuser", "/dev/ttyS0");
+	add_par_string     (INDI_SERVER, PAR_INDI, 0, "server",
+			    "Server", "localhost");
+	set_par_description(INDI_SERVER,
+			    "Address of the INDI server we're connecting to. If a non-standard "
+			    "port is used, it can be specified as host:port.");
+
+	add_par_string     (INDI_MAIN_CAMERA, PAR_INDI, 0, "main_camera",
+			    "Main camera", "CCD Simulator");
+	set_par_description(INDI_MAIN_CAMERA,
+			    "Device name of the main camera. "
+			    "If a PORT is required to connect to this device, it can be specified "
+			    "as DEVICE:PORT. Both the DEVICE and PORT can optionally be escaped in "
+			    "quotes.");
+	add_par_string     (INDI_MAIN_CAMERA_FWHEEL, PAR_INDI, 0, "main_camera_fwheel",
+			    "Main camera filter wheel", "CCD Simulator");
+	set_par_description(INDI_MAIN_CAMERA_FWHEEL,
+			    "Device name of the filter wheel associated with the main camera. "
+			    "If a PORT is required to connect to this device, it can be specified "
+			    "as DEVICE:PORT. Both the DEVICE and PORT can optionally be escaped in "
+			    "quotes.");
+	add_par_string     (INDI_MAIN_CAMERA_FOCUSER, PAR_INDI, 0, "main_camera_focuser",
+			    "Main camera focuser", "CCD Simulator");
+	set_par_description(INDI_MAIN_CAMERA_FOCUSER,
+			    "Device name of the focuser associated with the main camera. "
+			    "If a PORT is required to connect to this device, it can be specified "
+			    "as DEVICE:PORT. Both the DEVICE and PORT can optionally be escaped in "
+			    "quotes.");
+
+	add_par_string     (INDI_GUIDE_CAMERA, PAR_INDI, 0, "guide_camera",
+			    "Guide camera", "");
+	set_par_description(INDI_GUIDE_CAMERA,
+			    "Device name of the guide camera. "
+			    "If a PORT is required to connect to this device, it can be specified "
+			    "as DEVICE:PORT. Both the DEVICE and PORT can optionally be escaped in "
+			    "quotes.");
+	add_par_string     (INDI_GUIDE_CAMERA_FWHEEL, PAR_INDI, 0, "guide_camera_fwheel",
+			    "Guide camera filter wheel", "");
+	set_par_description(INDI_GUIDE_CAMERA_FWHEEL,
+			    "Device name of the filter wheel associated with the guide camera. "
+			    "If a PORT is required to connect to this device, it can be specified "
+			    "as DEVICE:PORT. Both the DEVICE and PORT can optionally be escaped in "
+			    "quotes.");
+	add_par_string     (INDI_GUIDE_CAMERA_FOCUSER, PAR_INDI, 0, "guide_camera_focuser",
+			    "Guide camera focuser", "");
+	set_par_description(INDI_GUIDE_CAMERA_FOCUSER,
+			    "Device name of the focuser associated with the guide camera. "
+			    "If a PORT is required to connect to this device, it can be specified "
+			    "as DEVICE:PORT. Both the DEVICE and PORT can optionally be escaped in "
+			    "quotes.");
+
+	add_par_string     (INDI_SCOPE_NAME, PAR_INDI, 0, "scope",
+			    "Telescope", "Telescope Simulator");
+	set_par_description(INDI_SCOPE_NAME,
+			    "Device name of the telescope. "
+			    "If a PORT is required to connect to this device, it can be specified "
+			    "as DEVICE:PORT. Both the DEVICE and PORT can optionally be escaped in "
+			    "quotes.");
 
 	/* telescope control */
 	add_par_double(TELE_E_LIMIT, PAR_TELE, PREC_1, "elimit",
