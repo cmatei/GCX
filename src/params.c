@@ -28,6 +28,10 @@
 #include <string.h>
 #include <ctype.h>
 
+#include <errno.h>
+
+
+
 #include "gcx.h"
 #include "gcximageview.h"
 #include "params.h"
@@ -71,20 +75,6 @@ char * wcsfit_models[] = PAR_CHOICE_WCSFIT_MODELS;
 char * stack_framing_options[] = PAR_CHOICE_STACK_FRAMING_OPTIONS;
 
 
-/*
- * return a pointer to a 1-char string describing the current
- * parameter status. The string is actually a constant
- */
-char *status_string(GcxPar p)
-{
-	if (PAR(p)->flags & PAR_USER) {
-		return "User Set";
-	} else if (PAR(p)->flags & PAR_FROM_RC) {
-		return "From File";
-	} else {
-		return "Default";
-	}
-}
 
 /* print a par default value for display) */
 void make_defval_string(GcxPar p, char *c, int len)
@@ -193,24 +183,29 @@ void make_value_string(GcxPar p, char *c, int len)
  * return 0 if successfull.
  * We need to add stuff for formats other than the 'natural'
  */
-int try_parse_double(GcxPar p, char *text)
+int try_parse_double(GcxPar p, const char *text)
 {
-	float v;
-	int ret;
-	ret = sscanf(text, "%f", &v);
-	if (ret > 0) {
-		P_DBL(p) = v;
-		return 0;
-	} else {
+	double v;
+	char *endp;
+
+	/* use g_ascii_strtod for C locale behaviour */
+	v = g_ascii_strtod(text, &endp);
+	if ((*endp != 0) ||
+	    (v ==  HUGE_VAL && errno == ERANGE) ||
+	    (v == -HUGE_VAL && errno == ERANGE) ||
+	    (v == 0.0 && errno == ERANGE))
+
 		return -1;
-	}
+
+	P_DBL(p) = v;
+	return 0;
 }
 
 /* try to parse the string to an int according to the format
  * return 0 if successfull.
  * We need to add stuff for formats other than the 'natural'
  */
-int try_parse_int(GcxPar p, char *text)
+int try_parse_int(GcxPar p, const char *text)
 {
 	int v;
 	int ret;
@@ -253,7 +248,7 @@ int try_parse_int(GcxPar p, char *text)
 
 /* change the parameter's value string using a copy of the supplied
  * text */
-void change_par_string(GcxPar p, char *text)
+void change_par_string(GcxPar p, const char *text)
 {
 	if (P_STR(p) != NULL) {
 		free(P_STR(p));
@@ -266,7 +261,7 @@ void change_par_string(GcxPar p, char *text)
 
 /* change the parameter's value string using a copy of the supplied
  * text */
-void change_par_default_string(GcxPar p, char *text)
+static void change_par_default_string(GcxPar p, char *text)
 {
 	if (PAR(p)->defval.s != NULL) {
 		free(PAR(p)->defval.s);
@@ -282,7 +277,7 @@ void change_par_default_string(GcxPar p, char *text)
  * and update it's value. return 0 if the parse was successfull,
  * or a negative error
  */
-int try_update_par_value(GcxPar p, char *text)
+int try_update_par_value(GcxPar p, const char *text)
 {
 	switch(PAR_TYPE(p)) {
 	case PAR_INTEGER:
@@ -454,8 +449,7 @@ static void fprint_item(FILE *fp, GcxPar p, char *path)
 void fprint_params(FILE *fp, GcxPar p)
 {
 	if (p != PAR_NULL) {
-
-/* search for the proper path */
+		/* search for the proper path */
 		fprint_item(fp, p, ".");
 	} else {
 		p = PAR_FIRST;

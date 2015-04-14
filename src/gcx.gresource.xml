@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/org/gcx">
+    <file preprocess="xml-stripblanks">ui/paramsdialog.ui</file>
     <file preprocess="xml-stripblanks">ui/camera.ui</file>
     <file preprocess="xml-stripblanks">ui/ccdreduction.ui</file>
     <file preprocess="xml-stripblanks">ui/entryprompt.ui</file>
     <file preprocess="xml-stripblanks">ui/multiband.ui</file>
-    <file preprocess="xml-stripblanks">ui/paredit.ui</file>
     <file preprocess="xml-stripblanks">ui/pstar.ui</file>
     <file preprocess="xml-stripblanks">ui/query_window.ui</file>
     <file preprocess="xml-stripblanks">ui/recipe.ui</file>

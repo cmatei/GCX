@@ -16,7 +16,7 @@ gcx_SOURCES = \
 	cameragui.c cameragui.h catalogs.c catalogs.h \
 	filegui.c filegui.h gui.c gui.h imadjust.c \
 	interface.c interface.h obsdata.c obsdata.h obslist.c \
-	obslist.h params.c paramsgui.c params.h photometry.c \
+	obslist.h params.c params.h photometry.c \
 	sourcesdraw.c sourcesdraw.h staredit.c \
 	textgui.c wcs.c wcs.h \
 	helpmsg.c helpmsg.h wcsedit.c recipy.c recipy.h recipygui.c symbols.h\
@@ -31,6 +31,7 @@ gcx_SOURCES = \
 	fwheel_indi.c fwheel_indi.h focus_indi.c focus_indi.h \
 	common_indi.c common_indi.h \
 	gcximageview.c gcximageview.h \
+	gcxparamsdialog.c gcxparamsdialog.h \
         \
 	libindiclient/lilxml.h libindiclient/lilxml.c \
 	libindiclient/base64.h libindiclient/base64.c \

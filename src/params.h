@@ -559,13 +559,14 @@ extern char * stack_framing_options[];
 /* function prototypes */
 /* params.c */
 void init_ptable(void);
-char *status_string(GcxPar p);
+
 void make_value_string(GcxPar p, char *c, int len);
 void make_defval_string(GcxPar p, char *c, int len);
-int try_parse_double(GcxPar p, char *text);
-int try_parse_int(GcxPar p, char *text);
-int try_update_par_value(GcxPar p, char *text);
-void change_par_string(GcxPar p, char *text);
+
+void change_par_string(GcxPar p, const char *text);
+
+int try_update_par_value(GcxPar p, const char *text);
+
 int or_child_type(GcxPar p, int type);
 int fscan_params(FILE *fp, GcxPar root);
 int next_token(char **text, char **start, char **end);
