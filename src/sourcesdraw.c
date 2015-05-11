@@ -467,7 +467,7 @@ void find_stars_cb(gpointer window, guint action)
 			error_beep();
 			return;
 		}
-		gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
+		gsl = gcx_image_view_get_stars (iv);
 		if (gsl == NULL) {
 			gsl = gui_star_list_new();
 			//attach_star_list(gsl, window);
@@ -488,7 +488,7 @@ void find_stars_cb(gpointer window, guint action)
 			error_beep();
 			return;
 		}
-		gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
+		gsl = gcx_image_view_get_stars (iv);
 		if (gsl == NULL) {
 			gsl = gui_star_list_new();
 			//attach_star_list(gsl, window);
@@ -528,7 +528,8 @@ void find_stars_cb(gpointer window, guint action)
 			error_beep();
 			return;
 		}
-		gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
+
+		gsl = gcx_image_view_get_stars (iv);
 		if (gsl == NULL) {
 			gsl = gui_star_list_new();
 			//attach_star_list(gsl, window);
@@ -559,7 +560,7 @@ void find_stars_cb(gpointer window, guint action)
 		break;
 
 	case ADD_STARS_DETECT:
-		gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
+		gsl = gcx_image_view_get_stars (iv);
 		if (gsl == NULL) {
 			gsl = gui_star_list_new();
 			//attach_star_list(gsl, window);
@@ -616,7 +617,7 @@ void find_stars_cb(gpointer window, guint action)
 			error_beep();
 			return;
 		}
-		gsl = g_object_get_data(G_OBJECT(window), "gui_star_list");
+		gsl = gcx_image_view_get_stars (iv);
 		if (gsl == NULL) {
 			gsl = gui_star_list_new();
 			//attach_star_list(gsl, window);
@@ -633,6 +634,7 @@ void find_stars_cb(gpointer window, guint action)
 		err_printf("find_stars_cb: unknown action %d \n", action);
 		break;
 	}
+
 	gtk_widget_queue_draw(window);
 }
 

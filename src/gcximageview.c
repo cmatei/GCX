@@ -122,6 +122,8 @@ G_DEFINE_TYPE(GcxImageView, gcx_image_view, GTK_TYPE_SCROLLED_WINDOW);
 static gboolean gcx_image_view_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer user);
 static gboolean gcx_image_view_motion_event_cb (GtkWidget *widget, GdkEventMotion *event, gpointer user);
 
+static void gcx_image_view_queue_draw_region (GtkWidget *widget, const cairo_region_t *region);
+
 static void
 gcx_image_view_init(GcxImageView *view)
 {
@@ -165,15 +167,16 @@ gcx_image_view_finalize(GObject *object)
 }
 
 static void
-gcx_image_view_class_init(GcxImageViewClass *klass)
+gcx_image_view_class_init(GcxImageViewClass *class)
 {
-	GObjectClass *gobject_class = (GObjectClass *) klass;
+	GObjectClass *gobject_class = G_OBJECT_CLASS (class);
+	GtkWidgetClass *widget_class = (GtkWidgetClass *) class;
 
 	gobject_class->finalize = gcx_image_view_finalize;
 
 	image_view_signals[FRAME_CHANGED] =
 		g_signal_new ("frame-changed",
-			      G_TYPE_FROM_CLASS (klass),
+			      G_TYPE_FROM_CLASS (class),
 			      G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
 			      G_STRUCT_OFFSET (GcxImageViewClass, frame_changed),
 			      NULL, NULL,
@@ -182,12 +185,14 @@ gcx_image_view_class_init(GcxImageViewClass *klass)
 
 	image_view_signals[MAPPING_CHANGED] =
 		g_signal_new ("mapping-changed",
-			      G_TYPE_FROM_CLASS (klass),
+			      G_TYPE_FROM_CLASS (class),
 			      G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
 			      G_STRUCT_OFFSET (GcxImageViewClass, mapping_changed),
 			      NULL, NULL,
 			      g_cclosure_marshal_VOID__VOID,
 			      G_TYPE_NONE, 0);
+
+	widget_class->queue_draw_region = gcx_image_view_queue_draw_region;
 
 }
 
@@ -198,6 +203,14 @@ gcx_image_view_new()
 	return GTK_WIDGET(g_object_new (GCX_TYPE_IMAGE_VIEW, NULL));
 }
 
+
+static void
+gcx_image_view_queue_draw_region (GtkWidget *widget, const cairo_region_t *region)
+{
+	GcxImageView *view = GCX_IMAGE_VIEW (widget);
+
+	GTK_WIDGET_CLASS (gcx_image_view_parent_class)->queue_draw_region (widget, region);
+}
 
 
 
@@ -1151,9 +1164,9 @@ static void set_view_size(GcxImageView *view, double xc, double yc)
 	gtk_widget_set_size_request(GTK_WIDGET(view->darea), view->map->width * zi / zo,
 				    view->map->height * zi / zo);
 
-/* we need this to make sure the drawing area contracts properly
- * when we go from scrollbars to no scrollbars, we have to be sure
- * everything happens in sequnece */
+	/* we need this to make sure the drawing area contracts properly
+	 * when we go from scrollbars to no scrollbars, we have to be sure
+	 * everything happens in sequnece */
 
 	if (w >= view->map->width * zi / zo || h >= view->map->height * zi / zo) {
 		gtk_widget_queue_resize (GTK_WIDGET(view));
