@@ -490,6 +490,177 @@ static struct catalog *cat_open_ucac4(struct catalog *cat)
 
 /* local catalog code */
 
+#define MAX_CAT_LOAD 100000
+#define CAT_MAX_OBS 16
+/* load a file into the local catalog; return the number of stars added
+   or a negative error. */
+static int local_load_file(char *fn)
+{
+	struct catalog *loc;
+	FILE *inf;
+	int n = 0;
+	struct stf *stf;
+	GList *sl;
+
+
+	loc = open_catalog("local");
+	g_return_val_if_fail(loc != NULL, -1);
+
+	inf = fopen(fn, "r");
+	if (inf == NULL) {
+		err_printf("cannot load catalog file: %s (%s)\n", fn, strerror(errno));
+		return -1;
+	}
+
+	stf = stf_read_frame(inf);
+
+	if (stf == NULL)
+		return -1;
+
+	sl = stf_find_glist(stf, 0, SYM_STARS);
+
+	for (; sl != NULL; sl = sl->next) {
+		n ++;
+		local_add(CAT_STAR(sl->data), loc);
+	}
+	stf_free_all(stf);
+	return n;
+}
+
+/* load all files from path into local catalog */
+void local_load_catalogs(char *path)
+{
+	char *dir;
+	char buf[1024];
+	char pathc[1024];
+	glob_t gl;
+	int i;
+	int ret;
+
+	strncpy(pathc, path, 1023);
+	pathc[1023] = 0;
+	dir = strtok(pathc, ":");
+	while (dir != NULL) {
+		snprintf(buf, 1024, "%s", dir);
+		gl.gl_offs = 0;
+		gl.gl_pathv = NULL;
+		gl.gl_pathc = 0;
+		ret = glob(buf, GLOB_TILDE, NULL, &gl);
+		if (ret == 0) {
+			for (i = 0; i < gl.gl_pathc; i++) {
+				info_printf("Loading catalog file: %s\n", gl.gl_pathv[i]);
+				local_load_file(gl.gl_pathv[i]);
+			}
+		}
+		globfree(&gl);
+		dir = strtok(NULL, ":");
+	}
+}
+
+static struct cat_star *local_search_file(char *fn, char *name)
+{
+	char *lbuf = NULL;
+	size_t len = 0;
+	FILE *inf;
+	int ret, i;
+	char *nm = NULL;
+	int paren = 1;
+	GScanner *scan;
+	struct cat_star *cats;
+
+	inf = fopen(fn, "r");
+	if (inf == NULL) {
+		err_printf("cannot open catalog file: %s (%s)\n", fn, strerror(errno));
+		return NULL;
+	}
+
+	do {
+		ret = getline(&lbuf, &len, inf);
+		if (ret < 0)
+			break;
+		nm = strstr(lbuf, name);
+		if (nm != NULL && nm > lbuf) {
+			if (nm[-1] == '"' && nm[strlen(name)] == '"')
+				break;
+		} else {
+			nm = NULL;
+		}
+	} while (ret > 0);
+	if (nm == NULL || ret == 0) {
+		if (lbuf)
+			free(lbuf);
+		fclose(inf);
+		return NULL;
+	}
+	d3_printf("found: \n%s\n", lbuf);
+
+	fseek(inf, nm - lbuf - ret + 1, SEEK_CUR);
+
+	for (i = 0; i < 100000 && ftell(inf) > 0; i++) {
+		char c;
+		fseek(inf, -2, SEEK_CUR);
+		c = fgetc(inf);
+		if (c == '(') {
+			paren --;
+			if (paren == 0) {
+//				fseek(inf, -1, SEEK_CUR);
+				break;
+			}
+		}
+		if (c == ')')
+			paren ++;
+	}
+	lseek(fileno(inf), ftell(inf), SEEK_SET);
+	scan = init_scanner();
+	g_scanner_input_file(scan, fileno(inf));
+	cats = cat_star_new();
+	if (!parse_star(scan, cats)) {
+		g_scanner_destroy(scan);
+		if (lbuf)
+			free(lbuf);
+		fclose(inf);
+		return cats;
+	} else {
+		cat_star_release(cats);
+	}
+	if (lbuf)
+		free(lbuf);
+	fclose(inf);
+	return NULL;
+}
+
+static struct cat_star *local_search_files(char *name)
+{
+	char *dir, *path;
+	char buf[1024];
+	char pathc[1024];
+	glob_t gl;
+	int i;
+	int ret;
+	struct cat_star *cats = NULL;
+
+	path = P_STR(FILE_CATALOG_PATH);
+	strncpy(pathc, path, 1023);
+	pathc[1023] = 0;
+	dir = strtok(pathc, ":");
+	while (dir != NULL && cats == NULL) {
+		snprintf(buf, 1024, "%s", dir);
+		gl.gl_offs = 0;
+		gl.gl_pathv = NULL;
+		gl.gl_pathc = 0;
+		ret = glob(buf, GLOB_TILDE, NULL, &gl);
+		if (ret == 0) {
+			for (i = 0; i < gl.gl_pathc; i++) {
+				d1_printf("Searching catalog file: %s\n", gl.gl_pathv[i]);
+				cats = local_search_file(gl.gl_pathv[i], name);
+			}
+		}
+		globfree(&gl);
+		dir = strtok(NULL, ":");
+	}
+	return cats;
+}
+
 /* local catalog methods */
 /* search for objects within a certain area
  * the 'radius' is actually the max of the ra and dec
@@ -1195,175 +1366,4 @@ int update_band_by_name(char **mags, char *band, double mag, double err)
 	free(*mags);
 	*mags = nb;
 	return 0;
-}
-
-#define MAX_CAT_LOAD 100000
-#define CAT_MAX_OBS 16
-/* load a file into the local catalog; return the number of stars added
-   or a negative error. */
-int local_load_file(char *fn)
-{
-	struct catalog *loc;
-	FILE *inf;
-	int n = 0;
-	struct stf *stf;
-	GList *sl;
-
-
-	loc = open_catalog("local");
-	g_return_val_if_fail(loc != NULL, -1);
-
-	inf = fopen(fn, "r");
-	if (inf == NULL) {
-		err_printf("cannot load catalog file: %s (%s)\n", fn, strerror(errno));
-		return -1;
-	}
-
-	stf = stf_read_frame(inf);
-
-	if (stf == NULL)
-		return -1;
-
-	sl = stf_find_glist(stf, 0, SYM_STARS);
-
-	for (; sl != NULL; sl = sl->next) {
-		n ++;
-		local_add(CAT_STAR(sl->data), loc);
-	}
-	stf_free_all(stf);
-	return n;
-}
-
-/* load all files from path into local catalog */
-void local_load_catalogs(char *path)
-{
-	char *dir;
-	char buf[1024];
-	char pathc[1024];
-	glob_t gl;
-	int i;
-	int ret;
-
-	strncpy(pathc, path, 1023);
-	pathc[1023] = 0;
-	dir = strtok(pathc, ":");
-	while (dir != NULL) {
-		snprintf(buf, 1024, "%s", dir);
-		gl.gl_offs = 0;
-		gl.gl_pathv = NULL;
-		gl.gl_pathc = 0;
-		ret = glob(buf, GLOB_TILDE, NULL, &gl);
-		if (ret == 0) {
-			for (i = 0; i < gl.gl_pathc; i++) {
-				info_printf("Loading catalog file: %s\n", gl.gl_pathv[i]);
-				local_load_file(gl.gl_pathv[i]);
-			}
-		}
-		globfree(&gl);
-		dir = strtok(NULL, ":");
-	}
-}
-
-static struct cat_star *local_search_file(char *fn, char *name)
-{
-	char *lbuf = NULL;
-	size_t len = 0;
-	FILE *inf;
-	int ret, i;
-	char *nm = NULL;
-	int paren = 1;
-	GScanner *scan;
-	struct cat_star *cats;
-
-	inf = fopen(fn, "r");
-	if (inf == NULL) {
-		err_printf("cannot open catalog file: %s (%s)\n", fn, strerror(errno));
-		return NULL;
-	}
-
-	do {
-		ret = getline(&lbuf, &len, inf);
-		if (ret < 0)
-			break;
-		nm = strstr(lbuf, name);
-		if (nm != NULL && nm > lbuf) {
-			if (nm[-1] == '"' && nm[strlen(name)] == '"')
-				break;
-		} else {
-			nm = NULL;
-		}
-	} while (ret > 0);
-	if (nm == NULL || ret == 0) {
-		if (lbuf)
-			free(lbuf);
-		fclose(inf);
-		return NULL;
-	}
-	d3_printf("found: \n%s\n", lbuf);
-
-	fseek(inf, nm - lbuf - ret + 1, SEEK_CUR);
-
-	for (i = 0; i < 100000 && ftell(inf) > 0; i++) {
-		char c;
-		fseek(inf, -2, SEEK_CUR);
-		c = fgetc(inf);
-		if (c == '(') {
-			paren --;
-			if (paren == 0) {
-//				fseek(inf, -1, SEEK_CUR);
-				break;
-			}
-		}
-		if (c == ')')
-			paren ++;
-	}
-	lseek(fileno(inf), ftell(inf), SEEK_SET);
-	scan = init_scanner();
-	g_scanner_input_file(scan, fileno(inf));
-	cats = cat_star_new();
-	if (!parse_star(scan, cats)) {
-		g_scanner_destroy(scan);
-		if (lbuf)
-			free(lbuf);
-		fclose(inf);
-		return cats;
-	} else {
-		cat_star_release(cats);
-	}
-	if (lbuf)
-		free(lbuf);
-	fclose(inf);
-	return NULL;
-}
-
-static struct cat_star *local_search_files(char *name)
-{
-	char *dir, *path;
-	char buf[1024];
-	char pathc[1024];
-	glob_t gl;
-	int i;
-	int ret;
-	struct cat_star *cats = NULL;
-
-	path = P_STR(FILE_CATALOG_PATH);
-	strncpy(pathc, path, 1023);
-	pathc[1023] = 0;
-	dir = strtok(pathc, ":");
-	while (dir != NULL && cats == NULL) {
-		snprintf(buf, 1024, "%s", dir);
-		gl.gl_offs = 0;
-		gl.gl_pathv = NULL;
-		gl.gl_pathc = 0;
-		ret = glob(buf, GLOB_TILDE, NULL, &gl);
-		if (ret == 0) {
-			for (i = 0; i < gl.gl_pathc; i++) {
-				d1_printf("Searching catalog file: %s\n", gl.gl_pathv[i]);
-				cats = local_search_file(gl.gl_pathv[i], name);
-			}
-		}
-		globfree(&gl);
-		dir = strtok(NULL, ":");
-	}
-	return cats;
 }

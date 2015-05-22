@@ -79,7 +79,6 @@ struct frame_map {
  */
 struct map_cache {
 	int valid;		/* the cache is valid */
-	int type;		/* type of cache: gray or rgb */
 	double zoom;		/* zoom level of the cache */
 	int x; /* coordinate of top-left corner of cache (in display space) */
 	int y;
@@ -1577,7 +1576,7 @@ void show_zoom_cuts(GtkWidget * window)
 #endif
 }
 
-#define T_START_GAMMA 0.2
+//#define T_START_GAMMA 0.2
 
 /* set LUT from the gamma and toe */
 static void channel_set_lut_from_gamma(struct frame_map *map)
