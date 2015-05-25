@@ -38,7 +38,7 @@
 #include "wcs.h"
 #include "params.h"
 #include "obsdata.h"
-#include "sidereal_time.h"
+#include "astro.h"
 
 //#define CHECK_WCS_CLOSURE
 
@@ -214,12 +214,12 @@ void refracted_from_true(double *ra, double *dec, double jd, double lat, double 
 	double gast;
 	double alt, az, R;
 
-	gast = get_apparent_sidereal_time (jd);
-	get_hrz_from_equ_sidereal_time (*ra, *dec, lng, lat, gast, &alt, &az);
-	R = get_refraction_adj_true (alt, 1010, 10.0);
+	gast = astro_get_apparent_sidereal_time (jd);
+	astro_get_hrz_from_equ_sidereal_time (*ra, *dec, lng, lat, gast, &alt, &az);
+	R = astro_get_refraction_adj_true (alt, 1010, 10.0);
 //	d3_printf("alt:%.3f az:%.3f R:%.3f\n", alt, az, R);
 	alt += R ;
-	get_equ_from_hrz_sidereal_time (alt, az, lng, lat, gast, ra, dec);
+	astro_get_equ_from_hrz_sidereal_time (alt, az, lng, lat, gast, ra, dec);
 }
 
 
@@ -255,18 +255,18 @@ void true_from_refracted(double *ra, double *dec, double jd, double lat, double 
 	double aalt;
 	int i;
 
-	gast = get_apparent_sidereal_time (jd);
-	get_hrz_from_equ_sidereal_time (*ra, *dec, lng, lat, gast, &alt, &az);
+	gast = astro_get_apparent_sidereal_time (jd);
+	astro_get_hrz_from_equ_sidereal_time (*ra, *dec, lng, lat, gast, &alt, &az);
 	aalt = alt;
 	for (i = 0; i < 40; i++) { 	/* iterate to reverse refraction */
-		R = get_refraction_adj_true (alt, 1010, 10.0);
+		R = astro_get_refraction_adj_true (alt, 1010, 10.0);
 		if (fabs(alt - (aalt - R)) < 0.000001) {
 			break;
 		}
 		alt = aalt - R;
 	}
 //	d3_printf("alt:%.3f R:%.5f i=%d\n", alt, R, i);
-	get_equ_from_hrz_sidereal_time (alt, az, lng, lat, gast, ra, dec);
+	astro_get_equ_from_hrz_sidereal_time (alt, az, lng, lat, gast, ra, dec);
 }
 
 

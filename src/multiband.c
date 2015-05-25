@@ -35,9 +35,6 @@
 #include <ctype.h>
 #include <time.h>
 
-#include <gdk/gdkkeysyms.h>
-#include <gtk/gtk.h>
-
 #include "gcx.h"
 #include "gcximageview.h"
 #include "catalogs.h"

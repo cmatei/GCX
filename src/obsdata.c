@@ -39,7 +39,7 @@
 #include "obsdata.h"
 #include "params.h"
 
-#include "sidereal_time.h"
+#include "astro.h"
 
 /* extract the catalog name (the part before ":") from the name and return
  * a pointer to it (a terminating 0 is added). Also update name
@@ -603,9 +603,9 @@ double calculate_airmass(double ra, double dec, double jd, double lat, double ln
 {
 	double alt, az, airm;
 
-	get_hrz_from_equ_sidereal_time (ra, dec, lng, lat,
-					get_apparent_sidereal_time(jd),
-					&alt, &az);
+	astro_get_hrz_from_equ_sidereal_time (ra, dec, lng, lat,
+					      astro_get_apparent_sidereal_time(jd),
+					      &alt, &az);
 
 	airm = airmass(alt);
 	airm = 0.001 * floor(airm * 1000);
@@ -697,7 +697,7 @@ double obs_current_hour_angle(struct obs_data *obs)
 	gettimeofday(&tv, NULL);
 	jd = timeval_to_jdate(&tv);
 
-	ha = get_apparent_sidereal_time(jd) - (P_DBL(OBS_LONGITUDE) + obs->ra) / 15.0;
+	ha = astro_get_apparent_sidereal_time(jd) - (P_DBL(OBS_LONGITUDE) + obs->ra) / 15.0;
 	if (ha > 12)
 		ha -= 24;
 	d3_printf("current ha = %f\n", ha);
@@ -715,10 +715,10 @@ double obs_current_airmass(struct obs_data *obs)
 	gettimeofday(&tv, NULL);
 	jd = timeval_to_jdate(&tv);
 
-	get_hrz_from_equ_sidereal_time (obs->ra, obs->dec, P_DBL(OBS_LONGITUDE),
-					P_DBL(OBS_LATITUDE),
-					get_apparent_sidereal_time(jd),
-					&alt, &az);
+	astro_get_hrz_from_equ_sidereal_time (obs->ra, obs->dec, P_DBL(OBS_LONGITUDE),
+					      P_DBL(OBS_LATITUDE),
+					      astro_get_apparent_sidereal_time(jd),
+					      &alt, &az);
 	airm = airmass(alt);
 	d3_printf("current airmass = %f\n", airm);
 	return airm;

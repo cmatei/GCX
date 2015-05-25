@@ -57,15 +57,6 @@ G_END_DECLS
 #endif
 
 
-#define JD2000 2451545.0
-#define	hrdeg(x)	((x)*15.)
-#define	deghr(x)	((x)/15.)
-#define	hrrad(x)	degrad(hrdeg(x))
-#define	radhr(x)	deghr(raddeg(x))
-#define degrad(x) ((x) * PI / 180)
-#define raddeg(x) ((x) * 180 / PI)
-
-
 // current circumstances of observation
 #define OBSCOLS 68
 

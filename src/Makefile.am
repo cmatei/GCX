@@ -20,8 +20,9 @@ gcx_SOURCES = \
 	sourcesdraw.c sourcesdraw.h staredit.c \
 	textgui.c wcs.c wcs.h \
 	helpmsg.c helpmsg.h wcsedit.c recipy.c recipy.h recipygui.c symbols.h\
-	tycho2.c tycho2.h ucac4.c ucac4.h report.c sidereal_time.c nutation.c nutation.h\
-	sidereal_time.h	reduce.c reduce.h misc.c misc.h reducegui.c\
+	tycho2.c tycho2.h ucac4.c ucac4.h report.c \
+	astro.c astro.h \
+	reduce.c reduce.h misc.c misc.h reducegui.c\
 	initparams.c starlist.c	guidegui.c \
 	guide.c guide.h multiband.c multiband.h mbandgui.c plots.c plots.h \
 	mbandrep.c starfile.c getline.h synth.c psf.c psf.h dsimplex.c dsimplex.h \
@@ -32,6 +33,7 @@ gcx_SOURCES = \
 	common_indi.c common_indi.h \
 	gcximageview.c gcximageview.h \
 	gcxparamsdialog.c gcxparamsdialog.h \
+	gcxexposuredialog.c gcxexposuredialog.h \
         \
 	libindiclient/lilxml.h libindiclient/lilxml.c \
 	libindiclient/base64.h libindiclient/base64.c \

@@ -37,7 +37,6 @@
 
 #include "gcx.h"
 #include "gcximageview.h"
-//#include "gui.h"
 #include "gsc/gsc.h"
 #include "catalogs.h"
 #include "sourcesdraw.h"
@@ -48,6 +47,7 @@
 #include "symbols.h"
 #include "recipy.h"
 #include "misc.h"
+#include "astro.h"
 
 #define GSC_NAME 0
 #define LOCAL_NAME 1

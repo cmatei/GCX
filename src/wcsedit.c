@@ -46,6 +46,7 @@
 #include "interface.h"
 #include "wcs.h"
 #include "misc.h"
+#include "astro.h"
 
 #define INV_DBL -10000.0
 

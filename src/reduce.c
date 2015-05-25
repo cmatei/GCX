@@ -54,6 +54,7 @@
 #include "recipy.h"
 #include "filegui.h"
 #include "demosaic.h"
+#include "astro.h"
 
 int progress_print(char *msg, void *data)
 {

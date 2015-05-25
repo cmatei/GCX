@@ -33,9 +33,6 @@
 #include <math.h>
 #include <ctype.h>
 
-#include <gdk/gdkkeysyms.h>
-#include <gtk/gtk.h>
-
 #include "gcx.h"
 #include "catalogs.h"
 #include "gui.h"

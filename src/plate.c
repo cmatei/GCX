@@ -1,23 +1,23 @@
 /*******************************************************************************
   Copyright(c) 2000 - 2003 Radu Corlan. All rights reserved.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
   any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
-  
+
   You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
+  this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
-  
+
   Contact Information: radu@corlan.net
 *******************************************************************************/
 
@@ -36,7 +36,7 @@
 #include "sourcesdraw.h"
 #include "wcs.h"
 #include "params.h"
-
+#include "astro.h"
 
 /* ****************************************************** */
 /* coordinate transforms; each plate model must implement */
@@ -45,8 +45,8 @@
 
 
 /* aips-style (cdelt + rotation) */
-static void XE_to_xy_aips(double xrefpix, double yrefpix, 
-			  double xinc, double yinc, double rot, 
+static void XE_to_xy_aips(double xrefpix, double yrefpix,
+			  double xinc, double yinc, double rot,
 			  double X, double E, double *xpix, double *ypix)
 {
 	double dx = X;
@@ -69,8 +69,8 @@ static void XE_to_xy_aips(double xrefpix, double yrefpix,
 
 
 /* aips-style (cdelt + rotation) */
-static void xy_to_XE_aips(double xrefpix, double yrefpix, 
-			  double xinc, double yinc, double rot, 
+static void xy_to_XE_aips(double xrefpix, double yrefpix,
+			  double xinc, double yinc, double rot,
 			  double x, double y, double *X, double *E)
 {
 	double dx;
@@ -84,7 +84,7 @@ static void xy_to_XE_aips(double xrefpix, double yrefpix,
 /*   Offset from ref pixel  */
 	dx = (x - xrefpix) * xinc;
 	dy = (y - yrefpix) * yinc;
-	
+
 	dz = dx * cosr - dy * sinr;
 	dy = dy * cosr + dx * sinr;
 	dx = dz;
@@ -95,8 +95,8 @@ static void xy_to_XE_aips(double xrefpix, double yrefpix,
 
 
 /* general linear (matrix + cdelt) */
-static void xy_to_XE_linear(double xrefpix, double yrefpix, 
-			    double xinc, double yinc, double pc[2][2], 
+static void xy_to_XE_linear(double xrefpix, double yrefpix,
+			    double xinc, double yinc, double pc[2][2],
 			    double x, double y, double *X, double *E)
 {
 	double dx;
@@ -106,7 +106,7 @@ static void xy_to_XE_linear(double xrefpix, double yrefpix,
 /*   Offset from ref pixel  */
 	dx = (x - xrefpix);
 	dy = (y - yrefpix);
-	
+
 	t = (dx * pc[0][0] + dy * pc[0][1]);
 	dy = (dx * pc[1][0] + dy * pc[1][1]);
 	dx = t;
@@ -116,8 +116,8 @@ static void xy_to_XE_linear(double xrefpix, double yrefpix,
 }
 
 /* general linear (matrix + cdelt) */
-static void XE_to_xy_linear(double xrefpix, double yrefpix, 
-			    double xinc, double yinc, double pc[2][2], 
+static void XE_to_xy_linear(double xrefpix, double yrefpix,
+			    double xinc, double yinc, double pc[2][2],
 			    double X, double E, double *x, double *y)
 {
 	double dx;
@@ -137,7 +137,7 @@ static void XE_to_xy_linear(double xrefpix, double yrefpix,
 /*   Offset from ref pixel  */
 	dx = (pc[1][1] * X - pc[0][1] * E) / D;
 	dy = (pc[0][0] * E - pc[1][0] * X) / D;
-	
+
 	*x = dx + xrefpix;
 	*y = dy + yrefpix;
 }
@@ -155,29 +155,29 @@ void rot_to_matrix(double rot, double xinc, double yinc, double pc[2][2])
 /* *********************************************** */
 
 /* transform projection plane coordinates into pixel coordinates */
-/* this is a "driver" routine that calls a different function for each 
+/* this is a "driver" routine that calls a different function for each
    solution type */
 void XE_to_xy(struct wcs *wcs, double X, double E, double *x, double *y)
 {
 	if (wcs->flags & WCS_USE_LIN) {
-		XE_to_xy_linear(wcs->xrefpix, wcs->yrefpix, 
+		XE_to_xy_linear(wcs->xrefpix, wcs->yrefpix,
 				wcs->xinc, wcs->yinc, wcs->pc, X, E, x, y);
 	} else {
-		XE_to_xy_aips(wcs->xrefpix, wcs->yrefpix, 
+		XE_to_xy_aips(wcs->xrefpix, wcs->yrefpix,
 			      wcs->xinc, wcs->yinc, wcs->rot, X, E, x, y);
 	}
 }
 
 /* transform pixel coordinates into projection plane coordinates */
-/* this is a "driver" routine that calls a different function for each 
+/* this is a "driver" routine that calls a different function for each
    solution type */
 void xy_to_XE(struct wcs *wcs, double x, double y, double *X, double *E)
 {
 	if (wcs->flags & WCS_USE_LIN) {
-		xy_to_XE_linear(wcs->xrefpix, wcs->yrefpix, 
+		xy_to_XE_linear(wcs->xrefpix, wcs->yrefpix,
 				wcs->xinc, wcs->yinc, wcs->pc, x, y, X, E);
 	} else {
-		xy_to_XE_aips(wcs->xrefpix, wcs->yrefpix, 
+		xy_to_XE_aips(wcs->xrefpix, wcs->yrefpix,
 			      wcs->xinc, wcs->yinc, wcs->rot, x, y, X, E);
 	}
 }
@@ -189,7 +189,7 @@ void xy_to_XE(struct wcs *wcs, double x, double y, double *X, double *E)
 
 
 
-/* entry point for plate solution fitting: adjust wcs for best fit on 
+/* entry point for plate solution fitting: adjust wcs for best fit on
    the supplied pairs; return 0 if successfull. */
 
 int plate_solve(struct wcs *wcs, struct fit_pair fpairs[], int n, int model)

@@ -46,7 +46,7 @@
 
 #include "gcx.h"
 #include "misc.h"
-#include "sidereal_time.h"
+#include "astro.h"
 #include "getline.h"
 
 /* set the entry named name under dialog to the given text */

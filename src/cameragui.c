@@ -1032,6 +1032,7 @@ static void set_scope_params_from_par(gpointer dialog)
 	set_named_checkb_val(dialog, "s_limit_checkb", P_INT(TELE_S_LIMIT_EN));
 }
 
+#if 0
 void act_control_camera (GtkAction *action, gpointer window)
 {
 	GtkWidget *dialog;
@@ -1080,3 +1081,5 @@ void act_control_camera (GtkAction *action, gpointer window)
 //	cam_dialog_update(dialog);
 //	cam_dialog_edit(dialog);
 }
+
+#endif
