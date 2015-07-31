@@ -14,6 +14,8 @@
 #include "gcx.h"
 #include "gcxexposuredialog.h"
 
+#include "camera_indi.h"
+
 struct _GcxExposureDialogPrivate
 {
 	GtkWidget *cam_binx_combotext;
@@ -167,13 +169,21 @@ gcx_exposure_dialog_class_init (GcxExposureDialogClass *class)
 }
 
 GtkWidget *
-gcx_exposure_dialog_new (const gchar *title,
-			 GtkWindow   *parent)
+gcx_exposure_dialog_new (const gchar *title, GtkWindow *parent)
 {
 	return g_object_new (GCX_TYPE_EXPOSURE_DIALOG,
-			     "transient-for", parent,
 			     "title", title ? title : _("Camera Control"),
 			     NULL);
+}
+
+
+
+static void controls_from_camera(GcxExposureDialog *dialog, struct camera_t *camera)
+{
+}
+
+static void controls_to_camera(GcxExposureDialog *dialog, struct camera_t *camera)
+{
 }
 
 
@@ -184,5 +194,7 @@ act_control_camera (GtkAction *action, gpointer window)
 	GtkWidget *camwin;
 
 	camwin = gcx_exposure_dialog_new (_("Exposure Control"), window);
+	gtk_window_set_decorated (GTK_WINDOW(camwin), TRUE);
 	gtk_window_present (GTK_WINDOW (camwin));
+
 }

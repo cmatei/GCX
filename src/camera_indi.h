@@ -39,13 +39,20 @@ struct camera_t {
 
 void camera_get_binning(struct camera_t *camera, int *x, int *y);
 void camera_set_binning(struct camera_t *camera, int x, int y);
+
 void camera_get_size(struct camera_t *camera, const char *param, int *value, int *min, int *max);
 void camera_set_size(struct camera_t *camera, int width, int height, int x_offset, int y_offset);
+
 void camera_get_temperature(struct camera_t *camera, float *value, float *min, float *max);
 void camera_set_temperature(struct camera_t *camera, float value);
+
 void camera_get_exposure_settings(struct camera_t *camera, float *value, float *min, float *max);
+
 void camera_expose(struct camera_t *camera, double time);
 void camera_abort_exposure(struct camera_t *camera);
+
 void camera_set_ready_callback(void *window, int type, void *func, void *data);
+
 struct camera_t *camera_find(void *window, int type);
+
 #endif
