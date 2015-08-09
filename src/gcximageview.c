@@ -78,7 +78,7 @@ struct frame_map {
  * redraws.
  */
 struct map_cache {
-	int valid;		/* the cache is valid */
+	gboolean valid;		/* the cache is valid */
 	double zoom;		/* zoom level of the cache */
 	int x; /* coordinate of top-left corner of cache (in display space) */
 	int y;
@@ -357,7 +357,7 @@ static void cache_render_rgb_float_zi(struct map_cache *cache, struct frame_map 
 			cdat += stride;
 		}
 	}
-	cache->valid = 1;
+	cache->valid = TRUE;
 }
 
 static void cache_render_rgb_float_zo(struct map_cache *cache, struct frame_map *map,
@@ -442,7 +442,7 @@ static void cache_render_rgb_float_zo(struct map_cache *cache, struct frame_map 
 		cdat   += cjump;
 	}
 
-	cache->valid = 1;
+	cache->valid = TRUE;
 }
 
 /* render a float frame to the cache at zoom >= 1*/
@@ -498,7 +498,7 @@ static void cache_render_float_zi(struct map_cache *cache, struct frame_map *map
 		}
 	}
 
-	cache->valid = 1;
+	cache->valid = TRUE;
 }
 
 static void cache_render_float_zo(struct map_cache *cache, struct frame_map *map,
@@ -564,7 +564,7 @@ static void cache_render_float_zo(struct map_cache *cache, struct frame_map *map
 		fdat += fjump;
 		cdat += cjump;
 	}
-	cache->valid = 1;
+	cache->valid = TRUE;
 }
 
 
@@ -651,7 +651,7 @@ int gcx_image_view_set_frame(GcxImageView *view, struct ccd_frame *fr)
 	//if ((fr->magic & FRAME_VALID_RGB) == 0)
 	//	bayer_interpolate(fr);
 
-	cache->valid = 0;
+	cache->valid = FALSE;
 
 	if (map->fr)
 		release_frame(map->fr);
@@ -746,13 +746,13 @@ gcx_image_view_draw_cb(GtkWidget *darea, cairo_t *cr, gpointer user)
 
 	/* invalidate cache if needed */
 	if (cache->zoom != map->zoom)
-		cache->valid = 0;
+		cache->valid = FALSE;
 
 	if (map->changed)
-		cache->valid = 0;
+		cache->valid = FALSE;
 
 	if (!area_in_cache(&area, cache))
-		cache->valid = 0;
+		cache->valid = FALSE;
 
 	if (!cache->valid)
 		update_cache(cache, map, &area);
@@ -778,7 +778,8 @@ gcx_image_view_draw_cb(GtkWidget *darea, cairo_t *cr, gpointer user)
  * if fname is null, the file is output on stdout
  * return 0 for success */
 
-int gcx_image_view_to_pnm_file(GcxImageView *iv, char *fn, int is_16bit)
+int
+gcx_image_view_to_pnm_file(GcxImageView *iv, char *fn, int is_16bit)
 {
 	struct ccd_frame *fr = gcx_image_view_get_frame (iv);
 	FILE *pnmf;
