@@ -31,7 +31,8 @@ gcx_SOURCES = \
 	tele_indi.c tele_indi.h camera_indi.c camera_indi.h \
 	fwheel_indi.c fwheel_indi.h focus_indi.c focus_indi.h \
 	common_indi.c common_indi.h \
-	gcximageview.c gcximageview.h \
+	gcx-application.c gcx-application.h \
+	gcx-imageview.c gcx-imageview.h \
 	gcxparamsdialog.c gcxparamsdialog.h \
 	gcxexposuredialog.c gcxexposuredialog.h \
         \

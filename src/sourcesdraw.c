@@ -39,7 +39,7 @@
 #include "gcx.h"
 #include "catalogs.h"
 #include "gui.h"
-#include "gcximageview.h"
+#include "gcx-imageview.h"
 #include "sourcesdraw.h"
 #include "params.h"
 #include "wcs.h"
@@ -348,7 +348,7 @@ void draw_gui_star(struct gui_star *gs, GtkWidget *widget)
 		return;
 
 	zoom = gcx_image_view_get_zoom (iv);
-	cr = gcx_image_view_cairo_surface (iv);
+	//cr = gcx_image_view_cairo_surface (iv);
 
 	draw_star_helper(gs, cr, gsl, zoom);
 

@@ -5,7 +5,7 @@
 
 #include <gtk/gtk.h>
 
-#include "gcximageview.h"
+#include "gcx-imageview.h"
 
 /* a star label; shares the ref_count with it's star*/
 struct label {

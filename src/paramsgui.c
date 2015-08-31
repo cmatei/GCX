@@ -32,7 +32,7 @@
 #include <gtk/gtk.h>
 
 #include "gcx.h"
-#include "gcximageview.h"
+#include "gcx-imageview.h"
 #include "params.h"
 #include "catalogs.h"
 #include "sourcesdraw.h"

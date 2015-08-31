@@ -31,7 +31,7 @@
 #include "gcx.h"
 #include "catalogs.h"
 #include "gui.h"
-#include "gcximageview.h"
+#include "gcx-imageview.h"
 #include "sourcesdraw.h"
 #include "params.h"
 #include "wcs.h"
@@ -314,7 +314,7 @@ static gboolean image_clicked_cb(GtkWidget *w, GdkEventButton *event, gpointer d
 		show_region_stats(data, event->x, event->y);
 		if (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK))
 		    return FALSE;
-		pan_cursor(data);
+		gcx_image_view_pan_cursor(data);
 	}
 	if (event->button == 1) {
 		found = stars_under_click(w, event);
@@ -720,6 +720,7 @@ static GtkWidget *get_main_menu_bar(GtkWidget *window)
 GtkWidget * create_image_window()
 {
 	GtkWidget *window;
+	GtkWidget *scrolled;
 	GtkWidget *imview;
 	GtkWidget *image_popup;
 	GtkWidget *vbox;
@@ -731,6 +732,11 @@ GtkWidget * create_image_window()
 
 
 	imview = gcx_image_view_new();
+
+	scrolled = gtk_scrolled_window_new (gcx_image_view_get_hadjustment (imview),
+					    gcx_image_view_get_vadjustment (imview));
+
+	gtk_container_add (GTK_CONTAINER (scrolled), imview);
 
 	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	g_object_ref_sink(window);
@@ -767,7 +773,7 @@ GtkWidget * create_image_window()
 	gtk_box_pack_start(GTK_BOX(hbox), statuslabel1, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 0);
 
-	gtk_box_pack_start(GTK_BOX(vbox), imview, 1, 1, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), scrolled, 1, 1, 0);
 	gtk_box_pack_start(GTK_BOX(vbox), statuslabel2, 0, 0, 0);
 	gtk_container_add(GTK_CONTAINER(window), vbox);
 
@@ -1048,4 +1054,92 @@ void destroy( GtkWidget *widget,
 void show_xy_status(GtkWidget *window, double x, double y)
 {
 	info_printf_sb2(window, "%.0f, %.0f", x, y);
+}
+
+/*
+ * display stats in region around cursor
+ * does not use action or menu_item
+ */
+void show_region_stats(GtkWidget *window, double x, double y)
+{
+#if 0
+	char buf[180];
+	gpointer ret;
+	struct image_channel *i_channel;
+	struct map_geometry *geom;
+	struct rstats rs;
+	int xi, yi;
+	float val;
+
+	ret = g_object_get_data(G_OBJECT(window), "i_channel");
+	if (ret == NULL) /* no channel */
+		return;
+	i_channel = ret;
+	if (i_channel->fr == NULL) /* no frame */
+		return;
+
+	geom = g_object_get_data(G_OBJECT(window), "geometry");
+	if (geom == NULL)
+		return;
+
+	x /= geom->zoom;
+	y /= geom->zoom;
+
+	xi = x;
+	yi = y;
+
+	val = get_pixel_luminence(i_channel->fr, xi, yi);
+	ring_stats(i_channel->fr, x, y, 0, 10, 0xf, &rs, -HUGE, HUGE);
+
+	if (i_channel->fr->magic & FRAME_VALID_RGB) {
+		sprintf(buf, "[%d,%d]=%.1f (%.1f, %.1f, %.1f)  Region: Avg:%.0f  Sigma:%.1f  Min:%.0f  Max:%.0f",
+			xi, yi, val,
+			*(((float *) i_channel->fr->rdat) + xi + yi * i_channel->fr->w),
+			*(((float *) i_channel->fr->gdat) + xi + yi * i_channel->fr->w),
+			*(((float *) i_channel->fr->bdat) + xi + yi * i_channel->fr->w),
+			rs.avg, rs.sigma, rs.min, rs.max );
+	} else {
+		sprintf(buf, "[%d,%d]=%.1f  Region: Avg:%.0f  Sigma:%.1f  Min:%.0f  Max:%.0f",
+			xi, yi, val, rs.avg, rs.sigma, rs.min, rs.max );
+	}
+
+	info_printf_sb2(window, "%s\n", buf);
+#endif
+}
+
+/*
+ * show zoom/cuts in statusbar
+ */
+void show_zoom_cuts(GtkWidget * window)
+{
+#if 0
+	char buf[180];
+	GtkWidget *statuslabel, *dialog;
+	gpointer ret;
+	struct image_channel *i_channel;
+	struct map_geometry *geom;
+	void imadj_dialog_update(GtkWidget *dialog);
+
+	statuslabel = g_object_get_data(G_OBJECT(window), "statuslabel1");
+	if (statuslabel == NULL)
+		return;
+	ret = g_object_get_data(G_OBJECT(window), "i_channel");
+	if (ret == NULL) /* no channel */
+		return;
+	i_channel = ret;
+
+	geom = g_object_get_data(G_OBJECT(window), "geometry");
+	if (geom == NULL)
+		return;
+
+	sprintf(buf, " Z:%.2f  Lcut:%.0f  Hcut:%.0f",
+		geom->zoom, i_channel->lcut, i_channel->hcut);
+
+	gtk_label_set_text(GTK_LABEL(statuslabel), buf);
+/* see if we have a imadjust dialog and update it, too */
+	dialog = g_object_get_data(G_OBJECT(window), "imadj_dialog");
+	if (dialog == NULL)
+		return;
+	imadj_dialog_update(dialog);
+#endif
 }

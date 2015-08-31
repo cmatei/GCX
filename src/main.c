@@ -44,7 +44,8 @@
 #include "gcx.h"
 #include "catalogs.h"
 #include "gui.h"
-#include "gcximageview.h"
+#include "gcx-application.h"
+#include "gcx-imageview.h"
 #include "params.h"
 #include "filegui.h"
 #include "obslist.h"
@@ -538,7 +539,7 @@ static void print_scint_table(char *apert)
 
 }
 
-
+#if 0
 int main(int ac, char **av)
 {
 	int ret, i;
@@ -1156,11 +1157,31 @@ int main(int ac, char **av)
 		gtk_main ();
 		exit(0);
 	}
+
 	d3_printf("calling gtk_main, no frame\n");
 	if (of[0] != 0) { /* run obs */
 		if (run_obs_file(window, of))
 			exit (1);
 	}
+
+//	GcxApplication *app = gcx_application_new ();
+
+//	gtk_application_add_window (GTK_APPLICATION (app), GTK_WINDOW (window));
+
+//	g_application_run (G_APPLICATION (app), NULL, NULL);
+//	g_object_unref (app);
+
 	gtk_main ();
 	exit(0);
+}
+#endif
+
+int main(int argc, char **argv)
+{
+	GcxApplication *app = gcx_application_new ();
+
+	g_application_run (G_APPLICATION (app), argc, argv);
+	g_object_unref (app);
+
+	return 0;
 }

@@ -30,7 +30,7 @@
 #include <math.h>
 
 #include "gcx.h"
-#include "gcximageview.h"
+#include "gcx-imageview.h"
 #include "catalogs.h"
 #include "gui.h"
 #include "sourcesdraw.h"
@@ -216,7 +216,7 @@ static gboolean image_clicked_cb(GtkWidget *w, GdkEventButton *event, gpointer d
 	}
 	if (event->button == 2) {
 		show_region_stats(data, event->x, event->y);
-		pan_cursor(data);
+		gcx_image_view_pan_cursor(data);
 	}
 	if (event->button == 1) {
 		// We should really not hardcode the region size here!

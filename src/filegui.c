@@ -42,7 +42,7 @@
 #include "gcx.h"
 #include "catalogs.h"
 #include "gui.h"
-#include "gcximageview.h"
+#include "gcx-imageview.h"
 #include "obsdata.h"
 #include "sourcesdraw.h"
 #include "params.h"
