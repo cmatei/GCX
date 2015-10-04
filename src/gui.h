@@ -14,7 +14,7 @@ extern int modal_entry_prompt(char *text, char *title, char *initial, char **val
 extern int err_printf_sb2(gpointer window, const char *fmt, ...);
 extern int info_printf_sb2(gpointer window, const char *fmt, ...);
 
-extern GtkWidget * create_image_window(void);
+extern GtkWidget * create_image_window(GtkApplication *app);
 extern int window_auto_pairs(gpointer window);
 
 extern struct ccd_frame *frame_from_window (gpointer window);

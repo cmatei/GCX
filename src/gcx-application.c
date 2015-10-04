@@ -4,6 +4,7 @@
 struct _GcxApplication {
 	GtkApplication parent_instance;
 
+	GtkWidget *image_window;
 };
 
 struct _GcxApplicationClass {
@@ -17,6 +18,8 @@ static void
 gcx_application_startup (GApplication *application)
 {
 	G_APPLICATION_CLASS (gcx_application_parent_class)->startup (application);
+
+	init_ptable();
 }
 
 static void
@@ -30,12 +33,11 @@ extern GtkWidget *create_image_window();
 static void
 gcx_application_activate (GApplication *application)
 {
-	GtkWidget *window = create_image_window ();
+	GCX_APPLICATION(application)->image_window = create_image_window (GTK_APPLICATION (application));
 
-	// new_window (application, NULL);
+	printf("activate!\n");
 }
 
-#if 0
 
 static void
 gcx_application_open (GApplication  *application,
@@ -43,11 +45,19 @@ gcx_application_open (GApplication  *application,
 		      gint           n_files,
 		      const gchar   *hint)
 {
-//	gint i;
+
+	gint i;
+
+	for (i = 0; i < n_files; i++) {
+		char *path = g_file_get_path(files[i]);
+
+		printf("open %s\n", path);
+
+		g_free(path);
+	}
 //	for (i = 0; i < n_files; i++)
 //		new_window (application, files[i]);
 }
-#endif
 
 static void
 gcx_application_finalize (GObject *object)
@@ -65,6 +75,7 @@ gcx_application_local_command_line (GApplication *app,
 				    gchar      ***args,
 				    gint         *status)
 {
+#if 0
 	char *shortopts = "D:p:hP:V:vo:id:b:f:B:M:A:O:usa:T:S:nG:Nj:FcX:e:w";
 	struct option longopts[] = {
 		{"debug", required_argument, NULL, 'D'},
@@ -128,7 +139,7 @@ gcx_application_local_command_line (GApplication *app,
 
 	setenv("LANG", "C", 1);
 
-	init_ptable();
+	//init_ptable();
 
 	/* FIXME: NULL arg should be gcx instance */
 	gcx_load_rcfile (NULL, NULL);
@@ -644,9 +655,12 @@ gcx_application_local_command_line (GApplication *app,
 	}
 
 	*status = 0;
+#endif
 
 	/* completely handled command-line */
-	return TRUE;
+	//return TRUE;
+
+	return FALSE;
 }
 
 static void
@@ -656,11 +670,11 @@ gcx_application_class_init (GcxApplicationClass *class)
 	GObjectClass *object_class = G_OBJECT_CLASS (class);
 
 	application_class->startup  = gcx_application_startup;
-	application_class->shutdown = gcx_application_shutdown;
+	//application_class->shutdown = gcx_application_shutdown;
 	application_class->activate = gcx_application_activate;
-//  application_class->open     = gcx_application_open;
+	application_class->open     = gcx_application_open;
 
-	application_class->local_command_line = gcx_application_local_command_line;
+	//application_class->local_command_line = gcx_application_local_command_line;
 
 	object_class->finalize = gcx_application_finalize;
 }

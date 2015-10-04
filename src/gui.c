@@ -717,7 +717,7 @@ static GtkWidget *get_main_menu_bar(GtkWidget *window)
 
 
 
-GtkWidget * create_image_window()
+GtkWidget * create_image_window(GtkApplication *app)
 {
 	GtkWidget *window;
 	GtkWidget *scrolled;
@@ -733,12 +733,12 @@ GtkWidget * create_image_window()
 
 	imview = gcx_image_view_new();
 
-	scrolled = gtk_scrolled_window_new (gcx_image_view_get_hadjustment (imview),
-					    gcx_image_view_get_vadjustment (imview));
+	scrolled = gtk_scrolled_window_new (gcx_image_view_get_hadjustment (GCX_IMAGE_VIEW (imview)),
+					    gcx_image_view_get_vadjustment (GCX_IMAGE_VIEW (imview)));
 
 	gtk_container_add (GTK_CONTAINER (scrolled), imview);
 
-	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+	window = gtk_application_window_new (app);
 	g_object_ref_sink(window);
 
 	g_signal_connect (G_OBJECT (window), "destroy",
@@ -747,23 +747,23 @@ GtkWidget * create_image_window()
 	gtk_window_set_title (GTK_WINDOW (window), "gcx");
 	gtk_container_set_border_width (GTK_CONTAINER (window), 0);
 
-	vbox = gtk_vbox_new(0, 0);
-	hbox = gtk_hbox_new(0, 0);
+	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 
 	statuslabel1 = gtk_label_new ("");
 	g_object_ref (statuslabel1);
-	gtk_misc_set_padding (GTK_MISC (statuslabel1), 6, 0);
+	//gtk_misc_set_padding (GTK_MISC (statuslabel1), 6, 0);
 	g_object_set_data_full (G_OBJECT (window), "statuslabel1", statuslabel1,
 				  (GDestroyNotify) g_object_unref);
 	gtk_widget_show (statuslabel1);
 
 	statuslabel2 = gtk_label_new ("");
 	g_object_ref (statuslabel2);
-	gtk_misc_set_padding (GTK_MISC (statuslabel2), 3, 3);
-	gtk_misc_set_alignment (GTK_MISC (statuslabel2), 0, 0.5);
+	//gtk_misc_set_padding (GTK_MISC (statuslabel2), 3, 3);
+	//gtk_misc_set_alignment (GTK_MISC (statuslabel2), 0, 0.5);
 	g_object_set_data_full (G_OBJECT (window), "statuslabel2", statuslabel2,
-				  (GDestroyNotify) g_object_unref);
-	gtk_widget_show (statuslabel1);
+				(GDestroyNotify) g_object_unref);
+	gtk_widget_show (statuslabel2);
 
 	menubar = get_main_menu_bar(window);
 	//gtk_menu_bar_set_shadow_type(GTK_MENU_BAR(menubar), GTK_SHADOW_NONE);
@@ -837,7 +837,7 @@ GtkWidget* create_about_cx (void)
 	dialog_vbox1 = gtk_dialog_get_content_area (GTK_DIALOG(about_cx));
 	g_object_set_data (G_OBJECT (about_cx), "dialog_vbox1", dialog_vbox1);
 
-	vbox1 = gtk_vbox_new (FALSE, 0);
+	vbox1 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 	g_object_ref (vbox1);
 	g_object_set_data_full (G_OBJECT (about_cx), "vbox1", vbox1,
 				  (GDestroyNotify) g_object_unref);
@@ -852,7 +852,7 @@ GtkWidget* create_about_cx (void)
 	gtk_box_pack_start (GTK_BOX (vbox1), frame1, TRUE, TRUE, 0);
 	gtk_container_set_border_width (GTK_CONTAINER (frame1), 5);
 
-	vbox2 = gtk_vbox_new (TRUE, 0);
+	vbox2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 	g_object_ref (vbox2);
 	g_object_set_data_full (G_OBJECT (about_cx), "vbox2", vbox2,
 				  (GDestroyNotify) g_object_unref);
@@ -923,7 +923,7 @@ GtkWidget* create_about_cx (void)
 	gtk_widget_show (label15);
 	gtk_box_pack_start (GTK_BOX (vbox2), label15, FALSE, FALSE, 0);
 
-	hseparator1 = gtk_hseparator_new ();
+	hseparator1 = gtk_separator_new (GTK_ORIENTATION_HORIZONTAL);
 	g_object_ref (hseparator1);
 	g_object_set_data_full (G_OBJECT (about_cx), "hseparator1", hseparator1,
 				  (GDestroyNotify) g_object_unref);
