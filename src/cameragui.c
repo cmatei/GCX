@@ -217,7 +217,6 @@ static void dither_move(gpointer dialog, double amount)
 
 	/* FIXME: this crude hack allows me to dither for now. */
 	system("/home/cmatei/dither-script");
-
 }
 
 static void scope_dither_cb( GtkWidget *widget, gpointer data )
@@ -234,8 +233,12 @@ static int maybe_save_frame(struct ccd_frame *fr, GtkWidget *dialog)
 	char mb[1024];
 	int seq;
 	char *text;
+	double exposure;
+	struct camera_t *camera;
+
 
 	imwin = g_object_get_data(G_OBJECT(dialog), "image_window");
+	camera = camera_find(imwin, CAMERA_MAIN);
 	togb = g_object_get_data(G_OBJECT(dialog), "img_get_multiple_button");
 	if (togb != NULL && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(togb))) {
 		if (imwin != NULL
@@ -257,10 +260,14 @@ static int maybe_save_frame(struct ccd_frame *fr, GtkWidget *dialog)
 					dither_move(dialog, P_DBL(TELE_DITHER_AMOUNT));
 				}
 
-				if (capture_image(dialog)) {
-					seq = 0;
-					d4_printf("aborting sequence\n");
-				}
+
+				exposure = named_spin_get_value(dialog, "img_exp_spin");
+				camera_expose(camera, exposure);
+
+				//if (capture_image(dialog)) {
+				//	seq = 0;
+				//	d4_printf("aborting sequence\n");
+				//}
 			}
 			sprintf(mb, "%d", seq);
 			named_entry_set(dialog, "current_frame_entry", mb);
@@ -275,7 +282,10 @@ static int maybe_save_frame(struct ccd_frame *fr, GtkWidget *dialog)
 	}
 	togb = g_object_get_data(G_OBJECT(dialog), "img_focus_button");
 	if (togb != NULL && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(togb))) {
-		capture_image(dialog);
+		//capture_image(dialog);
+
+		exposure = named_spin_get_value(dialog, "img_exp_spin");
+		camera_expose(camera, exposure);
 
 		return TRUE;
 	}

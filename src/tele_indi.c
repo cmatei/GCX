@@ -309,8 +309,10 @@ int tele_set_coords(struct tele_t *tele, int type, double ra, double dec, double
 			break;
 		}
 		if (elem) {
+#if 0
 			if (tele->abort_prop)
 				indi_send(tele->abort_prop, elem);
+#endif
 		} else {
 			err_printf("Telescope failed to change mode\n");
 			return -1;
