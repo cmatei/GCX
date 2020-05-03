@@ -663,7 +663,7 @@ void show_region_stats(GtkWidget *window, double x, double y)
 	xi = x;
 	yi = y;
 
-	val = get_pixel_luminence(i_channel->fr, xi, yi);
+	val = get_pixel_luminance(i_channel->fr, xi, yi);
 	ring_stats(i_channel->fr, x, y, 0, 10, 0xf, &rs, -HUGE, HUGE);
 
 	if (i_channel->fr->magic & FRAME_VALID_RGB) {

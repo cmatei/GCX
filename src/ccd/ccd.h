@@ -211,6 +211,9 @@ struct ccd_frame {
 	int w;		// width of frame in pixels
 	int h;		// height of frame in pixels
 
+	int xs, xe;     // actual image pixels accounting for overscan
+	int ys, ye;
+
 	unsigned magic; // an unique number identifying the frame (science, dark, flatfield etc)
 
 	struct exp_data exp;
@@ -471,7 +474,7 @@ enum {
 	PLANE_BLUE  = 4,
 };
 
-static inline float get_pixel_luminence(struct ccd_frame *fr, int x, int y) {
+static inline float get_pixel_luminance(struct ccd_frame *fr, int x, int y) {
 	float val;
 	int offset = y * fr->w + x;
 

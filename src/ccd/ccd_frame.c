@@ -169,6 +169,12 @@ struct ccd_frame *new_frame_head_fr(struct ccd_frame* fr, unsigned size_x, unsig
 		hd->w = size_x;
 	if (size_y != 0)
 		hd->h = size_y;
+
+	hd->xs = 0;
+	hd->xe = hd->w;
+	hd->ys = 0;
+	hd->ye = hd->h;
+
 	if (!hd->fim.wcsset) {
 		hd->fim.xref = 0.0;
 		hd->fim.yref = 0.0;
@@ -317,19 +323,16 @@ int frame_stats(struct ccd_frame *hd)
 
 	memset(hd->stats.avgs, 0, sizeof(hd->stats.avgs));
 
-// do the reading and calculate stats
-	all = hd->w * (hd->h);
-	min = max = get_pixel_luminence(hd, 0, 0);
+	// do the reading and calculate stats
+	all = (hd->xe - hd->xs) * (hd->ye - hd->ys);
+	min = max = get_pixel_luminance(hd, 0, 0);
 
-	for (y = 0; y < hd->h; y++) {
-		for (x = 0; x < hd->w; x++) {
-			v = get_pixel_luminence(hd, x, y);
+	for (y = hd->ys; y < hd->ye; y++) {
+		for (x = hd->xs; x < hd->xe; x++) {
+			v = get_pixel_luminance(hd, x, y);
 			if (isnan(v))
 				d3_printf("found NaN at %d, %d", x, y);
-//			if (v < -HIST_OFFSET)
-//				v = -HIST_OFFSET;
-//			if (v > H_MAX)
-//				v = H_MAX;
+
 			b = HIST_OFFSET + floor( (v - hmin) / hstep );
 			if (b < 0)
 				b = 0;
@@ -338,14 +341,12 @@ int frame_stats(struct ccd_frame *hd)
 			hdata[b] ++;
 			if (hdata[b] > binmax)
 				binmax = hdata[b];
-			if (v > max) {
+
+			if (v > max)
 				max = v;
-//				d3_printf("max = %.1f", max);
-			}
-			else if (v < min) {
+			if (v < min)
 				min = v;
-//				d3_printf("min = %.1f", min);
-			}
+
 			sum += v;
 			sumsq += v * v;
 
@@ -369,8 +370,7 @@ int frame_stats(struct ccd_frame *hd)
 	hd->stats.hist.st = H_MIN - HIST_OFFSET;
 	hd->stats.hist.end = H_MAX - HIST_OFFSET;
 
-// scan the histogram to get the median, cavg and csigma
-
+	// scan the histogram to get the median, cavg and csigma
 	sum = 0.0;
 	sumsq = 0.0;
 	b=0;
@@ -393,7 +393,6 @@ int frame_stats(struct ccd_frame *hd)
 		if (b - hdata[i] < c && b >= c) { // we are at the median point
 			if (hdata[i] != 0) { // get the interpolated median
 				median = (b - c) / hdata[i] * hstep + i + hmin - HIST_OFFSET;
-//				info_printf("M: %.3f\n", median);
 			} else {
 				median = (i - 0.5) * hstep + hmin - HIST_OFFSET;
 			}
@@ -550,17 +549,18 @@ static struct ccd_frame *read_fits_file_generic(void *fp, char *fn, int force_un
 	lb[80] = 0;
 
 
-//now allocate the header for the new frame
+	// now allocate the header for the new frame
 	hd = new_frame_head_fr(NULL, 0, 0);
-		if (hd == NULL) {
-			err_printf("read_fits_file_generic: error creating header\n");
-			return NULL;
-		}
+	if (hd == NULL) {
+		err_printf("read_fits_file_generic: error creating header\n");
+		return NULL;
+	}
+
 	for (i = 0; i < 50; i++)	{// at most 50 header blocks
 		for (j = 0; j < FITS_HROWS; j++) {	// 36 cards per block
 			for (k = 0; k < FITS_HCOLS; k++)	// chars per card
 				lb[k] = rd->fngetc(fp);
-// now parse the fits header lines
+			// now parse the fits header lines
 			if (strncmp(lb, "END", 3) == 0)
 				ef = 1;
 			else if (sscanf(lb, "NAXIS = %d", &naxis) )
@@ -590,7 +590,7 @@ static struct ccd_frame *read_fits_file_generic(void *fp, char *fn, int force_un
 				} else {
 					hd->var = cp;
 					memcpy(cp + hd->nvar, lb, FITS_HCOLS);
-//x					d3_printf("adding generic line:\n%80s\n", lb);
+					// d3_printf("adding generic line:\n%80s\n", lb);
 					hd->nvar ++;
 				}
 			}
@@ -604,7 +604,7 @@ static struct ccd_frame *read_fits_file_generic(void *fp, char *fn, int force_un
 		goto err_exit;
 	}
 
-// checking header data
+	// checking header data
 	if (naxis == 3) {
 		if (naxis3 != 3) {
 			err_printf("NAXIS3 = %d (!= 3)\n", naxis3);
@@ -630,6 +630,9 @@ static struct ccd_frame *read_fits_file_generic(void *fp, char *fn, int force_un
 		goto err_exit;
 	}
 
+	hd->xs = 0; hd->xe = hd->w;
+	hd->ys = 0; hd->ye = hd->h;
+
 	if (alloc_frame_data(hd)) {
 		err_printf("read_fits_file_generic: cannot allocate data for frame\n");
 		goto err_exit;
@@ -646,7 +649,7 @@ static struct ccd_frame *read_fits_file_generic(void *fp, char *fn, int force_un
 	d1_printf("Reading FITS file: %s %d x %d x %d\n",
 		  fn, hd->w, hd->h, pix_size);
 
-// check for any required scaling/shifting
+	// check for any required scaling/shifting
 	if (bsset) {
 		if (bscale == 0.0) {
 			err_printf("bad BSCALE (0) - using 1.0\n");
@@ -659,7 +662,7 @@ static struct ccd_frame *read_fits_file_generic(void *fp, char *fn, int force_un
 		bs = 1.0;
 	}
 
-// do the reading and calculate stats
+	// do the reading and calculate stats
 	frame = hd->w * hd->h;
 	all = frame * (naxis == 3 ? 3 : 1);
 	data = (float *)(hd->dat);
@@ -1219,7 +1222,6 @@ int sub_frames (struct ccd_frame *fr, struct ccd_frame *fr1)
 
 
 // make fr <= fr * m + s
-
 int scale_shift_frame(struct ccd_frame *fr, double m, double s)
 {
 	int i, all;
@@ -1388,8 +1390,12 @@ int crop_frame(struct ccd_frame *fr, int x, int y, int w, int h)
  		*dpp = ret;
 	}
 	// adjust the frame info
-	fr->w = w;
-	fr->h = h;
+	fr->xs = 0;
+	fr->w = fr->xe = w;
+
+	fr->ys = 0;
+	fr->h = fr->ye = h;
+
 	fr->stats.statsok = 0;
 	return 0;
 }

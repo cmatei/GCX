@@ -245,7 +245,7 @@ void aperture_stats(struct ccd_frame *fr, struct psf *psf, double x, double y,
 	h_offset = ry - psf->cy;
 	for (iy = ys; iy < ye; iy++) {
 		for (ix = xs; ix < xe; ix++) {
-			d = get_pixel_luminence(fr, w_offset + ix, h_offset + iy);
+			d = get_pixel_luminance(fr, w_offset + ix, h_offset + iy);
 			if (psf->d[ix][iy] >= 0.5) {
 				vals[nvals++] = d;
 				if (d > rs->max) {
@@ -306,7 +306,7 @@ void aperture_multiply(struct ccd_frame *fr, struct psf *psf, double x, double y
 	h_offset = ry - psf->cy;
 	for (iy = ys; iy < ye; iy++) {
 		for (ix = xs; ix < xe; ix++) {
-			psf->d[ix][iy] *= get_pixel_luminence(fr, w_offset + ix, h_offset + iy);
+			psf->d[ix][iy] *= get_pixel_luminance(fr, w_offset + ix, h_offset + iy);
 		}
 	}
 }
@@ -344,7 +344,7 @@ static void extract_patch(struct ccd_frame *fr, struct psf *psf, double x, doubl
 	h_offset = ry - psf->cy;
 	for (iy = ys; iy < ye; iy++) {
 		for (ix = xs; ix < xe; ix++) {
-			psf->d[ix][iy] = get_pixel_luminence(fr, w_offset + ix, h_offset + iy);
+			psf->d[ix][iy] = get_pixel_luminance(fr, w_offset + ix, h_offset + iy);
 			d++;
 		}
 	}
@@ -426,7 +426,7 @@ int dodge_high(struct ccd_frame *fr, struct psf *psf, double x, double y,
 	h_offset = ry - psf->cy;
 	for (iy = ys; iy < ye; iy++) {
 		for (ix = xs; ix < xe; ix++) {
-			if (get_pixel_luminence(fr, w_offset + ix, h_offset + iy) > ht) {
+			if (get_pixel_luminance(fr, w_offset + ix, h_offset + iy) > ht) {
 				if (psf->d[ix][iy] > 0)
 					n++;
 				psf->d[ix][iy] = 0;
@@ -523,7 +523,7 @@ int radial_profile(struct ccd_frame *fr, double x, double y, double r,
 			double dist;
 			dist = sqrt(sqr(ix + xs - x) + sqr(iy + ys - y));
 			if (ns < n && dist <= r && xs + ix >= 0 && xs + ix < fr->w && ys + iy >= 0 && ys + iy < fr->h) {
-				d = get_pixel_luminence(fr, xs + ix, ys + iy);
+				d = get_pixel_luminance(fr, xs + ix, ys + iy);
 //				d4_printf("dist %8.1f v:%.1f\n", dist, d);
 				rpp[ns].r = dist;
 				rpp[ns].v = d;
@@ -1361,4 +1361,3 @@ void plot_sky_histogram(gpointer window, GSList *found)
 	free(rpp);
 	free(rs);
 }
-

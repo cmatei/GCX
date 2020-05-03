@@ -105,7 +105,7 @@ static int thin_ring_stats(struct ccd_frame *fr, int x, int y,
 			    < rsq1 || r > rsq2)
 				continue;
 
-			v = get_pixel_luminence(fr, ix, iy);
+			v = get_pixel_luminance(fr, ix, iy);
 			if (v < min || v > max) {
 				nskipped ++;
 				continue;
@@ -191,7 +191,7 @@ static int star_moments(struct ccd_frame *fr, double x, double y,
 	mxy = 0;
 	for (iy = ys; iy < ye; iy++) {
 		for (ix = xs; ix < xe; ix++) {
-			v = get_pixel_luminence(fr, ix, iy);
+			v = get_pixel_luminance(fr, ix, iy);
 			if (((rn = sqr(ix - xc) + sqr(iy - yc)) > sqr(r)))
 				continue;
 			nring ++;
@@ -618,7 +618,7 @@ int extract_stars(struct ccd_frame *fr, struct region *reg, double min_flux, dou
 
 	for (y = ys; y < ys + h; y++) {
 		for (x = xs; x < xs + w; x++) {
-			dp = get_pixel_luminence(fr, x, y);
+			dp = get_pixel_luminance(fr, x, y);
 			if ((pk = dp) <= minpk) {// below detection threshold
 				continue;
 			}

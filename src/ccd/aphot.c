@@ -188,7 +188,7 @@ int ring_stats(struct ccd_frame *fr, double x, double y,
 				continue;
 
 			nring ++;
-			v = get_pixel_luminence(fr, ix, iy);
+			v = get_pixel_luminance(fr, ix, iy);
 			if (v < H_START || v >= H_START+H_SIZE) {
 				nskipped ++;
 				continue;
@@ -332,7 +332,7 @@ static double aperture_flux(struct ccd_frame *fr, double r, double x, double y,
 	n = 0.0;
 	for (iy = ys; iy < ye; iy++) {
 		for (ix = xs; ix < xe; ix++) {
-			v = get_pixel_luminence(fr, ix, iy);
+			v = get_pixel_luminance(fr, ix, iy);
 			d = sqrt(sqr(1.0 * ix - x) + sqr(1.0 * iy - y));
 			if (d > r + 0.5)
 				we = 0.0;
@@ -401,7 +401,7 @@ static double aperture_centroid(struct ccd_frame *fr, double r, double x, double
 	n = 0.0;
 	for (iy = ys; iy < ye; iy++) {
 		for (ix = xs; ix < xe; ix++) {
-			v = get_pixel_luminence(fr, ix, iy);
+			v = get_pixel_luminance(fr, ix, iy);
 			d = sqrt(sqr(1.0 * ix - x) + sqr(1.0 * iy - y));
 			if (d > r + 0.5)
 				we = 0.0;
@@ -751,5 +751,3 @@ void get_ph_solution(struct vs_recipy *vs)
 		}
 	}
 }
-
-
