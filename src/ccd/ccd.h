@@ -121,7 +121,7 @@ struct im_stats {
 				   to a "mean" value, but is _not_ actually used in the
 				   transformation. the xinc/yinc are however, according to the
 				   fits convention. */
-struct wcs{
+struct wcs {
 	int ref_count;
 	int wcsset;	/* non-zero when following are ok */
 	int flags;

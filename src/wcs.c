@@ -92,7 +92,7 @@ void try_wcs_from_frame_obs(struct ccd_frame *fr, struct wcs *wcs)
 	}
 	if (!haveeq)
 		eq = 2000.0;
-	d3_printf("scale is %.2g\n", scale);
+
 	if (!havescale)
 		scale = P_DBL(WCS_SEC_PER_PIX);
 	d3_printf("scale is %.2g\n", scale);

@@ -858,7 +858,7 @@ struct ccd_frame *read_fits_file_from_mem(const unsigned char *data, unsigned lo
 
 int write_fits_frame(struct ccd_frame *fr, char *filename)
 {
-	char lb[MAX_FILENAME];
+	char lb[MAX_FILENAME + 1];
 	FILE *fp;
 	int i, j, k, v;
 	unsigned all;
@@ -1004,7 +1004,7 @@ int write_fits_frame(struct ccd_frame *fr, char *filename)
 int write_gz_fits_frame(struct ccd_frame *fr, char *fn, char *gzcmd)
 {
 	char *text;
-	char lb[MAX_FILENAME];
+	char lb[MAX_FILENAME + 1];
 	int ret;
 
 	if (gzcmd == NULL)

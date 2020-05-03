@@ -1,6 +1,6 @@
 /*==================================================================
 ** NAME         :prtgsc.c
-** TYPE         :int 
+** TYPE         :int
 ** DESCRIPTION  :prints GSC record with format according to fmt
 ** INPUT        :
 ** OUTPUT       :stdout
@@ -10,21 +10,21 @@
 *=================================================================*/
 #include <gsc.h>
 
-static char *form2  = 
+static char *form2  =
 	"%05d%05d %09.5lf %+09.5lf %5.2f; %6.2f %3.0f";
-static char *form3  = 
+static char *form3  =
 	"%05d%05d%s %s %5.2f; %6.2f %3.0f";
-static char *form0  = 
+static char *form0  =
 	"%05d%05d %09.5lf %+09.5lf%6.1f%6.2f%5.2f%3d%2d%5s %c;%7.2f%4.0f";
-static char *form10 = 
+static char *form10 =
 	"%05d%05d %09.5lf %+09.5lf%6.1f%6.2f%5.2f%3d%2d%s %c;%7.2f%4.0f";
-static char *form30 = 
+static char *form30 =
 	"%05d%05d %09.5lf %+09.5lf%6.1f%6.2f%5.2f%3d%2d%5s%s %c;%7.2f%4.0f";
-static char *form1  = 
+static char *form1  =
 	"%05d%05d%s %s%6.1f%6.2f%5.2f%3d%2d%5s %c;%7.2f%4.0f";
-static char *form11 = 
+static char *form11 =
 	"%05d%05d%s %s%6.1f%6.2f%5.2f%3d%2d%s %c;%7.2f%4.0f";
-static char *form31 = 
+static char *form31 =
 	"%05d%05d%s %s%6.1f%6.2f%5.2f%3d%2d%5s%s %c;%7.2f%4.0f";
 static char *formol = /* To get original GSC format */
 	"%05d%05d %09.5lf %+09.5lf %5.1f %5.2f %4.2f %2d %1d %s %1c";
@@ -68,25 +68,25 @@ char *gsc2a(fmt,iepoch,r)
 	switch(fmt&0xf) {
 	case 3:
 	    if (!r) return(entete3);
-		rar = r->ra;
-		der = r->dec;
-		rar /= 15.0;
-		dtos(&rar,sa1,2); sa1[0]=' ';
-		dtos(&der,sd1,1);
-		end += 4;
-		sprintf(line,form3,r->reg,r->id,sa1,sd1,
+	    rar = r->ra;
+	    der = r->dec;
+	    rar /= 15.0;
+	    dtos(&rar,sa1,2); sa1[0]=' ';
+	    dtos(&der,sd1,1);
+	    end += 4;
+	    sprintf(line,form3,r->reg,r->id,sa1,sd1,
 		    r->m,r->dist,r->posang);
-		break;
+	    break;
 	case 2:
 	    if (!r) return(entete2);
-		rar = r->ra;
-		der = r->dec;
-		sprintf(line,form2,r->reg,r->id,r->ra,r->dec,
-		r->m,r->dist,r->posang);
-		break;
+	    rar = r->ra;
+	    der = r->dec;
+	    sprintf(line,form2,r->reg,r->id,r->ra,r->dec,
+		    r->m,r->dist,r->posang);
+	    break;
 
 	case 1:
-	    if (!r) return(iepoch==0 ? entete1 : 
+	    if (!r) return(iepoch==0 ? entete1 :
 	       iepoch == 1 ? entete11 : entete31);
 		rar = r->ra;
 		der = r->dec;
@@ -100,34 +100,35 @@ char *gsc2a(fmt,iepoch,r)
 		r->plate,r->mu,r->dist,r->posang);
 	   else if (iepoch == 1)
 		sprintf(line,form11,r->reg,r->id,sa1,sd1,
-		r->poserr,r->m,r->merr,r->mb,r->cl,
-		epa,r->mu,r->dist,r->posang);
-	   else 
-		sprintf(line,form31,r->reg,r->id,sa1,sd1,
-		r->poserr,r->m,r->merr,r->mb,r->cl,
-		r->plate,epa,r->mu,r->dist,r->posang);
-		break;
-	case 0:
-	  if (!r) return(iepoch==0 ? entete : 
-	      iepoch==1 ? entete10 : entete30 );
-		rar = r->ra;
-		der = r->dec;
-	   if (iepoch == 0)
-		sprintf(line,form0,r->reg,r->id,r->ra,r->dec,
-		r->poserr,r->m,r->merr,r->mb,r->cl,
-		r->plate,r->mu,r->dist,r->posang);
-	   else if (iepoch == 1)
-		sprintf(line,form10,r->reg,r->id,r->ra,r->dec,
-		r->poserr,r->m,r->merr,r->mb,r->cl,
-		epa,r->mu,r->dist,r->posang);
+			r->poserr,r->m,r->merr,r->mb,r->cl,
+			epa,r->mu,r->dist,r->posang);
 	   else
-		sprintf(line,form30,r->reg,r->id,r->ra,r->dec,
-		r->poserr,r->m,r->merr,r->mb,r->cl,
-		r->plate,epa,r->mu,r->dist,r->posang);
-		break;
-	 default:	/* Original GSC */
+		sprintf(line,form31,r->reg,r->id,sa1,sd1,
+			r->poserr,r->m,r->merr,r->mb,r->cl,
+			r->plate,epa,r->mu,r->dist,r->posang);
+	   break;
+
+	case 0:
+	  if (!r) return(iepoch==0 ? entete :
+			 iepoch==1 ? entete10 : entete30 );
+	  rar = r->ra;
+	  der = r->dec;
+	  if (iepoch == 0)
+		  sprintf(line,form0,r->reg,r->id,r->ra,r->dec,
+			  r->poserr,r->m,r->merr,r->mb,r->cl,
+			  r->plate,r->mu,r->dist,r->posang);
+	  else if (iepoch == 1)
+		  sprintf(line,form10,r->reg,r->id,r->ra,r->dec,
+			  r->poserr,r->m,r->merr,r->mb,r->cl,
+			  epa,r->mu,r->dist,r->posang);
+	  else
+		  sprintf(line,form30,r->reg,r->id,r->ra,r->dec,
+			  r->poserr,r->m,r->merr,r->mb,r->cl,
+			  r->plate,epa,r->mu,r->dist,r->posang);
+	  break;
+	default:	/* Original GSC */
 	   	if (r) sprintf(line,formol, r->reg,r->id,r->ra,r->dec,
-		r->poserr,r->m,r->merr,r->mb,r->cl,r->plate,r->mu);
+			       r->poserr,r->m,r->merr,r->mb,r->cl,r->plate,r->mu);
 		return(line) ;
 	}
 	if (!r->mu) line[end]=0;

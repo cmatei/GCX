@@ -1591,7 +1591,7 @@ struct ccd_frame *read_raw_file(char *filename)
 
 int parse_color_field(struct ccd_frame *fr, char *default_cfa)
 {
-	char str[80];
+	char str[81];
 	float r, g, gp, b;
 
 	if (fr->magic & FRAME_VALID_RGB) {

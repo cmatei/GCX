@@ -365,9 +365,10 @@ static struct stf * create_obs_alist(struct ccd_frame *fr, struct wcs *wcs)
 			stf_append_double(stf, SYM_AIRMASS, v);
 		}
 	}
-	if (fits_get_string(fr, P_STR(FN_OBSERVER), s, 79) > 0)
+	if (fits_get_string(fr, P_STR(FN_OBSERVER), s, 79) > 0) {
 		trim_blanks(s);
 		stf_append_string(stf, SYM_OBSERVER, s);
+	}
 	return stf;
 }
 
