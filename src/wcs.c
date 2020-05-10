@@ -99,8 +99,8 @@ void try_wcs_from_frame_obs(struct ccd_frame *fr, struct wcs *wcs)
 
 	fr->fim.xref = ra;
 	fr->fim.yref = dec;
-	fr->fim.xrefpix = fr->w / 2;
-	fr->fim.yrefpix = fr->h / 2;
+	fr->fim.xrefpix = fr->xs + (fr->xe - fr->xs) / 2;
+	fr->fim.yrefpix = fr->ys + (fr->ye - fr->ys) / 2;
 	fr->fim.rot = 0;
 	fr->fim.equinox = eq;
 	fr->fim.xinc = - scale / 3600.0;
@@ -130,8 +130,8 @@ void wcs_from_frame(struct ccd_frame *fr, struct wcs *wcs)
 		memcpy(wcs, &(fr->fim), sizeof (struct wcs));
 	} else {
 		wcs->wcsset = WCS_INVALID;
-		wcs->xrefpix = fr->w / 2;
-		wcs->yrefpix = fr->h / 2;
+		wcs->xrefpix = fr->xs + (fr->xe - fr->xs) / 2;
+		wcs->yrefpix = fr->ys + (fr->ye - fr->ys) / 2;
 		try_wcs_from_frame_obs(fr, wcs);
 	}
 	wcs->jd = frame_jdate(fr);

@@ -433,8 +433,8 @@ static int set_wcs_from_object (struct ccd_frame *fr, char *name, double spp)
 	fr->fim.wcsset = WCS_INITIAL;
 	fr->fim.xref = cats->ra;
 	fr->fim.yref = cats->dec;
-	fr->fim.xrefpix = fr->w / 2;
-	fr->fim.yrefpix = fr->h / 2;
+	fr->fim.xrefpix = fr->xs + (fr->xe - fr->xs) / 2;
+	fr->fim.yrefpix = fr->ys + (fr->ye - fr->ys) / 2;
 	fr->fim.equinox = cats->equinox;
 	fr->fim.rot = 0.0;
 	fr->fim.xinc = spp / 3600.0;
